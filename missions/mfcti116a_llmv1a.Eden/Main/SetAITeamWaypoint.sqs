@@ -1,0 +1,30 @@
+;Last modified 10/16/3
+
+_unit = _this Select 0
+_x = _this Select 1
+_y = _this Select 2
+_side = Side _unit
+
+? (_side == east):Goto "SetEast"
+
+#SetWest
+
+	;Wait for server to process any other waypoint requests.
+	@ (!westSetPlayerWaypoint)
+
+	westPlayerWaypointPlayer = _unit;PublicVariable "westPlayerWaypointPlayer"
+	westPlayerWaypointX = _x;PublicVariable "westPlayerWaypointX"
+	westPlayerWaypointY = _y;PublicVariable "westPlayerWaypointY"
+	westSetPlayerWaypoint = true;PublicVariable "westSetPlayerWaypoint"
+
+	Exit
+
+#SetEast
+
+	;Wait for server to process any other waypoint requests.
+	@ (!eastSetPlayerWaypoint)
+
+	eastPlayerWaypointPlayer = _unit;PublicVariable "eastPlayerWaypointPlayer"
+	eastPlayerWaypointX = _x;PublicVariable "eastPlayerWaypointX"
+	eastPlayerWaypointY = _y;PublicVariable "eastPlayerWaypointY"
+	eastSetPlayerWaypoint = true;PublicVariable "eastSetPlayerWaypoint"

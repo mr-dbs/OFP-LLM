@@ -1,0 +1,56 @@
+;Last modified 4/2/3
+;Puts in request to the server to subtract resources from a team.
+;Script Usage:  [Team,Amount] Exec "SubtractResources.sqs"
+
+_team = _this Select 0
+_amount = _this Select 1
+_side = Side _team
+
+? (_team != WestCommanderTeam) && (_team != EastCommanderTeam):goto "SubtractTeamResources"
+? (_side == east):goto "SubtractEastResources"
+
+#SubtractWestResources
+
+	;Wait until server has processed any other request.
+	@ (subtractWestResources == 0)
+
+	subtractWestResources = _amount;PublicVariable "subtractWestResources"
+	Exit
+
+#SubtractEastResources
+
+	;Wait until server has processed any other request.
+	@ (subtractEastResources == 0)
+
+	subtractEastResources = _amount;PublicVariable "subtractEastResources"
+	Exit
+
+#SubtractTeamResources
+
+	? (_side == east):goto "SubtractEastTeamResources"
+
+#SubtractWestTeamResources
+
+	? (_team == WestAlphaTeam):westAlphaResources = westAlphaResources - _amount;PublicVariable "westAlphaResources"
+	? (_team == WestBravoTeam):westBravoResources = westBravoResources - _amount;PublicVariable "westBravoResources"
+	? (_team == WestCharlieTeam):westCharlieResources = westCharlieResources - _amount;PublicVariable "westCharlieResources"
+	? (_team == WestDeltaTeam):westDeltaResources = westDeltaResources - _amount;PublicVariable "westDeltaResources"
+	? (_team == WestEchoTeam):westEchoResources = westEchoResources - _amount;PublicVariable "westEchoResources"
+	? (_team == WestFoxtrotTeam):westFoxtrotResources = westFoxtrotResources - _amount;PublicVariable "westFoxtrotResources"
+	? (_team == WestGolfTeam):westGolfResources = westGolfResources - _amount;PublicVariable "westGolfResources"
+	? (_team == WestHotelTeam):westHotelResources = westHotelResources - _amount;PublicVariable "westHotelResources"
+
+	Exit
+
+#SubtractEastTeamResources
+
+	? (_team == EastAlphaTeam):eastAlphaResources = eastAlphaResources - _amount;PublicVariable "eastAlphaResources"
+	? (_team == EastBravoTeam):eastBravoResources = eastBravoResources - _amount;PublicVariable "eastBravoResources"
+	? (_team == EastCharlieTeam):eastCharlieResources = eastCharlieResources - _amount;PublicVariable "eastCharlieResources"
+	? (_team == EastDeltaTeam):eastDeltaResources = eastDeltaResources - _amount;PublicVariable "eastDeltaResources"
+	? (_team == EastEchoTeam):eastEchoResources = eastEchoResources - _amount;PublicVariable "eastEchoResources"
+	? (_team == EastFoxtrotTeam):eastFoxtrotResources = eastFoxtrotResources - _amount;PublicVariable "eastFoxtrotResources"
+	? (_team == EastGolfTeam):eastGolfResources = eastGolfResources - _amount;PublicVariable "eastGolfResources"
+	? (_team == EastHotelTeam):eastHotelResources = eastHotelResources - _amount;PublicVariable "eastHotelResources"
+
+	Exit

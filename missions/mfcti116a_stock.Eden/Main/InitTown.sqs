@@ -1,0 +1,72 @@
+;Last modified 4/27/3
+;Script usage:  [Town,"Name","Side",Value] exec "InitTown.sqs"
+
+_town = _this Select 0
+_name = _this Select 1
+_side = _this Select 2
+_value = _this Select 3
+
+;The first town to be set should call this so the arrays are declared.
+? !(startedTownInit):goto "InitTownArrays"
+
+#Set
+
+;Add to player arrays.
+townsMP = townsMP + [_town]
+townNamesMP = townNamesMP + [_name]
+townValuesMP = townValuesMP + [_value]
+
+? !(Local LocalServerObject):Exit
+
+#SetTownStats
+
+;Add to server arrays.
+towns = towns + [_town]
+townNames = townNames + [_name]
+townSides = townSides + [_side]
+townValues = townValues + [_value]
+totalTowns = totalTowns + 1;PublicVariable "totalTowns"
+
+? (_side == "West"):townAreaWestSides = townAreaWestSides + [true];townAreaEastSides = townAreaEastSides + [false]
+? (_side == "East"):townAreaWestSides = townAreaWestSides + [false];townAreaEastSides = townAreaEastSides + [true]
+? (_side == "N/A"):townAreaWestSides = townAreaWestSides + [false];townAreaEastSides = townAreaEastSides + [false];townWestTimes = townWestTimes + [time - 10000];townEastTimes = townEastTimes + [time - 10000]
+
+Exit
+
+#InitTownArrays
+
+startedTownInit = true
+towns = []
+townNames = []
+townSides = []
+townAreaWestSides = []
+townAreaEastSides = []
+townWestTimes = []
+townEastTimes = []
+townValues = []
+townsMP = []
+townNamesMP = []
+townValuesMP = []
+
+totalTowns = 0;PublicVariable "totalTowns"
+
+setTown = false;PublicVariable "setTownSide"
+setTownSideTown = ObjNull;PublicVariable "setTownSideTown"
+setTownSide = -1;PublicVariable "setTownSide"
+
+setTownArea = false;PublicVariable "setTownArea"
+setTownAreaTown = ObjNull;PublicVariable "setTownAreaTown"
+setTownAreaSide = -1;PublicVariable "setTownAreaSide"
+setTownAreaSet = false;PublicVariable "setTownAreaSet"
+
+setTownMP = ObjNull;PublicVariable "setTownMP"
+setTownSideMP = -1;PublicVariable "setTownSideMP"
+setTownIndexMP = 0;PublicVariable "setTownIndexMP"
+setTownLastSideMP = -1;PublicVariable "setTownLastSideMP"
+
+setTownAreaMP = ObjNull;PublicVariable "setTownAreaMP"
+setTownAreaSideMP = -1;PublicVariable "setTownAreaSideMP"
+setTownAreaIndexMP = 0;PublicVariable "setTownAreaIndexMP"
+setTownAreaSetMP = false;PublicVariable "setTownAreaSetMP"
+
+goto "Set"

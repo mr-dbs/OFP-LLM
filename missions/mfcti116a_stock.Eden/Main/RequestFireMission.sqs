@@ -1,0 +1,54 @@
+;Last modified 2/19/4
+
+_unit = _this Select 0
+
+_team = Group _unit
+_side = Side _team
+_notify = false
+
+? (_team == WestCommanderTeam) || (_team == EastCommanderTeam):_teamNumber = groupCommander
+? (_team == WestAlphaTeam) || (_team == EastAlphaTeam):_teamNumber = groupAlpha
+? (_team == WestBravoTeam) || (_team == EastBravoTeam):_teamNumber = groupBravo
+? (_team == WestCharlieTeam) || (_team == EastCharlieTeam):_teamNumber = groupCharlie
+? (_team == WestDeltaTeam) || (_team == EastDeltaTeam):_teamNumber = groupDelta
+? (_team == WestEchoTeam) || (_team == EastEchoTeam):_teamNumber = groupEcho
+? (_team == WestFoxtrotTeam) || (_team == EastFoxtrotTeam):_teamNumber = groupFoxtrot
+? (_team == WestGolfTeam) || (_team == EastGolfTeam):_teamNumber = groupGolf
+? (_team == WestHotelTeam) || (_team == EastHotelTeam):_teamNumber = groupHotel
+
+? (_side == east):goto "EastRequest"
+
+#WestRequest
+
+	_destination = GetMarkerPos Format["West%1WP",teamMapDesignations Select _teamNumber]
+
+	? (_team In westPlayerGroups):_notify = true
+	? (totalWestStationaryMortars < 1) && (_notify):Hint Localize "STRNOMORTARS"
+	? (totalWestStationaryMortars < 1):Exit
+
+	? (MFCTI116NoMortars && _notify):Hint Localize "STRNOFIREMISSION";Exit
+	? (westFireMission && _notify):Hint Localize "STRFIREMISSIONINPROGRESS"
+	? (westFireMission || MFCTI116NoMortars):Exit
+
+	[west,_teamNumber,messageRequestFireMission,_destination Select 0,_destination Select 1] Exec "Main\SendSideMessage.sqs"
+	westRequestFireMissionX = _destination Select 0;PublicVariable "westRequestFireMissionX"
+	westRequestFireMissionY = _destination Select 1;PublicVariable "westRequestFireMissionY"
+	westRequestFireMission = true;PublicVariable "westRequestFireMission"
+	Exit
+
+#EastRequest
+
+	_destination = GetMarkerPos Format["East%1WP",teamMapDesignations Select _teamNumber]
+
+	? (_team In eastPlayerGroups):_notify = true
+	? (totalEastStationaryMortars < 1) && (_notify):Hint Localize "STRNOMORTARS"
+	? (totalEastStationaryMortars < 1):Exit
+
+	? (MFCTI116NoMortars && _notify):Hint Localize "STRNOFIREMISSION";Exit
+	? (eastFireMission && _notify):Hint Localize "STRFIREMISSIONINPROGRESS"
+	? (eastFireMission || MFCTI116NoMortars):Exit
+
+	[east,_teamNumber,messageRequestFireMission,_destination Select 0,_destination Select 1] Exec "Main\SendSideMessage.sqs"
+	eastRequestFireMissionX = _destination Select 0;PublicVariable "eastRequestFireMissionX"
+	eastRequestFireMissionY = _destination Select 1;PublicVariable "eastRequestFireMissionY"
+	eastRequestFireMission = true;PublicVariable "eastRequestFireMission"

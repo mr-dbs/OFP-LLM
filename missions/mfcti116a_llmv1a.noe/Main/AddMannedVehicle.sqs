@@ -1,0 +1,391 @@
+;Last modified 1/30/4
+
+;Creates a unit, adds it to a group if needed, & runs a script on unit if needed.
+;Note that if _buildingList is an empty array then _deploymentLocation is used and there is no build time but twice the cost.
+;Script Usage:[Side,"Unit","Driver","Gunner","Commander",Cost,BuildTime,Building,BuildingName,GroupToJoin,"ScriptToRun",DeploymentLocation] Exec "Main\AddUnit.sqs"
+
+? !(Local LocalServerObject):Exit
+
+_names = unitNames
+? (limitedRadar):_names = unitLRNames
+
+_side = _this Select 0
+
+? (_side == east):goto "SetEast"
+
+_vehicleType = addWestMannedVehicle
+_building = addWestMannedVehicleBuilding
+_vehicle = _names Select _vehicleType
+_driver = _names Select addWestDriver
+_gunner = _names Select addWestGunner
+_commander = _names Select addWestCommander
+_driverType = addWestDriver
+_gunnerType = addWestGunner
+_commanderType = addWestCommander
+_group = westGroups Select westSelectedGroup
+_AIPurchase = addWestMannedVehicleTeamPurchase
+_commanderUnit = Leader WestCommanderTeam
+
+? !(IsNull addWestMannedVehicleGroup):_group = addWestMannedVehicleGroup
+? (IsNull _group):Exit
+
+_cost = unitCosts Select _vehicleType
+
+? (cheapTransportAC) && (_vehicleType In westAircraftTransports):_cost = _cost * cheapTransportACMultiplier
+? (expensiveAssaultAC) && (_vehicleType In westAssaultAircraft):_cost = _cost * expensiveAssaultACMultiplier
+
+_driverCost = unitCosts Select addWestDriver
+_gunnerCost = unitCosts Select addWestGunner
+_commanderCost = unitCosts Select addWestCommander
+_buildTime = unitBuildTimes Select _vehicleType
+_player = addWestMannedVehiclePlayer
+_type = addWestMannedVehicleType
+_scriptType = addWestMannedVehicleScript
+
+;Clear the request variables now that they have been used.
+addWestMannedVehicleBuilding = ObjNull;PublicVariable "addWestMannedVehicleBuilding"
+addWestMannedVehicle = 0;PublicVariable "addWestMannedVehicle"
+addWestDriver = 0;PublicVariable "addWestDriver"
+addWestGunner = 0;PublicVariable "addWestGunner"
+addWestCommander = 0;PublicVariable "addWestCommander"
+addWestMannedVehicleGroup = ObjNull;PublicVariable "addWestMannedVehicleGroup"
+addWestMannedVehiclePlayer = ObjNull;PublicVariable "addWestMannedVehiclePlayer"
+addWestMannedVehicleType = 0;PublicVariable "addWestMannedVehicleType"
+addWestMannedVehicleScript = 0;PublicVariable "addWestMannedVehicleScript"
+addWestMannedVehicleTeamPurchase = false;PublicVariable "addWestMannedVehicleTeamPurchase"
+
+Goto "DebugText"
+
+#SetEast
+
+_vehicleType = addEastMannedVehicle
+_building = addEastMannedVehicleBuilding
+_vehicle = _names Select _vehicleType
+_driver = _names Select addEastDriver
+_gunner = _names Select addEastGunner
+_commander = _names Select addEastCommander
+_driverType = addEastDriver
+_gunnerType = addEastGunner
+_commanderType = addEastCommander
+_group = eastGroups Select eastSelectedGroup
+_AIPurchase = addEastMannedVehicleTeamPurchase
+_commanderUnit = Leader EastCommanderTeam
+
+? !(IsNull addEastMannedVehicleGroup):_group = addEastMannedVehicleGroup
+? (IsNull _group):Exit
+
+_cost = unitCosts Select _vehicleType
+
+? (cheapTransportAC) && (_vehicleType In eastAircraftTransports):_cost = _cost * cheapTransportACMultiplier
+? (expensiveAssaultAC) && (_vehicleType In eastAssaultAircraft):_cost = _cost * expensiveAssaultACMultiplier
+
+_driverCost = unitCosts Select addEastDriver
+_gunnerCost = unitCosts Select addEastGunner
+_commanderCost = unitCosts Select addEastCommander
+_buildTime = unitBuildTimes Select _vehicleType
+_player = addEastMannedVehiclePlayer
+_type = addEastMannedVehicleType
+_scriptType = addEastMannedVehicleScript
+
+;Clear the request variables now that they have been used.
+addEastMannedVehicleBuilding = ObjNull;PublicVariable "addEastMannedVehicleBuilding"
+addEastMannedVehicle = 0;PublicVariable "addEastMannedVehicle"
+addEastDriver = 0;PublicVariable "addEastDriver"
+addEastGunner = 0;PublicVariable "addEastGunner"
+addEastCommander = 0;PublicVariable "addEastCommander"
+addEastMannedVehicleGroup = ObjNull;PublicVariable "addEastMannedVehicleGroup"
+addEastMannedVehiclePlayer = ObjNull;PublicVariable "addEastMannedVehiclePlayer"
+addEastMannedVehicleType = 0;PublicVariable "addEastMannedVehicleType"
+addEastMannedVehicleScript = 0;PublicVariable "addEastMannedVehicleScript"
+addEastMannedVehicleTeamPurchase = false;PublicVariable "addEastMannedVehicleTeamPurchase"
+
+#DebugText
+
+? (debug):_mes = Format["V: %1, C: %2, G: %3 T: %4",_vehicle,_cost,_group,_buildTime];Hint (_mes)
+? (_scriptType == salvageScript):_group = GrpNull
+
+? (_side == east):goto "CheckEastVehicleTotal"
+
+#CheckWestVehicleTotal
+
+	;Wait until server has finished any other requests.
+	@ (!countWestVehicles)
+
+	;Request server does a vehicle count.
+	countWestVehicles = true;PublicVariable "countWestVehicles"
+
+	;Wait until server has finished request.
+	@ (!countWestVehicles)
+
+	;If the the total vehicle count is too high then exit now.
+	? (totalWestVehicles >= maxVehicles):[_commanderUnit,groupCommander,messageMaxVehiclesReached,0,0] Exec "Main\SendPlayerMessage.sqs";Exit
+	? (_scriptType == salvageScript) && (_vehicleType == salvageTruckType) && (totalWestSalvagers >= maxSalvagers):[_commanderUnit,0,messageMaxSalvagersReached,0,0] Exec "Main\SendPlayerMessage.sqs";Exit
+
+	goto "CheckGroup"
+
+#CheckEastVehicleTotal
+
+	;Wait until server has finished any other requests.
+	@ (!countEastVehicles)
+
+	;Request server does a vehicle count.
+	countEastVehicles = true;PublicVariable "countEastVehicles"
+
+	;Wait until server has finished request.
+	@ (!countEastVehicles)
+
+	;If the the total vehicle count is too high then exit now.
+	? (totalEastVehicles >= maxVehicles):[_commanderUnit,groupCommander,messageMaxVehiclesReached,0,0] Exec "Main\SendPlayerMessage.sqs";Exit
+	? (_scriptType == salvageScript) && (_vehicleType == salvageTruckEastType) && (totalEastSalvagers >= maxSalvagers):[_commanderUnit,0,messageMaxSalvagersReached,0,0] Exec "Main\SendPlayerMessage.sqs";Exit
+
+;If group is a player group exit the script now.
+#CheckGroup
+
+	? (IsNull _group):goto "CheckBuilding"
+
+_neededSize = 0
+_maxSize = maxAIGroupSize
+
+? (_driver != ""):_neededSize = _neededSize + 1 
+? (_gunner != ""):_neededSize = _neededSize + 1
+? (_commander != ""):_neededSize = _neededSize + 1
+
+_addToPlayer = false
+? (_side == west && _group In westPlayerGroups) || (_side == east && _group In eastPlayerGroups):_addToPlayer = true;_maxSize = 11
+? (_group In playerOnlyReinforcements):Exit
+
+#CheckAISize
+
+;Do not exceed max group size.
+? (Count Units _group > _maxSize - _neededSize):[_commanderUnit,groupCommander,messageMaxGroupSizeReached,0,0] Exec "Main\SendPlayerMessage.sqs";Exit
+
+;If a building was specified then don't search for one.
+#CheckBuilding
+? !(IsNull _building):goto "CheckDamage"
+
+_count = 0
+
+? (_side == west)&&(_type == repairDepotType):_buildingsList = westRepairDepot
+? (_side == west)&&(_type == lightFactoryType):_buildingsList = westLightFactory
+? (_side == west)&&(_type == heavyFactoryType):_buildingsList = westHeavyFactory
+? (_side == west)&&(_type == airFactoryType):_buildingsList = westAirFactory
+? (_side == west)&&(_type == ammoDepotType):_buildingsList = westAmmoDepot
+? (_side == west)&&(_type == repairDepotType):_buildingsList = westRepairDepot
+
+? (_side == east)&&(_type == repairDepotType):_buildingsList = eastRepairDepot
+? (_side == east)&&(_type == lightFactoryType):_buildingsList = eastLightFactory
+? (_side == east)&&(_type == heavyFactoryType):_buildingsList = eastHeavyFactory
+? (_side == east)&&(_type == airFactoryType):_buildingsList = eastAirFactory
+? (_side == east)&&(_type == ammoDepotType):_buildingsList = eastAmmoDepot
+? (_side == east)&&(_type == repairDepotType):_buildingsList = eastRepairDepot
+
+_maxBuildings = Count _buildingsList
+
+? (_maxBuildings < 1):Exit
+
+;If no building was specified then find first available one.
+#FindFactory
+
+	_building = _buildingsList Select _count
+	_count = _count + 1
+
+	? (GetDammage _building != 1) && !(_building In buildingsInUseServer):goto "CheckDamage"
+	? (_count < _maxBuildings):goto "FindFactory"
+
+	? (_AIPurchase) && !(_group In westPlayerGroups) && !(_group In westPlayerGroups) && (_building In buildingsInUseServer):Exit
+	? (_building In buildingsInUseServer):[_side,_vehicleType,_building,true,_group] Exec "Main\AddToQueueServer.sqs"
+
+	Exit
+
+#CheckDamage
+
+	;If building is damaged then report it to the player.
+	? (GetDammage _building == 1):Exit
+
+;If the building is in use & an AI team is purchasing then exit the script.
+? (_AIPurchase) && !(_group In westPlayerGroups) && !(_group In westPlayerGroups) && (_building In buildingsInUseServer):Exit
+? (_building In buildingsInUseServer):[_side,_vehicleType,_building,true,_group] Exec "Main\AddToQueueServer.sqs";Exit
+
+? (_side == east):goto "GetEastPlayerResources"
+
+#GetWestPlayerResources
+
+	_resources = westResources
+
+	? !(_AIPurchase):goto "CheckResources"
+	? (_group == WestAlphaTeam):_resources = westAlphaResources
+	? (_group == WestBravoTeam):_resources = westBravoResources
+	? (_group == WestCharlieTeam):_resources = westCharlieResources
+	? (_group == WestDeltaTeam):_resources = westDeltaResources
+	? (_group == WestEchoTeam):_resources = westEchoResources
+	? (_group == WestFoxtrotTeam):_resources = westFoxtrotResources
+	? (_group == WestGolfTeam):_resources = westGolfResources
+	? (_group == WestHotelTeam):_resources = westHotelResources
+
+	goto "CheckResources"
+
+#GetEastPlayerResources
+
+	_resources = eastResources
+
+	? !(_AIPurchase):goto "CheckResources"
+	? (_group == EastAlphaTeam):_resources = eastAlphaResources
+	? (_group == EastBravoTeam):_resources = eastBravoResources
+	? (_group == EastCharlieTeam):_resources = eastCharlieResources
+	? (_group == EastDeltaTeam):_resources = eastDeltaResources
+	? (_group == EastEchoTeam):_resources = eastEchoResources
+	? (_group == EastFoxtrotTeam):_resources = eastFoxtrotResources
+	? (_group == EastGolfTeam):_resources = eastGolfResources
+	? (_group == EastHotelTeam):_resources = eastHotelResources
+
+#CheckResources
+
+? (_resources < _cost):Exit
+? (_AIPurchase):[_group,_cost] Exec "Main\SubtractTeamResources.sqs"
+? !(_AIPurchase):[_side,_cost] Exec "Main\SubtractResources.sqs"
+
+? !(_AIPurchase):[_commanderUnit,_cost / purchaseValuePerPoint] Exec "Main\AddPlayerPoints.sqs"
+
+;Wait until a previous building lock is done.
+? (_side == east):goto "WaitForEast"
+
+@ !(westRequestBuildingInUseMP)
+westRequestBuildingInUseMP = true;PublicVariable "westRequestBuildingInUseMP"
+goto "SetBuildingInUse"
+
+#WaitForEast
+
+@ !(eastRequestBuildingInUseMP)
+eastRequestBuildingInUseMP = true;PublicVariable "eastRequestBuildingInUseMP"
+
+;This locks the building from other players until construction is complete.
+#SetBuildingInUse
+
+? (_side == west):westBuildingInUseMP = _building;PublicVariable "westBuildingInUseMP"
+? (_side == west):westBuildingInUseStateMP = true;PublicVariable "westBuildingInUseStateMP"
+
+? (_side == east):eastBuildingInUseMP = _building;PublicVariable "eastBuildingInUseMP"
+? (_side == east):eastBuildingInUseStateMP = true;PublicVariable "eastBuildingInUseStateMP"
+
+;Wait until the unit is built.
+~_buildTime
+
+? (_side == west):westBuildingInUseMP = _building;PublicVariable "westBuildingInUseMP"
+? (_side == west):westBuildingInUseStateMP = false;PublicVariable "westBuildingInUseStateMP"
+
+? (_side == east):eastBuildingInUseMP = _building;PublicVariable "eastBuildingInUseMP"
+? (_side == east):eastBuildingInUseStateMP = false;PublicVariable "eastBuildingInUseStateMP"
+
+_createEmpty = false
+
+;If group size has increased beyond allowed size during build time then create empty an vehicle.
+? (Count Units _group > _maxSize - _neededSize):_createEmpty = true
+
+;If an AI purchase then just exit.
+? (_createEmpty) && (_AIPurchase):Exit
+
+;If the building was destroyed while unit was being built then exit now.
+? (GetDammage _building == 1):Exit
+
+;If adding to a player team.
+? (_addToPlayer):[_side,_group,_vehicleType,_building] Exec "Main\AddToPlayerServer.sqs";Exit
+
+;Set temporary group to create unit into before adding it to the proper group.
+? (_side == west):_tempGroup = WestTempGroup
+? (_side == east):_tempGroup = EastTempGroup
+
+;Create vehicle.
+;_destination = GetPos _building
+_direction = (GetDir _building + 180) % 360
+_distance = 14
+
+;Place aircraft a little further from their factories.
+? (_vehicle In westAirNames)||(_vehicle In eastAirNames):_distance = 25
+? (_vehicle In westLRAirNames)||(_vehicle In eastLRAirNames):_distance = 25
+
+? (_vehicleType In westOneManAir) || (_vehicleType In eastOneManAir):_distance = 35
+
+_destination = [(GetPos _building Select 0)+((sin _direction)*_distance),(GetPos _building Select 1)+((cos _direction)*_distance),GetPos _building Select 2]
+
+_newVehicle = ObjNull
+_newVehicle = _vehicle CreateVehicle _destination
+_direction = (GetDir _building + 90) % 360
+_newVehicle SetDir _direction
+
+@ (!IsNull _newVehicle)
+
+[_newVehicle,_side,ObjNull] Exec "Main\VehicleCleanUp.sqs"
+
+[_side,_vehicle,_newVehicle] Exec "Main\AddVehicleToServerList.sqs"
+[_newVehicle,_vehicleType,_side] Exec "Loadouts\EquipVehicle.sqs"
+
+;If the group leader is not in a vehicle and nearby then move him into the driver's seat.
+? (Vehicle (Leader _group) == (Leader _group)) && (Leader _group Distance _newVehicle < leaderIntoVehicleRange):Leader _group MoveInDriver _newVehicle;goto "CreateGunner"
+? (_driver == ""):goto "CreateGunner"
+
+;Skip crew creation if vehicle should be empty.
+? (_createEmpty):goto "Debug"
+
+;Create a driver
+#CreateDriver
+
+	_driver CreateUnit [_destination,_tempGroup,"",1,"PRIVATE"]
+	~0.1
+	_newDriver = (Units _tempGroup) Select (Count Units _tempGroup - 1)
+	_newDriver MoveInDriver _newVehicle
+	[_newDriver] Join _group
+	[_newDriver,_driverCost * bountyPercentage] Exec "Main\UnitCleanUp.sqs"
+
+	? (_scriptType == salvageScript):[_newDriver] Exec "Main\UpdateSalvageAI.sqs"
+
+#CreateGunner
+
+	? (_gunner == ""):goto "CreateCommander"
+
+	;Create a gunner
+	_gunner CreateUnit [_destination,_tempGroup,"",1,"PRIVATE"]
+	~0.1
+	_newGunner = (Units _tempGroup) Select (Count Units _tempGroup - 1)
+	_newGunner MoveInGunner _newVehicle
+
+	[_newGunner] Join _group
+	[_newGunner,_gunnerCost * bountyPercentage] Exec "Main\UnitCleanUp.sqs"
+
+#CreateCommander
+
+	? (_commander == ""):goto "Debug"
+
+	;Create a commander
+	_commander CreateUnit [_destination,_tempGroup,"",1,"PRIVATE"]
+	~0.1
+	_newCommander = (Units _tempGroup) Select (Count Units _tempGroup - 1)
+	_newCommander MoveInCommander _newVehicle
+
+	[_newCommander] Join _group
+	[_newCommander,_commanderCost * bountyPercentage] Exec "Main\UnitCleanUp.sqs"
+
+#Debug
+
+	;Wait until any previous notifications of created salvage, ammo, & repair trucks are complete.
+	@ (IsNull westSalvageTruck) && (IsNull eastSalvageTruck)
+	@ (IsNull westAmmoTruck) && (IsNull eastAmmoTruck)
+	@ (IsNull westRepairTruck) && (IsNull eastRepairTruck)
+
+	;If new vehicle is a salvage, ammo, or repair truck post it to the server.
+	? (_vehicleType == salvageTruckType):westSalvageTruck = _newVehicle;PublicVariable "westSalvageTruck"
+	? (_vehicleType == salvageTruckEastType):eastSalvageTruck = _newVehicle;PublicVariable "eastSalvageTruck"
+
+	? (_vehicleType == ammoTruckType):westAmmoTruck = _newVehicle;PublicVariable "westAmmoTruck"
+	? (_vehicleType == ammoTruckEastType):eastAmmoTruck = _newVehicle;PublicVariable "eastAmmoTruck"
+
+	? (_vehicleType == repairTruckType):westRepairTruck = _newVehicle;PublicVariable "westRepairTruck"
+	? (_vehicleType == repairTruckEastType):eastRepairTruck = _newVehicle;PublicVariable "eastRepairTruck"
+
+	? (debug):_message = Format["%1 (%2) built at %3.",_vehicle,_newVehicle,_building];player GlobalChat (_message)
+
+#AddMarker
+
+	? (_side == west):westUnitBuiltMP = _newVehicle;PublicVariable "westUnitBuiltMP"
+	? (_side == east):eastUnitBuiltMP = _newVehicle;PublicVariable "eastUnitBuiltMP"
+
+Exit

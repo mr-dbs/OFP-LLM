@@ -1,0 +1,68 @@
+;Last modified 7/21/3
+;Script usage:  [] Exec "AwardTownBounty.sqs"
+
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_town = _this Select 1
+_index = _this Select 2
+
+_groupList = []
+
+#AwardBounty
+
+	_count = 0
+
+	? (_side == west):_groupList = westGroups
+	? (_side == east):_groupList = eastGroups
+
+	_totalGroups = Count _groupList
+	? (_totalGroups < 1):Exit
+
+	_value = townValues Select _index
+
+	;Reduce bounty if town is being retaken shortly after being lost.
+	? (_side == west) && (time - (townWestTimes Select _index) < townBountyDelay):_value = _value / 4;_value = _value - (_value % 1)
+	? (_side == east) && (time - (townEastTimes Select _index) < townBountyDelay):_value = _value / 4;_value = _value - (_value % 1)
+
+	_points = _value / townValuePerPoint
+	_points = _points - (_points % 1)
+
+	#AwardGroup
+
+		_leader = Leader (_groupList Select _count)
+
+		? (_side == west) && (_leader Distance _town <= (targetDefendRange * 1.25)):goto "AwardWestBounty"
+		? (_side == east) && (_leader Distance _town <= (targetDefendRange * 1.25)):goto "AwardEastBounty"
+
+		#AwardNextGroup
+
+			_count = _count + 1
+			? (_count < _totalGroups):goto "AwardGroup"
+
+			Exit
+
+#AwardWestBounty
+
+	[_leader,_value] Exec "Main\AddResourcesToTeam.sqs"
+
+	? !((Group _leader) In westPlayerGroups):goto "AwardNextGroup"
+
+	[_leader,_points] Exec "Main\AddPlayerPoints.sqs"
+	[_leader,groupCommander,messageCapturedTown,_value,_index] Exec "Main\SendPlayerMessage.sqs"
+	~1
+
+	goto "AwardNextGroup"
+
+#AwardEastBounty
+
+
+	[_leader,_value] Exec "Main\AddResourcesToTeam.sqs"
+
+	? !((Group _leader) In eastPlayerGroups):goto "AwardNextGroup"
+
+	[_leader,_points] Exec "Main\AddPlayerPoints.sqs"
+	[_leader,groupCommander,messageCapturedTown,_value,_index] Exec "Main\SendPlayerMessage.sqs"
+	~1
+
+	goto "AwardNextGroup"

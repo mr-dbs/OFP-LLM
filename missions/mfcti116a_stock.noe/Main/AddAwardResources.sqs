@@ -1,0 +1,24 @@
+;Last modified 5/5/3
+
+;Puts in request to the server to add resources to a side.  Points will be divided amongst teams base on their points.
+;Script Usage:  [Side,Amount] Exec "AddAwardResources.sqs"
+
+_side = _this Select 0
+_amount = _this Select 1
+
+? (_side == east):goto "AddEastResources"
+
+#AddWestResources
+
+	;Wait until server has processed any other request.
+	@ (addWestAwardResources == 0)
+
+	addWestAwardResources = _amount;PublicVariable "addWestAwardResources"
+	Exit
+
+#AddEastResources
+
+	;Wait until server has processed any other request.
+	@ (addEastAwardResources == 0)
+
+	addEastAwardResources = _amount;PublicVariable "addEastAwardResources"

@@ -1,0 +1,58 @@
+;Last modified 4/15/3
+;Use on a unit to make it's team resistance AI.
+;Script usage: [Unit,Town] Exec "UpdateResistance.sqs"
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+~5
+_unit = _this select 0
+_town = _this select 1
+_group = Group _unit
+_minSize = (Count Units _group) / 4
+_index = 0
+
+;Team is too small to act as an organized group.
+? (_minSize < 1):Exit
+
+;Get town's index so it doesn't have to be looked up every update.
+#GetTownIndex
+
+_count = 0
+_totalTowns = Count towns
+
+	;Find the town in list that matches.
+	#FindTown
+
+		? ((towns Select _count) == _town):_index = _count;goto "Update"
+
+		_count = _count + 1
+
+		? (_count < _totalTowns):goto "FindTown"
+
+		Exit
+
+#Update
+~20
+
+	;Team is no longer large enough to act as an organized group.
+	? (Count Units _group < _minSize):Exit
+	? ((townSides Select _index) != "N/A"):goto "TakeFlag"
+
+	goto "Update"
+
+#TakeFlag
+
+	_group Move GetPos _town
+
+	@((Leader _group Distance _town < 5) || (Count Units _group < _minSize))
+
+	? (Count Units _group < _minSize):Exit
+
+	;Randomly move away from flag.
+	_direction = Random 359
+	_distance = 20 + Random 30
+	_townPosition = GetPos _town
+	_destination = [(_townPosition Select 0)+((sin _direction)*_distance),(_townPosition Select 1)+((cos _direction)*_distance),_townPosition Select 2]
+	_group Move _destination
+
+	goto "Update"

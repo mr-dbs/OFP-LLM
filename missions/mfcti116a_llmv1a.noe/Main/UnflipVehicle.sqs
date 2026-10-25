@@ -1,0 +1,6 @@
+;Last modified 1/25/3
+;Script usage:  [Vehicle] Exec "VehicleCleanUp.sqs"
+
+_vehicle = _this Select 0
+
+_vehicle SetPos (GetPos _vehicle)

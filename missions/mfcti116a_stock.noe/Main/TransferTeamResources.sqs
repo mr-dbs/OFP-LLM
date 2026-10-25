@@ -1,0 +1,96 @@
+;Last modified 8/30/3
+;Transfers resources from one team to another.
+;Script Usage:  [SourceTeam,DestinationTeam,Amount] Exec "TransferTeamResources.sqs"
+
+_team = _this Select 0
+_destinationTeam = _this Select 1
+_amount = _this Select 2
+_side = Side _destinationTeam
+
+? (_side != west) && (_side != east):Exit
+
+? (_side == east):goto "SubtractEastTeamResources"
+
+#SubtractWestTeamResources
+
+	? (_team == WestCommanderTeam):_resources = westResources;westResources = westResources - _amount;PublicVariable "westResources"
+	? (_team == WestAlphaTeam):_resources = westAlphaResources;westAlphaResources = westAlphaResources - _amount;PublicVariable "westAlphaResources"
+	? (_team == WestBravoTeam):_resources = westBravoResources;westBravoResources = westBravoResources - _amount;PublicVariable "westBravoResources"
+	? (_team == WestCharlieTeam):_resources = westCharlieResources;westCharlieResources = westCharlieResources - _amount;PublicVariable "westCharlieResources"
+	? (_team == WestDeltaTeam):_resources = westDeltaResources;westDeltaResources = westDeltaResources - _amount;PublicVariable "westDeltaResources"
+	? (_team == WestEchoTeam):_resources = westEchoResources;westEchoResources = westEchoResources - _amount;PublicVariable "westEchoResources"
+	? (_team == WestFoxtrotTeam):_resources = westFoxtrotResources;westFoxtrotResources = westFoxtrotResources - _amount;PublicVariable "westFoxtrotResources"
+	? (_team == WestGolfTeam):_resources = westGolfResources;westGolfResources = westGolfResources - _amount;PublicVariable "westGolfResources"
+	? (_team == WestHotelTeam):_resources = westHotelResources;westHotelResources = westHotelResources - _amount;PublicVariable "westHotelResources"
+
+	goto "CheckResources"
+
+#SubtractEastTeamResources
+
+	? (_team == EastCommanderTeam):_resources = eastResources;eastResources = eastResources - _amount;PublicVariable "eastResources"
+	? (_team == EastAlphaTeam):_resources = eastAlphaResources;eastAlphaResources = eastAlphaResources - _amount;PublicVariable "eastAlphaResources"
+	? (_team == EastBravoTeam):_resources = eastBravoResources;eastBravoResources = eastBravoResources - _amount;PublicVariable "eastBravoResources"
+	? (_team == EastCharlieTeam):_resources = eastCharlieResources;eastCharlieResources = eastCharlieResources - _amount;PublicVariable "eastCharlieResources"
+	? (_team == EastDeltaTeam):_resources = eastDeltaResources;eastDeltaResources = eastDeltaResources - _amount;PublicVariable "eastDeltaResources"
+	? (_team == EastEchoTeam):_resources = eastEchoResources;eastEchoResources = eastEchoResources - _amount;PublicVariable "eastEchoResources"
+	? (_team == EastFoxtrotTeam):_resources = eastFoxtrotResources;eastFoxtrotResources = eastFoxtrotResources - _amount;PublicVariable "eastFoxtrotResources"
+	? (_team == EastGolfTeam):_resources = eastGolfResources;eastGolfResources = eastGolfResources - _amount;PublicVariable "eastGolfResources"
+	? (_team == EastHotelTeam):_resources = eastHotelResources ;eastHotelResources = eastHotelResources - _amount;PublicVariable "eastHotelResources"
+
+#CheckResources
+
+	_resourcesLeft = _resources - _amount
+	_transferResources = _amount
+
+	? (_resourcesLeft >= 0):goto "TransferResources"
+
+	;If resources went negative set them to zero.
+	_resourcesLeft = -_resourcesLeft
+	_transferResources = _amount - _resourcesLeft
+	_amount = _resourcesLeft
+	_return = "TransferResources"
+
+	;Resources only need to be reset for a non-commander team.
+	? (_team != WestCommanderTeam) && (_team != EastCommanderTeam):goto "AddTeamResources"
+
+	#TransferResources
+
+		_amount = _transferResources
+		_team = _destinationTeam
+		_return = "ExitScript"
+
+#AddTeamResources
+
+	? (_side == east):goto "AddEastTeamResources"
+
+#AddWestTeamResources
+
+	? (_team == WestCommanderTeam):westResources = westResources + _amount;PublicVariable "westResources"
+	? (_team == WestAlphaTeam):westAlphaResources = westAlphaResources + _amount;PublicVariable "westAlphaResources"
+	? (_team == WestBravoTeam):westBravoResources = westBravoResources + _amount;PublicVariable "westBravoResources"
+	? (_team == WestCharlieTeam):westCharlieResources = westCharlieResources + _amount;PublicVariable "westCharlieResources"
+	? (_team == WestDeltaTeam):westDeltaResources = westDeltaResources + _amount;PublicVariable "westDeltaResources"
+	? (_team == WestEchoTeam):westEchoResources = westEchoResources + _amount;PublicVariable "westEchoResources"
+	? (_team == WestFoxtrotTeam):westFoxtrotResources = westFoxtrotResources + _amount;PublicVariable "westFoxtrotResources"
+	? (_team == WestGolfTeam):westGolfResources = westGolfResources + _amount;PublicVariable "westGolfResources"
+	? (_team == WestHotelTeam):westHotelResources = westHotelResources + _amount;PublicVariable "westHotelResources"
+
+	goto _return
+
+#AddEastTeamResources
+
+	? (_team == EastCommanderTeam):eastResources = eastResources + _amount;PublicVariable "eastResources"
+	? (_team == EastAlphaTeam):eastAlphaResources = eastAlphaResources + _amount;PublicVariable "eastAlphaResources"
+	? (_team == EastBravoTeam):eastBravoResources = eastBravoResources + _amount;PublicVariable "eastBravoResources"
+	? (_team == EastCharlieTeam):eastCharlieResources = eastCharlieResources + _amount;PublicVariable "eastCharlieResources"
+	? (_team == EastDeltaTeam):eastDeltaResources = eastDeltaResources + _amount;PublicVariable "eastDeltaResources"
+	? (_team == EastEchoTeam):_eastEchoResources = eastEchoResources+- _amount;PublicVariable "eastEchoResources"
+	? (_team == EastFoxtrotTeam):eastFoxtrotResources = eastFoxtrotResources + _amount;PublicVariable "eastFoxtrotResources"
+	? (_team == EastGolfTeam):eastGolfResources = eastGolfResources + _amount;PublicVariable "eastGolfResources"
+	? (_team == EastHotelTeam):eastHotelResources = eastHotelResources + _amount;PublicVariable "eastHotelResources"
+
+	goto _return
+
+#ExitScript
+
+	Exit

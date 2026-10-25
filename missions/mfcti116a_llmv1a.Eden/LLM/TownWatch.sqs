@@ -1,0 +1,110 @@
+; LLM\TownWatch.sqs (version 1)
+; Counts who stands in each town's capture circle every few seconds. Server only.
+; Started from LLM\Init.sqs when llmRecountTowns is true.
+;
+; How the mission decides who owns a town: mission.sqm has a trigger of 10 m radius round each flag
+; ("Take over Town N"). When it fires, Main\SetTownSide.sqs counts the units inside by side and gives
+; the town to the side with the most.
+;
+; The fault: the game fires that trigger only at the moment the circle goes from empty to occupied.
+; While anything stays inside, the count is never taken again. Anything means a man on foot, a vehicle,
+; and also an abandoned vehicle that is not a wreck, which occupies the circle and counts for nobody.
+; So teams that crowd round a flag, or one abandoned vehicle beside it, stop the town from ever changing
+; hands. In the trial of 9 October seven East teams stood round one flag for 36 minutes with no enemy
+; in sight and never took the town.
+;
+; The repair: this script keeps a circle of its own, the same size, on every flag. Every
+; llmRecountSeconds it takes the same count for each occupied circle. Only when the count would give
+; the town to a new owner does it run the mission's own Main\SetTownSide.sqs with the units it found,
+; so the award, the flag and the messages are exactly the mission's. The mission's triggers still work.
+;
+; What this means in play: a town goes to whichever side has the most units in the circle now. Before,
+; it went to whoever stepped into an empty circle first and kept it for as long as the circle stayed
+; occupied. So a town can now be taken while a defender is still alive in the circle, if he is
+; outnumbered there, and he takes it back the moment he is not. A vehicle counts as one unit, as
+; before. An empty vehicle counts for nobody, as before. A tie changes nothing, as before.
+
+? !(Local LocalServerObject) : Exit
+
+_total = count towns
+? (_total < 1) : Exit
+
+_watch = []
+_trg = objNull
+_n = 0
+
+#MakeCircle
+
+	_trg = createTrigger ["EmptyDetector", getPos (towns select _n)]
+	_trg setTriggerArea [10, 10, 0, false]
+	_trg setTriggerActivation ["ANY", "PRESENT", true]
+	_watch = _watch + [_trg]
+	_n = _n + 1
+	? (_n < _total) : goto "MakeCircle"
+
+_list = []
+_inside = 0
+_unit = objNull
+_low = false
+_west = 0
+_east = 0
+_guer = 0
+_new = ""
+_slot = 0
+_u = 0
+
+#Recount
+
+~llmRecountSeconds
+
+	? !(llmRecountTowns) : goto "Recount"
+	_n = 0
+
+	#RecountTown
+
+		; A copy: the game refills its own list while this script reads it.
+		_list = [] + (list (_watch select _n))
+		_inside = count _list
+		? (_inside < 1) : goto "NextTown"
+
+		; The same count as Main\SetTownSide.sqs: by side, and only what is less than 3 m off the ground.
+		_west = 0
+		_east = 0
+		_guer = 0
+		_u = 0
+
+		#CountUnit
+
+			_unit = _list select _u
+			_low = ((getPos _unit) select 2) < 3
+			? (_low) and ((side _unit) == west) : _west = _west + 1
+			? (_low) and ((side _unit) == east) : _east = _east + 1
+			? (_low) and ((side _unit) == resistance) : _guer = _guer + 1
+			_u = _u + 1
+			? (_u < _inside) : goto "CountUnit"
+
+		_new = ""
+		_slot = -1
+		? (_west > _east) and (_west > _guer) : _new = "West"; _slot = 0
+		? (_east > _west) and (_east > _guer) : _new = "East"; _slot = 1
+		? (_guer > _west) and (_guer > _east) : _new = "N/A"; _slot = 2
+
+		; No clear winner, or the winner already owns it: leave it alone.
+		? (_slot < 0) : goto "NextTown"
+		? (_new == (townSides select _n)) : goto "NextTown"
+
+		; One change at a time: the mission passes a change to the server through one set of variables.
+		; While this waited, the mission's own trigger may have made the same change already.
+		@ !(setTown)
+		? (_new == (townSides select _n)) : goto "NextTown"
+		[_list, towns select _n] exec "Main\SetTownSide.sqs"
+		~3
+		@ !(setTown)
+		? (_new == (townSides select _n)) : llmRecounts set [_slot, (llmRecounts select _slot) + 1]
+
+		#NextTown
+
+		_n = _n + 1
+		? (_n < _total) : goto "RecountTown"
+
+	goto "Recount"

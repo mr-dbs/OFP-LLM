@@ -1,0 +1,16 @@
+;Last modified 3/30/3
+;Script usage:[UnitType,Building] Exec "AddToQueue.sqs"
+
+_unitType = _this Select 0
+_building = _this Select 1
+_manned = _this Select 2
+_team = _this Select 3
+
+? (GetDammage _building >= 1):Exit
+
+buildingQueue = buildingQueue + [_building]
+unitQueue = unitQueue + [_unitType]
+mannedUnitQueue = mannedUnitQueue + [_manned]
+teamQueue = teamQueue + [_team]
+
+Hint Format["%1.\n%2",Localize "STRBUILDINGINUSE",Localize "STRADDINGTOQUEUE"]

@@ -1,0 +1,65 @@
+;Last modified 2/19/4
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_destination = _this Select 1
+_direction = _this Select 2
+
+? (publicServer):Exit
+
+_AAName = "MFCTI116AAStaticMG"
+? (_side == east):_AAName = _AAName + "E"
+? (limitedRadar):_AAName = _AAName + "LR"
+
+#CreateAA
+
+	;Create building, props, gun, & gunner.
+	_AA = _AAName CreateVehicle _destination
+	_AA SetDir _direction
+	_AA SetPos _destination
+	_AA SetPos [(_destination Select 0)+((sin _direction)*0.5),(_destination Select 1)+((cos _direction)*.5),(_destination Select 2)]
+
+	[_side,_AA,AAGunType] Exec "Main\UpdateStationaryGun.sqs"
+	_AA AddEventHandler ["fired",{_this Exec "Main\UpdateAAMissile.sqs"}]
+
+	? (_side == east):goto "AddAAToEast"
+
+#AddAAToWest
+
+	;Add it to the list of factories & increment the total count.
+	westAAGun = westAAGun + [_AA]
+	westAAGunDamage = westAAGunDamage + [500]
+
+	;Send the new building to other players.
+	westBuildingBuiltMP = _AA;PublicVariable "westBuildingBuiltMP"
+	westBuildingBuiltTypeMP = AAGunType;PublicVariable "westBuildingBuiltTypeMP"
+
+	totalWestStationaryAAs = totalWestStationaryAAs + 1;PublicVariable "totalWestStationaryAAs"
+
+	goto "AddObjects"
+
+#AddAAToEast
+
+
+	;Add it to the list of factories & increment the total count.
+	eastAAGun = eastAAGun + [_AA]
+	eastAAGunDamage = eastAAGunDamage + [500]
+
+	;Send the new building to other players.
+	eastBuildingBuiltMP = _AA;PublicVariable "eastBuildingBuiltMP"
+	eastBuildingBuiltTypeMP = AAGunType;PublicVariable "eastBuildingBuiltTypeMP"
+
+	totalEastStationaryAAs = totalEastStationaryAAs + 1;PublicVariable "totalEastStationaryAAs"
+
+#AddObjects
+
+	_crate = "MFCTI116EmptyCrate" CreateVehicle _destination
+
+	_direction = GetDir _AA
+	_position = GetPos _AA
+
+	_crate SetPos _position
+	_crate SetDir _direction
+	_crate SetPos [(_position Select 0)-((sin _direction)*4),(_position Select 1)-((cos _direction)*4),(_position Select 2)]
+	[_AA,[_crate]] Exec "Main\StationaryGunCleanUp.sqs"

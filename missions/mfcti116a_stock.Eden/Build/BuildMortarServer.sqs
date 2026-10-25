@@ -1,0 +1,63 @@
+;Last modified 2/19/4
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_destination = _this Select 1
+_direction = _this Select 2
+
+? (publicServer):Exit
+
+_mortarName = "MFCTI116WestMortar"
+? (_side == east):_mortarName = "MFCTI116EastMortar"
+
+#CreateMortar
+
+	;Create building, props, gun, & gunner.
+	_mortar = _mortarName CreateVehicle _destination
+	_mortar SetDir _direction
+	_mortar SetPos _destination
+	_mortar SetPos [(_destination Select 0)+((sin _direction)*0.5),(_destination Select 1)+((cos _direction)*.5),(_destination Select 2)]
+	[_mortar] Exec "Main\UpdateMortar.sqs"
+
+	? (_side == east):goto "AddMortarToEast"
+
+#AddMortarToWest
+
+	;Add it to the list of factories & increment the total count.
+	westMortar = westMortar + [_mortar]
+	westMortarDamage = westMortarDamage + [500]
+
+	;Send the new building to other players.
+	westBuildingBuiltMP = _mortar;PublicVariable "westBuildingBuiltMP"
+	westBuildingBuiltTypeMP = mortarType;PublicVariable "westBuildingBuiltTypeMP"
+
+	totalWestStationaryMortars = totalWestStationaryMortars + 1;PublicVariable "totalWestStationaryMortars"
+
+	goto "AddObjects"
+
+#AddMortarToEast
+
+
+	;Add it to the list of factories & increment the total count.
+	eastMortar = eastMortar + [_mortar]
+	eastMortarDamage = eastMortarDamage + [500]
+
+	;Send the new building to other players.
+	eastBuildingBuiltMP = _mortar;PublicVariable "eastBuildingBuiltMP"
+	eastBuildingBuiltTypeMP = mortarType;PublicVariable "eastBuildingBuiltTypeMP"
+
+	totalEastStationaryMortars = totalEastStationaryMortars + 1;PublicVariable "totalEastStationaryMortars"
+
+#AddObjects
+
+	_crate = "MFCTI116EmptyCrate" CreateVehicle _destination
+
+	_direction = GetDir _mortar
+	_position = GetPos _mortar
+
+	_crate SetPos _position
+	_crate SetDir _direction
+	_crate SetPos [(_position Select 0)-((sin _direction)*4),(_position Select 1)-((cos _direction)*4),(_position Select 2)]
+
+	[_mortar,[_crate]] Exec "Main\StationaryGunCleanUp.sqs"

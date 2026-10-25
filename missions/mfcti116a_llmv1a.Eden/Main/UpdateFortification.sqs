@@ -1,0 +1,157 @@
+;Last modified 2/19/4
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_fortification = _this Select 1
+_gun = _this Select 2
+_pallet1 = _this Select 3
+_pallet2 = _this Select 4
+_pallet3 = _this Select 5
+_gunType = _this Select 6
+
+_destroyed = false
+
+#Update
+~5
+
+	? (_destroyed) && (GetDammage _gun != 1):goto "Repair"
+	? !(_destroyed) && (GetDammage _gun == 1):_destroyed = true
+
+	;Check if gun needs a reload.
+	? (publicServer)&&(_gunType == M2FortificationType)&&!(SomeAmmo _gun)&&!(_destroyed):goto "CheckReload"
+	? (publicServer)&&(_gunType == HEFortificationType)&&!(SomeAmmo _gun)&&!(_destroyed):goto "CheckReload"
+	? !(publicServer)&&(_gunType == M2FortificationType)&&!(SomeAmmo _gun)&&!(_destroyed):goto "CheckReload"
+	? !(publicServer)&&(_gunType == HEFortificationType)&&!(SomeAmmo _gun)&&!(_destroyed):goto "CheckReload"
+
+	;Check for the floating pallets bug.
+	_position1 = GetPos _pallet1;_position2 = GetPos _pallet2;_position3 = GetPos _pallet3
+
+	? (_pallet1 Distance _fortification < 5) && (_pallet2 Distance _fortification < 5) && (_pallet3 Distance _fortification < 5):goto "UpdateDamage"
+
+	;Wait for blown away pallets to be at rest.
+	~12
+
+	goto "Reposition"
+
+#UpdateDamage
+
+	goto "Update"
+
+#CheckReload
+
+	? (_side == west):_depotList = westAmmoDepot;_truckList = westAmmoTrucks
+	? (_side == east):_depotList = eastAmmoDepot;_truckList = eastAmmoTrucks
+
+	_count = 0
+	_delay = ammoDepotReloadDelay
+	_maxAmmoDepots = Count _depotList
+	_maxAmmoTrucks = Count _truckList
+
+	? (_maxAmmoTrucks < 1) && (_maxAmmoDepots < 1):goto "Update"
+
+	;First check for a nearby Ammo Depot.
+	#CheckAmmoDepot
+
+	_depot = _depotList Select _count
+	_count = _count + 1
+
+	? !(IsNull _depot) && (GetDammage _depot != 1) && (_depot Distance _fortification <= ammoDepotReloadRange):goto "Reload"
+	? (_count < _maxAmmoDepots):goto "CheckAmmoDepot"
+
+	_count = 0
+
+	;Reloading from a truck is slower.
+	_delay = ammoDepotReloadDelay * 4
+
+	;Check for a nearby Ammo Truck.
+	#CheckAmmoTruck
+
+	_truck = _truckList Select _count
+	_count = _count + 1
+
+	? !(IsNull _truck) && (GetDammage _truck != 1) && (_truck Distance _gun <= ammoDepotReloadRange):goto "Reload"
+	? (_count < _maxAmmoTrucks):goto "CheckAmmoTruck"
+
+	goto "UpdateDamage"
+
+#Reload
+
+	? (IsNull (Gunner _gun)):goto "Update"
+
+	~_delay
+
+	? (_gunType == HEFortificationType):goto "ReloadHE"
+
+#ReloadM2
+
+	? (publicServer):_gun RemoveMagazine "Browning";_gun AddMagazine "Browning"
+	? !(publicServer):_gun RemoveMagazine "MFCTI116M2";_gun AddMagazine "MFCTI116M2";_gun AddMagazine "MFCTI116M2";_gun AddMagazine "MFCTI116M2";_gun AddMagazine "MFCTI116M2";_gun AddMagazine "MFCTI116M2"
+
+	goto "UpdateDamage"
+
+#ReloadHE
+
+	? (publicServer):_gun RemoveMagazine "MachineGun30";_gun AddMagazine "MachineGun30"
+	? !(publicServer):_gun RemoveMagazine "MFCTI116HE";_gun AddMagazine "MFCTI116HE";_gun AddMagazine "MFCTI116HE";_gun AddMagazine "MFCTI116HE";_gun AddMagazine "MFCTI116HE";_gun AddMagazine "MFCTI116HE"
+
+	goto "UpdateDamage"
+
+#DropGun
+
+	;Drop gun to the floor.
+	_position = GetPos _fortification
+	_gun SetPos [_position Select 0,_position Select 1,(_position Select 2) + 1.5]
+	
+	goto "Update"
+
+;If the gun is repaired fix the rest too.
+#Repair
+
+	_destroyed = false
+
+	;Repair remaining parts of fortification.
+	_fortification SetDammage 0
+	_gun SetDammage 0
+	_pallet1 SetDammage 0
+	_pallet2 SetDammage 0
+	_pallet3 SetDammage 0
+
+	goto "Reposition"
+
+;Set all the objects back in their place.
+#Reposition
+
+	;Set the parts' positions back to the regular place.
+	_direction = GetDir _fortification
+	_position = GetPos _fortification
+
+	_gun SetDir _direction
+	_pallet1 SetDir _direction
+	_pallet2 SetDir _direction
+	_pallet3 SetDir _direction
+
+	_gun SetPos _position
+	_pallet1 SetPos _position
+	_pallet2 SetPos _position
+	_pallet3 SetPos _position
+
+	_direction = (_direction + 50) % 360
+	_gun SetDir _direction
+	_pallet1 SetDir _direction
+	_pallet2 SetDir _direction
+	_pallet3 SetDir _direction
+
+	_gun SetPos [(_position Select 0)+((sin _direction)*2.45),(_position Select 1)+((cos _direction)*2.45),2.15]
+	_pallet1 SetPos [(_position Select 0)+((sin _direction)*2.45),(_position Select 1)+((cos _direction)*2.45),1.9]
+	_pallet2 SetPos [(_position Select 0)+((sin _direction)*2.45),(_position Select 1)+((cos _direction)*2.45),1.7]
+	_pallet3 SetPos [(_position Select 0)+((sin _direction)*2.45),(_position Select 1)+((cos _direction)*2.45),1.5]
+
+	_direction = (_direction - 50) % 360
+	_gun SetDir _direction
+	_pallet1 SetDir _direction
+	_pallet2 SetDir _direction
+	_pallet3 SetDir _direction
+
+	goto "Update"

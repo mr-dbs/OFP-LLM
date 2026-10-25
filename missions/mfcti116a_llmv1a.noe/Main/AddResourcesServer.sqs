@@ -1,0 +1,94 @@
+;Last modified 5/5/3
+;Script Usage:  [Side] Exec "AddResourcesServer.sqs"
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+
+? (_side == east):goto "AddEastResources"
+
+#AddWestResources
+
+	_count = 0
+	_groups = westPlayerGroups - [WestCommanderTeam]
+	_totalPlayers = Count _groups
+
+	westResources = westResources + addWestResources
+
+	? (_totalPlayers < 1):goto "ClearWestResourceRequest"
+
+	;Calculate resources to send to the player pool.
+	_totalValue = addWestResources * westPlayerResourcePercentage
+	_totalValue = _totalValue - (_totalValue % 1)
+	_value = _totalValue / _totalPlayers
+	_value = _value - (_value % 1)
+
+	;Add the remaining amount to the main resource pool.
+	westResources = westResources - _totalValue
+
+	;Add player resources to each player.
+	#AddWestPlayerResources
+
+		_group = _groups Select _count
+		_count = _count + 1
+
+		? (_group == WestAlphaTeam):westAlphaResources = westAlphaResources + _value;PublicVariable "westAlphaResources"
+		? (_group == WestBravoTeam):westBravoResources = westBravoResources + _value;PublicVariable "westBravoResources"
+		? (_group == WestCharlieTeam):westCharlieResources = westCharlieResources + _value;PublicVariable "westCharlieResources"
+		? (_group == WestDeltaTeam):westDeltaResources = westDeltaResources + _value;PublicVariable "westDeltaResources"
+		? (_group == WestEchoTeam):westEchoResources = westEchoResources + _value;PublicVariable "westEchoResources"
+		? (_group == WestFoxtrotTeam):westFoxtrotResources = westFoxtrotResources + _value;PublicVariable "westFoxtrotResources"
+		? (_group == WestGolfTeam):westGolfResources = westGolfResources + _value;PublicVariable "westGolfResources"
+		? (_group == WestHotelTeam):westHotelResources = westHotelResources + _value;PublicVariable "westHotelResources"
+
+		? (_count < _totalPlayers):goto "AddWestPlayerResources"
+
+#ClearWestResourceRequest
+
+	PublicVariable "westResources"
+	addWestResources = 0;PublicVariable "addWestResources"
+	Exit
+
+#AddEastResources
+
+	? (debug):player SideChat("Add resources to east")
+
+	_count = 0
+	_groups = eastPlayerGroups - [EastCommanderTeam]
+	_totalPlayers = Count _groups
+
+	eastResources = eastResources + addEastResources
+
+	? (_totalPlayers < 1):goto "ClearEastResourceRequest"
+
+	;Calculate resources to send to the player pool.
+	_totalValue = addEastResources * eastPlayerResourcePercentage
+	_totalValue = _totalValue - (_totalValue % 1)
+	_value = _totalValue / (_totalPlayers)
+	_value = _value - (_value % 1)
+
+	;Add the remaining amount to the main resource pool.
+	eastResources = eastResources - _totalValue
+
+	;Add player resources to each player.
+	#AddEastPlayerResources
+
+		_group = _groups Select _count
+		_count = _count + 1
+
+		? (_group == EastAlphaTeam):eastAlphaResources = eastAlphaResources + _value;PublicVariable "eastAlphaResources"
+		? (_group == EastBravoTeam):eastBravoResources = eastBravoResources + _value;PublicVariable "eastBravoResources"
+		? (_group == EastCharlieTeam):eastCharlieResources = eastCharlieResources + _value;PublicVariable "eastCharlieResources"
+		? (_group == EastDeltaTeam):eastDeltaResources = eastDeltaResources + _value;PublicVariable "eastDeltaResources"
+		? (_group == EastEchoTeam):eastEchoResources = eastEchoResources + _value;PublicVariable "eastEchoResources"
+		? (_group == EastFoxtrotTeam):eastFoxtrotResources = eastFoxtrotResources + _value;PublicVariable "eastFoxtrotResources"
+		? (_group == EastGolfTeam):eastGolfResources = eastGolfResources + _value;PublicVariable "eastGolfResources"
+		? (_group == EastHotelTeam):eastHotelResources = eastHotelResources + _value;PublicVariable "eastHotelResources"
+
+		? (_count < _totalPlayers):goto "AddEastPlayerResources"
+
+#ClearEastResourceRequest
+
+	PublicVariable "eastResources"
+	addEastResources = 0;PublicVariable "addEastResources"

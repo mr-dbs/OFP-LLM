@@ -1,0 +1,39 @@
+;Last modified 10/27/3
+;Script usage:  [Vehicle,Side] Exec "EmptyVehicleCleanUp.sqs"
+
+_unit = _this Select 0
+_side = _this Select 1
+
+;Do not proceed further except on the server.
+? !(Local LocalServerObject):goto "Update"
+
+@ (serverStarted)
+
+? (_side == resistance):vehicles = vehicles + [_unit]
+
+#Update
+~30
+
+? !(_unit In vehicles):Exit
+? (GetDammage _unit == 1):goto "CleanUp"
+
+goto "Update"
+
+#CleanUp
+
+	? (IsNull _group):goto "AddCasualty"
+	? (Local player) && (Group player == _group):totalTeamVehiclesLost = totalTeamVehiclesLost + 1
+
+	#AddCasualty
+
+		? (_side == west):totalWestVehiclesLost = totalWestVehiclesLost + 1;PublicVariable "totalWestVehiclesLost"
+		? (_side == east):totalEastVehiclesLost = totalEastVehiclesLost + 1;PublicVariable "totalEastVehiclesLost"
+		? (_side == resistance):totalResistanceVehiclesLost = totalResistanceVehiclesLost + 1;PublicVariable "totalResistanceVehiclesLost"
+		? (_side == civilian):totalCivilianVehiclesLost = totalCivilianVehiclesLost + 1;PublicVariable "totalCivilianVehiclesLost"
+
+	~600
+
+	? (_side == resistance):vehicles = vehicles - [_unit];DeleteVehicle _unit;Exit
+	? (_side == civilian):DeleteVehicle _unit;Exit
+
+	[_unit] Exec "Main\DeleteVehicle.sqs"

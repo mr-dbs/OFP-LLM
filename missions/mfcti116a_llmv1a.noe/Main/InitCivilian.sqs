@@ -1,0 +1,26 @@
+;Last modified 8/28/3
+;Add this to script caller.
+;Script usage:  [Vehicle] exec "InitCivilian.sqs"
+
+? !(Local LocalServerObject):Exit
+
+_vehicle = _this Select 0
+
+;The first town to be set should call this so the arrays are declared.
+? !(startedCivilianInit):goto "InitCivilianArrays"
+
+#AddCivilian
+
+civilians = civilians + [_vehicle]
+(Group Driver _vehicle) LockWP true
+[Driver _vehicle,50] Exec "Main\UnitCleanUp.sqs"
+[_vehicle,civilian,ObjNull] Exec "Main\VehicleCleanUp.sqs"
+
+Exit
+
+#InitCivilianArrays
+
+startedCivilianInit = true
+civilians = []
+
+goto "AddCivilian"

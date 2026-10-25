@@ -1,0 +1,24 @@
+;Last modified 10/7/2
+
+;Puts in request to the server to add resources to a side.  Useful when dealing with lag.
+;Script Usage:  [Side,Amount] Exec "AddResources.sqs"
+
+_side = _this Select 0
+_amount = _this Select 1
+
+? (_side == east):goto "AddEastResources"
+
+#AddWestResources
+
+	;Wait until server has processed any other request.
+	@ (addWestResources == 0)
+
+	addWestResources = _amount;PublicVariable "addWestResources"
+	Exit
+
+#AddEastResources
+
+	;Wait until server has processed any other request.
+	@ (addEastResources == 0)
+
+	addEastResources = _amount;PublicVariable "addEastResources"

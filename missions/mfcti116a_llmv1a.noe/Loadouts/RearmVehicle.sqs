@@ -1,0 +1,112 @@
+;Last modified 2/19/4
+;Rearms vehicle.
+;ScriptUsage:  [Unit,NotifyTeam] Exec "UpdateAmmo.sqs"
+
+;Vehicle weapons that only use one magazine.
+;singleReloads = ["MFCTI116M2A2MachineGun7_6","MFCTI116M60MachineGun7_6","MFCTI116M1MachineGun7_6","MFCTI116PKT","MFCTI116MI17MachineGun12_7","MFCTI116MI17MachineGun12_7","MFCTI116AH1MachineGun20","MFCTI116AH64MachineGun30","MFCTI116MI24MachineGun30","MFCTI116VulcanCannon","MFCTI116ShilkaCannon","Cannon25HE","MachineGun30A10","HellfireLauncherCobra","HellfireLauncherApach","HellfireLauncherHind","HellfireLauncherKamov","MaverickLauncher","ZuniLauncherOH","ZuniLauncher38","Rocket57x64","MFCTI116Rocket80x40","LaserGuidedBombLauncher","MFCTI116EastLaserGuidedBombLauncher"]
+
+;PS version
+;singleReloads = ["MachineGun7_6","Browning","MachineGun30","ZsuCannon","VulcanCannon","Cannon25HE","Cannon30","MachineGun30A10","AT3Launcher","HellfireLauncherBMP2","HellfireLauncherHind","HellfireLauncherCobra","HellfireLauncherApach","HellfireLauncherKamov","MaverickLauncher","ZuniLauncherOH","ZuniLauncher38","Rocket57x64","Rocket57x192","Rocket57x40Kamov","LaserGuidedBombLauncher"]
+
+_vehicle = _this Select 0
+_notify = _this Select 1
+_rearmed = false
+_driver = Driver _vehicle
+
+? (publicServer):goto "ReloadWeaponsPS"
+? !(publicServer):goto "ReloadWeapons"
+
+#ReloadWeaponsPS
+
+	_weapons = Weapons _vehicle
+
+	_weaponCount = 0
+	_totalReloads = Count singleReloads
+
+	#ReloadWeaponPS
+
+		_weapon = singleReloads Select _weaponCount
+		_weaponCount = _weaponCount + 1
+
+		? (_weapon In _weapons):_vehicle RemoveMagazine _weapon;_vehicle AddMagazine _weapon;_rearmed = true
+		? (_weaponCount < _totalReloads):goto "ReloadWeaponPS"
+
+	;Cannons
+	? ("Cannon30" In _weapons):_vehicle RemoveMagazine "Cannon30HE";_vehicle AddMagazine "Cannon30HE";_vehicle RemoveMagazine "Cannon30AP";_vehicle AddMagazine "Cannon30AP";_rearmed = true
+
+	;Turrets
+	? ("Gun73" In _weapons):_vehicle RemoveMagazine "Heat73";_vehicle AddMagazine "Heat73";_vehicle RemoveMagazine "Shell73";_vehicle AddMagazine "Shell73";_rearmed = true
+	? ("Gun105" In _weapons):_vehicle RemoveMagazine "Heat105";_vehicle AddMagazine "Heat105";_vehicle RemoveMagazine "Shell105";_vehicle AddMagazine "Shell105";_rearmed = true
+	? ("Gun120" In _weapons):_vehicle RemoveMagazine "Heat120";_vehicle AddMagazine "Heat120";_vehicle RemoveMagazine "Shell120";_vehicle AddMagazine "Shell120";_rearmed = true
+
+	? (_notify && _rearmed) && ((Group _driver In westPlayerGroups) || (Group _driver In eastPlayerGroups)):[_driver,groupCommander,messageRearmingVehicle,0,0] Exec "Main\SendPlayerMessage.sqs"
+
+	Exit
+
+#ReloadWeapons
+
+	_weapons = Weapons _vehicle
+
+	_weaponCount = 0
+	_totalReloads = Count singleReloads
+
+	#ReloadWeapon
+
+		_weapon = singleReloads Select _weaponCount
+		_weaponCount = _weaponCount + 1
+
+		? (_weapon In _weapons):_vehicle RemoveMagazine _weapon;_vehicle AddMagazine _weapon;_rearmed = true
+		? (_weaponCount < _totalReloads):goto "ReloadWeapon"
+
+	;MGs
+	? ("MFCTI116M85" In _weapons):_return = "ReloadNSVT";_weaponCount = 5;_magazine = "MFCTI116M85";goto "ReloadMagazines"
+
+	#ReloadNSVT
+	? ("MFCTI116NSVT" In _weapons):_return = "ReloadM2";_weaponCount = 5;_magazine = "MFCTI116NSVT";goto "ReloadMagazines"
+
+	#ReloadM2
+	? ("MFCTI116M2" In _weapons):_return = "ReloadCannons";_weaponCount = 5;_magazine = "MFCTI116M2";goto "ReloadMagazines"
+
+	#ReloadCannons
+
+	? ("MFCTI116Cannon30" In _weapons):_vehicle RemoveMagazine "Cannon30HE";_vehicle AddMagazine "Cannon30HE";_vehicle RemoveMagazine "MFCTI116Cannon30AP";_vehicle AddMagazine "MFCTI116Cannon30AP"
+
+	;Turrets
+	? ("MFCTI116BMP1Gun" In _weapons):_vehicle RemoveMagazine "MFCTI116BMP1Heat";_vehicle AddMagazine "MFCTI116BMP1Heat";_vehicle RemoveMagazine "MFCTI116BMP1HEFrag";_vehicle AddMagazine "MFCTI116BMP1HEFrag";_rearmed = true
+	? ("MFCTI116M60Gun" In _weapons):_vehicle RemoveMagazine "MFCTI116M60Sabot";_vehicle AddMagazine "MFCTI116M60Sabot";_vehicle RemoveMagazine "MFCTI116M60Heat";_vehicle AddMagazine "MFCTI116M60Heat";_rearmed = true
+	? ("MFCTI116M1Gun" In _weapons):_vehicle RemoveMagazine "MFCTI116M1Sabot";_vehicle AddMagazine "MFCTI116M1Sabot";_vehicle RemoveMagazine "MFCTI116M1Heat";_vehicle AddMagazine "MFCTI116M1Heat";_rearmed = true
+	? ("MFCTI116M1A1Gun" In _weapons):_vehicle RemoveMagazine "MFCTI116M1A1APFSDS";_vehicle AddMagazine "MFCTI116M1A1APFSDS";_vehicle RemoveMagazine "MFCTI116M1A1Heat";_vehicle AddMagazine "MFCTI116M1A1Heat";_rearmed = true
+	? ("MFCTI116T72Gun" In _weapons):_vehicle RemoveMagazine "MFCTI116T72Sabot";_vehicle AddMagazine "MFCTI116T72Sabot";_vehicle RemoveMagazine "MFCTI116T72Heat";_vehicle AddMagazine "MFCTI116T72Heat";_rearmed = true
+	? ("MFCTI116T72BGun" In _weapons):_vehicle RemoveMagazine "MFCTI116T72Sabot";_vehicle AddMagazine "MFCTI116T72Sabot";_vehicle RemoveMagazine "MFCTI116T72Heat";_vehicle AddMagazine "MFCTI116T72Heat";_vehicle RemoveMagazine "MFCTI116T72AT11";_vehicle AddMagazine "MFCTI116T72AT11";_rearmed = true
+	? ("MFCTI116T80Gun" In _weapons):_vehicle RemoveMagazine "MFCTI116T80Sabot";_vehicle AddMagazine "MFCTI116T80Sabot";_vehicle RemoveMagazine "MFCTI116T80Heat";_vehicle AddMagazine "MFCTI116T80Heat";_rearmed = true
+	? ("MFCTI116T80BGun" In _weapons):_vehicle RemoveMagazine "MFCTI116T80Sabot";_vehicle AddMagazine "MFCTI116T80Sabot";_vehicle RemoveMagazine "MFCTI116T80Heat";_vehicle AddMagazine "MFCTI116T80Heat";_vehicle RemoveMagazine "MFCTI116T80AT8";_vehicle AddMagazine "MFCTI116T80AT8";_rearmed = true
+	? ("MFCTI116T80UGun" In _weapons):_vehicle RemoveMagazine "MFCTI116T80Sabot";_vehicle AddMagazine "MFCTI116T80Sabot";_vehicle RemoveMagazine "MFCTI116T80Heat";_vehicle AddMagazine "MFCTI116T80Heat";_vehicle RemoveMagazine "MFCTI116T80AT11";_vehicle AddMagazine "MFCTI116T80AT11";_rearmed = true
+
+	;ATs
+	? ("MFCTI116TOW2Launcher" In _weapons):_vehicle RemoveMagazine "MFCTI116TOW2Launcher";_vehicle AddMagazine "MFCTI116TOW2Launcher";_rearmed = true
+	? ("MFCTI116AT3Launcher" In _weapons):_vehicle RemoveMagazine "MFCTI116AT3Launcher";_vehicle AddMagazine "MFCTI116AT3Launcher";_rearmed = true
+	? ("MFCTI116AT5Launcher" In _weapons):_vehicle RemoveMagazine "MFCTI116AT5Launcher";_vehicle AddMagazine "MFCTI116AT5Launcher";_rearmed = true
+	? ("MFCTI116AT5BLauncher" In _weapons):_vehicle RemoveMagazine "MFCTI116AT5BLauncher";_vehicle AddMagazine "MFCTI116AT5BLauncher";_rearmed = true
+
+	? (_notify && _rearmed) && ((Group _driver In westPlayerGroups) || (Group _driver In eastPlayerGroups)):[_driver,groupCommander,messageRearmingVehicle,0,0] Exec "Main\SendPlayerMessage.sqs"
+
+	Exit
+
+#ReloadMagazines
+
+	_rearmed = true
+	_countRemove = _weaponCount
+
+	#RemoveMagazine
+
+		_vehicle RemoveMagazine _magazine
+		_countRemove = _countRemove - 1
+		? (_countRemove > 0):goto "RemoveMagazine"
+
+	#ReloadMagazine
+
+		_vehicle AddMagazine _magazine
+		_weaponCount = _weaponCount - 1
+		? (_weaponCount > 0):goto "ReloadMagazine"
+
+	goto _return

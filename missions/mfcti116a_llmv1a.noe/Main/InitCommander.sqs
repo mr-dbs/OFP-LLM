@@ -1,0 +1,31 @@
+;Last modified 4/14/3
+
+_unit = _this Select 0
+_side = Side _unit
+
+showBuildActions = true
+redrawBuildActions = false
+redrawDefenseActions = false
+redrawUpgrades = true
+
+@ (gameStarted)
+@ (_unit == WestCommander) || (_unit == EastCommander)
+
+;Hold until _unit shows up as a player (can take a little while in multiplayer).
+@ (_unit == player)
+@ (mapCenterComplete)
+
+? (Side player == west):WestMobileHQ AddAction[Localize "STRLOCKMHQ","Main\ToggleMHQLock.sqs"];WestMobileHQ AddAction [Localize "STRDISABLECOMMANDERONLYMHQ","Main\ToggleCommanderOnlyMHQ.sqs"]
+? (Side player == east):EastMobileHQ AddAction[Localize "STRLOCKMHQ","Main\ToggleMHQLock.sqs"];EastMobileHQ AddAction [Localize  "STRDISABLECOMMANDERONLYMHQ","Main\ToggleCommanderOnlyMHQ.sqs"]
+
+;Run GUI based commander menus.
+[_unit] Exec "GUI\UpdateGUIBuildMenu.sqs"
+[_unit] Exec "GUI\UpdateGUICommandMenu.sqs"
+[_unit] Exec "GUI\UpdateGUIControlCenterMenu.sqs"
+[_unit] Exec "GUI\UpdateGUITeamMenu.sqs"
+
+;Command menu
+redrawCommandActions = true
+commandSelectionMenu = false
+showCommandMainMenu = false
+commandTeamSelectMenu = false

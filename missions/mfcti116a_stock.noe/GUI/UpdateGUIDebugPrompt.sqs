@@ -1,0 +1,24 @@
+;Last modified 11/23/3
+private ["_callVariable"]
+
+_callVariable = ""
+_unit = _this select 0
+
+debugPromptShow = false
+CreateDialog Format ["DebugPrompt%1",GUISkin]
+
+#Update
+~0.1
+
+	? !(dialog) || (CtrlText IDCMenuTitle != Localize "STRVARIABLE"):Exit
+	? (debugPromptShow):goto "ShowValue"
+
+	goto "Update"
+
+#ShowValue
+
+	Call Format["_callVariable = %1",CtrlText IDCMenuList]
+	CtrlSetText [IDCMenuInfo,Format["%1",_callVariable]]
+	debugPromptShow = false
+
+	goto "Update"

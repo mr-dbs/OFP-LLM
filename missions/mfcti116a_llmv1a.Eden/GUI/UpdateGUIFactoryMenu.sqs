@@ -1,0 +1,419 @@
+;Last modified 11/23/3
+;Routines for a factory's build menu.
+
+_unit = _this Select 0
+_side = Side _unit
+
+@ (serverStarted)
+
+_currentlyUpgraded = []
+_actionsAdded = []
+_actionIDs = []
+_factories = []
+_menuInUse = false
+_menu = false
+_custom = false
+_customID = 0
+_customCost = 0
+
+_factoryLists = [infantryFactory,lightFactory,heavyFactory,airFactory,ammoDepot,repairDepot,[]]
+_factoryMenuText = ["Infantry","Light","Heavy","Aircraft","Ammo","Repair","ResistanceFactory"]
+_factoryLanguageText = [Localize "STRBARRACKS",Localize "STRLIGHTFACTORY",Localize "STRHEAVYFACTORY",Localize "STRAIRFACTORY",Localize "STRAMMODEPOT",Localize "STRREPAIRDEPOT",Localize "STRRESISTANCEFACTORY"]
+
+_westUpgradedNames = [westUpgradedSoldierNames,westUpgradedLightNames,westUpgradedHeavyNames,westUpgradedAirNames,[],[],[]]
+_eastUpgradedNames = [eastUpgradedSoldierNames,eastUpgradedLightNames,eastUpgradedHeavyNames,eastUpgradedAirNames,[],[],[]]
+_names = unitNames
+
+? !(limitedRadar):goto "SetTransports"
+
+_westUpgradedNames = [westUpgradedSoldierNames,westUpgradedLRLightNames,westUpgradedLRHeavyNames,westUpgradedLRAirNames,[],[],[]]
+_eastUpgradedNames = [eastUpgradedSoldierNames,eastUpgradedLRLightNames,eastUpgradedLRHeavyNames,eastUpgradedLRAirNames,[],[],[]]
+_names = unitLRNames
+
+#SetTransports
+
+_aircraftTransports = westAircraftTransports;_assaultAircraft = westAssaultAircraft 
+? (_side == east):_aircraftTransports = eastAircraftTransports;_assaultAircraft = eastAssaultAircraft 
+
+_count = 0
+_totalLists = Count _factoryLists
+
+#InitList
+
+	_actionsAdded = _actionsAdded + [false]
+	_actionIDs = _actionIDs + [0]
+	_currentlyUpgraded = _currentlyUpgraded + [false]
+	_factories = _factories + [ObjNull]
+	_count = _count + 1
+
+	? (_count < _totalLists):goto "InitList"
+
+openMenuType = 0
+menuInUse = false
+menuAddEmpty = false
+menuAddToPlayer = false
+menuAddToTeam = false
+repairDepotMenuIndependentSalvager = false
+
+#Update
+~0.5
+
+	;If unit dies or is no longer on his/her side (team killing).
+	? !(Alive _unit) || (Side _unit != west && Side _unit != east):goto "RemoveAllActions"
+
+	;Get player's current building lists.
+	_factoryLists = [infantryFactory,lightFactory,heavyFactory,airFactory,ammoDepot,repairDepot]
+	_currentFactoryType = -1
+	_return = "CheckFactoryLists"
+
+	? (_side == west):goto "GetWestUpgrades"
+	? (_side == east):goto "GetEastUpgrades"
+
+	#CheckFactoryLists
+
+		_lastCustomCost = _customCost
+		? (_side == west):_customCost = westTemplateCosts Select customTemplate
+		? (_side == east):_customCost = eastTemplateCosts Select customTemplate
+
+		_listCount = 0
+		_totalLists = Count _factoryLists
+
+		#CheckFactoryList
+
+			_count = 0
+			_list = _factoryLists Select _listCount
+			_totalFactories = Count _list
+
+			? (_totalFactories < 1):goto "CheckNextFactoryList"
+
+			;If a factory already exists & is in range & not destroyed then don't check remaining list.
+			? (!IsNull (_factories Select _listCount)) && (_actionsAdded Select _listCount) && ((_factories Select _listCount) Distance _unit <= buildingActionRange) && (GetDammage (_factories Select _listCount) != 1):goto "CheckNextFactoryList"
+
+			;Remove custom if it was added to the action menu.
+			? (_custom) && (_listCount == 0):_custom = false;_unit RemoveAction _customID
+			;If factory was destroyed or out of range then remove action.
+			? (_actionsAdded Select _listCount):_actionsAdded Set [_listCount,false];_unit RemoveAction (_actionIDs Select _listCount);_factories Set [_listCount,ObjNull]
+
+			;Attempt to find a working factory in range & add action.
+			#CheckFactory
+
+				_factory = _list Select _count
+				_count = _count + 1
+
+				;If in range of a factory & no actions have been added then do so.
+				? (_factory Distance _unit <= buildingActionRange)&&(GetDammage _factory != 1)&&!(_actionsAdded Select _listCount):_actionsAdded Set [_listCount,true];_actionIDs Set [_listCount,_unit AddAction[Format["%1 %2",_factoryLanguageText Select _listCount,Localize "STROPTIONS"],Format["GUI\Open%1MenuGUI.sqs",_factoryMenuText Select _listCount]]];_factories Set [_listCount,_factory];goto "CheckNextFactoryList"
+				? (_count < _totalFactories):goto "CheckFactory"
+
+				_factories Set [_listCount,ObjNull]
+
+			#CheckNextFactoryList
+
+				;If custom loadout has been set then display it in the action menu if in range of a working barracks.
+				? (_customCost > 0) && (_actionsAdded Select 0) && !(_custom):_custom = true;_customID = _unit AddAction[Format[Localize "STRBUYCUSTOM",_customCost],"Loadouts\BuyCustomLoadout.sqs"]
+
+				_listCount = _listCount + 1
+				? (_listCount  < _totalLists):goto "CheckFactoryList"
+
+	#UpdateActions
+
+
+		? (_lastCustomCost != _customCost) && (_custom):_unit RemoveAction _customID;_customID = _unit AddAction[Format[Localize "STRBUYCUSTOM",_customCost],"Loadouts\BuyCustomLoadout.sqs"]
+		? (_currentFactoryType > -1) && !(_menuInUse):goto "InitMenu"
+		? (menuAddEmpty) && (openMenuType == infantryFactoryType):goto "OpenLoadouts"
+		? (menuAddEmpty):goto "AddEmpty"
+		? (menuAddToPlayer):goto "AddToPlayer"
+		? (menuAddToTeam):goto "AddToTeam"
+		? (repairDepotMenuIndependentSalvager):goto "AddIndependentSalvager"
+
+		;If the value is not 1 then the menu was closed with the ESC key.
+		? !(dialog) || (CtrlText IDCMenuTitle != _menuName):_menuInUse = false;openMenuType = 0;goto "Update"
+		? !(_menuInUse):goto "Update"
+
+		#UpdateStatusLabel
+
+			CtrlSetText [IDCMenuStatusLabel,""]
+
+			? ((_factories Select _currentFactoryType) In buildingsInUse):CtrlSetText [IDCMenuStatusLabel,Format["(%1)",Localize "STRBUILDINGINUSE"]]
+
+		lbClear IDCMenuInfo
+		[_unit,IDCMenuInfo,Format ["%1:",Localize "STRRESOURCES"]] Exec "GUI\SetGUIResources.sqs"
+
+		#UpdateImage
+
+			? (lbCurSel IDCMenuList < 0):goto "CheckNextUpdate"
+
+			lbClear IDCMenuImage
+			_selection = lbadd [IDCMenuImage,""]
+			_unitType = lbValue[IDCMenuList,lbCurSel IDCMenuList]
+			lbSetPicture [IDCMenuImage,_selection,unitImages Select _unitType]
+
+		#CheckNextUpdate
+
+			? (_unit == WestCommander)||(_unit == EastCommander):goto "CommanderUpdate"
+
+		goto "CheckUpgrades"
+
+	#CommanderUpdate
+
+		;Get selected team from menu.
+		[_side,IDCMenuTeamList,false,false] Exec "GUI\GetGUISelectedTeam.sqs"
+		[_side,IDCMenuInfo] Exec "GUI\SetGUITeamSize.sqs"
+
+		goto "CheckUpgrades"
+
+;Creates the factory menu.
+#InitMenu
+
+	_menuInUse = true
+	_commanderInit = false
+	_dialogName = Format["UnitMenu%1",GUISkin]
+	_menuName = _factoryLanguageText Select _currentFactoryType
+
+	;If unit is a command then create the commander factory menu.
+	? (_unit == WestCommander) || (_unit == EastCommander):_dialogName = Format ["CommanderUnitMenu%1",GUISkin];_menuName = Format["%1 (%2)",_factoryLanguageText Select _currentFactoryType,Localize "STRCOMMANDER"]
+	? (openMenuType == repairDepotType) && ((_unit == WestCommander) || (_unit == EastCommander)):_dialogName = Format ["CommanderRepairMenu%1",GUISkin]
+
+	;Otherwise create the standard factory menu.
+	_menu = CreateDialog _dialogName
+	CtrlSetText [IDCMenuTitle,_menuName]
+	CtrlSetText [IDCMenuButton,Localize "STRADDEMPTY"]
+	CtrlSetText [IDCMenuButton1,Localize "STRADDMANNED"]
+
+	? (openMenuType == infantryFactoryType):CtrlSetText [IDCMenuButton,Localize "STRLOADOUTS"];CtrlSetText [IDCMenuButton1,Localize "STRADD"]
+
+#AddUnitSelections
+
+	;Set slot 0 to 1.  If this is no longer 1 then the menu was exited.
+	lbClear IDCMenuInfo
+	lbAdd[IDCMenuInfo,""]
+
+	_IDC = IDCMenuList
+
+;Add unit lists to the barracks menu.
+#AddSelections
+
+	? (_side == west):_upgradedRockets = westUpgradedAircraftRockets
+	? (_side == east):_upgradedRockets = eastUpgradedAircraftRockets
+
+	lbClear _IDC
+
+	_count = _selectionStart
+	_totalUnits = Count unitDescriptions
+	_buildingList = _factoryList;_return = "AddUnitSelection";goto "CountWorkingBuildings"
+
+	;Add an entry onto the unit selection comboboxes.
+	#AddUnitSelection
+
+		_unitCost = unitCosts Select _count
+		_unmannedCost = unmannedUnitCosts Select _count
+		_totalFactories = _workingBuildings
+
+		? (cheapTransportAC) && (_count In _aircraftTransports):_unitCost = _unitCost * cheapTransportACMultiplier;_unmannedCost = _unmannedCost * cheapTransportACMultiplier
+		? (expensiveAssaultAC) && (_count In _assaultAircraft):_unitCost = _unitCost * expensiveAssaultACMultiplier;_unmannedCost = _unmannedCost * expensiveAssaultACMultiplier
+
+		_spacer = ""
+		_space = " "
+		? (openMenuType != infantryFactoryType):_space = "  "
+		? (_unitCost  < 100):_spacer = _space
+		? (_unitCost < 1000):_spacer = _spacer + _space
+		? (_unmannedCost < 1000) && (_unitCost >= 1000):_spacer = _spacer + " "
+		? ((openMenuType == heavyFactoryType) || (openMenuType == airFactoryType)) && (_unitCost < 10000):_spacer = _spacer + _space
+
+		_layout = "$%1-$%2 %3%4";_layout1 = "$%1 %2%3"
+		? (Localize "STRCURRENCYPOSITION" == "Back"):_layout = "%1$-%2$ %3%4";_layout1 = "%1$ %2%3"
+
+		;Add the text that is displayed in the entry.
+		_text = Format[_layout,_unmannedCost,_unitCost,_spacer,unitDescriptions Select _count]
+		? (openMenuType == infantryFactoryType):_text = Format[_layout1,_unitCost,_spacer,unitDescriptions Select _count]
+
+		_value = _count
+
+		? (openMenuType == 0):_count = _lastUnitType;_text = Localize "STRNOFACTORY";_value = -1;goto "AddUnitToList"
+
+		;Since the Mi17 Transport & Mi17 are the same vehicle on PS version do a special upgrade check now.
+		? (publicServer) && (openMenuType == airFactoryType) && (_count == MI17TransportType):goto "AddUnitToList"
+
+		;If there are no aircraft rockets remove MI-17 from list since it would just be an expensive Mi-17 Transport.
+		? ((noACRockets) || !(_upgradedRockets)) && (openMenuType == airFactoryType) && (_count == MI17Type):goto "AddNextUnitSelection"
+
+		;If there are no aircraft rockets remove UH-60 from list since it would just be an expensive unarmed craft.
+		? ((noACRockets) || !(_upgradedRockets)) && (openMenuType == airFactoryType) && (_count == UH60Type):goto "AddNextUnitSelection"
+
+		;Check for upgrades unless an ammo or repair depot.
+		? (openMenuType != ammoDepotType) && (openMenuType != repairDepotType) && ((_names Select _count) In (_upgradedNames Select _currentFactoryType)) && !(_upgraded):goto "AddNextUnitSelection"
+		? (openMenuType == infantryFactoryType) && ((_names Select _count) In _upgradedBlackOpsNames) && !(_upgradedBlackOps):goto "AddNextUnitSelection"
+		? (openMenuType == repairDepotType) && (_count == ammoTruckType || _count == ammoTruckEastType):goto "AddNextUnitSelection"
+
+		#AddUnitToList
+
+			_selection = lbAdd[_IDC,_text]
+
+			;Add the data that is stored in the entry.
+			lbSetValue [_IDC,_selection,_value]
+
+			#AddNextUnitSelection
+
+				_count = _count  + 1
+
+				? (_count <= _lastUnitType):goto "AddUnitSelection"
+
+			#EndAddSelections
+
+				? ((_unit != WestCommander)&&(_unit != EastCommander)):goto "Update"
+
+#InitCommanderMenu
+
+	;Add team selections to menu.
+	[_side,IDCMenuTeamList,false,false] Exec "GUI\SetGUITeamSelections.sqs"
+
+	goto "Update"
+
+#CheckUpgrades
+
+	;If a new upgrade has occurred add the units to the selection menu.
+	? (_upgraded) && (_currentFactoryType >= 0) && !(_currentlyUpgraded Select _currentFactoryType):_currentlyUpgraded Set [_currentFactoryType,true];goto "AddUnitSelections"
+
+	goto "Update"
+
+;Add an empty unit.
+#AddEmpty
+
+	menuAddEmpty = false
+
+	;If a unit has not been selected then return to the main loop.
+	? (lbCurSel IDCMenuList < 0):goto "Update"
+
+	_unitType = lbValue[IDCMenuList,lbCurSel IDCMenuList]
+	? (openMenuType != infantryFactoryType):[_unit,_unitType,_factories Select _currentFactoryType,false,false] Exec "Main\AddVehicleToPlayer.sqs"
+	? (openMenuType == infantryFactoryType):[_unit,_unitType,_factories Select _currentFactoryType] Exec "Main\AddUnitToPlayer.sqs"
+
+	;Prevents multiple build orders before buildingInUse takes effect.
+	~1.5
+
+	goto "Update"
+
+#AddIndependentSalvager
+
+	repairDepotMenuIndependentSalvager = false
+
+	? ((_factories Select _currentFactoryType) In buildingsInUse):goto "Update"
+	? (_side == west):[_side,_factories Select _currentFactoryType,salvageTruckType,salvageScript,GrpNull,false] Exec "Main\BuyVehicle.sqs"
+	? (_side == east):[_side,_factories Select _currentFactoryType,salvageTruckEastType,salvageScript,GrpNull,false] Exec "Main\BuyVehicle.sqs"
+
+	;Prevents multiple build orders before buildingInUse takes effect.
+	~1.5
+
+	goto "Update"
+
+;Add a unit to the player's team.
+#AddToPlayer
+
+	menuAddToPlayer = false
+
+	;If a unit has not been selected then return to the main loop.
+	? (lbCurSel IDCMenuList < 0):goto "Update"
+
+	_unitType = lbValue[IDCMenuList,lbCurSel IDCMenuList]
+	? (openMenuType != infantryFactoryType):[_unit,_unitType,_factories Select _currentFactoryType,true,false] Exec "Main\AddVehicleToPlayer.sqs"
+	? (openMenuType == infantryFactoryType):[_unit,_unitType,_factories Select _currentFactoryType] Exec "Main\AddUnitToPlayer.sqs"
+
+	;Prevents multiple build orders before buildingInUse takes effect.
+	~1.5
+
+	goto "Update"
+
+;Add a unit to the selected AI team.
+#AddToTeam
+
+	menuAddToTeam = false
+
+	;Make sure player is not trying to add to a disabled AI team.
+	_group = westGroups Select westSelectedGroup
+	? (_side == east):_group = eastGroups Select eastSelectedGroup
+	? (IsNull _group):goto "Update"
+
+	;If a unit has not been selected then return to the main loop.
+	? (lbCurSel IDCMenuList < 0):goto "Update"
+
+	_unitType = lbValue[IDCMenuList,lbCurSel IDCMenuList]
+	? (openMenuType != infantryFactoryType):[_side,_factories Select _currentFactoryType,_unitType,noScript,GrpNull,false] Exec "Main\BuyVehicle.sqs"
+	? (openMenuType == infantryFactoryType):[_side,_factories Select _currentFactoryType,_unitType,noScript,GrpNull,false] Exec "Main\BuyUnit.sqs"
+
+	;Prevents multiple build orders before buildingInUse takes effect.
+	~1.5
+
+	goto "Update"
+
+;Count total working buildings on list.
+#CountWorkingBuildings
+
+	_buildingCount = 0
+	_totalBuildings = Count _buildingList
+	_workingBuildings = 0
+
+	#CountBuilding
+
+		_building = _buildingList Select _buildingCount
+		_buildingCount = _buildingCount + 1
+
+		? (GetDammage _building != 1):_workingBuildings = _workingBuildings + 1
+		? (_buildingCount < _totalBuildings):goto "CountBuilding"
+
+		goto _return
+
+#GetWestUpgrades
+
+	_upgraded = false
+
+	_upgradedNames = _westUpgradedNames
+
+	? (openMenuType == infantryFactoryType):_upgraded = westUpgradedInfantry;_upgradedBlackOps = westUpgradedBlackOps;_currentFactoryType = 0;_selectionStart = 1;_lastUnitType = lastWestSoldier;_upgradedBlackOpsNames = westUpgradedBlackOpNames
+	? (openMenuType == lightFactoryType):_upgraded = westUpgradedLight;_currentFactoryType = 1;_selectionStart = lastWestSoldier + 1;_lastUnitType = lastWestLight
+	? (openMenuType == heavyFactoryType):_upgraded = westUpgradedHeavy;_currentFactoryType = 2;_selectionStart = lastWestMisc + 1;_lastUnitType = lastWestHeavy
+	? (openMenuType == airFactoryType):_upgraded = westUpgradedAir;_currentFactoryType = 3;_selectionStart = lastWestHeavy + 1;_lastUnitType = lastWestAir
+	? (openMenuType == ammoDepotType):_currentFactoryType = 4;_selectionStart = ammoTruckType;_lastUnitType = ammoTruckType
+	? (openMenuType == repairDepotType):_currentFactoryType = 5;_selectionStart = repairTruckType;_lastUnitType = salvageTruckType
+
+	goto _return
+	
+#GetEastUpgrades
+
+	_upgraded = false
+
+	_upgradedNames = _eastUpgradedNames
+
+	? (openMenuType == infantryFactoryType):_upgraded = eastUpgradedInfantry;_upgradedBlackOps = eastUpgradedBlackOps;_currentFactoryType = 0;_selectionStart = lastWestUnit + 1;_lastUnitType = lastEastSoldier;_upgradedBlackOpsNames = eastUpgradedBlackOpNames
+	? (openMenuType == lightFactoryType):_upgraded = eastUpgradedLight;_currentFactoryType = 1;_selectionStart = lastEastSoldier + 1;_lastUnitType = lastEastLight
+	? (openMenuType == heavyFactoryType):_upgraded = eastUpgradedHeavy;_currentFactoryType = 2;_selectionStart = lastEastMisc + 1;_lastUnitType = lastEastHeavy
+	? (openMenuType == airFactoryType):_upgraded = eastUpgradedAir;_currentFactoryType = 3;_selectionStart = lastEastHeavy + 1;_lastUnitType = lastEastAir
+	? (openMenuType == ammoDepotType):_currentFactoryType = 4;_selectionStart = ammoTruckEastType;_lastUnitType = ammoTruckEastType
+	? (openMenuType == repairDepotType):_currentFactoryType = 5;_selectionStart = repairTruckEastType;_lastUnitType = salvageTruckEastType
+
+	goto _return
+
+#OpenLoadouts
+
+	menuAddEmpty = false
+	_menuInUse = false
+	openMenuType = 0
+	closeDialog 0
+
+	[] Exec "GUI\UpdateGUILoadout.sqs"
+
+	goto "Update"
+
+#RemoveAllActions
+
+	? (_custom):_unit RemoveAction _customID;_custom = false
+
+	_count = 0
+	_totalActions = Count _actionsAdded
+
+	#RemoveAction
+
+		? (_actionsAdded Select _count):_actionsAdded Set [_count,false];_unit RemoveAction (_actionIDs Select _count)
+
+		_count = _count + 1
+		? (_count < _totalActions):goto "RemoveAction"
+
+	Exit

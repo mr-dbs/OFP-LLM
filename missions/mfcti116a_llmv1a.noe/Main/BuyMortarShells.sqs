@@ -1,0 +1,30 @@
+;Last modified 12/5/3
+_mortar = _this Select 0
+_unit = _this Select 1
+_side = Side Group _unit
+_delay = 0.25 + Random 0.75
+
+? (_side == east):goto "BuyEast"
+
+#BuyWest
+
+	@ (IsNull buyWestMortarShells)
+	~_delay
+
+	? !(IsNull buyWestMortarShells):goto "BuyWest"
+
+	buyWestMortarShells = _mortar;PublicVariable "buyWestMortarShells"
+	buyWestMortarShellsUnit = _unit;PublicVariable "buyWestMortarShellsUnit"
+	Exit
+
+#BuyEast
+
+
+	@ (IsNull buyEastMortarShells)
+	~_delay
+
+	? !(IsNull buyEastMortarShells):goto "BuyEast"
+
+	buyEastMortarShells = _mortar;PublicVariable "buyEastMortarShells"
+	buyEastMortarShellsUnit = _unit;PublicVariable "buyEastMortarShellsUnit"
+	Exit

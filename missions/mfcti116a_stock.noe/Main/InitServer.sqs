@@ -1,0 +1,887 @@
+;Last modified 2/29/4
+;Coop Addons version.
+private ["_westStartingPlayerResources","_eastStartingPlayerResources"]
+_westStartingPlayerResources = 0
+_eastStartingPlayerResources = 0
+
+? !(Local LocalServerObject):Exit
+
+;For addon.
+MFCTI116LocalServerObject = LocalServerObject;PublicVariable "MFCTI116LocalServerObject"
+
+scopedWeapons = false;PublicVariable "scopedWeapons"
+MFCTI116Extensions = true;PublicVariable "MFCTI116Extensions"
+
+;Game property values.
+westCoopValue			= 1
+eastCoopValue			= 2
+lessUnitsValue			= 4
+nightMissionValue		= 8
+
+;Set defaults.
+fastGame = false;PublicVariable "fastGame"
+limitedRadar = false;PublicVariable "limitedRadar"
+lessUnits = false;PublicVariable "lessUnits"
+nightMission = false;PublicVariable "nightMission"
+
+fastGameMultiplier = 2;PublicVariable "fastGameMultiplier"
+higherIncomeMultiplier = 2;PublicVariable "higherIncomeMultiplier"
+
+;Variables for Coop Version.  Included for script compatibility between versions.
+defendTheBase			= false;PublicVariable "defendTheBase"
+lightOpValue			= 1;PublicVariable "lightOpValue"
+averageOpValue			= 2;PublicVariable "averageOpValue"
+heavyOpValue			= 4;PublicVariable "heavyOpValue"
+insaneOpValue			= 8;PublicVariable "insaneOpValue"
+defendTheBaseValue		= 16;PublicVariable "defendTheBaseValue"
+westCoopValue			= 1;PublicVariable "westCoopValue"
+eastCoopValue			= 2;PublicVariable "eastCoopValue"
+
+;Default coop & opposition.
+opposition				= lightOpValue;PublicVariable "opposition"
+coopValue				= westCoopValue;PublicVariable "coopValue"
+
+resistanceRatio = 0.025
+newResistance = ObjNull
+
+;Variables for MP Version.  Included for script compatibility between versions.
+pointsToWin = 0;PublicVariable "pointsToWin"
+townsToWin = 0;PublicVariable "townsToWin"
+timeToEnd = 0;PublicVariable "timeToEnd"
+
+;Set any game parameters that have been passed in.
+? (param1 == eastCoopValue):coopValue = eastCoopValue;PublicVariable "coopValue"
+? (param1 == lessUnitsValue):lessUnits = true;PublicVariable "lessUnits"
+? (param1 == westCoopValue+lessUnitsValue):lessUnits = true;PublicVariable "lessUnits"
+? (param1 == eastCoopValue+lessUnitsValue):coopValue = eastCoopValue;PublicVariable "coopValue";lessUnits = true;PublicVariable "lessUnits"
+? (param1 == nightMissionValue):nightMission = true;PublicVariable "nightMission"
+? (param1 == westCoopValue+nightMissionValue):nightMission = true;PublicVariable "nightMission"
+? (param1 == eastCoopValue+nightMissionValue):nightMission = true;PublicVariable "nightMission";coopValue = eastCoopValue;PublicVariable "coopValue"
+? (param1 == lessUnitsValue+nightMissionValue):lessUnits = true;PublicVariable "lessUnits";nightMission = true;PublicVariable "nightMission"
+? (param1 == westCoopValue+lessUnitsValue+nightMissionValue):lessUnits = true;PublicVariable "lessUnits";nightMission = true;PublicVariable "nightMission"
+? (param1 == eastCoopValue+lessUnitsValue+nightMissionValue):coopValue = eastCoopValue;PublicVariable "coopValue";lessUnits = true;PublicVariable "lessUnits";nightMission = true;PublicVariable "nightMission"
+
+;Set any coop parameters that have been passed in.
+? (param2 == averageOpValue):opposition = averageOpValue;PublicVariable "opposition"
+? (param2 == heavyOpValue):opposition = heavyOpValue;PublicVariable "opposition"
+? (param2 == insaneOpValue):opposition = insaneOpValue;PublicVariable "opposition"
+? (param2 == defendTheBaseValue):defendTheBase = true;PublicVariable "defendTheBase"
+? (param2 == averageOpValue+defendTheBaseValue):opposition = averageOpValue;PublicVariable "opposition";defendTheBase = true;PublicVariable "defendTheBase"
+? (param2 == heavyOpValue+defendTheBaseValue):opposition = heavyOpValue;PublicVariable "opposition";defendTheBase = true;PublicVariable "defendTheBase"
+? (param2 == insaneOpValue+defendTheBaseValue):opposition = insaneOpValue;PublicVariable "opposition";defendTheBase = true;PublicVariable "defendTheBase"
+
+;Adjust the AI resources by the opposition value.
+_oppositionResources = opposition * 100000
+_teamOppositionResources = opposition * 100000
+
+;Adjust the resistance in town by the opposition value.
+? (opposition == lightOpValue):resistanceRatio = resistanceRatio / 2
+? (opposition == heavyOpValue):resistanceRatio = resistanceRatio * 1.5;_oppositionResources = _oppositionResources * 2;_teamOppositionResources = _teamOppositionResources * 5
+? (opposition == insaneOpValue):resistanceRatio = resistanceRatio * 3;_oppositionResources = _oppositionResources * 2;_teamOppositionResources = _teamOppositionResources * 10
+
+;If defend the base mode give the AI nearly unlimited resources since they won't bother with towns.
+? (defendTheBase):_oppositionResources = 500000;_teamOppositionResources = 500000
+
+estimatedTimeLeft = 60
+? (timeToEnd > 0):estimatedTimeLeft = timeToEnd;PublicVariable "estimatedTimeLeft"
+
+;Resources
+westResources = 9000;PublicVariable "westResources"
+eastResources = 9000;PublicVariable "eastResources"
+
+_westStartingPlayerResources = 850
+_eastStartingPlayerResources = 850
+
+? (coopValue == westCoopValue):_eastStartingPlayerResources = _teamOppositionResources;eastResources = _oppositionResources;PublicVariable "eastResources"
+? (coopValue == eastCoopValue):_westStartingPlayerResources = _teamOppositionResources;westResources = _oppositionResources;PublicVariable "westResources"
+
+maxAIGroupSize = 12
+maxVehicles = 20
+
+;If less units parameter was set then reduce the allowed vehicles and units to improve performance.
+? (lessUnits):maxVehicles = 10;maxAIGroupSize = 6
+
+PublicVariable "maxVehicles"
+PublicVariable "maxAIGroupSize"
+
+maxVehicleMarkers = 50;PublicVariable "maxVehicleMarkers"
+maxWorkers = 10;PublicVariable "maxWorkers"
+maxSalvagers = 5;PublicVariable "maxSalvagers"
+maxStationaryM2s = 10;PublicVariable "maxStationaryM2s"
+maxStationaryHEs = 5;PublicVariable "maxStationaryHEs"
+maxStationaryAAs = 5;PublicVariable "maxStationaryAAs"
+maxStationaryMortars = 5;PublicVariable "maxStationaryMortars"
+
+;Enable to set in-game debug text and able faster build time and more resources.
+debug = false;PublicVariable "debug"
+
+;Enable beta testing debug text for the commander's score.
+debugMP = false;PublicVariable "debugMP"
+
+;Set to use other group's weapon addons.
+addons = false;PublicVariable "addons"
+OFP146 = false;PublicVariable "OFP146"
+
+;If this variable is set then the MFCTI addon will not be used.
+;As a result AIs will not attack buildings and there will be no custom map icons.
+;This option is available so that any player can jump on a server without the need of an addon.
+publicServer = false;PublicVariable "publicServer"
+
+westCommanderOnlyMHQ = true;PublicVariable "westCommanderOnlyMHQ"
+eastCommanderOnlyMHQ = true;PublicVariable "eastCommanderOnlyMHQ"
+
+;Percent of resources that are put into the player resource pool and divided amongst the players.
+westPlayerResourcePercentage = 0.3;PublicVariable "westPlayerResourcePercentage"
+eastPlayerResourcePercentage = 0.3;PublicVariable "eastPlayerResourcePercentage"
+
+;Percent of resources that are put into the player award pool (divided based on score).
+westPlayerAwardPercentage = 0.1;PublicVariable "westPlayerAwardPercentage"
+eastPlayerAwardPercentage = 0.1;PublicVariable "eastPlayerAwardPercentage"
+
+;Set true if playing OFP 1.46 for a text-only menu-interface.
+;If running OFP:Resistance set true for a graphical point & click interface.
+noGUI = false;PublicVariable "noGUI"
+
+westCommanderInRepairTruckRange = false;PublicVariable "westCommanderInRepairTruckRange"
+eastCommanderInRepairTruckRange = false;PublicVariable "eastCommanderInRepairTruckRange"
+
+westRadarEnabled = false;PublicVariable "westRadarEnabled"
+eastRadarEnabled = false;PublicVariable "eastRadarEnabled"
+
+requestScore = false;PublicVariable "requestScore"
+
+westIncome = 0;PublicVariable "westIncome"
+eastIncome = 0;PublicVariable "eastIncome"
+
+westTownsHeld = 0;PublicVariable "westTownsHeld"
+eastTownsHeld = 0;PublicVariable "eastTownsHeld"
+
+westBaseFound = ObjNull;PublicVariable "westBaseFound"
+eastBaseFound = ObjNull;PublicVariable "eastBaseFound"
+
+;Message to send to an entire side.
+westMessage = 0;PublicVariable "westMessage"
+eastMessage = 0;PublicVariable "eastMessage"
+
+westMessageValue1 = 0;PublicVariable "westMessageValue1"
+westMessageValue2 = 0;PublicVariable "westMessageValue2"
+eastMessageValue1 = 0;PublicVariable "eastMessageValue1"
+eastMessageValue2 = 0;PublicVariable "eastMessageValue2"
+
+;Message to send to a specific player.
+westPlayerMessage = 0;PublicVariable "westPlayerMessage"
+eastPlayerMessage = 0;PublicVariable "eastPlayerMessage"
+
+;Player to send message to.
+westPlayerMessagePlayer = ObjNull;PublicVariable "westPlayerMessagePlayer"
+eastPlayerMessagePlayer = ObjNull;PublicVariable "eastPlayerMessagePlayer"
+
+;Player group # that sent the message.
+westPlayerMessageGroupFrom = 0;PublicVariable "westPlayerMessageGroupFrom"
+eastPlayerMessageGroupFrom = 0;PublicVariable "eastPlayerMessageGroupFrom"
+
+;Team markers for enemy structures and activity.
+westMarkerID = 0;PublicVariable "westMarkerID"
+westMarkerTeam = 0;PublicVariable "westMarkerTeam"
+westMarkerType = 0;PublicVariable "westMarkerType"
+westMarkerUnit = ObjNull;PublicVariable "westMarkerUnit"
+
+eastMarkerID = 0;PublicVariable "eastMarkerID"
+eastMarkerTeam = 0;PublicVariable "eastMarkerTeam"
+eastMarkerType = 0;PublicVariable "eastMarkerType"
+eastMarkerUnit = ObjNull;PublicVariable "eastMarkerUnit"
+
+westFireMission = false;PublicVariable "westFireMission"
+eastFireMission = false;PublicVariable "eastFireMission"
+westFireMissionX = 0;PublicVariable "westFireMissionX"
+westFireMissionY = 0;PublicVariable "westFireMissionY"
+eastFireMissionX = 0;PublicVariable "eastFireMissionX"
+eastFireMissionY = 0;PublicVariable "eastFireMissionY"
+
+westRequestFireMission = false;PublicVariable "westRequestFireMission"
+eastRequestFireMission = false;PublicVariable "eastRequestFireMission"
+westRequestFireMissionX = 0;PublicVariable "westRequestFireMissionX"
+westRequestFireMissionY = 0;PublicVariable "westRequestFireMissionY"
+eastRequestFireMissionX = 0;PublicVariable "eastRequestFireMissionX"
+eastRequestFireMissionY = 0;PublicVariable "eastRequestFireMissionY"
+
+;Server request to add a unit to an AI group.
+westAddToQueue = 0;PublicVariable "westAddToQueue"
+westAddToQueuePlayer = ObjNull;PublicVariable "westAddToQueuePlayer"
+westAddToQueueTeam = ObjNull;PublicVariable "westAddToQueueTeam"
+westAddToQueueManned = false;PublicVariable "westAddToQueueManned"
+westAddToQueueBuilding = ObjNull;PublicVariable "westAddToQueueBuilding"
+
+eastAddToQueue = 0;PublicVariable "eastAddToQueue"
+eastAddToQueuePlayer = ObjNull;PublicVariable "eastAddToQueuePlayer"
+eastAddToQueueTeam = ObjNull;PublicVariable "eastAddToQueueTeam"
+eastAddToQueueManned = false;PublicVariable "eastAddToQueueManned"
+eastAddToQueueBuilding = ObjNull;PublicVariable "eastAddToQueueBuilding"
+
+buildingActionRange = 15;PublicVariable "buildingActionRange"
+
+;Distance from the Mobile Command HQ that a commander can be and build.
+mobileHQBuildDistance = 150;PublicVariable "mobileHQBuildDistance"
+
+;Request variables for adding special vehicles to the server lists.
+westAmmoTruck = ObjNull;PublicVariable "westAmmoTruck"
+eastAmmoTruck = ObjNull;PublicVariable "eastAmmoTruck"
+
+westSalvageTruck = ObjNull;PublicVariable "westSalvageTruck"
+eastSalvageTruck = ObjNull;PublicVariable "eastSalvageTruck"
+
+westRepairTruck = ObjNull;PublicVariable "westRepairTruck"
+eastRepairTruck = ObjNull;PublicVariable "eastRepairTruck"
+
+;Game over variables
+
+;Buildings to pan around when the game ends.
+loserBarracks = ObjNull;PublicVariable "loserBarracks"
+loserLight = ObjNull;PublicVariable "loserLight"
+loserHeavy = ObjNull;PublicVariable "loserHeavy"
+loserAir = ObjNull;PublicVariable "loserAir"
+
+;End of game over variables
+
+;COMMAND VARIABLES
+westSelectedGroup = 1;PublicVariable "westSelectedGroup"
+westSelectedAll = false;PublicVariable "westSelectedAll"
+eastSelectedGroup = 1;PublicVariable "eastSelectedGroup"
+eastSelectedAll = false;PublicVariable "eastSelectedAll"
+;END OF COMMAND VARIABLES
+
+;SERVER VARIABLES
+eastCommanderDead = false
+westCommanderDead = false
+
+addToWestPlayer = ObjNull;PublicVariable "addToWestPlayer"
+addToWestPlayerUnit = 0;PublicVariable "addToWestPlayerUnit"
+addToWestPlayerBuilding = ObjNull;PublicVariable "addToWestPlayerBuilding"
+
+addToEastPlayer = ObjNull;PublicVariable "addToEastPlayer"
+addToEastPlayerUnit = 0;PublicVariable "addToEastPlayerUnit"
+addToEastPlayerBuilding = ObjNull;PublicVariable "addToEastPlayerBuilding"
+
+;Request server to add resources to team and amount to add.
+addWestResourcesToTeam = -1;PublicVariable "addWestResourcesToTeam"
+addWestResourcesFromTeam = -1;PublicVariable "addWestResourcesFromTeam"
+addWestResourcesToTeamAmount = 0;PublicVariable "addWestResourcesToTeamAmount"
+
+addEastResourcesToTeam = -1;PublicVariable "addEastResourcesToTeam"
+addEastResourcesFromTeam = -1;PublicVariable "addEastResourcesFromTeam"
+addEastResourcesToTeamAmount = 0;PublicVariable "addEastResourcesToTeamAmount"
+
+addWestAwardResources = 0;PublicVariable "addWestAwardResources"
+addEastAwardResources = 0;PublicVariable "addEastAwardResources"
+
+;Request server to count total vehicles for a side.
+countWestVehicles = false;PublicVariable "countWestVehicles"
+countEastVehicles = false;PublicVariable "countEastVehicles"
+
+;Total vehicles for each side.
+totalWestVehicles = 0;PublicVariable "totalWestVehicles"
+totalEastVehicles = 0;PublicVariable "totalEastVehicles"
+
+buyWestMortarShells = ObjNull;PublicVariable "buyWestMortarShells"
+buyWestMortarShellsUnit = ObjNull;PublicVariable "buyWestMortarShellsUnit"
+
+buyEastMortarShells = ObjNull;PublicVariable "buyEastMortarShells"
+buyEastMortarShellsUnit = ObjNull;PublicVariable "buyEastMortarShellsUnit"
+
+;Player waypoints
+;While SetPlayerWaypoint is true server is busy processing waypoint.
+westSetPlayerWaypoint = false;PublicVariable "westSetPlayerWaypoint"
+eastSetPlayerWaypoint = false;PublicVariable "eastSetPlayerWaypoint"
+
+;Player that requests a waypoint placement.
+westPlayerWaypointPlayer = ObjNull;PublicVariable "westPlayerWaypointPlayer"
+eastPlayerWaypointPlayer = ObjNull;PublicVariable "eastPlayerWaypointPlayer"
+
+;Group # that requests waypoint placement.
+westPlayerWaypointGroup = 0;PublicVariable "westPlayerWaypointGroup"
+eastPlayerWaypointGroup = 0;PublicVariable "eastPlayerWaypointGroup"
+
+;Use x,y instead of player since a non-severside player often cannot be determined properly from server.
+westPlayerWaypointX = 0;PublicVariable "westPlayerWaypointX"
+westPlayerWaypointY = 0;PublicVariable "westPlayerWaypointY"
+
+eastPlayerWaypointX = 0;PublicVariable "eastPlayerWaypointX"
+eastPlayerWaypointY = 0;PublicVariable "eastPlayerWaypointY"
+
+;Request to add a new vehicle to server list.
+addWestLight = ObjNull;PublicVariable "addWestLight"
+addWestMisc = ObjNull;PublicVariable "addWestMisc"
+addWestHeavy = ObjNull;PublicVariable "addWestHeavy"
+addWestAir = ObjNull;PublicVariable "addWestAir"
+addWestTransport = ObjNull;PublicVariable "addWestTransport"
+
+addEastLight = ObjNull;PublicVariable "addEastLight"
+addEastMisc = ObjNull;PublicVariable "addEastMisc"
+addEastHeavy = ObjNull;PublicVariable "addEastHeavy"
+addEastAir = ObjNull;PublicVariable "addEastAir"
+addEastTransport = ObjNull;PublicVariable "addEastTransport"
+
+queuedUnitRequestedMP = false;PublicVariable "queuedUnitRequestedMP"
+
+;Update a player's score on all clients.
+addWestPlayerPointsPlayer = ObjNull;PublicVariable "addWestPlayerPointsPlayer"
+addWestPlayerPoints = 0;PublicVariable "addWestPlayerPoints"
+addWestPlayerPointsLast = 0;PublicVariable "addWestPlayerPointsLast"
+addWestPlayerPointsID = 0;PublicVariable "addWestPlayerPointsID"
+
+addEastPlayerPointsPlayer = ObjNull;PublicVariable "addEastPlayerPointsPlayer"
+addEastPlayerPoints = 0;PublicVariable "addEastPlayerPoints"
+addEastPlayerPointsLast = 0;PublicVariable "addEastPlayerPointsLast"
+addEastPlayerPointsID = 0;PublicVariable "addEastPlayerPointsID"
+
+;Request to undo last structure that player created.
+undoLastStructure = false;PublicVariable "undoLastStructure"
+undoLastStructurePlayer = ObjNull;PublicVariable "undoLastStructurePlayer"
+
+deleteStructure = ObjNull;PublicVariable "deleteStructure"
+
+;Update Commander so the server can calculate their current heading & position.
+westCurrentCommander = ObjNull;PublicVariable "westCurrentCommander"
+eastCurrentCommander = ObjNull;PublicVariable "eastCurrentCommander"
+
+westCommanderPosition = GetPos WestCommander;PublicVariable "westCommanderPosition"
+westCommanderDirection = 0;PublicVariable "westCommanderDirection"
+
+eastCommanderPosition = GetPos EastCommander;PublicVariable "eastCommanderPosition"
+eastCommanderDirection = 0;PublicVariable "eastCommanderDirection"
+
+;Variables for placing structures.
+addWestStructure = false;PublicVariable "addWestStructure"
+addWestStructureType = 0;PublicVariable "addWestStructureType"
+addWestStructurePlayer = ObjNull;PublicVariable "addWestStructurePlayer"
+addWestStructureX = 0;PublicVariable "addWestStructureX"
+addWestStructureY = 0;PublicVariable "addWestStructureY"
+addWestStructureZ = 0;PublicVariable "addWestStructureZ"
+addWestStructureDirection = 0;PublicVariable "addWestStructureDirection"
+addWestStructureAlign = false;PublicVariable "addWestStructureAlign"
+
+addEastStructure = false;PublicVariable "addEastStructure"
+addEastStructureType = 0;PublicVariable "addEastStructureType"
+addEastStructurePlayer = ObjNull;PublicVariable "addEastStructurePlayer"
+addEastStructureX = 0;PublicVariable "addEastStructureX"
+addEastStructureY = 0;PublicVariable "addEastStructureY"
+addEastStructureZ = 0;PublicVariable "addEastStructureZ"
+addEastStructureDirection = 0;PublicVariable "addEastStructureDirection"
+addEastStructureAlign = false;PublicVariable "addEastStructureAlign"
+
+;For requests to add resources to side.
+addWestResources = 0;PublicVariable "addWestResources"
+addEastResources = 0;PublicVariable "addEastResources"
+
+;For requests to add resources equally to each player and commander on a side.
+addWestEqualResources = 0;PublicVariable "addWestEqualResources"
+addEastEqualResources = 0;PublicVariable "addEastEqualResources"
+
+;For requests to subtract resources from a side.
+subtractWestResources = 0;PublicVariable "subtractWestResources"
+subtractEastResources = 0;PublicVariable "subtractEastResources"
+
+;For requests to deploy a worker at the Mobile HQ.
+deployWestWorker = false;PublicVariable "deployWestWorker"
+deployEastWorker = false;PublicVariable "deployEastWorker"
+
+;For requests to deploy create a worker at a barracks.
+createWestWorker = false;PublicVariable "createWestWorker"
+createEastWorker = false;PublicVariable "createEastWorker"
+
+;For requests for the server to create a manned vehicle.
+addWestMannedVehicle = 0;PublicVariable "addWestMannedVehicle"
+addWestMannedVehicleBuilding = ObjNull;PublicVariable "addWestMannedVehicleBuilding"
+addWestDriver = 0;PublicVariable "addWestDriver"
+addWestGunner = 0;PublicVariable "addWestGunner"
+addWestCommander = 0;PublicVariable "addWestCommander"
+addWestMannedVehicleGroup = ObjNull;PublicVariable "addWestMannedVehicleGroup"
+addWestMannedVehiclePlayer = ObjNull;PublicVariable "addWestMannedVehiclePlayer"
+addWestMannedVehicleType = 0;PublicVariable "addWestMannedVehicleType"
+addWestMannedVehicleScript = 0;PublicVariable "addWestMannedVehicleScript"
+addWestMannedVehicleTeamPurchase = false;PublicVariable "addWestMannedVehicleTeamPurchase"
+
+addEastMannedVehicle = 0;PublicVariable "addEastMannedVehicle"
+addEastMannedVehicleBuilding = ObjNull;PublicVariable "addEastMannedVehicleBuilding"
+addEastDriver = 0;PublicVariable "addEastDriver"
+addEastGunner = 0;PublicVariable "addEastGunner"
+addEastCommander = 0;PublicVariable "addEastCommander"
+addEastMannedVehicleGroup = ObjNull;PublicVariable "addEastMannedVehicleGroup"
+addEastMannedVehiclePlayer = ObjNull;PublicVariable "addEastMannedVehiclePlayer"
+addEastMannedVehicleType = 0;PublicVariable "addEastMannedVehicleType"
+addEastMannedVehicleScript = 0;PublicVariable "addEastMannedVehicleScript"
+addEastMannedVehicleTeamPurchase = false;PublicVariable "addEastMannedVehicleTeamPurchase"
+
+;For requests for the server to create a unit.
+addWestUnitBuilding = ObjNull;PublicVariable "addWestUnitBuilding"
+addWestUnit = 0;PublicVariable "addWestUnit"
+addWestUnitGroup = ObjNull;PublicVariable "addWestUnitGroup"
+addWestUnitScript = 0;PublicVariable "addWestUnitScript"
+addWestUnitTeamPurchase = false;PublicVariable "addWestUnitTeamPurchase"
+
+addEastUnitBuilding = ObjNull;PublicVariable "addEastUnitBuilding"
+addEastUnit = 0;PublicVariable "addEastUnit"
+addEastUnitGroup = ObjNull;PublicVariable "addEastUnitGroup"
+addEastUnitScript = 0;PublicVariable "addEastUnitScript"
+addEastUnitTeamPurchase = false;PublicVariable "addEastUnitTeamPurchase"
+
+;Last building created by west.
+westBuildingBuiltMP = ObjNull;PublicVariable "westBuildingBuiltMP"
+westBuildingBuiltTypeMP = 0;PublicVariable "westBuildingBuiltNameMP"
+
+;Last building created by east.
+eastBuildingBuiltMP = ObjNull;PublicVariable "eastBuildingBuiltMP"
+eastBuildingBuiltTypeMP = 0;PublicVariable "eastBuildingBuiltNameMP"
+
+;Last unit created.
+westUnitBuiltMP = ObjNull;PublicVariable "westUnitBuiltMP"
+eastUnitBuiltMP = ObjNull;PublicVariable "eastUnitBuiltMP"
+
+;Last building to be put in use (building something).
+;Note if state is true it is building, if state is false it has stopped.
+westRequestBuildingInUseMP = false;PublicVariable "westRequestBuildingInUseMP"
+westBuildingInUseMP = ObjNull;PublicVariable "westBuildingInUseMP"
+westBuildingInUseStateMP = false;PublicVariable "westBuildingInUseStateMP"
+
+;Last building to be put in use (building something).
+;Note if state is true it is building, if state is false it has stopped.
+eastRequestBuildingInUseMP = false;PublicVariable "eastRequestBuildingInUseMP"
+eastBuildingInUseMP = ObjNull;PublicVariable "eastBuildingInUseMP"
+eastBuildingInUseStateMP = false;PublicVariable "eastBuildingInUseStateMP"
+
+totalWestInfantryFactories = 0;PublicVariable "totalWestInfantryFactories"
+totalWestLightFactories = 0;PublicVariable "totalWestLightFactories"
+totalWestHeavyFactories = 0;PublicVariable "totalWestHeavyFactories"
+totalWestAirFactories = 0;PublicVariable "totalWestAirFactories"
+totalWestControlCenters = 0;PublicVariable "totalWestControlCenters"
+totalWestRepairDepots = 0;PublicVariable "totalWestRepairDepots"
+totalWestObservationTowers = 0;PublicVariable "totalWestObservationTowers"
+totalWestFieldHospitals = 0;PublicVariable "totalWestFieldHospitals"
+
+totalEastInfantryFactories = 0;PublicVariable "totalEastInfantryFactories"
+totalEastLightFactories = 0;PublicVariable "totalEastLightFactories"
+totalEastHeavyFactories = 0;PublicVariable "totalEastHeavyFactories"
+totalEastAirFactories = 0;PublicVariable "totalEastAirFactories"
+totalEastControlCenters = 0;PublicVariable "totalEastControlCenters"
+totalEastRepairDepots = 0;PublicVariable "totalEastRepairDepots"
+totalEastObservationTowers = 0;PublicVariable "totalEastObservationTowers"
+totalEastFieldHospitals = 0;PublicVariable "totalEastFieldHospitals"
+
+totalWestSalvagers = 0;PublicVariable "totalWestSalvagers"
+totalEastSalvagers = 0;PublicVariable "totalEastSalvagers"
+
+totalWestStationaryMortars = 0;PublicVariable "totalWestStationaryMortars"
+totalEastStationaryMortars = 0;PublicVariable "totalEastStationaryMortars"
+
+totalWestStationaryAAs = 0;PublicVariable "totalWestStationaryAAs"
+totalEastStationaryAAs = 0;PublicVariable "totalEastStationaryAAs"
+
+totalWestStationaryHEs = 0;PublicVariable "totalWestStationaryHEs"
+totalEastStationaryHEs = 0;PublicVariable "totalEastStationaryHEs"
+
+totalWestStationaryM2s = 0;PublicVariable "totalWestStationaryM2s"
+totalEastStationaryM2s = 0;PublicVariable "totalEastStationaryM2s"
+
+totalWestWorkers = 0;PublicVariable "totalWestWorkers"
+totalEastWorkers = 0;PublicVariable "totalEastWorkers"
+
+totalWestCasualties = 0;PublicVariable "totalWestCasualties"
+totalEastCasualties = 0;PublicVariable "totalEastCasualties"
+totalResistanceCasualties = 0;PublicVariable "totalResistanceCasualties"
+totalCivilianCasualties = 0;PublicVariable "totalCivilianCasualties"
+
+totalWestVehiclesLost = 0;PublicVariable "totalWestVehiclesLost"
+totalEastVehiclesLost = 0;PublicVariable "totalEastVehiclesLost"
+totalResistanceVehiclesLost = 0;PublicVariable "totalResistanceVehiclesLost"
+totalCivilianVehiclesLost = 0;PublicVariable "totalCivilianVehiclesLost"
+
+westCommanderInControlRange = false;PublicVariable "westCommanderInControlRange"
+eastCommanderInControlRange = false;PublicVariable "eastCommanderInControlRange"
+
+;Type of upgrade to request the server to start.
+westRequestUpgrade = 0;PublicVariable "westRequestUpgrade"
+eastRequestUpgrade = 0;PublicVariable "eastRequestUpgrade"
+
+;If true an upgrade is in progress.
+westUpgradeInProgress = false;PublicVariable "westUpgradeInProgress"
+westUpgradeInProgressType = 0;PublicVariable "westUpgradeInProgressType"
+
+eastUpgradeInProgress = false;PublicVariable "eastUpgradeInProgress"
+eastUpgradeInProgressType = 0;PublicVariable "eastUpgradeInProgressType"
+
+;SERVER CONSTANTS
+
+commanderDeadBonus = 400;PublicVariable "commanderDeadBonus"
+
+;Range at which an AI leader will teleport to to enter a newly created vehicle if leader is on foot.
+leaderIntoVehicleRange = 100
+
+;Script type
+assaultScript			= 1;PublicVariable "assaultScript"
+defenseScript			= 2;PublicVariable "defenseScript"
+blackOpsScript			= 3;PublicVariable "blackOpsScript"
+moveToWaypointScript	= 4;PublicVariable "moveToWaypointScript"
+newWaypointOrderScript	= 5;PublicVariable "newWaypointOrderScript"
+defendBaseScript		= 6;PublicVariable "defendBaseScript"
+searchAndDestroyScript	= 7;PublicVariable "searchAndDestroyScript"
+commandVehiclesScript	= 8;PublicVariable "commandVehiclesScript"
+disembarkVehiclesScript = 9;PublicVariable "disembarkVehiclesScript"
+embarkTransportScript	= 10;PublicVariable "embarkTransportScript"
+disembarkTransportScript= 11;PublicVariable "disembarkTransportScript"
+takeTownsAndBasesScript	= 12;PublicVariable "takeTownsAndBasesScript"
+defendTownsAndBasesScript= 13;PublicVariable "defendTownsAndBasesScript"
+recycleScript			= 14;PublicVariable "recycleScript"
+newOrderScript			= 40;PublicVariable "newOrderScript"
+salvageScript			= 50;PublicVariable "salvageScript"
+utilityScript			= 51;PublicVariable "utilityScript"
+noScript				= 100;PublicVariable "noScript"
+
+;Goal type
+offensiveGoal			= 0;PublicVariable "offensiveGoal"
+defensiveGoal			= 1;PublicVariable "defensiveGoal"
+
+;Role type
+infantryRole			= 0;PublicVariable "infantryRole"
+infantryAARole			= 1;PublicVariable "infantryAARole"
+infantryATRole			= 2;PublicVariable "infantryATRole"
+infantryCQBRole			= 3;PublicVariable "infantryCQBRole"
+blackOpsRole			= 4;PublicVariable "blackOpsRole"
+mechanizedRole			= 5;PublicVariable "mechanizedRole"
+mechanizedAARole		= 6;PublicVariable "mechanizedAARole"
+armourRole				= 7;PublicVariable "armourRole"
+armourHeavyRole			= 8;PublicVariable "armourHeavyRole"
+airRole					= 9;PublicVariable "airRole"
+
+minIndependentSize		= 3
+
+;END OF SERVER CONSTANTS
+
+_count = 0
+_totalTeams = Count teamMapDesignations
+
+#SetTeamVariables
+
+	;Team points.
+	Call Format["west%1Points = 0;PublicVariable ""west%1Points""",teamMapDesignations Select _count]
+	Call Format["east%1Points = 0;PublicVariable ""east%1Points""",teamMapDesignations Select _count]
+
+	Call Format["west%1LastPoints = 0;PublicVariable ""west%1LastPoints""",teamMapDesignations Select _count]
+	Call Format["east%1LastPoints = 0;PublicVariable ""east%1LastPoints""",teamMapDesignations Select _count]
+
+	Call Format["westTotal%1Points = 0;PublicVariable ""westTotal%1Points""",teamMapDesignations Select _count]
+	Call Format["eastTotal%1Points = 0;PublicVariable ""eastTotal%1Points""",teamMapDesignations Select _count]
+
+	Call Format["west%1Votes = 0;PublicVariable ""west%1Votes""",teamMapDesignations Select _count]
+	Call Format["east%1Votes = 0;PublicVariable ""east%1Votes""",teamMapDesignations Select _count]
+
+	Call Format["west%1Player = false;PublicVariable ""west%1Player""",teamMapDesignations Select _count]
+	Call Format["east%1Player = false;PublicVariable ""east%1Player""",teamMapDesignations Select _count]
+
+	? (_count == groupCommander):goto "SetNextTeamVariables"
+
+	Call Format["west%1Resources = _westStartingPlayerResources;PublicVariable ""west%1Resources""",teamMapDesignations Select _count]
+	Call Format["east%1Resources = _eastStartingPlayerResources;PublicVariable ""east%1Resources""",teamMapDesignations Select _count]
+
+	;Team scripts
+	Call Format["west%1TeamScript = assaultScript;PublicVariable ""west%1TeamScript""",teamMapDesignations Select _count]
+	Call Format["east%1TeamScript = assaultScript;PublicVariable ""east%1TeamScript""",teamMapDesignations Select _count]
+
+	;Independent teams.
+	Call Format["west%1Independent = false;PublicVariable ""west%1Independent""",teamMapDesignations Select _count]
+	Call Format["east%1Independent = false;PublicVariable ""east%1Independent""",teamMapDesignations Select _count]
+
+	;Team roles.
+	Call Format["west%1Role = infantryRole;PublicVariable ""west%1Role""",teamMapDesignations Select _count]
+	Call Format["east%1Role = infantryRole;PublicVariable ""east%1Role""",teamMapDesignations Select _count]
+
+	;Team goals.
+	Call Format["west%1Goal = offensiveGoal;PublicVariable ""west%1Goal""",teamMapDesignations Select _count]
+	Call Format["east%1Goal = offensiveGoal;PublicVariable ""east%1Goal""",teamMapDesignations Select _count]
+
+	#SetNextTeamVariables
+
+		_count = _count + 1
+		? (_count < _totalTeams):goto "SetTeamVariables"
+
+westTotalPoints = 0;PublicVariable "westTotalPoints"
+eastTotalPoints = 0;PublicVariable "eastTotalPoints"
+
+;End multiplayer variables
+
+@ (statsStarted)
+
+;Set default vote options.
+_count = 0
+_totalVotes = Count voteVariables
+
+#SetVoteOption
+
+	Call Format["%1 = false;publicVariable ""%1""",voteVariables Select _count]
+
+	_count = _count + 1
+	? (_count < _totalVotes):goto "SetVoteOption"
+
+@ (gameStarted)
+
+;COMMAND VARIABLES
+
+westPlayers = 0
+eastPlayers = 0
+
+;Evaluate which teams are player controlled and make the data public.
+? (!Local Leader WestCommanderTeam)||(Leader WestCommanderTeam == player):westCommanderPlayer = true;PublicVariable "westCommanderPlayer";westResources = 9000;PublicVariable "westResources"
+? !(IsNull WestAlphaTeam)&&((!Local Leader WestAlphaTeam)||(Leader WestAlphaTeam == player)):westAlphaPlayer = true;PublicVariable "westAlphaPlayer";westAlphaResources = 850;PublicVariable "westAlphaResources"
+? !(IsNull WestBravoTeam)&&((!Local Leader WestBravoTeam)||(Leader WestBravoTeam == player)):westBravoPlayer = true;PublicVariable "westBravoPlayer";westBravoResources = 850;PublicVariable "westBravoResources"
+? !(IsNull WestCharlieTeam)&&((!Local Leader WestCharlieTeam)||(Leader WestCharlieTeam == player)):westCharliePlayer = true;PublicVariable "westCharliePlayer";westCharlieResources = 850;PublicVariable "westCharlieResources"
+? !(IsNull WestDeltaTeam)&&((!Local Leader WestDeltaTeam)||(Leader WestDeltaTeam == player)):westDeltaPlayer = true;PublicVariable "westDeltaPlayer";westDeltaResources = 850;PublicVariable "westDeltaResources"
+? !(IsNull WestEchoTeam)&&((!Local Leader WestEchoTeam)||(Leader WestEchoTeam == player)):westEchoPlayer = true;PublicVariable "westEchoPlayer";westEchoResources = 850;PublicVariable "westEchoResources"
+? !(IsNull WestFoxtrotTeam)&&((!Local Leader WestFoxtrotTeam)||(Leader WestFoxtrotTeam == player)):westFoxtrotPlayer = true;PublicVariable "westFoxtrotPlayer";westFoxtrotResources = 850;PublicVariable "westFoxtrotResources"
+? !(IsNull WestGolfTeam)&&((!Local Leader WestGolfTeam)||(Leader WestGolfTeam == player)):westGolfPlayer = true;PublicVariable "westGolfPlayer";westGolfResources = 850;PublicVariable "westGolfResources"
+? !(IsNull WestHotelTeam)&&((!Local Leader WestHotelTeam)||(Leader WestHotelTeam == player)):westHotelPlayer = true;PublicVariable "westHotelPlayer";westHotelResources = 850;PublicVariable "westHotelResources"
+
+? !(IsNull EastCommanderTeam)&&((!Local Leader EastCommanderTeam)||(Leader EastCommanderTeam == player)):eastCommanderPlayer = true;PublicVariable "eastCommanderPlayer";eastResources = 9000;PublicVariable "eastResources"
+? !(IsNull EastAlphaTeam)&&((!Local Leader EastAlphaTeam)||(Leader EastAlphaTeam == player)):eastAlphaPlayer = true;PublicVariable "eastAlphaPlayer";eastAlphaResources = 850;PublicVariable "eastAlphaResources"
+? !(IsNull EastBravoTeam)&&((!Local Leader EastBravoTeam)||(Leader EastBravoTeam == player)):eastBravoPlayer = true;PublicVariable "eastBravoPlayer";eastBravoResources = 850;PublicVariable "eastBravoResources"
+? !(IsNull EastCharlieTeam)&&((!Local Leader EastCharlieTeam)||(Leader EastCharlieTeam == player)):eastCharliePlayer = true;PublicVariable "eastCharliePlayer";eastCharlieResources = 850;PublicVariable "eastCharlieResources"
+? !(IsNull EastDeltaTeam)&&((!Local Leader EastDeltaTeam)||(Leader EastDeltaTeam == player)):eastDeltaPlayer = true;PublicVariable "eastDeltaPlayer";eastDeltaResources = 850;PublicVariable "eastDeltaResources"
+? !(IsNull EastEchoTeam)&&((!Local Leader EastEchoTeam)||(Leader EastEchoTeam == player)):eastEchoPlayer = true;PublicVariable "eastEchoPlayer";eastEchoResources = 850;PublicVariable "eastEchoResources"
+? !(IsNull EastFoxtrotTeam)&&((!Local Leader EastFoxtrotTeam)||(Leader EastFoxtrotTeam == player)):eastFoxtrotPlayer = true;PublicVariable "eastFoxtrotPlayer";eastFoxtrotResources = 850;PublicVariable "eastFoxtrotResources"
+? !(IsNull EastGolfTeam)&&((!Local Leader EastGolfTeam)||(Leader EastGolfTeam == player)):eastGolfPlayer = true;PublicVariable "eastGolfPlayer";eastGolfResources = 850;PublicVariable "eastGolfResources"
+? !(IsNull EastHotelTeam)&&((!Local Leader EastHotelTeam)||(Leader EastHotelTeam == player)):eastHotelPlayer = true;PublicVariable "eastHotelPlayer";eastHotelResources = 850;PublicVariable "eastHotelResources"
+
+;Create server-side list of player controlled teams.
+_count = 0
+_totalGroups = Count westGroups
+
+;Any groups that are not local to the server are player groups.  Add them to player group list.
+#CountPlayerGroups
+
+	_westGroup = westGroups Select _count
+	_eastGroup = eastGroups Select _count
+
+	? !(IsNull _westGroup)&&((!Local Leader _westGroup)||(Leader _westGroup == player)):westPlayerGroups = westPlayerGroups + [westGroups Select _count]
+	? !(IsNull _eastGroup)&&((!Local Leader _eastGroup)||(Leader _eastGroup == player)):eastPlayerGroups = eastPlayerGroups + [eastGroups Select _count]
+
+	_count = _count + 1
+
+	? (_count < _totalGroups):goto "CountPlayerGroups"
+
+? (debug):_mes = format["West player groups: %1",westPlayerGroups];WestCommander GlobalChat(_mes)
+? (debug):_mes = format["East player groups: %1",eastPlayerGroups];EastCommander GlobalChat(_mes)
+
+_groups = westPlayerGroups - [WestCommanderTeam]
+westPlayers = Count _groups;PublicVariable "westPlayers"
+
+_groups = eastPlayerGroups - [EastCommanderTeam]
+eastPlayers = Count _groups;PublicVariable "eastPlayers"
+
+westCommandWaypoint = [0,0,0]
+eastCommandWaypoint = [0,0,0]
+;END OF COMMAND VARIABLES
+
+;SERVER ARRAYS
+
+;Last structure that a player built.  (Used for undo feature).
+westLastPlayerStructure = ObjNull
+eastLastPlayerStructure = ObjNull
+
+westDefenseTeams = []
+westDefendedTargets = []
+eastDefenseTeams = []
+eastDefendedTargets = []
+
+;Vehicles
+westLightVehicles = []
+westHeavyVehicles = []
+westAirVehicles = []
+
+eastLightVehicles = []
+eastHeavyVehicles = []
+eastAirVehicles = []
+
+westTransports = []
+eastTransports = []
+
+westSalvageTrucks = []
+eastSalvageTrucks = []
+
+westAmmoTrucks = []
+eastAmmoTrucks = []
+
+westRepairTrucks = []
+eastRepairTrucks = []
+
+westVehicles = []
+eastVehicles = []
+resisanceVehicles = []
+
+vehicles = []
+playerOnlyReinforcements = []
+
+;Server building lists.
+;Build time is the time left until unit being contructed by building is complete.  Example, a barracks training a soldier.
+;Buildings in use are unavailable to perform other actions.  Usually in use when building something.
+;Building damage is the amount of left until a building is repaired or constructed.
+
+buildTimesServer = []
+buildingsInUseServer = []
+buildingsBuiltServer = []
+
+townBarracks = []
+townBarracksDamage = []
+townBarracksBuildTime = []
+townBarracksSide = []
+
+townFactory = []
+townFactoryDamage = []
+townFactoryBuildTime = []
+townFactorySide = []
+
+westLightFactory = []
+westLightFactoryDamage = []
+westLightFactoryBuildTime = []
+
+eastLightFactory = []
+eastLightFactoryDamage = []
+eastLightFactoryBuildTime = []
+
+westHeavyFactory = []
+westHeavyFactoryDamage = []
+westHeavyFactoryBuildTime = []
+
+eastHeavyFactory = []
+eastHeavyFactoryDamage = []
+eastHeavyFactoryBuildTime = []
+
+westAirFactory = []
+westAirFactoryDamage = []
+westAirFactoryBuildTime = []
+westAirFactoryPad = []
+
+eastAirFactory = []
+eastAirFactoryDamage = []
+eastAirFactoryBuildTime = []
+eastAirFactoryPad = []
+
+westInfantryFactory = []
+westInfantryFactoryDamage = []
+westInfantryFactoryBuildTime = []
+
+eastInfantryFactory = []
+eastInfantryFactoryDamage = []
+eastInfantryFactoryBuildTime = []
+
+westControlCenter = []
+westControlCenterDamage = []
+westControlCenterBuildTime = []
+
+eastControlCenter = []
+eastControlCenterDamage = []
+eastControlCenterBuildTime = []
+
+westAmmoDepot = []
+westAmmoDepotDamage = []
+
+eastAmmoDepot = []
+eastAmmoDepotDamage = []
+
+westRepairDepot = []
+westRepairDepotDamage = []
+
+eastRepairDepot = []
+eastRepairDepotDamage = []
+
+westObservationTower = []
+westObservationTowerDamage = []
+
+eastObservationTower = []
+eastObservationTowerDamage = []
+
+westFieldHospital = []
+westFieldHospitalDamage = []
+
+eastFieldHospital = []
+eastFieldHospitalDamage = []
+
+;Defense structures.
+westM2Gun = []
+westM2GunDamage = []
+
+eastM2Gun = []
+eastM2GunDamage = []
+
+westM2Station = []
+westM2StationDamage = []
+
+eastM2Station = []
+eastM2StationDamage = []
+
+westM2Fortification	= []
+westM2FortificationDamage = []
+
+eastM2Fortification	= []
+eastM2FortificationDamage = []
+
+westHEGun = []
+westHEGunDamage = []
+
+eastHEGun = []
+eastHEGunDamage = []
+
+townHEStation = []
+townHEStationDamage = []
+
+westHEStation = []
+westHEStationDamage = []
+
+eastHEStation = []
+eastHEStationDamage = []
+
+westHEFortification = []
+westHEFortificationDamage = []
+
+eastHEFortification = []
+eastHEFortificationDamage = []
+
+westAAGun = []
+westAAGunDamage = []
+
+eastAAGun = []
+eastAAGunDamage = []
+
+westAAStation = []
+westAAStationDamage = []
+
+eastAAStation = []
+eastAAStationDamage = []
+
+westMortar = []
+westMortarDamage = []
+
+eastMortar = []
+eastMortarDamage = []
+
+westSandbag = []
+eastSandbag = []
+
+westLargeWall = []
+eastLargeWall = []
+
+westTempBuildingList = []
+eastTempBuildingList = []
+
+westSpottedUnits = []
+eastSpottedUnits = []
+;END OF SERVER BUILDING LISTS
+
+serverStarted = true;PublicVariable "serverStarted"
+
+Exit
+
+;Use lines below to test end of game sequence.
+~90
+Hint("Destroying the commander & MHQ.")
+~4
+
+EastMobileHQ SetDammage 1
+;EastCommander SetDammage 1

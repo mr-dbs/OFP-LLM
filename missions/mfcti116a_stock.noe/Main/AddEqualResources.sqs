@@ -1,0 +1,23 @@
+;Last modified 11/6/2
+;Puts in request to the server to add resources equally to all of a side's players and commander.
+;Script Usage:  [Side,Amount] Exec "AddEqualResources.sqs"
+
+_side = _this Select 0
+_amount = _this Select 1
+
+? (_side == east):goto "AddEastResources"
+
+#AddWestResources
+
+	;Wait until server has processed any other request.
+	@ (addWestEqualResources == 0)
+
+	addWestEqualResources = _amount;PublicVariable "addWestEqualResources"
+	Exit
+
+#AddEastResources
+
+	;Wait until server has processed any other request.
+	@ (addEastEqualResources == 0)
+
+	addEastEqualResources = _amount;PublicVariable "addEastEqualResources"

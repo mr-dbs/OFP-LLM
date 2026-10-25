@@ -1,0 +1,221 @@
+;Last modified 11/23/3
+_unit = _this select 0
+_side = Side _unit
+
+_menuActionID = []
+
+openResourceMenu = false
+resourceMenuInUse = false
+_selectedTeam = 1
+_commander = false
+? (_unit == Leader WestCommanderTeam || _unit == Leader EastCommanderTeam):_commander = true
+
+#Update
+~0.5
+
+	? !(Alive _unit)||(Side _unit != west && Side _unit != east):Exit
+
+	#CheckActions
+
+		? (openResourceMenu):goto "InitResourceMenu"
+		? !(resourceMenuInUse):goto "Update"
+
+		;If data is not valid then the menu was exitted with ESC.  Set commandMenuInUse false.
+		? !((lbData[IDCMenuTeamList,0]) In teamDesignations):resourceMenuInUse = false;goto "Update"
+		? !(resourceMenuInUse):goto "Update"
+		? (resourceMenuGivePlayer):_return = "GiveTeam";goto "GetResources"
+
+		_totalTeams = Count teamDesignations
+		_selectedTeamName = lbData[IDCMenuTeamList,lbCurSel IDCMenuTeamList]
+
+		_count = 0
+		? (_commander):_count = 1
+
+		#GetSelectedTeam
+
+			? (_selectedTeamName == (teamDesignations Select _count)):_selectedTeam = _count
+
+			_count = _count  + 1
+
+			? (_count < _totalTeams):goto "GetSelectedTeam"
+
+		_receivingUnit = Leader (westGroups Select _selectedTeam)
+		? (_side == east):_receivingUnit = Leader (eastGroups Select _selectedTeam)
+
+		lbClear IDCMenuInfo
+		[_unit,IDCMenuInfo,Format["%1:",Localize "STRYOURRESOURCES"]] Exec "GUI\SetGUIResources.sqs"
+		? (!IsNull Group _receivingUnit):[_receivingUnit,IDCMenuInfo,Format["%1:",Localize "STRPLAYERRESOURCES"]] Exec "GUI\SetGUIResources.sqs"
+		? (IsNull Group _receivingUnit):lbAdd[IDCMenuInfo,""];lbSetValue[IDCMenuInfo,0,1]
+
+		? !(_commander):goto "Update"
+
+		_percentage = lbValue[IDCMenuList,lbCurSel IDCMenuList]
+		_awardPercentage = lbValue[IDCMenuList2,lbCurSel IDCMenuList2]
+
+		;Do not allow total percentages to exceed 100%.
+		? (_percentage + _awardPercentage > 100):_awardPercentage = 100 - _percentage;lbSetCurSel[IDCMenuList2,_awardPercentage / 10 - 1]
+
+		? (_percentage < 0):resourceMenuInUse = false;goto "Update"
+		? (_side == west):westPlayerResourcePercentage = _percentage / 100;PublicVariable "westPlayerResourcePercentage";westPlayerAwardPercentage = _awardPercentage / 100;PublicVariable "westPlayerAwardPercentage"
+		? (_side == east):eastPlayerResourcePercentage = _percentage / 100;PublicVariable "eastPlayerResourcePercentage";eastPlayerAwardPercentage = _awardPercentage / 100;PublicVariable "eastPlayerAwardPercentage"
+
+		goto "Update"
+
+;Creates the resource menu.
+#InitResourceMenu
+
+	resourceMenuInUse = true
+	openResourceMenu = false
+
+	_menuName = Format["ResourceMenu%1",GUISkin]
+	? (_unit == Leader WestCommanderTeam || _unit == Leader EastCommanderTeam):_menuName = Format["CommanderResourceMenu%1",GUISkin]
+
+	;Create the resource menu.
+	_resourceMenu = CreateDialog _menuName
+	_count = 0
+
+	;Start at 1 if the commander since the commander's team is 1.
+	? (_unit == Leader WestCommanderTeam || _unit == Leader EastCommanderTeam):_count = 1
+
+	_totalTeams = Count teamDesignations
+
+	;Add an entry onto the team selection combobox.
+	#AddTeamSelection
+
+		_group = westGroups Select _count;_playerGroups = westPlayerGroups
+		? (_side == east):_group = eastGroups Select _count;_playerGroups = eastPlayerGroups
+
+		_text = Format["%1-%2",teamDesignations Select _count,Localize "STRDISABLED"]
+		? !(IsNull _group):_text = Format["%1-%2",teamDesignations Select _count,Localize "STRAI"]
+		? (_group In _playerGroups):_text = Format["%1-%2",teamDesignations Select _count,Name Leader _group]
+
+		_selection = lbAdd[IDCMenuTeamList,_text]
+		lbSetData [IDCMenuTeamList,_selection,teamDesignations Select _count]
+
+		#AddTeamSelectionCount
+
+			_count = _count  + 1
+
+		? (_count < _totalTeams):goto "AddTeamSelection"
+
+	;Set menu to first selection (Alpha).
+	lbSetCurSel[IDCMenuTeamList,0]
+
+	;Add percentages selection boxes.
+	_count = 0
+
+	#AddPercentages
+
+		;Add the text & data for the column pull-down box.
+		_text = Format ["%1",_count * 10 + 10]
+		_selection = lbAdd[IDCMenuList,_text]
+		lbSetValue [IDCMenuList,_selection,_count * 10 + 10]
+
+		_selection = lbAdd[IDCMenuList2,_text]
+		lbSetValue [IDCMenuList2,_selection,_count * 10 + 10]
+
+		_count = _count  + 1
+
+		? (_count < 9):goto "AddPercentages"
+
+	;Set the selected combobox entry to the current player percentage.
+	? (_side == west):lbSetCurSel[IDCMenuList,westPlayerResourcePercentage * 10 - 1];lbSetCurSel[IDCMenuList2,westPlayerAwardPercentage * 10 - 1]
+	? (_side == east):lbSetCurSel[IDCMenuList,eastPlayerResourcePercentage * 10 - 1];lbSetCurSel[IDCMenuList2,eastPlayerAwardPercentage * 10 - 1]
+
+	;Add values of resources that can be given to a player.
+	#AddPlayerResources
+
+
+		_layout = "$%1"
+		? (Localize "STRCURRENCYPOSITION" == "Back"):_layout = "%1$"
+
+		_selection = lbAdd[IDCMenuList1,Format [_layout,25]]
+		lbSetValue [IDCMenuList1,_selection,25]
+		_selection = lbAdd[IDCMenuList1,Format [_layout,50]]
+		lbSetValue [IDCMenuList1,_selection,50]
+		_selection = lbAdd[IDCMenuList1,Format [_layout,100]]
+		lbSetValue [IDCMenuList1,_selection,100]
+		_selection = lbAdd[IDCMenuList1,Format [_layout,250]]
+		lbSetValue [IDCMenuList1,_selection,250]
+		_selection = lbAdd[IDCMenuList1,Format [_layout,500]]
+		lbSetValue [IDCMenuList1,_selection,500]
+		_selection = lbAdd[IDCMenuList1,Format [_layout,1000]]
+		lbSetValue [IDCMenuList1,_selection,1000]
+		_selection = lbAdd[IDCMenuList1,Format [_layout,2000]]
+		lbSetValue [IDCMenuList1,_selection,2000]
+
+		lbSetCurSel[IDCMenuList1,4]
+
+	goto "Update"
+
+#GiveTeam
+
+	resourceMenuGivePlayer = false
+
+	;If nothing is selected then return.
+	? (lbCurSel IDCMenuList1 < 0):goto "Update"
+
+	_value = lbValue[IDCMenuList1,lbCurSel IDCMenuList1]
+
+	? (_side == west) && (IsNull (westGroups Select _selectedTeam)):goto "Update"
+	? (_side == east) && (IsNull (eastGroups Select _selectedTeam)):goto "Update"
+
+	? (_value > _resources):goto "Update"
+	? (_side == east):goto "GiveEastPlayer"
+
+	@ (addWestResourcesToTeam == -1)
+
+	addWestResourcesToTeam = _selectedTeam;PublicVariable "addWestResourcesToTeam"
+	addWestResourcesFromTeam = _team;PublicVariable "addWestResourcesFromTeam"
+	addWestResourcesToTeamAmount = _value;PublicVariable "addWestResourcesToTeamAmount"
+
+	;Send a message to the player.
+	[Leader (westGroups Select _selectedTeam),_team,messageFundsTransferred,_value,0] Exec "Main\SendPlayerMessage.sqs"
+
+	goto "Update"
+
+	#GiveEastPlayer
+
+	@ (addEastResourcesToTeam == -1)
+
+	addEastResourcesToTeam = _selectedTeam;PublicVariable "addEastResourcesToTeam"
+	addEastResourcesFromTeam = _team;PublicVariable "addEastResourcesFromTeam"
+	addEastResourcesToTeamAmount = _value;PublicVariable "addEastResourcesToTeamAmount"
+
+	;Send a message to the player.
+	[Leader (eastGroups Select _selectedTeam),_team,messageFundsTransferred,_value,0] Exec "Main\SendPlayerMessage.sqs"
+
+	goto "Update"
+
+;Determine if player is a commander or not and get appropriate resources available.
+#GetResources
+
+	? (_side == east):goto "GetEastResources"
+
+	#GetWestResources
+
+		? (_unit == Leader WestCommanderTeam):_resources = westResources;_team = groupCommander
+		? (_unit == Leader westAlphaTeam):_resources = westAlphaResources;_team = groupAlpha
+		? (_unit == Leader westBravoTeam):_resources = westBravoResources;_team = groupBravo
+		? (_unit == Leader westCharlieTeam):_resources = westCharlieResources;_team = groupCharlie
+		? (_unit == Leader westDeltaTeam):_resources = westDeltaResources;_team = groupDelta
+		? (_unit == Leader westEchoTeam):_resources = westEchoResources;_team = groupEcho
+		? (_unit == Leader westFoxtrotTeam):_resources = westFoxtrotResources;_team = groupFoxtrot
+		? (_unit == Leader westGolfTeam):_resources = westGolfResources;_team = groupGolf
+		? (_unit == Leader westHotelTeam):_resources = westHotelResources;_team = groupHotel
+
+		goto _return
+
+	#GetEastResources
+
+		? (_unit == Leader EastCommanderTeam):_resources = eastResources;_team = groupCommander
+		? (_unit == Leader eastAlphaTeam):_resources = eastAlphaResources;_team = groupAlpha
+		? (_unit == Leader eastBravoTeam):_resources = eastBravoResources;_team = groupBravo
+		? (_unit == Leader eastCharlieTeam):_resources = eastCharlieResources;_team = groupCharlie
+		? (_unit == Leader eastDeltaTeam):_resources = eastDeltaResources;_team = groupDelta
+		? (_unit == Leader eastEchoTeam):_resources = eastEchoResources;_team = groupEcho
+		? (_unit == Leader eastFoxtrotTeam):_resources = eastFoxtrotResources;_team = groupFoxtrot
+		? (_unit == Leader eastGolfTeam):_resources = eastGolfResources;_team = groupGolf
+		? (_unit == Leader eastHotelTeam):_resources = eastHotelResources;_team = groupHotel
+
+		goto _return

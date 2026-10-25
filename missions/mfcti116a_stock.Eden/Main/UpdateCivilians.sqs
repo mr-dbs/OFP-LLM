@@ -1,0 +1,60 @@
+;Last modified 3/4/3
+
+;Use on a group to give it AI control.
+;Script usage: [] Exec "UpdateCivilians.sqs"
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+#Init
+
+	_count = 0;
+	_totalCivilians = Count civilians
+	_totalDestinations = Count civilianDestinations
+	_currentDestinations = []
+
+	;Add a current destination for each civilian.
+	#InitDestination
+
+		_currentDestinations = _currentDestinations + [ObjNull]
+
+		_count = _count + 1
+
+		? (_count < _totalCivilians):goto "InitDestination"
+
+#Update
+~30
+
+	_count = 0
+
+	#Move
+
+		_destination = _currentDestinations Select _count
+		_unit = Driver (civilians Select _count)
+
+		? !(Alive _unit):goto "MoveNext"
+		? (IsNull _destination) || (_unit Distance _destination < 10):goto "SetNewDestination"
+
+		#MoveNext
+
+			_count = _count + 1
+
+			? (_count < _totalCivilians):goto "Move"
+
+goto "Update"
+
+;Set a new destination for current civilian.
+#SetNewDestination
+
+	_rand = Random _totalDestinations
+	_rand = _rand - (_rand  % 1)
+
+	_newDestination = civilianDestinations Select (_rand)
+
+	? (_newDestination == _destination) || (_unit Distance _newDestination > 6000):goto "SetNewDestination"
+
+	Vehicle _unit SetFuel 1
+	_currentDestinations Set [_count,_newDestination]
+	_unit DoMove GetPos _newDestination
+
+	goto "MoveNext"

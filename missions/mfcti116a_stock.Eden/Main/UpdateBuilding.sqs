@@ -1,0 +1,103 @@
+;Last modified 9/22/3
+;Updates building damage.
+;ScriptUsage:  [] exec "BuildingUpdate.sqs"
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+#Update
+~updateBuildingDelay
+
+#WestUpdate
+
+	#CheckWestBuildings
+
+		_buildingLists = [westControlCenter,westInfantryFactory,westLightFactory,westHeavyFactory,westAirFactory,westRepairDepot,westAmmoDepot,westObservationTower,westFieldHospital,westMortar,westAAStation,westAAGun,westHEFortification,westHEStation,westHEGun,westM2Fortification,westM2Station,westM2Gun]
+		_radarList = westControlCenter
+		_damageLists = [westControlCenterDamage,westInfantryFactoryDamage,westLightFactoryDamage,westHeavyFactoryDamage,westAirFactoryDamage,westRepairDepotDamage,westAmmoDepotDamage,westObservationTowerDamage,westFieldHospitalDamage,westMortarDamage,westAAStationDamage,westAAGunDamage,westHEFortificationDamage,westHEStationDamage,westHEGunDamage,westM2FortificationDamage,westM2StationDamage,westM2GunDamage]
+		_totalLists = Count _buildingLists
+		_side = west
+
+		_return = "EastUpdate"
+		goto "CheckBuildings"
+
+#EastUpdate
+
+	#CheckEastBuildings
+
+		_buildingLists = [eastControlCenter,eastInfantryFactory,eastLightFactory,eastHeavyFactory,eastAirFactory,eastRepairDepot,eastAmmoDepot,eastObservationTower,eastFieldHospital,eastMortar,eastAAStation,eastAAGun,eastHEFortification,eastHEStation,eastHEGun,eastM2Fortification,eastM2Station,eastM2Gun]
+		_radarList = eastControlCenter
+		_damageLists = [eastControlCenterDamage,eastInfantryFactoryDamage,eastLightFactoryDamage,eastHeavyFactoryDamage,eastAirFactoryDamage,eastRepairDepotDamage,eastAmmoDepotDamage,eastObservationTowerDamage,eastFieldHospitalDamage,eastMortarDamage,eastAAStationDamage,eastAAGunDamage,eastHEFortificationDamage,eastHEStationDamage,eastHEGunDamage,eastM2FortificationDamage,eastM2StationDamage,eastM2GunDamage]
+		_totalLists = Count _buildingLists
+		_side = east
+
+		_return = "Update"
+
+	#CheckBuildings
+
+		_listCount = 0
+		_totalRadars = 0
+		_radars = false
+
+		#CheckList
+
+			_buildinglist = _buildingLists Select _listCount
+			_damageList = _damageLists Select _listCount
+
+			_buildingCount = 0
+			_totalbuildings = Count _buildinglist
+
+			? (_totalbuildings < 1):goto "CheckNextList"
+
+			#CheckBuilding
+
+				_building = _buildinglist Select _buildingCount
+				_damage = _damageList Select _buildingCount
+
+				? (IsNull _building):goto "CheckNextBuilding"
+
+				;Check if building has been destroyed & is not currently damaged.
+				? (GetDammage _building == 1) && (_damage == 500):_damage = 1
+				? (GetDammage _building == 0):_damage = 500
+				? (_building In _radarList) && (_damage == 500):_totalRadars = _totalRadars + 1
+
+				_damageList Set [_buildingCount,_damage]
+
+				;If there is damage then update the building's damage level.
+				? (_damage != 500):goto "UpdateBuildingDamage"
+
+				#CheckNextBuilding
+
+					_buildingCount = _buildingCount + 1
+					? (_buildingCount < _totalbuildings):goto "CheckBuilding"
+
+			#CheckNextList
+
+				_listCount = _listCount + 1
+				? (_totalRadars > 0):_radars = true
+				? (_listCount < _totalLists):goto "CheckList"
+
+			? (_side == west) && (westUpgradedRadar) && (_radars) && !(westRadarEnabled):westRadarEnabled = true;PublicVariable "westRadarEnabled"
+			? (_side == east) && (eastUpgradedRadar) && (_radars) && !(eastRadarEnabled):eastRadarEnabled = true;PublicVariable "eastRadarEnabled"
+			? (_side == west) && !(_radars) && (westRadarEnabled):westRadarEnabled = false;PublicVariable "westRadarEnabled"
+			? (_side == east) && !(_radars) && (eastRadarEnabled):eastRadarEnabled = false;PublicVariable "eastRadarEnabled"
+
+			goto _return
+
+#UpdateBuildingDamage
+
+	;Factory will slowly rebuild on it's own.
+	_damage = _damage - buildingRepairRate
+
+	? (_damage < 0) _damage = 0
+
+	_damageList Set [_buildingCount,_damage]
+
+	? (_damage > 0):goto "CheckNextBuilding"
+			
+	;If the damage 0 or less repair the building.
+	_damageList Set [_buildingCount,500]
+	_building SetDammage 0
+
+	goto "CheckNextBuilding"
+

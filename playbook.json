@@ -1,0 +1,19 @@
+{
+ "games_played": 1,
+ "last_result": "EAST LOST at minute 58",
+ "opponent_tendencies": [
+  "West used helicopter assaults to capture towns  [seen 3 times, minute 19, 31, 47]",
+  "West used ground forces to capture Dolina early  [seen once, minute 6]",
+  "West used satchel charges to destroy our base  [seen once, minute 52]"
+ ],
+ "what_beat_us": [
+  "Our vehicles were lost to helicopter attacks  [seen 2 times, minute 20, 33]",
+  "We had no anti-air units to counter helicopter assaults  [from spending]",
+  "We lost base to satchel charges  [seen once, minute 52]"
+ ],
+ "changes_to_make": [
+  "1 units SHILKA by minute 10 - to counter helicopter assaults and protect base",
+  "10 units AA_SOLDIER by minute 10 - to provide anti-air coverage and infantry to counter helicopters",
+  "1 teams DEFEND_BASE by minute 10 - to focus on base defense and reduce satchel damage"
+ ]
+}

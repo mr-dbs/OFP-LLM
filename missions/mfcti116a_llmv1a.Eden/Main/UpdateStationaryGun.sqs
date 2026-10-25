@@ -1,0 +1,85 @@
+;Last modified 2/19/4
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_gun = _this Select 1
+_gunType = _this Select 2
+
+#Update
+~2
+
+	;Check if gun needs a reload.
+	? (publicServer)&&((_gunType == M2GunType)||(_gunType == M2StationType))&&!(SomeAmmo _gun)&&(GetDammage _gun < 1):goto "CheckReload"
+	? (publicServer)&&((_gunType == HEGunType)||(_gunType == HEStationType))&&!(SomeAmmo _gun)&&(GetDammage _gun < 1):goto "CheckReload"
+	? !(publicServer)&&((_gunType == M2GunType)||(_gunType == M2StationType))&&!(SomeAmmo _gun)&&(GetDammage _gun < 1):goto "CheckReload"
+	? !(publicServer)&&((_gunType == HEGunType)||(_gunType == HEStationType))&&!(SomeAmmo _gun)&&(GetDammage _gun < 1):goto "CheckReload"
+	? !(publicServer)&&((_gunType == AAGunType)||(_gunType == AAStationType))&&((_gun Ammo "MFCTI116StaticAALauncher" < 1) || (_gun Ammo "MFCTI116AAMachineGun20" < 1))&&(GetDammage _gun < 1):goto "CheckReload"
+
+	goto "Update"
+
+#CheckReload
+
+	? (_side == west):_depotList = westAmmoDepot;_truckList = westAmmoTrucks
+	? (_side == east):_depotList = eastAmmoDepot;_truckList = eastAmmoTrucks
+
+	_count = 0
+	_delay = ammoDepotReloadDelay
+	_maxAmmoDepots = Count _depotList
+	_maxAmmoTrucks = Count _truckList
+
+	? (_maxAmmoTrucks < 1) && (_maxAmmoDepots < 1):goto "Update"
+
+	;First check for a nearby Ammo Depot.
+	#CheckAmmoDepot
+
+	_depot = _depotList Select _count
+	_count = _count + 1
+
+	? !(IsNull _depot) && (GetDammage _depot != 1) && (_depot Distance _gun <= ammoDepotReloadRange):goto "Reload"
+	? (_count < _maxAmmoDepots):goto "CheckAmmoDepot"
+
+	_count = 0
+
+	;Reloading from a truck is slower.
+	_delay = ammoDepotReloadDelay * 4
+
+	;Check for a nearby Ammo Truck.
+	#CheckAmmoTruck
+
+	_truck = _truckList Select _count
+	_count = _count + 1
+
+	? !(IsNull _truck) && (GetDammage _truck != 1) && (_truck Distance _gun <= ammoDepotReloadRange):goto "Reload"
+	? (_count < _maxAmmoTrucks):goto "CheckAmmoTruck"
+
+	goto "Update"
+
+#Reload
+
+	? (IsNull (Gunner _gun)):goto "Update"
+
+	~_delay
+
+	? (_gunType == HEGunType) || (_gunType == HEStationType):goto "ReloadHE"
+	? (_gunType == AAGunType) || (_gunType == AAStationType):goto "ReloadAA"
+
+#ReloadM2
+
+	? (publicServer):_gun RemoveMagazine "Browning";_gun AddMagazine "Browning"
+	? !(publicServer):_gun RemoveMagazine "MFCTI116M2";_gun AddMagazine "MFCTI116M2";_gun AddMagazine "MFCTI116M2";_gun AddMagazine "MFCTI116M2";_gun AddMagazine "MFCTI116M2";_gun AddMagazine "MFCTI116M2"
+
+	goto "Update"
+
+#ReloadHE
+
+	? (publicServer):_gun RemoveMagazine "MachineGun30";_gun AddMagazine "MachineGun30"
+	? !(publicServer):_gun RemoveMagazine "MFCTI116HE";_gun AddMagazine "MFCTI116HE";_gun AddMagazine "MFCTI116HE";_gun AddMagazine "MFCTI116HE";_gun AddMagazine "MFCTI116HE";_gun AddMagazine "MFCTI116HE"
+
+#ReloadAA
+
+	_gun RemoveMagazines "MFCTI116StaticAALauncher";_gun RemoveMagazines "MFCTI116AAMachineGun20"
+	_gun AddMagazine "MFCTI116StaticAALauncher";_gun AddMagazine "MFCTI116StaticAALauncher";_gun AddMagazine "MFCTI116AAMachineGun20";_gun AddMagazine "MFCTI116AAMachineGun20";_gun AddMagazine "MFCTI116AAMachineGun20";_gun AddMagazine "MFCTI116AAMachineGun20";_gun AddMagazine "MFCTI116AAMachineGun20"
+
+	goto "Update"

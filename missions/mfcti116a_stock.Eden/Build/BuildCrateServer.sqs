@@ -1,0 +1,51 @@
+;Last modified 2/19/4
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_type = _this Select 1
+_destination = _this Select 2
+_direction = _this Select 3
+
+_sideText = "West";_sideText1 = "W"
+? (_side == east):_sideText = "East";_sideText1 = "E"
+
+? (publicServer):goto "InitPublicServer"
+
+#Init
+
+	? (_type == weaponsCrateType):_name = Format["MFCTI116%1WeaponsCrate",_sideText]
+	? (_type == ammoCrateType):_name = Format["MFCTI116%1AmmoCrate",_sideText]
+	? (_type == heavyWeaponsCrateType):_name = Format["MFCTI116%1HeavyWeaponsCrate",_sideText]
+	? (_type == heavyAmmoCrateType):_name = Format["MFCTI116%1HeavyAmmoCrate",_sideText]
+
+	goto "CreateCrate"
+
+#InitPublicServer
+
+	? (_type == weaponsCrateType) || (_type == heavyWeaponsCrateType):_name = Format["ReammoBox%1",_sideText]
+	? (_type == ammoCrateType) || (_type == heavyAmmoCrateType):_name = Format["AmmoBoxAdd%1",_sideText1]
+
+#CreateCrate
+
+	;Create building, props, gun, & gunner.
+	_crate = _name CreateVehicle _destination
+	_crate  SetDir _direction
+	_crate  SetPos _destination
+	_crate SetPos [(_destination Select 0)+((sin _direction)*0.5),(_destination Select 1)+((cos _direction)*.5),(_destination Select 2)]
+
+	? (_side == east):goto "AddCrateToEast"
+
+#AddCrateToWest
+
+	;Send the new building to other players.
+	westBuildingBuiltMP = _crate;PublicVariable "westBuildingBuiltMP"
+	westBuildingBuiltTypeMP = _type;PublicVariable "westBuildingBuiltTypeMP"
+
+	Exit
+
+#AddCrateToEast
+
+	;Send the new building to other players.
+	eastBuildingBuiltMP = _crate;PublicVariable "eastBuildingBuiltMP"
+	eastBuildingBuiltTypeMP = _type;PublicVariable "eastBuildingBuiltTypeMP"

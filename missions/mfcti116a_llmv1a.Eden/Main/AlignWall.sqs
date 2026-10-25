@@ -1,0 +1,307 @@
+;Last modified 9/7/3
+;Aligns a wall to the nearest 45 degrees.
+;Script usage:  [Wall] exec AlignWallDirection.sqs"
+
+_side = _this Select 0
+_wall = _this Select 1
+_name = _this Select 2
+_alignPosition = _this Select 3
+_align = _this Select 4
+_direction = GetDir _wall
+
+? (_name == "FenceWood"):_direction = (_direction + 90) % 360;_wall SetDir _direction
+? !(_align):Exit
+
+;Align direction to nearest 45 degrees.
+? (_direction >= 337.5) || (_direction < 22.5):_alignDirection = 0
+? (_direction >= 22.5) && (_direction < 67.5):_alignDirection = 45
+? (_direction >= 67.5) && (_direction < 112.5):_alignDirection = 90
+? (_direction >= 112.5) && (_direction < 157.5):_alignDirection = 135
+? (_direction >= 157.5) && (_direction < 202.5):_alignDirection = 180
+? (_direction >= 202.5) && (_direction < 247.5):_alignDirection = 225
+? (_direction >= 247.5) && (_direction < 292.5):_alignDirection = 270
+? (_direction >= 292.5) && (_direction < 337.5):_alignDirection = 315
+
+_wall SetDir _alignDirection
+
+? (_name != "FenceWood"):goto "SetWall"
+
+#SetSandbag
+
+	_attachMod = 5
+	_wallLength = 2.3
+	_wallThickness = 0.2
+	_rotation = 0
+	_walls = westSandbag
+	_alignMod = 2.75
+	_midSection = 2
+
+	? (_side == east):_walls = eastSandbag
+
+	goto "CheckNearbyWalls"
+
+#SetWall
+
+	_attachMod = 2.25
+	_wallLength = 5.8
+	_wallThickness = 0.65
+	_rotation = 90
+
+	_walls = westLargeWall
+	_alignMod = 2.75
+	_midSection = 2
+
+	? (_side == east):_walls = eastLargeWall
+
+#CheckNearbyWalls
+
+	_closestWall = ObjNull
+	_closestDistance = _wallLength * _attachMod
+	_count = 0
+	_totalWalls = Count _walls
+
+	? (_totalWalls < 1):Exit
+
+#FindWall
+
+	_currentWall = _walls Select _count
+	_distance = _wall Distance _currentWall
+	_direction = GetDir _currentWall;_direction = _direction - (_direction % 1)
+	_count = _count + 1
+
+	;If a wall isn't already aligned then don't align to it.
+	? (_direction % 45 > 0):goto "FindNextWall"
+	? (_distance < _closestDistance) && (_currentWall != _wall):_closestWall = _currentWall;_closestDistance = _distance
+
+	#FindNextWall
+	
+		? (_count < _totalWalls):goto "FindWall"
+
+	? (IsNull _closestWall):Exit
+
+	;Get direction without any fractions.
+	_direction = GetDir _closestWall;_direction = _direction - (_direction % 1)
+	_position = GetPos _closestWall
+
+	_diagonalLength = sqrt (_wallLength^2 + _wallLength^2)
+	_diagonalThickness = sqrt(_wallThickness^2 + _wallThickness^2)
+
+#AlignWall
+
+	_directionType = -1
+	_offsetX = 0
+	_offsetY = 0
+	_sourceX = _position Select 0
+	_sourceY = _position Select 1
+	_alignX = _alignPosition Select 0
+	_alignY = _alignPosition Select 1
+	_direction = (_direction + _rotation) % 360
+	_alignDirection = (_alignDirection + _rotation) % 360
+
+	;|
+	? (_direction == 0) || (_direction == 180):_directionType = 0
+
+	;/
+	? (_direction == 45) || (_direction == 225):_directionType = 1
+
+	;\
+	? (_direction == 135) || (_direction == 315):_directionType = 2
+
+	;-
+	? (_direction == 90) || (_direction == 270):_directionType = 3
+
+	_alignDirectionType = -1
+
+	;|
+	? (_alignDirection == 0) || (_alignDirection == 180):_alignDirectionType = 0
+
+	;/
+	? (_alignDirection == 45) || (_alignDirection == 225):_alignDirectionType = 1
+
+	;\
+	? (_alignDirection == 135) || (_alignDirection == 315):_alignDirectionType = 2
+
+	;-
+	? (_alignDirection == 90) || (_alignDirection == 270):_alignDirectionType = 3
+
+	;Connections in same direction.
+	;|,|
+	? (_alignDirectionType == 0) && (_directionType == 0):goto "AlignNToS"
+	;-,-
+	? (_alignDirectionType == 3) && (_directionType == 3):goto "AlignWToE"
+	;/,/
+	? (_alignDirectionType == 1) && (_directionType == 1):goto "AlignSWToNE"
+	;\,\
+	? (_alignDirectionType == 2) && (_directionType == 2):goto "AlignSEToNW"
+
+	;Connections in different directions.
+	;-|,|-
+	? (_alignDirectionType == 3 && _directionType == 0) || (_alignDirectionType == 0 && _directionType == 3):goto "AlignPerpendicularCorner"
+	;/\
+	? (_alignDirectionType == 1 && _directionType == 2):goto "Align1To2"
+	;\/
+	? (_alignDirectionType == 2 && _directionType == 1):goto "Align2To1"
+	;/-,-/
+	? (_alignDirectionType == 1 && _directionType == 3) || (_alignDirectionType == 3 && _directionType == 1):goto "Align1To3"
+	;/|,|/
+	? (_alignDirectionType == 1 && _directionType == 0) || (_alignDirectionType == 0 && _directionType == 1):goto "Align1To0"
+	;\-,-\
+	? (_alignDirectionType == 2 && _directionType == 3) || (_alignDirectionType == 3 && _directionType == 2):goto "Align2To3"
+	;\|,|\
+	? (_alignDirectionType == 2 && _directionType == 0) || (_alignDirectionType == 0 && _directionType == 2):goto "Align2To0"
+
+	Exit
+
+;-,-
+#AlignWToE
+
+	? (_alignX < _sourceX):_offsetX = -_wallLength
+	? (_alignX > _sourceX):_offsetX = _wallLength
+
+	goto "PlaceWall"
+
+;|,|
+#AlignNToS
+
+	? (_alignY < _sourceY):_offsetY = -_wallLength
+	? (_alignY > _sourceY):_offsetY = _wallLength
+
+	goto "PlaceWall"
+
+;/,/
+#AlignSWToNE
+
+	;Get positive heading between two pieces.
+	_heading = (((_alignY - _sourceY) atan2 (_alignX - _sourceX)) + 360) % 360
+
+	;Determine if piece to be connected is NE or SW of source piece.
+	_SW = false
+	? (_heading < 315 && _heading > 135):_SW = true
+
+	? (_SW):_offsetX = -(_diagonalLength / 2);_offsetY = -(_diagonalLength / 2)
+	? !(_SW):_offsetX = (_diagonalLength / 2);_offsetY = (_diagonalLength / 2)
+
+	goto "PlaceWall"
+
+;\,\
+#AlignSEToNW
+
+	;Get positive heading between two pieces.
+	_heading = (((_alignY - _sourceY) atan2 (_alignX - _sourceX)) + 360) % 360
+
+
+	;Determine if piece to be connected is NW or SE of source piece.
+	_NW = false
+	? (_heading < 225 && _heading > 45):_NW = true
+
+	? !(_NW):_offsetX = (_diagonalLength / 2);_offsetY = -(_diagonalLength / 2)
+	? (_NW):_offsetX = -(_diagonalLength / 2);_offsetY = (_diagonalLength / 2)
+
+	goto "PlaceWall"
+
+;-,|
+;|,-
+#AlignPerpendicularCorner
+
+	? (_alignX > _sourceX):_offsetX = _wallLength / 2 - _wallThickness
+	? (_alignX < _sourceX):_offsetX = -(_wallLength / 2) + _wallThickness
+
+	? (_alignY > _sourceY):_offsetY = _wallLength / 2 - _wallThickness
+	? (_alignY < _sourceY):_offsetY = -(_wallLength / 2) + _wallThickness
+
+	goto "PlaceWall"
+
+;/,-
+#Align1To3
+
+	? (_alignX > _sourceX):_offsetX = _diagonalLength / 2 + _diagonalThickness / 2 ;_offsetY = _wallLength / 2 - _diagonalThickness
+	? (_alignX < _sourceX):_offsetX = -_diagonalLength / 2 - _diagonalThickness / 2;_offsetY = -_wallLength / 2 + _diagonalThickness
+
+	goto "PlaceWall"
+
+;/,|
+#Align1To0
+
+	? (_alignY > _sourceY):_offsetX = _wallLength / 2 - _diagonalThickness ;_offsetY = _diagonalLength / 2 + _diagonalThickness / 2
+	? (_alignY < _sourceY):_offsetX = -_wallLength / 2 + _diagonalThickness;_offsetY = -_diagonalLength / 2 - _diagonalThickness / 2
+
+	goto "PlaceWall"
+
+;\-,-\
+#Align2To3
+
+	? (_alignX > _sourceX):_offsetX = _diagonalLength / 2 + _diagonalThickness / 2;_offsetY = -_wallLength / 2 + _diagonalThickness
+	? (_alignX < _sourceX):_offsetX = -_diagonalLength / 2 - _diagonalThickness / 2;_offsetY = _wallLength / 2 - _diagonalThickness
+
+	goto "PlaceWall"
+
+;\,|
+#Align2To0
+
+	? (_alignY > _sourceY):_offsetX = -_wallLength / 2 + _diagonalThickness;_offsetY = _diagonalLength / 2 + _diagonalThickness / 2
+	? (_alignY < _sourceY):_offsetX = _wallLength / 2 - _diagonalThickness;_offsetY = -_diagonalLength / 2 - _diagonalThickness / 2
+
+	goto "PlaceWall"
+
+;/,\ NW = <
+;/,\ W	= \/
+;/,\ SW = \/
+;/,\ S	= >
+;/,\ SE	= >
+;/,\ E	= /\
+;/,\ NE	= /\
+;/,\ N	= <
+
+;/\.\/,>,<
+#Align1To2
+
+	;Get positive heading between two pieces.
+	_heading = (((_alignY - _sourceY) atan2 (_alignX - _sourceX)) + 360) % 360
+
+	_heading = (_heading - _rotation) % 360
+	? (_heading < 0):_heading = _heading + 360
+
+	;N (align is south) >
+	? (_heading >= 315 || _heading < 45):_offsetY = (_wallLength / 2) + _wallThickness / 2
+
+	;S (align is north) <
+	? (_heading >= 135 && _heading < 225):_offsetY = -(_wallLength / 2) - _wallThickness / 2
+
+	;E (align is west) /\
+	? (_heading >= 225 && _heading < 315):_offsetX = (_wallLength / 2) + _wallThickness / 2
+
+	;W (align is east) \/
+	? (_heading >= 45 && _heading < 135):_offsetX = -(_wallLength / 2) - _wallThickness / 2
+
+	goto "PlaceWall"
+
+;/\.\/,>,<
+#Align2To1
+
+	;Get positive heading between two pieces.
+	_heading = (((_alignY - _sourceY) atan2 (_alignX - _sourceX)) + 360) % 360
+
+	_heading = (_heading + _rotation) % 360
+	? (_heading < 0):_heading = _heading + 360
+
+	;N (align is south) <
+	? (_heading >= 315 || _heading < 45):_offsetY = -(_wallLength / 2) - _wallThickness / 2
+
+	;S (align is north) >
+	? (_heading >= 135 && _heading < 225):_offsetY = (_wallLength / 2) + _wallThickness / 2
+
+	;E (align is west) \/
+	? (_heading >= 225 && _heading < 315):_offsetX = -(_wallLength / 2) - _wallThickness / 2
+
+	;W (align is east) /\
+	? (_heading >= 45 && _heading < 135):_offsetX = (_wallLength / 2) + _wallThickness / 2
+
+	goto "PlaceWall"
+
+#PlaceWall
+
+	_direction = (_direction + _rotation) % 360
+	_alignDirection = (_alignDirection + _rotation) % 360
+
+	_wall SetPos [(_position Select 0) + _offsetX,(_position Select 1) + _offsetY,_position Select 2]
+	_wall SetDir _alignDirection

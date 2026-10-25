@@ -1,0 +1,204 @@
+;Last modified 12/31/3
+private ["_westVote","_eastVote","_playerVotes","_westTeam","_eastTeam","_currentVote"]
+
+;OFP bug?  If variables are not given a value in advance the call statement doesn't properly assign them one.
+_westTeam = ObjNull
+_eastTeam = ObjNull
+_westVote = ObjNull
+_eastVote = ObjNull
+_playerVotes = 0
+_currentVote = 0
+
+toggleVote = -1
+_totalVotes = Count voteVariables
+_totalTeams = Count teamDesignations
+_votes = []
+_votesOn = []
+_playerVotesOn = []
+
+_count = 0
+
+;Add the data that is stored in the entry.
+#AddVote
+
+	_votes = _votes + [0]
+	_votesOn = _votesOn + [false]
+	_playerVotesOn = _playerVotesOn + [false]
+	_count = _count  + 1
+	? (_count < _totalVotes):goto "AddVote"
+
+@ !(dialog)
+
+_menu = CreateDialog Format ["VoteMenu%1",GUISkin]
+
+_return = "Update"
+goto "GetTeamVote"
+
+#Update
+~0.5
+
+	_totalPlayers = Count westPlayerGroups + Count eastPlayerGroups
+
+	? !(Alive player) || (Side player != west && Side player != east):Exit
+	? !(dialog):Exit
+	? (CtrlText IDCMenuTitle != Localize "STRVOTEMENU"):Exit
+	? (toggleVote >= 0):_vote = toggleVote;goto "ToggleVote"
+
+	goto "UpdateVotes"
+
+#ToggleVote
+
+	_playerVotesOn Set [toggleVote,!(_playerVotesOn Select toggleVote)]
+
+	;Assemble player vote bit array to value.
+	_count = 0
+	_value = 0
+
+	#AddBit
+
+		? (_playerVotesOn Select _count):_value = _value + (2 ^ _count)
+		_count = _count + 1
+		? (_count < _totalVotes):goto "AddBit"
+
+	Call Format["%1 = %2;PublicVariable ""%1""",_playerVoteName,_value]
+	toggleVote = -1
+	goto "UpdateVotes"
+
+#UpdateMenu
+
+	_count = 0
+
+	;Add the data that is stored in the entry.
+	#SetVoteInfo
+
+		;Set current total votes.
+		CtrlSetText [IDCVoteOn + _count,Format["%1",_votes Select _count]]
+		CtrlSetText [IDCVoteOff + _count,Format["%1",_totalPlayers - (_votes Select _count)]]
+
+		;Display vote option and it's current voted status.
+		_optionText = Format["(%1)",Localize "STROFF"]
+		? (_votesOn Select _count):_optionText = Format["(%1) ",Localize "STRON"]
+
+		CtrlSetText [IDCVoteOption + _count,Format["%1 %2",_optionText,voteText Select _count]]
+
+		;Display player's vote.
+		CtrlSetText [IDCVoteToggle + _count,Localize "STROFF"]
+		? (_playerVotesOn Select _count):CtrlSetText [IDCVoteToggle + _count,Localize "STRON"]
+
+		SetNextVoteInfo
+
+			_count = _count  + 1
+			? (_count < _totalVotes):goto "SetVoteInfo"
+
+	goto "Update"
+
+#UpdateVotes
+
+	#ClearVotes
+
+		_count = 0
+
+		#ClearVote
+
+			_votes Set [_count,0]
+			_playerVotesOn Set [_count,false]
+			_count = _count + 1
+			? (_count < _totalVotes):goto "ClearVote"
+
+	_count = 0
+	_bool = false
+	_voteList = _votes
+
+	;Get all players' votes.
+	#GetVotes
+
+		Call Format["_westVote = west%1Votes",teamMapDesignations Select _count]
+		Call Format["_westTeam = west%1Team",teamMapDesignations Select _count]
+		Call Format["_eastVote = east%1Votes",teamMapDesignations Select _count]
+		Call Format["_eastTeam = east%1Team",teamMapDesignations Select _count]
+
+		#GetWestVotes
+
+			;Only count votes for player teams.
+			? !(_westTeam In westPlayerGroups):goto "GetEastVotes"
+
+			_value = _westVote
+			_return = "GetEastVotes"
+			goto "DecodeBits"
+
+		#GetEastVotes
+
+			;Only count votes for player teams.
+			? !(_eastTeam In eastPlayerGroups):goto "GetNextVotes"
+
+			_value = _eastVote
+			_return = "GetNextVotes"
+			goto "DecodeBits"
+
+		#GetNextVotes
+
+			_count = _count + 1
+			? (_count < _totalTeams):goto "GetVotes"
+
+	;Get current option settings.
+	#GetOptions
+
+		_count = 0
+
+		#GetOption
+
+			Call Format["_currentVote = %1",voteVariables Select _count]
+			_votesOn Set [_count,_currentVote]
+			_count = _count + 1
+			? (_count < _totalVotes):goto "GetOption"
+
+	;Get player's current votes.
+	Call Format["_playerVotes = %1",_playerVoteName]
+	_bool = true
+	_value = _playerVotes
+	_voteList = _playerVotesOn
+	_return = "UpdateMenu"
+	goto "DecodeBits"
+
+	#GetPlayerVotes
+
+;		_playerVotesOn = _voteList
+
+	goto "UpdateMenu"
+
+;Take value and decode it's individual bits.
+#DecodeBits
+
+	;n - 1
+	_bitCount = _totalVotes - 1
+
+	;Get current most significant bit and then remove it from the value.
+	#DecodeBit
+
+		_bitMask = 2 ^ _bitCount
+
+		? !(_bool) && (_value >= _bitMask):_value = _value - _bitMask;_voteList Set [_bitCount,(_voteList Select _bitCount) + 1]
+		? (_bool) && (_value >= _bitMask):_value = _value - _bitMask;_voteList Set [_bitCount,true]
+
+		_bitCount = _bitCount - 1
+		? (_bitCount >= 0):goto "DecodeBit"
+
+		goto _return
+
+;Get team vote variable name (example westAlphaVote).
+#GetTeamVote
+
+	_count = 0
+
+	#CheckTeamVote
+
+		Call Format["_westTeam = West%1Team",teamMapDesignations Select _count]
+		Call Format["_eastTeam = East%1Team",teamMapDesignations Select _count]
+
+		? (Group player == _westTeam):_playerVoteName = Format["west%1Votes",teamMapDesignations Select _count];goto _return
+		? (Group player == _eastTeam):_playerVoteName = Format["east%1Votes",teamMapDesignations Select _count];goto _return
+
+		_count = _count + 1
+		? (_count < _totalTeams):goto "CheckTeamVote"
+
+	goto _return

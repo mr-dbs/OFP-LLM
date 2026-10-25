@@ -1,0 +1,32 @@
+;Last modified 8/27/3
+
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+
+_count = 0
+_workingVehicles = 0
+_workingSalvagers = 0
+
+? (_side == west):_totalVehicles = Count westVehicles;_list = westVehicles
+? (_side == east):_totalVehicles = Count eastVehicles;_list = eastVehicles
+
+#CountVehicles
+
+	_vehicle = _list Select _count
+	_driver = Driver _vehicle
+	_count = _count + 1
+
+	? (IsNull _vehicle) || (GetDammage _vehicle >= 1):goto "CountNextVehicle"
+	? (!IsNull _vehicle) && (GetDammage _vehicle < 1):_workingVehicles = _workingVehicles + 1
+
+	? (_vehicle In westSalvageTrucks) && !(IsNull _driver) && !(Group _driver In westGroups):_workingSalvagers = _workingSalvagers + 1
+	? (_vehicle In eastSalvageTrucks) && !(IsNull _driver) && !(Group _driver In eastGroups):_workingSalvagers = _workingSalvagers + 1
+
+	#CountNextVehicle
+	
+		? (_count < _totalVehicles):goto "CountVehicles"
+
+;Post results and make server free for another vehicle count request.
+? (_side == west):totalWestVehicles = _workingVehicles;PublicVariable "totalWestVehicles";totalWestSalvagers = _workingSalvagers;PublicVariable "totalWestSalvagers";countWestVehicles = false;PublicVariable "countWestVehicles"
+? (_side == east):totalEastVehicles = _workingVehicles;PublicVariable "totalEastVehicles";totalEastSalvagers = _workingSalvagers;PublicVariable "totalEastSalvagers";countEastVehicles = false;PublicVariable "countEastVehicles"

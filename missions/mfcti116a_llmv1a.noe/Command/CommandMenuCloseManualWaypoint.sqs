@@ -1,0 +1,35 @@
+;Last modified 3/30/2
+
+;_unit = _this Select 0
+_unit = player
+_side = Side _unit
+
+;Toggle between an open and closed command menu.
+redrawCommandActions = true
+commandManualWaypointMenu = false
+
+_position = [commandWaypointColumn * 1280 + 640,(9 - commandWaypointRow) * 1280 + 640,0]
+
+? (_side == east):Goto "SetEast"
+
+#SetWest
+
+	;Wait for server to process any other waypoint requests.
+	@ (!westSetPlayerWaypoint)
+
+	westPlayerWaypointPlayer = _unit;PublicVariable "westPlayerWaypointPlayer"
+	westPlayerWaypointX = _position Select 0;PublicVariable "westPlayerWaypointX"
+	westPlayerWaypointY = _position Select 1;PublicVariable "westPlayerWaypointY"
+	westSetPlayerWaypoint = true;PublicVariable "westSetPlayerWaypoint"
+
+	Exit
+
+#SetEast
+
+	;Wait for server to process any other waypoint requests.
+	@ (!eastSetPlayerWaypoint)
+
+	eastPlayerWaypointPlayer = _unit;PublicVariable "eastPlayerWaypointPlayer"
+	eastPlayerWaypointX = _position Select 0;PublicVariable "eastPlayerWaypointX"
+	eastPlayerWaypointY = _position Select 1;PublicVariable "eastPlayerWaypointY"
+	eastSetPlayerWaypoint = true;PublicVariable "eastSetPlayerWaypoint"

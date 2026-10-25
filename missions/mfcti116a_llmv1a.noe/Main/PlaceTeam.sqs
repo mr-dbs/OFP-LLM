@@ -1,0 +1,36 @@
+;Last modified 2/13/4
+;Place unit on player's system.
+
+_unit = _this Select 0
+_group = Group _unit
+_side = Side _unit
+_x = 0
+
+;Wait until starting locations have been selected.
+@ (!(IsNull westStartingLocation) && !(IsNull eastStartingLocation))
+
+? (_side != east) && (_side != west):Exit
+? (_side == west):_destination = GetPos westStartingLocation;_mhq = WestMobileHQ
+? (_side == east):_destination = GetPos eastStartingLocation;_mhq = EastMobileHQ
+
+? (_group == WestAlphaTeam) || (_group == EastAlphaTeam):_x = 15
+? (_group == WestBravoTeam) || (_group == EastBravoTeam):_x = 20
+? (_group == WestCharlieTeam) || (_group == EastCharlieTeam):_x = 25
+? (_group == WestDeltaTeam) || (_group == EastDeltaTeam):_x = 30
+? (_group == WestEchoTeam) || (_group == EastEchoTeam):_x = 35
+? (_group == WestFoxtrotTeam) || (_group == EastFoxtrotTeam):_x = 40
+? (_group == WestGolfTeam) || (_group == EastGolfTeam):_x = 45
+? (_group == WestHotelTeam) || (_group == EastHotelTeam):_x = 50
+
+_unit SetPos [(_destination Select 0) + _x,_destination Select 1,0]
+
+;Fix for lagged players at beginning of game.  Attempt to place them at proper starting location.
+#Update
+~5
+
+	_destination = GetPos _mhq
+
+	? (_unit Distance _mhq < 250) || !(Alive _unit):Exit
+
+	_unit SetPos [(_destination Select 0) + _x + 10,_destination Select 1,0]
+	goto "Update"

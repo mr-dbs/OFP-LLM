@@ -1,0 +1,14 @@
+;DBS Arsenal - adds the Arsenal action to a player body. Removes it when that body dies or is swapped.
+;Usage: [unit] Exec "DBSArsenal\AddAction.sqs"
+
+_unit = _this Select 0
+
+@ (Format ["%1",dbsArsInitDone] == "true")
+? not (Alive _unit):Exit
+
+_id = _unit AddAction ["Arsenal","DBSArsenal\Open.sqs"]
+
+#Update
+~1
+? not (Alive _unit):_unit RemoveAction _id;Exit
+goto "Update"

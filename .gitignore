@@ -1,0 +1,10 @@
+# Left out of the GitHub backup
+*.DMP
+*.dmp
+logs/
+backup/
+pack*/
+__pycache__/
+*.pyc
+*.zip
+*.rar

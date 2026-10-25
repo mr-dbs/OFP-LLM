@@ -1,0 +1,66 @@
+;Last modified 4/27/3
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+
+? (_side == east):goto "AddToEast"
+
+#AddToWest
+
+	? (addWestResourcesToTeam == groupCommander):westResources = westResources + addWestResourcesToTeamAmount;PublicVariable "westResources"
+	? (addWestResourcesToTeam == groupAlpha):westAlphaResources = westAlphaResources + addWestResourcesToTeamAmount;PublicVariable "westAlphaResources"
+	? (addWestResourcesToTeam == groupBravo):westBravoResources = westBravoResources + addWestResourcesToTeamAmount;PublicVariable "westBravoResources"
+	? (addWestResourcesToTeam == groupCharlie):westCharlieResources = westCharlieResources + addWestResourcesToTeamAmount;PublicVariable "westCharlieResources"
+	? (addWestResourcesToTeam == groupDelta):westDeltaResources = westDeltaResources + addWestResourcesToTeamAmount;PublicVariable "westDeltaResources"
+	? (addWestResourcesToTeam == groupEcho):westEchoResources = westEchoResources + addWestResourcesToTeamAmount;PublicVariable "westEchoResources"
+	? (addWestResourcesToTeam == groupFoxtrot):westFoxtrotResources = westFoxtrotResources + addWestResourcesToTeamAmount;PublicVariable "westFoxtrotResources"
+	? (addWestResourcesToTeam == groupGolf):westGolfResources = westGolfResources + addWestResourcesToTeamAmount;PublicVariable "westGolfResources"
+	? (addWestResourcesToTeam == groupHotel):westHotelResources = westHotelResources + addWestResourcesToTeamAmount;PublicVariable "westHotelResources"
+
+	? (addWestResourcesFromTeam >= 0):goto "AddFromWestTeam"
+
+	goto "ClearWest"
+
+	#AddFromWestTeam
+
+		[westGroups Select addWestResourcesFromTeam,addWestResourcesToTeamAmount] Exec "Main\SubtractTeamResources.sqs"
+
+#ClearWest
+~0.025
+
+	addWestResourcesToTeamAmount = 0;PublicVariable "addWestResourcesToTeamAmount"
+	addWestResourcesFromTeam = -1;PublicVariable "addWestResourcesFromTeam"
+	addWestResourcesToTeam = -1;PublicVariable "addWestResourcesToTeam"
+
+	Exit
+
+#AddToEast
+
+	? (addEastResourcesToTeam == groupCommander):eastResources = eastResources + addEastResourcesToTeamAmount;PublicVariable "eastResources"
+	? (addEastResourcesToTeam == groupAlpha):eastAlphaResources = eastAlphaResources + addEastResourcesToTeamAmount;PublicVariable "eastAlphaResources"
+	? (addEastResourcesToTeam == groupBravo):eastBravoResources = eastBravoResources + addEastResourcesToTeamAmount;PublicVariable "eastBravoResources"
+	? (addEastResourcesToTeam == groupCharlie):eastCharlieResources = eastCharlieResources + addEastResourcesToTeamAmount;PublicVariable "eastCharlieResources"
+	? (addEastResourcesToTeam == groupDelta):eastDeltaResources = eastDeltaResources + addEastResourcesToTeamAmount;PublicVariable "eastDeltaResources"
+	? (addEastResourcesToTeam == groupEcho):eastEchoResources = eastEchoResources + addEastResourcesToTeamAmount;PublicVariable "eastEchoResources"
+	? (addEastResourcesToTeam == groupFoxtrot):eastFoxtrotResources = eastFoxtrotResources + addEastResourcesToTeamAmount;PublicVariable "eastFoxtrotResources"
+	? (addEastResourcesToTeam == groupGolf):eastGolfResources = eastGolfResources + addEastResourcesToTeamAmount;PublicVariable "eastGolfResources"
+	? (addEastResourcesToTeam == groupHotel):eastHotelResources = eastHotelResources + addEastResourcesToTeamAmount;PublicVariable "eastHotelResources"
+
+	? (addEastResourcesFromTeam >= 0):goto "AddFromEastTeam"
+
+	goto "ClearEast"
+
+	#AddFromEastTeam
+
+		[eastGroups Select addEastResourcesFromTeam,addEastResourcesToTeamAmount] Exec "Main\SubtractTeamResources.sqs"
+
+#ClearEast
+~0.025
+
+	addEastResourcesToTeam = -1;PublicVariable "addEastResourcesToTeam"
+	addEastResourcesFromTeam = -1;PublicVariable "addEastResourcesFromTeam"
+	addEastResourcesToTeamAmount = 0;PublicVariable "addEastResourcesToTeamAmount"
+
+	Exit

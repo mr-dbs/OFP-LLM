@@ -1,0 +1,101 @@
+;Last modified 2/19/4
+
+_unit = _this Select 0
+_destination = _this Select 1
+_direction = _this Select 2
+_side = Side _unit
+
+;Exit if side does not have enough resources to build depot.
+? (_side == east):goto "CreateEastUnit"
+
+#CreateWestUnit
+
+	;Create depot.
+	_buildingName = "Houseammostore2"
+	_ammoBox = "ReammoBoxWest"
+	_ammoBox1 = "HeavyReammoBoxWest"
+	_ammoBox2 = "AmmoBoxAddW"
+	
+	? !(publicServer):_buildingName = "MFCTI116WestAmmoDepot";_ammoBox = "MFCTI116WestAmmoCrate";_ammoBox1 = "MFCTI116WestHeavyAmmoCrate";_ammoBox2 = "MFCTI116WestEquipmentCrate"
+
+	_depot = _buildingName CreateVehicle _destination
+	_depot SetDir _direction
+	_depot SetPos _destination
+	_destination = [(_destination Select 0)+((sin _direction)*0.5),(_destination Select 1)+((cos _direction)*.5),(_destination Select 2)] 
+	_depot SetPos _destination
+
+	;Add it to the list of factories & increment the total count.
+	westAmmoDepot = westAmmoDepot + [_depot]
+	westAmmoDepotDamage = westAmmoDepotDamage + [500]
+	westTempBuildingList = westTempBuildingList + [_depot]
+	totalWestAmmoDepots = totalWestAmmoDepots + 1;PublicVariable "totalWestAmmoDepots"
+
+	;Send the new building to other players.
+	? (publicServer):westBuildingBuiltMP = _depot;PublicVariable "westBuildingBuiltMP"
+	? (publicServer):westBuildingBuiltTypeMP = ammoDepotType;PublicVariable "westBuildingBuiltTypeMP"
+
+	westLastPlayerStructure = _depot
+
+	Goto "SetDepot"
+
+#CreateEastUnit
+
+	;Create depot.
+	_buildingName = "Houseammostore2"
+	_ammoBox = "ReammoBoxEast"
+	_ammoBox1 = "HeavyReammoBoxEast"
+	_ammoBox2 = "AmmoBoxAddE"
+
+	? !(publicServer):_buildingName = "MFCTI116EastAmmoDepot";_ammoBox = "MFCTI116EastAmmoCrate";_ammoBox1 = "MFCTI116EastHeavyAmmoCrate";_ammoBox2 = "MFCTI116EastEquipmentCrate"
+
+	_depot = _buildingName CreateVehicle _destination
+	_depot SetDir _direction
+	_depot SetPos _destination
+	_destination =[(_destination Select 0)+((sin _direction)*0.5),(_destination Select 1)+((cos _direction)*.5),(_destination Select 2)] 
+	_depot SetPos _destination
+
+	;Add it to the list of factories & increment the total count.
+	eastAmmoDepot = eastAmmoDepot + [_depot]
+	eastAmmoDepotDamage = eastAmmoDepotDamage + [500]
+	eastTempBuildingList = eastTempBuildingList + [_depot]
+	totalEastAmmoDepots = totalEastAmmoDepots + 1;PublicVariable "totalEastAmmoDepots"
+
+	;Send the new building to other players.
+	? (publicServer):eastBuildingBuiltMP = _depot;PublicVariable "eastBuildingBuiltMP"
+	? (publicServer):eastBuildingBuiltTypeMP = ammoDepotType;PublicVariable "eastBuildingBuiltTypeMP"
+
+	eastLastPlayerStructure = _depot
+
+#SetDepot
+
+	? (_side == west):westPlayerMessage = messageAmmoPlaced;PublicVariable "westPlayerMessage";westPlayerMessagePlayer = _unit;PublicVariable "westPlayerMessagePlayer"
+	? (_side == east):eastPlayerMessage = messageAmmoPlaced;PublicVariable "eastPlayerMessage";eastPlayerMessagePlayer = _unit;PublicVariable "eastPlayerMessagePlayer"
+
+	[_depot,_buildingName,_destination,_direction] exec "Main\AlignBuildingDirection.sqs"
+	[_side,_depot,_buildingName,ammoDepotType,false] Exec "Main\ResetBuilding.sqs"
+
+	_depot SetDammage 1
+
+	@ (GetDammage _depot != 1)
+
+	;If depot was undone then do not display construction complete message.
+	? (IsNull _depot):Exit
+
+	;Have the commander transmit a structure complete message to everyone on his/her side.
+	? (_side == west):westMessage = messageAmmoConstructed;PublicVariable "westMessage";westPlayerMessageGroupFrom = groupCommander;PublicVariable "westPlayerMessageGroupFrom"
+	? (_side == east):eastMessage = messageAmmoConstructed;PublicVariable "eastMessage";westPlayerMessageGroupFrom = groupCommander;PublicVariable "westPlayerMessageGroupFrom"
+
+	_crate1 = _ammoBox CreateVehicle GetPos player
+	_crate2 = _ammoBox1 CreateVehicle GetPos player
+	_crate3 = _ammoBox2 CreateVehicle GetPos player
+
+	_crate1 SetDir _direction
+	_crate1 SetPos _destination
+	_crate2 SetDir _direction
+	_crate2 SetPos _destination
+	_crate3 SetDir _direction
+	_crate3 SetPos _destination
+
+	[_crate1,_ammoBox,_destination,_direction] exec "Main\AlignBuildingDirection.sqs"
+	[_crate2,_ammoBox1,_destination,_direction] exec "Main\AlignBuildingDirection.sqs"
+	[_crate3,_ammoBox2,_destination,_direction] exec "Main\AlignBuildingDirection.sqs"

@@ -1,0 +1,24 @@
+;DBS Arsenal - apply one preset to every AI in the player's group (gear, then skin).
+;Usage: dbsArsSquadDone = false;[presetIndex] Exec "DBSArsenal\ApplySquad.sqs"
+
+_p = dbsArsPresets Select (_this Select 0)
+_skin = _p Select 1
+_w = _p Select 2
+_m = _p Select 3
+_list = (Units Group player) - [player]
+_i = 0
+
+#Next
+? (_i >= Count _list):goto "Done"
+_u = _list Select _i
+_i = _i + 1
+? not (Alive _u):goto "Next"
+[_u,_w,_m] call dbsArsFnApplyGear
+? (Vehicle _u != _u) or (TypeOf _u == _skin):goto "Next"
+dbsArsSkinDone = false
+[_u,_skin] Exec "DBSArsenal\SetSkin.sqs"
+@ (dbsArsSkinDone)
+goto "Next"
+
+#Done
+dbsArsSquadDone = true

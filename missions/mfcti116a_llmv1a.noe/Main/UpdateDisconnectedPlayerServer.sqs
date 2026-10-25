@@ -1,0 +1,162 @@
+;Last modified 5/5/3
+
+;Only run this script on the server.
+? !(Local LocalServerObject):Exit
+
+disconnectedWestCommander = false
+disconnectedEastCommander = false
+
+#Update
+~30
+
+;Evaluate which teams are player controlled and make the data public.
+? (westCommanderPlayer)&&(Local Leader WestCommanderTeam)&&(Leader WestCommanderTeam != player):westCommanderPlayer = false;PublicVariable "westCommanderPlayer";westCommanderPoints = 0;PublicVariable "westCommanderPoints"
+? (westAlphaPlayer)&&(Local Leader WestAlphaTeam)&&(Leader WestAlphaTeam != player):westAlphaPlayer = false;PublicVariable "westAlphaPlayer";westAlphaPoints = 0;PublicVariable "westAlphaPoints"
+? (westBravoPlayer)&&(Local Leader WestBravoTeam)&&(Leader WestBravoTeam != player):westBravoPlayer = false;PublicVariable "westBravoPlayer";westBravoPoints = 0;PublicVariable "westBravoPoints"
+? (westCharliePlayer)&&(Local Leader WestCharlieTeam)&&(Leader WestCharlieTeam != player):westCharliePlayer = false;PublicVariable "westCharliePlayer";westCharliePoints = 0;PublicVariable "westCharliePoints"
+? (westDeltaPlayer)&&(Local Leader WestDeltaTeam)&&(Leader WestDeltaTeam != player):westDeltaPlayer = false;PublicVariable "westDeltaPlayer";westDeltaPoints = 0;PublicVariable "westDeltaPoints"
+? (westEchoPlayer)&&(Local Leader WestEchoTeam)&&(Leader WestEchoTeam != player):westEchoPlayer = false;PublicVariable "westEchoPlayer";westEchoPoints = 0;PublicVariable "westEchoPoints"
+? (westFoxtrotPlayer)&&(Local Leader WestFoxtrotTeam)&&(Leader WestFoxtrotTeam != player):westFoxtrotPlayer = false;PublicVariable "westFoxtrotPlayer";westFoxtrotPoints = 0;PublicVariable "westFoxtrotPoints"
+? (westGolfPlayer)&&(Local Leader WestGolfTeam)&&(Leader WestGolfTeam != player):westGolfPlayer = false;PublicVariable "westGolfPlayer";westGolfPoints = 0;PublicVariable "westGolfPoints"
+? (westHotelPlayer)&&(Local Leader WestHotelTeam)&&(Leader WestHotelTeam != player):westHotelPlayer = false;PublicVariable "westHotelPlayer";westHotelPoints = 0;PublicVariable "westHotelPoints"
+
+
+? (eastCommanderPlayer)&&(Local Leader EastCommanderTeam)&&(Leader EastCommanderTeam != player):eastCommanderPlayer = false;PublicVariable "eastCommanderPlayer";eastCommanderPoints = 0;PublicVariable "eastCommanderPoints"
+? (eastAlphaPlayer)&&(Local Leader EastAlphaTeam)&&(Leader EastAlphaTeam != player):eastAlphaPlayer = false;PublicVariable "eastAlphaPlayer";eastAlphaPoints = 0;PublicVariable "eastAlphaPoints"
+? (eastBravoPlayer)&&(Local Leader EastBravoTeam)&&(Leader EastBravoTeam != player):eastBravoPlayer = false;PublicVariable "eastBravoPlayer";eastBravoPoints = 0;PublicVariable "eastBravoPoints"
+? (eastCharliePlayer)&&(Local Leader EastCharlieTeam)&&(Leader EastCharlieTeam != player):eastCharliePlayer = false;PublicVariable "eastCharliePlayer";eastCharliePoints = 0;PublicVariable "eastCharliePoints"
+? (eastDeltaPlayer)&&(Local Leader EastDeltaTeam)&&(Leader EastDeltaTeam != player):eastDeltaPlayer = false;PublicVariable "eastDeltaPlayer";eastDeltaPoints = 0;PublicVariable "eastDeltaPoints"
+? (eastEchoPlayer)&&(Local Leader EastEchoTeam)&&(Leader EastEchoTeam != player):eastEchoPlayer = false;PublicVariable "eastEchoPlayer";eastEchoPoints = 0;PublicVariable "eastEchoPoints"
+? (eastFoxtrotPlayer)&&(Local Leader EastFoxtrotTeam)&&(Leader EastFoxtrotTeam != player):eastFoxtrotPlayer = false;PublicVariable "eastFoxtrotPlayer";eastFoxtrotPoints = 0;PublicVariable "eastFoxtrotPoints"
+? (eastGolfPlayer)&&(Local Leader EastGolfTeam)&&(Leader EastGolfTeam != player):eastGolfPlayer = false;PublicVariable "eastGolfPlayer";eastGolfPoints = 0;PublicVariable "eastGolfPoints"
+? (eastHotelPlayer)&&(Local Leader EastHotelTeam)&&(Leader EastHotelTeam != player):eastHotelPlayer = false;PublicVariable "eastHotelPlayer";eastHotelPoints = 0;PublicVariable "eastHotelPoints"
+
+#CountWestPlayers
+
+_count = 0
+_totalGroups = Count westPlayerGroups
+
+? (_totalGroups < 1):goto "CountEastPlayers"
+
+;Update server list of players.
+#CountWestPlayerGroups
+
+	_group = westPlayerGroups Select _count
+	_count = _count + 1
+
+	;If a player is local to the server and that player isn't playing on server then remove him/her from the player group list, give control to the AI, and restart this check.
+	? (Leader _group != Leader WestCommanderTeam)&&(Local Leader _group)&&(Leader _group != player):goto "WestPlayerDisconnected"
+	? (Leader _group == Leader WestCommanderTeam)&&(Local Leader _group)&&(Leader _group != player):goto "WestCommanderDisconnected"
+	? (_count < _totalGroups):goto "CountWestPlayerGroups"
+
+	;Check for any east player disconnects.
+	goto "CountEastPlayers"
+
+#WestPlayerDisconnected
+
+	;Remove player from the server's player list.
+	westPlayerGroups = westPlayerGroups - [_group]
+
+	;Update player count.
+	_groups = westPlayerGroups - [WestCommanderTeam]
+	westPlayers = Count _groups;PublicVariable "westPlayers"
+
+	;Assign AI to player's position.
+	[Leader _group,west] Exec "Main\UpdateAI.sqs"
+
+	;Notify players of the event.
+	westMessage = messagePlayerDisconnected;PublicVariable "westMessage"
+	westPlayerMessageGroupFrom = groupCommander;PublicVariable "westPlayerMessageGroupFrom"
+
+	;Start the player count over now that the list has been modified.
+	goto "CountWestPlayers"
+
+#WestCommanderDisconnected
+
+	disconnectedWestCommander = true
+
+	;Remove commander from the server's player list.
+	westPlayerGroups = westPlayerGroups - [_group]
+
+	;Update player count.
+	_groups = westPlayerGroups - [WestCommanderTeam]
+	westPlayers = Count _groups;PublicVariable "westPlayers"
+
+	; (Count westPlayerGroups > 0):DeleteVehicle WestCommander;WestCommander = Leader (westPlayerGroups Select 0);PublicVariable "WestCommander";WestCommanderTeam = (westPlayerGroups Select 0);PublicVariable "WestCommanderTeam";[Leader (westPlayerGroups Select 0)] Exec "Main\InitCommander.sqs";goto "CountWestPlayers"
+
+	? (WestMobileHQ Distance westStartingLocation > 50):westStartingLocation = WestMobileHQ;PublicVariable "westStartingLocation"
+
+	;Assign AI commander to player's position.
+	[west] Exec "Main\UpdateCommanderAI.sqs"
+
+	;Notify players of the event.
+	westMessage = messageCommanderDisconnected;PublicVariable "westMessage"
+	westPlayerMessageGroupFrom = groupCommander;PublicVariable "westPlayerMessageGroupFrom"
+	
+	;Start the player count over now that the list has been modified.
+	goto "CountWestPlayers"
+
+#CountEastPlayers
+
+_count = 0
+_totalGroups = Count eastPlayerGroups
+
+? (_totalGroups < 1):goto "Update"
+
+;Update server list of players.
+#CountEastPlayerGroups
+
+	_group = eastPlayerGroups Select _count
+	_count = _count + 1
+
+	;If a player is local to the server and that player isn't playing on server then remove him/her from the player group list, give control to the AI, and restart this check.
+	? (Leader _group != Leader EastCommanderTeam)&&(Local Leader _group)&&(Leader _group != player):goto "EastPlayerDisconnected"
+	? (Leader _group == Leader EastCommanderTeam)&&(Local Leader _group)&&(Leader _group != player):goto "EastCommanderDisconnected"
+	? (_count < _totalGroups):goto "CountEastPlayerGroups"
+
+	_groups = eastPlayerGroups - [EastCommanderTeam]
+	eastPlayers = Count _groups;PublicVariable "eastPlayers"
+
+	goto "Update"
+
+#EastPlayerDisconnected
+
+	;Remove player from the server's player list.
+	eastPlayerGroups = eastPlayerGroups - [_group]
+
+	;Update player count.
+	_groups = eastPlayerGroups - [EastCommanderTeam]
+	eastPlayers = Count _groups;PublicVariable "eastPlayers"
+
+	;Assign AI to player's position.
+	[Leader _group,east] Exec "Main\UpdateAI.sqs"
+
+	;Notify players of the event.
+	eastMessage = messagePlayerDisconnected;PublicVariable "eastMessage"
+	eastPlayerMessageGroupFrom = groupCommander;PublicVariable "eastPlayerMessageGroupFrom"
+
+	;Start the player count over now that the list has been modified.
+	goto "CountEastPlayers"
+
+#EastCommanderDisconnected
+
+	disconnectedEastCommander = true
+
+	;Remove commander from the server's player list.
+	eastPlayerGroups = eastPlayerGroups - [_group]
+
+	;Update player count.
+	_groups = eastPlayerGroups - [EastCommanderTeam]
+	eastPlayers = Count _groups;PublicVariable "eastPlayers"
+
+	? (EastMobileHQ Distance eastStartingLocation > 50):eastStartingLocation = EastMobileHQ;PublicVariable "eastStartingLocation"
+
+	;Assign AI commander to player's position.
+	[east] Exec "Main\UpdateCommanderAI.sqs"
+
+	;Notify players of the event.
+	eastMessage = messageCommanderDisconnected;PublicVariable "eastMessage"
+	eastPlayerMessageGroupFrom = groupCommander;PublicVariable "eastPlayerMessageGroupFrom"
+	
+	;Start the player count over now that the list has been modified.
+	goto "CountEastPlayers"

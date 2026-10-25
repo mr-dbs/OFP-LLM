@@ -1,0 +1,63 @@
+;Last modified 9/19/3
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_totalTowns = Count towns
+
+#Update
+~60
+
+	_count = 0
+	_value = 0
+	_westValue = 0
+	_eastValue = 0
+
+	#CountResources
+
+		;Minimum value a side receives for an owned town.
+		_value = (townValues Select _count) * unoccupiedTownPercentage
+
+		;If No Town Occupation is set give max resources for an owned town.
+		? (noTownOccupation):_value = townValues Select _count;goto "GetValueMod"
+
+		;If a side occupies the area and the other side is not present then add the full value.
+		? (townSides Select _count == "West") && (townAreaWestSides Select _count) && !(townAreaEastSides Select _count):_value = townValues Select _count
+		? (townSides Select _count == "East") && (townAreaEastSides Select _count) && !(townAreaWestSides Select _count):_value = townValues Select _count
+
+		#GetValueMod
+
+		_valueMod = 0
+
+		? (townSides Select _count == "West") && (westPlayers > 1):_valueMod = _valueMod + westPlayers * .1
+		? (townSides Select _count == "East") && (eastPlayers > 1):_valueMod = _valueMod + eastPlayers * .1
+
+		_valueMod = _valueMod / 2 + 1
+		_value = _value * _valueMod
+
+		? (fastGame):_value = _value * fastGameMultiplier
+		? (higherIncome):_value = _value * higherIncomeMultiplier
+
+		;If the flag is west then the town is owned by the west.  Add the income to the west.
+		? (townSides Select _count == "West"):_westValue = _westValue + _value
+		? (townSides Select _count == "East"):_eastValue = _eastValue + _value
+
+		_count = _count + 1
+
+		? (_count < _totalTowns):goto "CountResources"
+
+		_westAwardValue = _westValue * westPlayerAwardPercentage
+		_eastAwardValue = _eastValue * eastPlayerAwardPercentage
+		_westAwardValue = _westAwardValue - (_westAwardValue % 1)
+		_eastAwardValue = _eastAwardValue - (_eastAwardValue % 1)
+
+		_westValue = _westValue - _westAwardValue
+		_eastValue = _eastValue - _eastAwardValue
+
+		[west,_westAwardValue] Exec "Main\AddAwardResources.sqs"
+		[east,_eastAwardValue] Exec "Main\AddAwardResources.sqs"
+
+		[west,_westValue] Exec "Main\AddResources.sqs"
+		[east,_eastValue] Exec "Main\AddResources.sqs"
+
+		goto "Update"

@@ -1,0 +1,31 @@
+;Last modified 10/4/3
+
+_unit = _this Select 0
+_team = Group _unit
+_side = Side _team
+
+? (_side == east):goto "EastAccept"
+
+#WestAccept
+
+	? (totalWestStationaryMortars < 1) || !(westRequestFireMission):Exit
+
+	westFireMissionX = westRequestFireMissionX;PublicVariable "westFireMissionX"
+	westFireMissionY = westRequestFireMissionY;PublicVariable "westFireMissionY"
+	westFireMission = true;PublicVariable "westFireMission"
+
+	[west,groupCommander,messageFireMission,westFireMissionX,westFireMissionY] Exec "Main\SendSideMessage.sqs"
+
+	westRequestFireMission = false;PublicVariable "westFireMission"
+
+#EastAccept
+
+	? (totalEastStationaryMortars < 1) || !(eastRequestFireMission):Exit
+
+	eastFireMissionX = eastRequestFireMissionX;PublicVariable "eastFireMissionX"
+	eastFireMissionY = eastRequestFireMissionY;PublicVariable "eastFireMissionY"
+	eastFireMission = true;PublicVariable "eastFireMission"
+
+	[east,groupCommander,messageFireMission,eastFireMissionX,eastFireMissionY] Exec "Main\SendSideMessage.sqs"
+
+	eastRequestFireMission = false;PublicVariable "eastFireMission"

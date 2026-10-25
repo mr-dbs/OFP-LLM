@@ -1,0 +1,189 @@
+; LLM\Init.sqs (version 11)
+; Starts the link between this mission and the LLM relay. Server only.
+; Started from Main\UpdateServer.sqs once the server has finished setting up.
+
+; These are read by the stock commander and team scripts, so they must exist at once.
+llmWestControl = false
+llmEastControl = false
+
+; How the ground teams of a side the LLM commands fight (Main\UpdateIndependentAI.sqs). No effect on any other
+; team, and none on aircraft, which stay on "RED".
+; "YELLOW" = fire at will and keep formation.
+; "RED"    = the stock mission's setting: fire at will, every man for himself. Under it the game lets each
+;            man hide or go and attack on his own, and the team's order waits until every one of them is done.
+llmCombatMode = "YELLOW"
+
+; true  = the crew of a ground team leader's vehicle are never handed a target by the team leader, so the
+;         vehicle the leader rides in is never sent away to attack. It still fires at what it sees.
+;         The game cannot undo this for a man: whoever has once ridden with a leader keeps it for the game.
+; false = the stock behaviour.
+llmLeadObeys = true
+
+; The team the relay names as the mortar crew (team number 1 to 8, -1 for none; set by LLM\Report.sqs from the
+; relay's reply). That team buys no more men once it has llmCrewMax (Main\UpdateIndependentAI.sqs): two gunners
+; for the two mortars, the leader, one spare.
+llmWestCrew = -1
+llmEastCrew = -1
+llmCrewMax = 4
+
+; Rounds the side's mortars have fired this game (a "fired" handler on each mortar, added by LLM\Report.sqs).
+llmWestShots = 0
+llmEastShots = 0
+
+; The commander's guard (LLM\Report.sqs version 18): HE stations kept at the base besides the two mortars, and
+; at most this many soldiers the commander buys into his own team to man the guns (one per gun).
+llmBaseHE = 4
+llmGuardMax = 6
+
+? !(Local LocalServerObject) : Exit
+
+; ---------------------------------------------------------------------------
+; SETTINGS
+; ---------------------------------------------------------------------------
+
+; Which sides the relay handles: [east], [west] or [east, west].
+llmSides = [east]
+
+; 0 = observe only: the stock AI commander stays in command and nothing in the game changes.
+; 1 = command: the model sets each AI team's role and order on the sides listed above.
+llmMode = 0
+
+; Seconds between reports.
+llmCycleSeconds = 60
+
+; true = count who stands in each town's capture circle every llmRecountSeconds (see LLM\TownWatch.sqs).
+; false = the stock rule: a town changes hands only when its circle goes from empty to occupied.
+; This is a rule of the game, the same for both sides and for players; it is not part of the commander.
+; The mission's own trigger looks twice a second, so one second here misses little that only passes through.
+llmRecountTowns = true
+llmRecountSeconds = 1
+
+; ---------------------------------------------------------------------------
+
+; Version 11: test and play settings. LLM\TestStart.sqf, which run_trials.ps1 or a play launcher writes, may set
+;   llmTestSides = [east, west]          the sides the LLM commands in this game, instead of llmSides above
+;   llmTestFunds = [200000, 50000]       funds for each side, and for each of its teams, the same for both sides
+; An empty list, which is what the file holds outside trials, leaves the setting above or the mission's own funds.
+llmTestStart = []
+llmTestSides = []
+llmTestFunds = []
+Call loadFile "LLM\TestStart.sqf"
+? (count llmTestSides > 0) : llmSides = llmTestSides
+
+_s = 0
+
+#MarkSide
+
+	? (llmMode > 0) and ((llmSides select _s) == west) : llmWestControl = true
+	? (llmMode > 0) and ((llmSides select _s) == east) : llmEastControl = true
+	_s = _s + 1
+	? (_s < count llmSides) : goto "MarkSide"
+
+; Equal funds for both sides (version 11). The mission set its own funds just before this script started.
+? (count llmTestFunds != 2) : goto "FundsDone"
+westResources = llmTestFunds select 0; PublicVariable "westResources"
+eastResources = llmTestFunds select 0; PublicVariable "eastResources"
+_f = 1
+
+#TeamFunds
+
+	Call Format ["west%1Resources = llmTestFunds select 1; PublicVariable ""west%1Resources""; east%1Resources = llmTestFunds select 1; PublicVariable ""east%1Resources""", teamMapDesignations select _f]
+	_f = _f + 1
+	? (_f < count teamMapDesignations) : goto "TeamFunds"
+
+#FundsDone
+
+; Per team number, 0 to 8: where it has been sent, and the role, order and town last applied.
+_nowhere = [0, 0, 0]
+llmWestDest = [_nowhere, _nowhere, _nowhere, _nowhere, _nowhere, _nowhere, _nowhere, _nowhere, _nowhere]
+llmEastDest = [_nowhere, _nowhere, _nowhere, _nowhere, _nowhere, _nowhere, _nowhere, _nowhere, _nowhere]
+llmWestRole = [-1, -1, -1, -1, -1, -1, -1, -1, -1]
+llmEastRole = [-1, -1, -1, -1, -1, -1, -1, -1, -1]
+llmWestCode = [-1, -1, -1, -1, -1, -1, -1, -1, -1]
+llmEastCode = [-1, -1, -1, -1, -1, -1, -1, -1, -1]
+llmWestTown = [-1, -1, -1, -1, -1, -1, -1, -1, -1]
+llmEastTown = [-1, -1, -1, -1, -1, -1, -1, -1, -1]
+
+; Key terrain and landing zones placed in the editor: objects named kt1, kt2 ... and hlz1, hlz2 ...
+; Any of these names that exists in the mission is picked up; names that do not exist are skipped.
+; llmPoints becomes a list of [name, object].
+llmPoints = []
+_names = ["kt1","kt2","kt3","kt4","kt5","kt6","kt7","kt8","kt9","kt10","kt11","kt12","kt13","kt14","kt15","kt16","kt17","kt18","kt19","kt20","kt21","kt22","kt23","kt24","kt25","kt26","kt27","kt28","kt29","kt30"]
+_names = _names + ["hlz1","hlz2","hlz3","hlz4","hlz5","hlz6","hlz7","hlz8","hlz9","hlz10","hlz11","hlz12","hlz13","hlz14","hlz15","hlz16","hlz17","hlz18","hlz19","hlz20","hlz21","hlz22","hlz23","hlz24","hlz25","hlz26","hlz27","hlz28","hlz29","hlz30"]
+; How this game prints a name that was never set. Anything that prints differently exists.
+_unset = format ["%1", llmNameThatIsNeverSet]
+_obj = objNull
+_i = 0
+
+#FindPoint
+
+	_name = _names select _i
+	call format ["_obj = %1", _name]
+	? (format ["%1", _obj] != _unset) and (not (isNull _obj)) : llmPoints = llmPoints + [[_name, _obj]]
+	_obj = objNull
+	_i = _i + 1
+	? (_i < count _names) : goto "FindPoint"
+
+; Map-wide triggers that hold what each side has spotted in roughly the last 100 seconds.
+_centre = [6400, 6400, 0]
+
+llmSeenWestByEast = createTrigger ["EmptyDetector", _centre]
+llmSeenWestByEast setTriggerArea [20000, 20000, 0, true]
+llmSeenWestByEast setTriggerActivation ["WEST", "EAST D", true]
+
+llmSeenGuerByEast = createTrigger ["EmptyDetector", _centre]
+llmSeenGuerByEast setTriggerArea [20000, 20000, 0, true]
+llmSeenGuerByEast setTriggerActivation ["GUER", "EAST D", true]
+
+llmSeenEastByWest = createTrigger ["EmptyDetector", _centre]
+llmSeenEastByWest setTriggerArea [20000, 20000, 0, true]
+llmSeenEastByWest setTriggerActivation ["EAST", "WEST D", true]
+
+llmSeenGuerByWest = createTrigger ["EmptyDetector", _centre]
+llmSeenGuerByWest setTriggerArea [20000, 20000, 0, true]
+llmSeenGuerByWest setTriggerActivation ["GUER", "WEST D", true]
+
+; Lists filled in by event handlers between reports.
+llmEastDeaths = []
+llmEastKills = []
+llmEastTagged = []
+llmEastTracked = []
+llmWestDeaths = []
+llmWestKills = []
+llmWestTagged = []
+llmWestTracked = []
+
+; How many towns the recount has handed to West, East and the resistance. Sent with every report.
+llmRecounts = [0, 0, 0]
+
+; Does this game have the diagnostic commands llmUnitInfo and llmGroupInfo (engine patch apply_llm_diag.py)?
+; They are tried once, inside a Call. Without them the Call fails with one script error, which is harmless,
+; llmDiagProbe stays empty, and the report script never uses them.
+llmHasDiag = false
+llmDiagProbe = ""
+call "llmDiagProbe = llmUnitInfo objNull"
+? (llmDiagProbe != "") : llmHasDiag = true
+
+; Which of this project's engine changes does this game have (engine patch apply_llm_engine.py)?
+; 0 = none. 1 = the diagnostic commands. 2 = also the fix for a driver who is left in command of his vehicle
+; and still follows the driving order of the commander he lost. Asked the same way as above: inside a Call,
+; which fails harmlessly without the command.
+llmEngineLevel = 0
+? (llmHasDiag) : llmEngineLevel = 1
+llmEngineProbe = 0
+call "llmEngineProbe = llmEngineInfo 0"
+? (llmEngineProbe > 0) : llmEngineLevel = llmEngineProbe
+
+~10
+
+? (llmRecountTowns) : [] exec "LLM\TownWatch.sqs"
+
+_s = 0
+
+#StartSide
+
+	[llmSides select _s] exec "LLM\Report.sqs"
+	_s = _s + 1
+	? (_s < count llmSides) : goto "StartSide"
+
+exit

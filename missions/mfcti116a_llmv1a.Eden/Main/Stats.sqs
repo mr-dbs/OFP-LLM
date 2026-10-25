@@ -1,0 +1,1229 @@
+;Last modified 3/3/4
+;Coop version
+
+westGroups = [WestCommanderTeam,WestAlphaTeam,WestBravoTeam,WestCharlieTeam,WestDeltaTeam,WestEchoTeam,WestFoxtrotTeam,WestGolfTeam,WestHotelTeam]
+eastGroups = [EastCommanderTeam,EastAlphaTeam,EastBravoTeam,EastCharlieTeam,EastDeltaTeam,EastEchoTeam,EastFoxtrotTeam,EastGolfTeam,EastHotelTeam]
+
+;GUI
+;Command menu GUI components
+IDCCommandMenuTeamSelect		= 100
+IDCCommandMenuWPColumn			= 101
+IDCCommandMenuWPRow				= 102
+IDCCommandMenuPreciseWPColumn1	= 103
+IDCCommandMenuPreciseWPColumn2	= 104
+IDCCommandMenuPreciseWPRow1		= 105
+IDCCommandMenuPreciseWPRow2		= 106
+IDCCommandMenuSetWPToCurrent	= 107
+IDCCommandMenuMoveToWP			= 108
+IDCCommandMenuTakeTowns			= 109
+IDCCommandMenuDefendTowns		= 110
+IDCCommandMenuSearch			= 111
+IDCCommandMenuCommand			= 112
+IDCCommandMenuDisembark			= 113
+IDCCommandMenuEmbarkTransport	= 114
+IDCCommandMenuDisembarkTransport= 115
+IDCCommandMenuFireMission		= 116
+
+;Control Center menu GUI components
+IDCControlMenuInfo				= 131
+IDCControlMenuUpgradeSelect		= 132
+IDCControlMenuTeamSelect		= 133
+IDCControlMenuUnitSelect		= 134
+IDCControlMenuLightSelect		= 135
+IDCControlMenuHeavySelect		= 146
+IDCControlMenuAirSelect			= 147
+
+;Vehicle menu GUI components
+IDCUnitMenuInfo					= 170
+IDCUnitMenuUnitList				= 171
+IDCUnitMenuTeamList				= 172
+
+IDCLoadoutResources				= 200
+IDCLoadoutSpace					= 201
+IDCLoadoutTradeIn				= 202
+IDCLoadoutCost					= 203
+IDCLoadoutRefund				= 204
+IDCLoadoutTemplateList			= 205
+IDCLoadoutPrimary				= 206
+IDCLoadoutPrimaryAmmo			= 207
+IDCLoadoutPrimaryList			= 208
+IDCLoadoutSecondary				= 209
+IDCLoadoutSecondaryAmmo			= 210
+IDCLoadoutSecondaryList			= 211
+IDCLoadoutSidearm				= 212
+IDCLoadoutSidearmList			= 213
+IDCLoadoutMisc					= 214
+IDCLoadoutMiscAmmo				= 215
+IDCLoadoutMiscList				= 216
+IDCLoadoutBuy					= 217
+
+;Default Menu IDCs.
+IDCMenuInfo						= 500
+IDCMenuTeamList					= 501
+IDCMenuList						= 502
+IDCMenuList1					= 503
+IDCMenuList2					= 504
+IDCMenuTitle					= 510
+IDCMenuStatusLabel				= 511
+IDCMenuButton					= 512
+IDCMenuButton1					= 513
+IDCMenuButton2					= 514
+IDCMenuImage					= 515
+
+;AI Team Menu IDCs.
+IDCTeam							= 1000
+IDCTeamSize						= 1100
+IDCTeamResources				= 1200
+IDCTeamIndependent				= 1300
+IDCTeamRole						= 1400
+IDCTeamGiveAmount				= 1500
+IDCTeamLabel					= 2000
+IDCCommanderResources			= 2001
+
+;Vote Menu IDCs.
+IDCVoteOption					= 3000
+IDCVoteToggle					= 3100
+IDCVoteOn						= 3200
+IDCVoteOff						= 3300
+
+IDCWestResources				= 4000
+IDCWestTownsHeld				= 4001
+IDCWestPoints					= 4002
+IDCWestIncome					= 4003
+
+IDCEastResources				= 4005
+IDCEastTownsHeld				= 4006
+IDCEastPoints					= 4007
+IDCEastIncome					= 4008
+
+;END OF GUI
+
+;POINTS (SCORING)
+stayAliveTime = 1200
+pointsPerStayAlive = 5
+
+salvageValuePerPoint = 1500
+buildValuePerPoint = 500
+townValuePerPoint = 100
+purchaseValuePerPoint = 5000
+
+;Amount of money a player is fined for killing a civilian.
+civilianKillingPenalty = 150
+
+;Amount of money a player is fined for killing a friendly vehicle.
+vehicleDestroyingPenalty = 500
+
+;Max range a player's team member can be for a player team respawn.
+teamRespawnRange = 500
+
+;Range a worker will move from it's present location to repair a building.
+workerRange = 250
+workerRepairRate = 0.025
+
+salvageRange = 25
+salvagerTravelRange = 5000
+salvageRate = 0.2
+
+targetDefendRange = 125
+repairTruckBuildRange = 75
+repairTruckRepairRange = 25
+repairTruckRepairRate = 0.1
+
+ammoTruckBuildRange = 75
+
+;DEBUG
+buildingRepairRate = 0
+? (debug):buildingRepairRate = 0.2
+
+ammoDepotReloadRange = 250
+ammoDepotReloadDelay = 5
+
+repairDepotRepairRange = 25
+ammoDepotRearmRange = 25
+
+;Range a unit will travel in board a vehicle.
+embarkVehicleRange = 100
+
+;Distance from destination before units will disembark to proceed on foot.
+disembarkVehicleRange = 300
+
+;Range leader will travel to reinforce group (only if convenient).
+reinforceRange = 200
+
+;Range at which a unit will remain in formation.
+inFormationRange = 250
+
+;Range leader must be from a structure to purchase from it.
+AIPurchaseRange = 80
+
+radarMinHeight = 60
+
+townBountyDelay = 300
+
+cheapTransportACMultiplier = 0.5
+expensiveAssaultACMultiplier = 2
+
+;Minimum value required before an AI commander will assign a defense team to a town.
+minDefendTownValue = 60
+
+maxDefendedTowns = 2
+
+;Number of teams AI will attempt to assign to assault a base if found.
+teamsToAssaultBase = 1
+
+infantryBuyLight = 15
+infantryBuyHeavy = 15
+
+armourBuyLight = 20
+
+enemyMarker = 1
+baseMarker = 2
+
+;Player (client) lists for structures.
+
+;Groups
+groupCommander	= 0
+groupAlpha		= 1
+groupBravo		= 2
+groupCharlie	= 3
+groupDelta		= 4
+groupEcho		= 5
+groupFoxtrot	= 6
+groupGolf		= 7
+groupHotel		= 8
+groupAll		= 9
+
+;Set HiddenMarkers (place to put invisible markers) off of visible map.
+HiddenMarkers SetPos [0,0,0]
+
+;Delay between updates for different functions in the game.
+updateAIDelay = 60;PublicVariable "updateAIDelay"
+updateWorkerAIDelay = 7;PublicVariable "updateWorkerAIDelay"
+updateFactoryDelay = 7;PublicVariable "updateFactoryDelay"
+updateBuildingDelay = 7;PublicVariable "updateBuildingDelay"
+
+;Vote options
+voteVariables = ["higherIncome","noTownOccupation","randomWeather","acceleratedTime","noACRockets","noACATRockets","cheapTransportAC","expensiveAssaultAC","noStationaryGunLimit","MFCTI115NoMortars","noTeamRespawning"]
+voteText = [Localize "STRHIGHERINCOME",Localize "STRTOWNOCCUPATION",Localize "STRWEATHER",Localize "STRACCELERATEDTIME",Localize "STRNOACROCKETS",Localize "STRNOACATAAROCKETS",Localize "STRCHEAPTRANSPORTAC",Localize "STREXPENSIVEASSAULTAC",Localize "STRNOSTATIONARYLIMIT",Localize "STRNOMORTARS1",Localize "STRNOTEAMRESPAWNING"]
+
+mortarRearmCost = 3000
+
+;Building/structure types
+infantryFactoryCost		= 1000
+infantryFactoryType		= 1
+
+lightFactoryCost		= 2000
+lightFactoryType		= 2
+
+heavyFactoryCost		= 3500
+heavyFactoryType		= 3
+
+airFactoryCost			= 8000
+airFactoryType			= 4
+
+blackOpsUpgradeType			= 5
+aircraftRocketsUpgradeType	= 6
+aircraftATUpgradeType		= 7
+radarUpgradeType			= 8
+
+controlCenterCost		= 3000
+controlCenterType		= 9
+
+ammoDepotCost			= 500
+ammoDepotType			= 10
+
+repairDepotCost			= 600
+repairDepotType			= 11
+
+observationTowerCost	= 100
+observationTowerType	= 12
+
+helicopterPadCost		= 150
+helicopterPadType		= 13
+
+fieldHospitalCost		= 300
+fieldHospitalType		= 14
+
+M2GunCost				= 100
+M2GunType				= 15
+
+M2StationCost			= 150
+M2StationType			= 16
+
+M2FortificationCost		= 300
+M2FortificationType		= 17
+
+HEGunCost				= 1000
+HEGunType				= 18
+
+HEStationCost			= 1050
+HEStationType			= 19
+
+HEFortificationCost		= 1200
+HEFortificationType		= 20
+
+AAGunCost				= 1200
+AAGunType				= 21
+
+AAStationCost			= 1250
+AAStationType			= 22
+
+mortarCost				= 4500
+mortarType				= 23
+
+sandbagCost				= 50
+sandbagType				= 24
+
+largeWallCost			= 250
+largeWallType			= 25
+
+resistanceBarracksType	= 26
+resistanceFactoryType	= 27
+
+weaponsCrateCost		= 200
+weaponsCrateType		= 28
+
+ammoCrateCost			= 100
+ammoCrateType			= 29
+
+heavyWeaponsCrateCost	= 300
+heavyWeaponsCrateType	= 30
+
+heavyAmmoCrateCost		= 300
+heavyAmmoCrateType		= 31
+
+infantryFactoryRespawn	= 1
+lightFactoryRespawn		= 2
+heavyFactoryRespawn		= 3
+airFactoryRespawn		= 4
+fieldHospitalRespawn	= 5
+teamRespawn				= true
+
+respawnText = [Localize "STRMOBILEHQ",Localize "STRBARRACKS",Localize "STRLIGHTFACTORY",Localize "STRHEAVYFACTORY",Localize "STRAIRFACTORY",Localize "STRHOSPITAL"]
+
+;UNITS
+upgradeInfantryCost				= 400
+upgradeInfantryTime				= 60
+
+? (debug):upgradeInfantryTime	= 5
+
+upgradeBlackOpsCost				= 250
+upgradeBlackOpsTime				= 40
+
+? (debug):upgradeBlackOpsTime	= 5
+
+upgradeLightCost				= 700
+upgradeLightTime				= 80
+
+? (debug):upgradeLightTime		= 5
+
+upgradeHeavyCost				= 2000
+upgradeHeavyTime				= 120
+
+? (debug):upgradeHeavyTime		= 5
+
+upgradeAirCost					= 8500
+upgradeAirTime					= 150
+
+? (debug):upgradeAirTime		= 5
+
+upgradeAircraftRocketsCost		= 8000
+upgradeAircraftRocketsTime		= 120
+
+upgradeAircraftATCost			= 8000
+upgradeAircraftATTime			= 120
+
+upgradeRadarCost				= 3000
+upgradeRadarTime				= 50
+
+workerCost						= 300
+workerBuildTime					= 5
+
+;BUILDABLE UNIT STATS
+
+soldierCost					= 75
+soldierBuildTime			= 6
+soldierType					= 1
+
+soldierLAWCost				= 200
+soldierLAWBuildTime			= 8
+soldierLAWType				= 2
+
+soldierATCost				= 300
+soldierATBuildTime			= 8
+soldierATType				= 3
+
+soldierAACost				= 300
+soldierAABuildTime			= 8
+soldierAAType				= 4
+
+soldierMGCost				= 100
+soldierMGBuildTime			= 7
+soldierMGType				= 5
+
+soldierGrenadierCost		= 100
+soldierGrenadierBuildTime	= 7
+soldierGrenadierType		= 6
+
+soldierHeavyGrenadierCost		= 125
+soldierHeavyGrenadierBuildTime	= 8
+soldierHeavyGrenadierType		= 7
+
+soldierSteyrCost			= 115
+soldierSteyrBuildTime		= 7
+soldierSteyrType			= 8
+
+sniperCost					= 150
+sniperBuildTime				= 8
+sniperType					= 9
+
+medicCost					= 100
+medicBuildTime				= 7
+medicType					= 10
+
+soldierMinerCost			= 110
+soldierMinerBuildTime		= 7
+soldierMinerType			= 11
+
+blackOpsCost				= 250
+blackOpsBuildTime			= 15
+blackOpsType				= 12
+
+soldierCrewCost				= soldierCost
+soldierCrewBuildTime		= soldierBuildTime
+soldierCrewType				= 13
+
+soldierPilotCost			= soldierCost
+soldierPilotBuildTime		= soldierBuildTime
+soldierPilotType			= 14
+
+hummerCost					= 325
+hummerBuildTime				= 15
+hummerType					= 15
+
+mannedHummerCost			= hummerCost + soldierCost
+mannedHummerBuildTime		= hummerBuildTime + soldierBuildTime
+
+jeepCost					= 225
+jeepBuildTime				= 10
+jeepType					= 16
+
+mannedJeepCost				= jeepCost + soldierCost
+mannedJeepBuildTime			= jeepBuildTime	+ soldierBuildTime
+
+jeepMGCost					= 325
+jeepMGBuildTime				= 13
+jeepMGType					= 17
+
+mannedJeepMGCost			= jeepMGCost + soldierCost * 2
+mannedJeepMGBuildTime		= jeepMGBuildTime + soldierBuildTime * 2
+
+truckCost					= 350
+truckBuildTime				= 15
+truckType					= 18
+
+mannedTruckCost				= truckCost + soldierCost
+mannedTruckBuildTime		= truckBuildTime + soldierBuildTime
+
+fuelTruckCost				= 375
+fuelTruckBuildTime			= 15
+fuelTruckType				= 19
+
+mannedFuelTruckCost			= fuelTruckCost + soldierCost
+mannedFuelTruckBuildTime	= fuelTruckBuildTime + soldierBuildTime
+
+ambulanceCost				= 400
+ambulanceBuildTime			= 20
+ambulanceType				= 20
+
+mannedAmbulanceCost			= ambulanceCost + medicCost
+mannedAmbulanceBuildTime	= ambulanceBuildTime + medicBuildTime
+
+M113Cost					= 650
+M113BuildTime				= 25
+M113Type					= 21
+
+mannedM113Cost				= M113Cost + soldierCrewCost * 2
+mannedM113BuildTime			= M113BuildTime + soldierCrewBuildTime * 2
+
+vulcanCost					= 1000
+vulcanBuildTime				= 35
+vulcanType					= 22
+
+mannedVulcanCost			= vulcanCost + soldierCrewCost * 2
+mannedVulcanBuildTime		= vulcanBuildTime + soldierCrewBuildTime * 2
+
+repairTruckCost				= 500
+repairTruckBuildTime		= 15
+repairTruckType				= 23
+
+mannedRepairTruckCost		= repairTruckCost + soldierCost
+mannedrepairTruckBuildTime	= repairTruckBuildTime + soldierBuildTime
+
+ammoTruckCost				= 750
+ammoTruckBuildTime			= 15
+ammoTruckType				= 24
+
+mannedAmmoTruckCost			= ammoTruckCost	+ soldierCost
+mannedAmmoTruckBuildTime	= ammoTruckBuildTime + soldierBuildTime
+
+salvageTruckCost			= 450
+salvageTruckBuildTime		= 15
+salvageTruckType			= 25
+
+mannedSalvageTruckCost		= salvageTruckCost + soldierCost
+mannedSalvageTruckBuildTime	= salvageTruckBuildTime + soldierBuildTime
+
+M2A2Cost					= 1050
+M2A2BuildTime				= 40
+M2A2Type					= 26
+
+mannedM2A2Cost				= M2A2Cost + soldierCrewCost * 3
+mannedM2A2BuildTime			= M2A2BuildTime + soldierCrewBuildTime * 3
+
+M3A2Cost					= 1150
+M3A2BuildTime				= 40
+M3A2Type					= 27
+
+mannedM3A2Cost				= M3A2Cost + soldierCrewCost * 3
+mannedM3A2BuildTime			= M3A2BuildTime + soldierCrewBuildTime * 3
+
+M60Cost						= 1500
+M60BuildTime				= 50
+M60Type						= 28
+
+mannedM60Cost				= M60Cost + soldierCrewCost * 3
+mannedM60BuildTime			= M60BuildTime + soldierCrewBuildTime * 3
+
+M60A3Cost					= 1700
+M60A3BuildTime				= 55
+M60A3Type					= 29
+
+mannedM60A3Cost				= M60A3Cost + soldierCrewCost * 3
+mannedM60A3BuildTime		= M60A3BuildTime + soldierCrewBuildTime * 3
+
+M1Cost						= 3250
+M1BuildTime					= 60
+M1Type						= 30
+
+mannedM1Cost				= M1Cost + soldierCrewCost * 3
+mannedM1BuildTime			= M1BuildTime + soldierCrewBuildTime * 3
+
+M1A1Cost					= 5500
+M1A1BuildTime				= 65
+M1A1Type					= 31
+
+mannedM1A1Cost				= M1A1Cost + soldierCrewCost * 3
+mannedM1A1BuildTime			= M1A1BuildTime + soldierCrewBuildTime * 3
+
+OH58Cost					= 4500
+OH58BuildTime				= 35
+OH58Type					= 32
+
+mannedOH58Cost				= OH58Cost + soldierPilotCost * 2
+mannedOH58BuildTime			= OH58BuildTime + soldierPilotBuildTime * 2
+
+UH60MGCost					= 4000
+UH60MGBuildTime				= 40
+UH60MGType					= 33
+
+mannedUH60MGCost			= UH60MGCost + soldierPilotCost * 2
+mannedUH60MGBuildTime		= UH60MGBuildTime + soldierPilotBuildTime * 2
+
+CH47DCost					= 5000
+CH47DBuildTime				= 55
+CH47DType					= 34
+
+mannedCH47DCost				= CH47DCost + soldierPilotCost * 2
+mannedCH47DBuildTime		= CH47DBuildTime + soldierPilotBuildTime * 2
+
+UH60Cost					= 6000
+UH60BuildTime				= 55
+UH60Type					= 35
+
+mannedUH60Cost				= UH60Cost + soldierPilotCost * 2
+mannedUH60BuildTime			= UH60BuildTime + soldierPilotBuildTime * 2
+
+AH1Cost						= 10000
+AH1BuildTime				= 60
+AH1Type						= 36
+
+mannedAH1Cost				= AH1Cost + soldierPilotCost * 2
+mannedAH1BuildTime			= AH1BuildTime + soldierPilotBuildTime * 2
+
+AH64Cost					= 12000
+AH64BuildTime				= 65
+AH64Type					= 37
+
+mannedAH64Cost				= AH64Cost + soldierPilotCost * 2
+mannedAH64BuildTime			= AH64BuildTime + soldierPilotBuildTime * 2
+
+AH64AACost					= 12000
+AH64AABuildTime				= 65
+AH64AAType					= 38
+
+mannedAH64AACost			= AH64AACost + soldierPilotCost * 2
+mannedAH64AABuildTime		= AH64AABuildTime + soldierPilotBuildTime * 2
+
+A10Cost						= 11000
+A10BuildTime				= 70
+A10Type						= 39
+
+mannedA10Cost				= A10Cost + soldierPilotCost * 2
+mannedA10BuildTime			= A10BuildTime + soldierPilotBuildTime * 2
+
+A10LGBCost					= 10500
+A10LGBBuildTime				= 70
+A10LGBType					= 40
+
+mannedA10LGBCost			= A10LGBCost + soldierPilotCost * 2
+mannedA10LGBBuildTime		= A10LGBBuildTime + soldierPilotBuildTime * 2
+
+;East
+soldierEastCost				= soldierCost
+soldierEastBuildTime		= soldierBuildTime	
+soldierEastType				= 41
+
+soldierLAWEastCost			= soldierLAWCost	
+soldierLAWEastBuildTime		= soldierLAWBuildTime
+soldierLAWEastType			= 42
+
+soldierATEastCost			= soldierATCost	
+soldierATEastBuildTime		= soldierATBuildTime
+soldierATEastType			= 43
+
+soldierAAEastCost			= soldierAACost	
+soldierAAEastBuildTime		= soldierAABuildTime
+soldierAAEastType			= 44
+
+soldierMGEastCost			= soldierMGCost	
+soldierMGEastBuildTime		= soldierMGBuildTime
+soldierMGEastType			= 45
+
+soldierGrenadierEastCost		= soldierGrenadierCost
+soldierGrenadierEastBuildTime	= soldierGrenadierBuildTime
+soldierGrenadierEastType		= 46
+
+soldierHeavyGrenadierEastCost		= soldierHeavyGrenadierCost
+soldierHeavyGrenadierEastBuildTime	= soldierHeavyGrenadierBuildTime
+soldierHeavyGrenadierEastType		= 47
+
+soldierAK101EastCost		= soldierSteyrCost
+soldierAK101EastBuildTime	= soldierSteyrBuildTime
+soldierAK101EastType		= 48
+
+sniperEastCost				= sniperCost
+sniperEastBuildTime			= sniperBuildTime
+sniperEastType				= 49
+
+medicEastCost				= medicCost
+medicEastBuildTime			= medicBuildTime
+medicEastType				= 50
+
+soldierMinerEastCost		= soldierMinerCost
+soldierMinerEastBuildTime	= soldierMinerBuildTime
+soldierMinerEastType		= 51
+
+blackOpsEastCost			= blackOpsCost
+blackOpsEastBuildTime		= blackOpsBuildTime
+blackOpsEastType			= 52
+
+soldierCrewEastCost			= soldierCost
+soldierCrewEastBuildTime	= soldierBuildTime
+soldierCrewEastType			= 53
+
+soldierPilotEastCost		= soldierCost
+soldierPilotEastBuildTime	= soldierBuildTime
+soldierPilotEastType		= 54
+
+UAZCost						= 250
+UAZBuildTime				= 10
+UAZType						= 55
+
+mannedUAZCost				= UAZCost + soldierCost
+mannedUAZBuildTime			= UAZBuildTime + soldierBuildTime
+
+BRDMCost					= 350
+BRDMBuildTime				= 13
+BRDMType					= 56
+
+mannedBRDMCost				= BRDMCost + soldierCost
+mannedBRDMBuildTime			= BRDMBuildTime + soldierBuildTime
+
+truckEastCost				= truckCost
+truckEastBuildTime			= truckBuildTime
+truckEastType				= 57
+
+mannedTruckEastCost			= truckCost	+ soldierCost
+mannedTruckEastBuildTime	= truckBuildTime + soldierBuildTime
+
+fuelTruckEastCost				= fuelTruckCost
+fuelTruckEastBuildTime			= fuelTruckBuildTime
+fuelTruckEastType				= 58
+
+mannedFuelTruckEastCost			= fuelTruckCost + soldierEastCost
+mannedFuelTruckEastBuildTime	= fuelTruckBuildTime + soldierEastBuildTime
+
+ambulanceEastCost				= ambulanceCost
+ambulanceEastBuildTime			= ambulanceBuildTime
+ambulanceEastType				= 59
+
+mannedAmbulanceEastCost			= ambulanceEastCost + medicEastCost
+mannedAmbulanceEastBuildTime	= ambulanceEastBuildTime + medicEastBuildTime
+
+shilkaCost					= 1000
+shilkaBuildTime				= 35
+shilkaType					= 60
+
+mannedShilkaCost			= shilkaCost + soldierCrewCost * 2
+mannedShilkaBuildTime		= shilkaBuildTime + soldierCrewBuildTime * 2
+
+repairTruckEastCost				= repairTruckCost
+repairTruckEastBuildTime		= repairTruckBuildTime
+repairTruckEastType				= 61
+
+mannedRepairTruckEastCost		= repairTruckCost + soldierCost
+mannedrepairTruckEastBuildTime	= repairTruckBuildTime + soldierBuildTime
+
+ammoTruckEastCost				= ammoTruckCost
+ammoTruckEastBuildTime			= ammoTruckBuildTime
+ammoTruckEastType				= 62
+
+mannedAmmoTruckEastCost			= ammoTruckCost	+ soldierCost
+mannedAmmoTruckEastBuildTime	= ammoTruckBuildTime + soldierBuildTime
+
+salvageTruckEastCost			= salvageTruckCost
+salvageTruckEastBuildTime		= salvageTruckBuildTime
+salvageTruckEastType			= 63
+
+mannedSalvageTruckEastCost		= salvageTruckEastCost	+ soldierEastCost
+mannedSalvageTruckEastBuildTime	= salvageTruckEastBuildTime + soldierBuildTime
+
+BMPCost						= 950
+BMPBuildTime				= 40
+BMPType						= 64
+
+mannedBMPCost				= BMPCost + soldierCrewCost * 3
+mannedBMPBuildTime			= BMPBuildTime + soldierCrewBuildTime * 3
+
+BMP2Cost					= 1100
+BMP2BuildTime				= 40
+BMP2Type					= 65
+
+mannedBMP2Cost				= BMP2Cost + soldierCrewCost * 3
+mannedBMP2BuildTime			= BMP2BuildTime + soldierCrewBuildTime * 3
+
+BMP2ECost					= 1300
+BMP2EBuildTime				= 40
+BMP2EType					= 66
+
+mannedBMP2ECost				= BMP2ECost + soldierCrewCost * 3
+mannedBMP2EBuildTime		= BMP2EBuildTime + soldierCrewBuildTime * 3
+
+T72Cost						= 1600
+T72BuildTime				= 45
+T72Type						= 67
+
+mannedT72Cost				= T72Cost + soldierCrewCost * 3
+mannedT72BuildTime			= T72BuildTime + soldierCrewBuildTime * 3
+
+T72ACost					= 1800
+T72ABuildTime				= 45
+T72AType					= 68
+
+mannedT72ACost				= T72ACost + soldierCrewCost * 3
+mannedT72ABuildTime			= T72ABuildTime + soldierCrewBuildTime * 3
+
+T72BCost					= 2000
+T72BBuildTime				= 45
+T72BType					= 69
+
+mannedT72BCost				= T72BCost + soldierCrewCost * 3
+mannedT72BBuildTime			= T72BBuildTime + soldierCrewBuildTime * 3
+
+T80Cost						= 3000
+T80BuildTime				= 50
+T80Type						= 70
+
+mannedT80Cost				= T80Cost + soldierCrewCost * 3
+mannedT80BuildTime			= T80BuildTime + soldierCrewBuildTime * 3
+
+T80BCost					= 3500
+T80BBuildTime				= 50
+T80BType					= 71
+
+mannedT80BCost				= T80BCost + soldierCrewCost * 3
+mannedT80BBuildTime			= T80BBuildTime + soldierCrewBuildTime * 3
+
+T80UCost					= 5000
+T80UBuildTime				= 55
+T80UType					= 72
+
+mannedT80UCost				= T80UCost + soldierCrewCost * 3
+mannedT80UBuildTime			= T80UBuildTime + soldierCrewBuildTime * 3
+
+MI17TransportCost			= 4000
+MI17TransportBuildTime		= 65
+MI17TransportType			= 73
+
+mannedMI17TransportCost		= MI17TransportCost + soldierPilotCost * 2
+mannedMI17TransportBuildTime= MI17TransportBuildTime + soldierPilotBuildTime * 2
+
+MI17Cost					= 8250
+MI17BuildTime				= 65
+MI17Type					= 74
+
+mannedMI17Cost				= MI17Cost + soldierPilotCost * 2
+mannedMI17BuildTime			= MI17BuildTime + soldierPilotBuildTime * 2
+
+MI24Cost					= 11000
+MI24BuildTime				= 70
+MI24Type					= 75
+
+mannedMI24Cost				= MI24Cost + soldierPilotCost * 2
+mannedMI24BuildTime			= MI24BuildTime + soldierPilotBuildTime * 2
+
+KA50Cost					= 12000
+KA50BuildTime				= 75
+KA50Type					= 76
+
+mannedKA50Cost				= KA50Cost + soldierPilotCost
+mannedKA50BuildTime			= KA50BuildTime + soldierPilotBuildTime
+
+;Include V80 for backward compatibility.
+V80Cost						= KA50Cost
+V80BuildTime				= KA50BuildTime
+V80Type						= KA50Type
+
+mannedV80Cost				= KA50Cost + soldierPilotCost
+mannedV80BuildTime			= KA50BuildTime + soldierPilotBuildTime
+
+KA50AACost					= 12000
+KA50AABuildTime				= 75
+KA50AAType					= 77
+
+mannedKA50AACost			= KA50AACost + soldierPilotCost
+mannedKA50AABuildTime		= KA50AABuildTime + soldierPilotBuildTime
+
+SU25Cost					= 12000
+SU25BuildTime				= 70
+SU25Type					= 78
+
+mannedSU25Cost				= SU25Cost + soldierPilotCost * 2
+mannedSU25BuildTime			= SU25BuildTime + soldierPilotBuildTime * 2
+
+SU25LGBCost					= 10500
+SU25LGBBuildTime			= 70
+SU25LGBType					= 79
+
+mannedSU25LGBCost			= SU25LGBCost + soldierPilotCost * 2
+mannedSU25LGBBuildTime		= SU25LGBBuildTime + soldierPilotBuildTime * 2
+
+;Should be no smaller than value of the highest build time from above list.
+highestBuildTime = 70
+
+soldierResistanceType			= 80
+soldierLAWResistanceType		= 81
+soldierATResistanceType			= 82
+soldierAAResistanceType			= 83
+soldierMGResistanceType			= 84
+soldierGrenadierResistanceType	= 85
+soldier1ResistanceType			= 86
+soldier2ResistanceType			= 87
+medicResistanceType				= 88
+sniperResistanceType			= 89
+officerResistanceType			= 90
+nightOfficerResistanceType		= 91
+soldierCrewResistanceType		= 92
+soldierPilotResistanceType		= 93
+BMPResistanceType				= 94
+T55ResistanceType				= 95
+T72ResistanceType				= 96
+T80ResistanceType				= 97
+
+;These two types do not need to be added in lists below.
+mobileHQType				= 98
+mobileHQEastType			= 99
+
+;Camera positions
+APCCamera = [M113Ambulance,M113Type,vulcanType,M2A2Type,M3A2Type,shilkaType]
+largeAPCCamera = [BMPAmbulanceType,BMPType,BMP2Type,BMP2EType]
+westTankCamera = [M60Type,M60A3Type,M1Type,M1A1Type]
+eastTankCamera = [T72Type,T72AType,T72BType,T80Type,T80BType,T80UType]
+aircraftCamera = [OH58Type,UH60Type,UH60MGType,AH1Type,AH64Type,AH64AAType]
+largeAircraftCamera = [CH47DType,A10Type,A10LGBType,MI17TransportType,MI17Type,MI24Type,KA50Type,KA50AAType,SU25Type,SU25LGBType]
+
+resistanceNames = resistanceSoldierNames + ["BMPRes","T55G","T72Res","T80Res"]
+
+;Minimum resources required to justify a return to base for equipment purchases.
+infantryMinResources			= soldierCost * 4
+mechanizedInfantryMinResources	= mannedM2A2Cost
+armourMinResources				= mannedT72Cost
+airMinResources					= mannedMI17Cost
+
+;Unarmed: 1 driver - light: 1 driver, 1 gunner - heavy: 1 driver, 1 gunner, 1 commander - Air: 2 pilots
+westUnarmed = [hummerType,jeepType,truckType,fuelTruckType,ambulanceType,ammoTruckType,repairTruckType,salvageTruckType]
+westLight = [jeepMGType,M113Type,vulcanType]
+westHeavy = [M2A2Type,M3A2Type,M60Type,M60A3Type,M1Type,M1A1Type]
+westAir = [OH58Type,UH60MGType,CH47DType,UH60Type,AH1Type,AH64Type,AH64AAType]
+westOneManAir = [A10Type,A10LGBType]
+
+;Unarmed: 1 driver - light: 1 driver, 1 gunner - heavy: 1 driver, 1 gunner, 1 commander - Air: 2 pilots
+eastUnarmed = [UAZType,BRDMType,truckEastType,fuelTruckEastType,ambulanceEastType,ammoTruckEastType,repairTruckEastType,salvageTruckEastType]
+eastLight = []
+eastHeavy = [shilkaType,BMPType,BMP2Type,BMP2EType,T72Type,T72AType,T72BType,T80Type,T80BType,T80UType]
+eastAir = [MI17TransportType,MI17Type,MI24Type]
+eastOneManAir = [KA50Type,KA50AAType,SU25Type,SU25LGBType]
+
+westSoldierNames = ["SoldierWB","SoldierWLAW","SoldierWAT","SoldierWAA","SoldierWMG","SoldierWG","MFCTI116HeavyGW","MFCTI116SoldierWSteyr","SoldierWSniper","SoldierWMedic","SoldierWMiner","SoldierWSaboteurDay","SoldierWCrew","SoldierWPilot"]
+westLightNames = ["HMMWV","Jeep","MFCTI116JeepMG","Truck5t","Truck5tRefuel","M113Ambul","MFCTI116M113","MFCTI116Vulcan"]
+westMiscNames = ["Truck5tRepair","MFCTI116Truck5tReammo","MFCTI116WestSalvager"]
+westHeavyNames = ["MFCTI116M2A2","MFCTI116M3A2","MFCTI116M60","MFCTI116M60A3","MFCTI116M1","MFCTI116M1A1"]
+westAirNames = ["OH58","MFCTI116UH60MG","MFCTI116CH47D","MFCTI116UH60","MFCTI116AH1","MFCTI116AH64","MFCTI116AH64AA","A10","A10LGB"]
+
+;Limited radar versions.
+westLRLightNames = ["HMMWV","Jeep","MFCTI116JeepMG","Truck5t","Truck5tRefuel","M113Ambul","MFCTI116M113LR","MFCTI116VulcanLR"]
+westLRHeavyNames = ["MFCTI116M2A2LR","MFCTI116M3A2LR","MFCTI116M60LR","MFCTI116M60A3LR","MFCTI116M1LR","MFCTI116M1A1LR"]
+westLRAirNames = ["MFCTI116OH58LR","MFCTI116UH60MGLR","MFCTI116CH47DLR","MFCTI116UH60LR","MFCTI116AH1LR","MFCTI116AH64LR","MFCTI116AH64AALR","MFCTI116A10LR","MFCTI116A10LGBLR"]
+
+westSoldierImages = ["ivojak","islaw","isat","isaa","ismg","igrenadier","igrenadier","ivojak","isniper","imedic","iminer","isaboteur","icrew","ipilot"]
+westLightImages = ["\humr\ihmmwv","ijeepMUTT","ijeepmg","itruck5t","iTruck5tfuel","im113_ambu","im113","\VULCAN\ivulcan"]
+westMiscImages = ["itruck5trepair","itruck5trepair","\humr\ihmmwv"]
+westHeavyImages = ["\M2A2\im2a2","\M2A2\im2a2","im60","im60","iabrams","iabrams"]
+westAirImages = ["\OH58\ikiowa","iuh60","\ch47\ich47","iuh60","icobra","\APAC\iah64","\APAC\iah64","ia10","ia10"]
+
+westUnitNames = westSoldierNames + westLightNames + westMiscNames + westHeavyNames + westAirNames
+westLRUnitNames = westSoldierNames + westLRLightNames + westMiscNames + westLRHeavyNames + westLRAirNames
+westUnitImages = westSoldierImages + westLightImages + westMiscImages + westHeavyImages + westAirImages
+westUnitCosts = [0,soldierCost,soldierLAWCost,soldierATCost,soldierAACost,soldierMGCost,soldierGrenadierCost,soldierHeavyGrenadierCost,soldierSteyrCost,sniperCost,medicCost,soldierMinerCost,blackOpsCost,soldierCrewCost,soldierPilotCost,mannedHummerCost,mannedJeepCost,mannedJeepMGCost,mannedTruckCost,mannedFuelTruckCost,mannedAmbulanceCost,mannedM113Cost,mannedVulcanCost,mannedRepairTruckCost,mannedAmmoTruckCost,mannedSalvageTruckCost,mannedM2A2Cost,mannedM3A2Cost,mannedM60Cost,mannedM60A3Cost,mannedM1Cost,mannedM1A1Cost,mannedOH58Cost,mannedUH60MGCost,mannedCH47DCost,mannedUH60Cost,mannedAH1Cost,mannedAH64Cost,mannedAH64AACost,mannedA10Cost,mannedA10LGBCost]
+westUnmannedUnitCosts = [0,soldierCost,soldierLAWCost,soldierATCost,soldierAACost,soldierMGCost,soldierGrenadierCost,soldierHeavyGrenadierCost,soldierSteyrCost,sniperCost,medicCost,soldierMinerCost,blackOpsCost,soldierCrewCost,soldierPilotCost,hummerCost,jeepCost,jeepMGCost,truckCost,fuelTruckCost,ambulanceCost,M113Cost,vulcanCost,repairTruckCost,ammoTruckCost,salvageTruckCost,M2A2Cost,M3A2Cost,M60Cost,M60A3Cost,M1Cost,M1A1Cost,OH58Cost,UH60MGCost,CH47DCost,UH60Cost,AH1Cost,AH64Cost,AH64AACost,A10Cost,A10LGBCost]
+westUnitBuildTimes = [0,soldierBuildTime,soldierLAWBuildTime,soldierATBuildTime,soldierAABuildTime,soldierMGBuildTime,soldierGrenadierBuildTime,soldierHeavyGrenadierBuildTime,soldierSteyrBuildTime,sniperBuildTime,medicBuildTime,soldierMinerBuildTime,blackOpsBuildTime,soldierCrewBuildTime,soldierPilotBuildTime,mannedHummerBuildTime,mannedJeepBuildTime,mannedJeepMGBuildTime,mannedTruckBuildTime,mannedFuelTruckBuildTime,mannedAmbulanceBuildTime,mannedM113BuildTime,mannedVulcanBuildTime,mannedRepairTruckBuildTime,mannedAmmoTruckBuildTime,mannedSalvageTruckBuildTime,mannedM2A2BuildTime,mannedM3A2BuildTime,mannedM60BuildTime,mannedM60A3BuildTime,mannedM1BuildTime,mannedM1A1BuildTime,mannedOH58BuildTime,mannedUH60MGBuildTime,mannedCH47DBuildTime,mannedUH60BuildTime,mannedAH1BuildTime,mannedAH64BuildTime,mannedAH64AABuildTime,mannedA10BuildTime,mannedA10LGBBuildTime]
+westUnitDescriptions = [Localize "STRSOLDIER",Localize "STRSOLDIERLAW",Localize "STRSOLDIERAT",Localize "STRSOLDIERAA",Localize "STRSOLDIERMG",Localize "STRGRENADIER",Localize "STRHEAVYGRENADIER",Localize "STRSOLDIERSTEYR",Localize "STRSNIPER",Localize "STRMEDIC",Localize "STRMINER",Localize "STRBLACKOPS",Localize "STRTANKER",Localize "STRPILOT",Localize "STRHUMMER",Localize "STRJEEP",Localize "STRJEEPMG",Localize "STRTRUCK",Localize "STRFUELTRUCK",Localize "STRM113AMBULANCE",Localize "STRM113",Localize "STRVULCAN",Localize "STRREPAIRTRUCK",Localize "STRAMMOTRUCK",Localize "STRSALVAGEVEHICLE",Localize "STRM2A2",Localize "STRM3A2",Localize "STRM60",Localize "STRM60A3",Localize "STRM1",Localize "STRM1A1",Localize "STROH58",Localize "STRUH60MG",Localize "STRCH47D",Localize "STRUH60",Localize "STRAH1",Localize "STRAH64",Localize "STRAH64AA",Localize "STRA10",Localize "STRA10LGB"]
+
+eastSoldierNames = ["SoldierEB","SoldierELAW","SoldierEAT","SoldierEAA","SoldierEMG","SoldierEG","MFCTI116HeavyGrenadier","MFCTI116SoldierEAK101","SoldierESniper","SoldierEMedic","SoldierEMiner","SoldierESaboteurBizon","SoldierECrew","SoldierEPilot"]
+eastLightNames = ["UAZ","BRDM","Ural","UralRefuel","BMPAmbul","MFCTI116Shilka"]
+eastMiscNames = ["UralRepair","MFCTI116UralReammo","MFCTI116EastSalvager"]
+eastHeavyNames = ["MFCTI116BMP1","MFCTI116BMP2","MFCTI116BMP2E","MFCTI116T72","MFCTI116T72A","MFCTI116T72B","MFCTI116T80","MFCTI116T80B","MFCTI116T80U"]
+eastAirNames = ["MFCTI116MI17Transport","MFCTI116MI17","MFCTI116MI24","MFCTI116KA50","MFCTI116KA50AA","Su25","MFCTI116SU25LGB"]
+
+;Limited radar versions.
+eastLRLightNames = ["UAZ","BRDM","Ural","UralRefuel","BMPAmbul","MFCTI116ShilkaLR"]
+eastLRHeavyNames = ["MFCTI116BMP1LR","MFCTI116BMP2LR","MFCTI116BMP2ELR","MFCTI116T72LR","MFCTI116T72ALR","MFCTI116T72BLR","MFCTI116T80LR","MFCTI116T80BLR","MFCTI116T80ULR"]
+eastLRAirNames = ["MFCTI116MI17TransportLR","MFCTI116MI17LR","MFCTI116MI24LR","MFCTI116KA50LR","MFCTI116KA50AALR","MFCTI116SU25LR","MFCTI116SU25LGBLR"]
+
+eastSoldierImages = ["ivojak","islaw","isat","isaa","ismg","igrenadier","igrenadier","ivojak","isniper","imedic","iminer","isaboteur","icrew","ipilot"]
+eastLightImages = ["iuaz","\BRMD\ibrmd","iural","iuralfuel","ibmp_abu","izsu"]
+eastMiscImages = ["iuralrepair","iural","\BRMD\ibrmd"]
+eastHeavyImages = ["ibmp","ibmp","ibmp","it72","it72","it72","it80","it80","it80"]
+eastAirImages = ["imi17","imi17","imi24","Images\KA50.paa","Images\KA50.paa","\SU25\isu25","\SU25\isu25"]
+
+eastUnitNames = eastSoldierNames + eastLightNames + eastMiscNames + eastHeavyNames + eastAirNames
+eastLRUnitNames = eastSoldierNames + eastLRLightNames + eastMiscNames + eastLRHeavyNames + eastLRAirNames
+eastUnitImages = eastSoldierImages + eastLightImages + eastMiscImages + eastHeavyImages + eastAirImages
+eastUnitCosts = [soldierEastCost,soldierLAWEastCost,soldierATEastCost,soldierAAEastCost,soldierMGEastCost,soldierGrenadierEastCost,soldierHeavyGrenadierEastCost,soldierAK101EastCost,sniperEastCost,medicEastCost,soldierMinerEastCost,blackOpsEastCost,soldierCrewEastCost,soldierPilotEastCost,mannedUAZCost,mannedBRDMCost,mannedTruckEastCost,mannedFuelTruckEastCost,mannedAmbulanceEastCost,mannedShilkaCost,mannedRepairTruckEastCost,mannedAmmoTruckEastCost,mannedSalvageTruckEastCost,mannedBMPCost,mannedBMP2Cost,mannedBMP2ECost,mannedT72Cost,mannedT72ACost,mannedT72BCost,mannedT80Cost,mannedT80BCost,mannedT80UCost,mannedMI17TransportCost,mannedMI17Cost,mannedMI24Cost,mannedKA50Cost,mannedKA50AACost,mannedSU25Cost,mannedSU25LGBCost]
+eastUnmannedUnitCosts = [soldierEastCost,soldierLAWEastCost,soldierATEastCost,soldierAAEastCost,soldierMGEastCost,soldierGrenadierEastCost,soldierHeavyGrenadierEastCost,soldierAK101EastCost,sniperEastCost,medicEastCost,soldierMinerEastCost,blackOpsEastCost,soldierCrewEastCost,soldierPilotEastCost,UAZCost,BRDMCost,truckEastCost,fuelTruckEastCost,ambulanceEastCost,shilkaCost,repairTruckEastCost,ammoTruckEastCost,salvageTruckEastCost,BMPCost,BMP2Cost,BMP2ECost,T72Cost,T72ACost,T72BCost,T80Cost,T80BCost,T80UCost,MI17TransportCost,MI17Cost,MI24Cost,KA50Cost,KA50AACost,SU25Cost,SU25LGBCost]
+eastUnitBuildTimes = [soldierEastBuildTime,soldierLAWEastBuildTime,soldierATEastBuildTime,soldierAAEastBuildTime,soldierMGEastBuildTime,soldierGrenadierEastBuildTime,soldierHeavyGrenadierEastBuildTime,soldierAK101EastBuildTime,sniperEastBuildTime,medicEastBuildTime,soldierMinerEastBuildTime,blackOpsEastBuildTime,soldierCrewEastBuildTime,soldierPilotEastBuildTime,mannedUAZBuildTime,mannedBRDMBuildTime,mannedTruckEastBuildTime,mannedFuelTruckEastBuildTime,mannedAmbulanceEastBuildTime,mannedShilkaBuildTime,mannedRepairTruckEastBuildTime,mannedAmmoTruckEastBuildTime,mannedSalvageTruckEastBuildTime,mannedBMPBuildTime,mannedBMP2BuildTime,mannedBMP2EBuildTime,mannedT72BuildTime,mannedT72ABuildTime,mannedT72BBuildTime,mannedT80BuildTime,mannedT80BBuildTime,mannedT80UBuildTime,mannedMI17TransportBuildTime,mannedMI17BuildTime,mannedMI24BuildTime,mannedKA50BuildTime,mannedKA50AABuildTime,mannedSU25BuildTime,mannedSU25LGBBuildTime]
+eastUnitDescriptions = [Localize "STRSOLDIER",Localize "STRSOLDIERRPG",Localize "STRSOLDIERAT",Localize "STRSOLDIERAA",Localize "STRSOLDIERMG",Localize "STRGRENADIER",Localize "STRHEAVYGRENADIER",Localize "STRSOLDIERAK101",Localize "STRSNIPER",Localize "STRMEDIC",Localize "STRMINER",Localize "STRSPETZNATZ",Localize "STRTANKER",Localize "STRPILOT",Localize "STRUAZ",Localize "STRBRDM",Localize "STRURAL",Localize "STRFUELURAL",Localize "STRBMPAMBULANCE",Localize "STRSHILKA",Localize "STRREPAIRURAL",Localize "STRAMMOURAL",Localize "STRSALVAGEVEHICLE",Localize "STRBMP1",Localize "STRBMP2",Localize "STRBMP2E",Localize "STRT72",Localize "STRT72A",Localize "STRT72B",Localize "STRT80",Localize "STRT80B",Localize "STRT80U",Localize "STRMI17TRANSPORT",Localize "STRMI17",Localize "STRMI24",Localize "STRKA50",Localize "STRKA50AA",Localize "STRSU25",Localize "STRSU25LGB"]
+
+resistanceSoldierNames = ["SoldierGB","SoldierGLAW","SoldierGAT","SoldierGAA","SoldierGMG","SoldierGG","SoldierG","SoldierGNOG","SoldierGMedic","SoldierGSniper","OfficerG","OfficerGNight","SoldierGCrew","SoldierGPilot"]
+resistanceSoldierImages = ["ivojak","islaw","isat","isaa","ismg","igrenadier","ivojak","ivojak","imedic","isniper","ivojak","ivojak","icrew","ipilot"]
+resistanceSoldierCosts = [75,100,100,100,100,100,100,100,100,125,150,150,75,125]
+
+resistanceNames = resistanceSoldierNames + ["BMPRes","T55G","T72Res","T80Res"]
+resistanceImages = resistanceSoldierImages + ["ibmp","it55","it72","it80"]
+resistanceUnitCosts = resistanceSoldierCosts + [BMPCost,850,T72Cost,T80Cost]
+resistanceUnmannedUnitCosts = [75,100,100,100,100,100,100,100,100,125,150,150,75,125,BMPCost,850,T72Cost,T80Cost]
+resistanceBuildTimes = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+resistanceUnitDescriptions = [Localize "STRSOLDIER",Localize "STRSOLDIERRPG",Localize "STRSOLDIERAT",Localize "STRSOLDIERAA",Localize "STRSOLDIERMG",Localize "STRSOLDIER",Localize "STRSOLDIER",Localize "STRSOLDIER",Localize "STRMEDIC",Localize "STRSNIPER",Localize "STROFFICER",Localize "STROFFICER",Localize "STRSOLDIER",Localize "STRPILOT",Localize "STRRESISTANCEBMP1",Localize "STRT55",Localize "STRRESISTANCET72",Localize "STRRESISTANCET80"]
+
+miscSoldierNames = ["Civilian","OfficerW","OfficerE"]
+miscSoldierImages = ["icivil","ivojak","ivojak"]
+miscSoldierCosts = [300,400,400]
+
+miscNames = miscSoldierNames + ["MFCTI116WestMobileHQ","MFCTI116EastMobileHQ"]
+miscImages = miscSoldierImages + ["\M2A2\im2a2","ibmp"]
+miscUnitCosts = miscSoldierCosts + [10000,10000]
+miscUnmannedUnitCosts = [300,400,400,10000,10000]
+miscBuildTimes = [workerBuildTime,0,0,0,0]
+miscUnitDescriptions = [Localize "STRWORKER",Localize "STRWESTCOMMANDER",Localize "STREASTCOMMANDER",Localize "STRWESTMHQ",Localize "STREASTMHQ"]
+
+;unitNames = westUnitNames + eastUnitNames
+unitNames = [""] + westUnitNames + eastUnitNames + resistanceNames + miscNames
+unitLRNames = [""] + westLRUnitNames + eastLRUnitNames + resistanceNames + miscNames
+unitImages = [""] + westUnitImages + eastUnitImages + resistanceImages + miscImages
+unitCosts = westUnitCosts + eastUnitCosts + resistanceUnitCosts + miscUnitCosts
+unmannedUnitCosts = westUnmannedUnitCosts + eastUnmannedUnitCosts + resistanceUnmannedUnitCosts + miscUnmannedUnitCosts
+unitBuildTimes = westUnitBuildTimes + eastUnitBuildTimes + resistanceBuildTimes + miscBuildTimes
+unitDescriptions = [""] + westUnitDescriptions + eastUnitDescriptions + resistanceUnitDescriptions + miscUnitDescriptions
+
+westUpgradedSoldierNames = ["SoldierWLAW","SoldierWAT","SoldierWAA","SoldierWG","MFCTI116HeavyGW","MFCTI116SoldierWSteyr","SoldierWSniper","SoldierWMiner","SoldierWCrew","SoldierWPilot"]
+westUpgradedBlackOpNames = ["SoldierWSaboteurDay"]
+westUpgradedLightNames = ["MFCTI116M113","MFCTI116Vulcan"]
+westUpgradedHeavyNames = ["MFCTI116M3A2","MFCTI116M60A3","MFCTI116M1","MFCTI116M1A1"]
+westUpgradedAirNames = ["MFCTI116CH47D","MFCTI116UH60","MFCTI116AH1","MFCTI116AH64","MFCTI116AH64AA","A10","A10LGB"]
+
+westUpgradedLRLightNames = ["MFCTI116M113LR","MFCTI116VulcanLR"]
+westUpgradedLRHeavyNames = ["MFCTI116M3A2LR","MFCTI116M60A3LR","MFCTI116M1LR","MFCTI116M1A1LR"]
+westUpgradedLRAirNames = ["MFCTI116CH47DLR","MFCTI116UH60LR","MFCTI116AH1LR","MFCTI116AH64LR","MFCTI116AH64AALR","MFCTI116A10LR","MFCTI116A10LGBLR"]
+
+eastUpgradedSoldierNames = ["SoldierELAW","SoldierEAT","SoldierEAA","SoldierEG","MFCTI116HeavyGrenadier","MFCTI116SoldierEAK101","SoldierESniper","SoldierEMiner","SoldierECrew","SoldierEPilot"]
+eastUpgradedBlackOpNames = ["SoldierESaboteurBizon"]
+eastUpgradedLightNames = ["MFCTI116Shilka"]
+eastUpgradedHeavyNames = ["MFCTI116BMP2E","MFCTI116T72A","MFCTI116T72B","MFCTI116T80","MFCTI116T80B","MFCTI116T80U"]
+eastUpgradedAirNames = ["MFCTI116MI17","MFCTI116MI24","MFCTI116KA50","MFCTI116KA50AA","Su25","MFCTI116SU25LGB"]
+
+eastUpgradedLRLightNames = ["MFCTI116ShilkaLR"]
+eastUpgradedLRHeavyNames = ["MFCTI116BMP2ELR","MFCTI116T72ALR","MFCTI116T72BLR","MFCTI116T80LR","MFCTI116T80BLR","MFCTI116T80ULR"]
+eastUpgradedLRAirNames = ["MFCTI116MI17LR","MFCTI116MI24LR","MFCTI116KA50LR","MFCTI116KA50AALR","MFCTI116SU25LR","MFCTI116SU25LGBLR"]
+
+resistanceUpgradedSoldierNames = []
+resistanceUpgradedFactoryNames = ["T72Res","T80Res"]
+
+;Names & available tranport crew positions available.
+
+westTransportNames = ["HMMWV","Jeep","JeepMG","M113Ambul","MFCTI116M113","Truck5t","MFCTI116M2A2","MFCTI116M3A2","MFCTI116UH60MG","MFCTI116CH47D","MFCTI116UH60","MFCTI116M113LR","MFCTI116M2A2LR","MFCTI116M3A2LR","MFCTI116UH60MGLR","MFCTI116CH47DLR","MFCTI116UH60LR"]
+westTransportPositions = [3,3,1,3,8,12,6,2,12,24,12,8,6,2,12,24,12]
+
+eastTransportNames = ["UAZ","BRDM","Ural","BMPAmbul","MFCTI116BMP1","MFCTI116BMP2","MFCTI116BMP2E","MFCTI116MI17Transport","MFCTI116MI17","MFCTI116MI24","MFCTI116BMP1LR","MFCTI116BMP2LR","MFCTI116BMP2ELR","MFCTI116MI17TransportLR","MFCTI116MI17LR","MFCTI116MI24LR"]
+eastTransportPositions = [3,3,12,2,8,6,6,12,12,8,8,6,6,12,12,8]
+
+westAircraftTransports = [UH60MGType,CH47DType]
+eastAircraftTransports = [MI17TransportType]
+
+westAssaultAircraft = [OH58Type,UH60Type,AH1Type,AH64Type,AH64AAType,A10Type,A10LGBType]
+eastAssaultAircraft = [MI17Type,MI24Type,KA50Type,KA50AAType,SU25Type,SU25LGBType]
+
+westBlackOps = blackOpsType
+
+lastWestSoldier = Count westSoldierNames
+lastWestLight = lastWestSoldier + Count westLightNames
+lastWestMisc = lastWestLight + Count westMiscNames
+lastWestHeavy = lastWestMisc + Count westHeavyNames
+lastWestAir = lastWestHeavy + Count westAirNames
+lastWestUnit = lastWestAir
+
+eastBlackOps = blackOpsEastType
+lastEastSoldier = lastWestAir + Count eastSoldierNames
+lastEastLight = lastEastSoldier + Count eastLightNames
+lastEastMisc = lastEastLight + Count eastMiscNames
+lastEastHeavy = lastEastMisc  + Count eastHeavyNames
+lastEastAir = lastEastHeavy + Count eastAirNames
+lastEastUnit = lastEastAir
+lastUnit = lastEastUnit
+
+lastResistanceSoldier = lastEastUnit + count resistanceSoldierNames
+lastResistanceVehicle = lastResistanceSoldier + 2
+
+;To solve the annoying CountType base class problem (all soldiers are returned as class Soldier.)
+soldierNames = westSoldierNames + eastSoldierNames + resistanceSoldierNames + miscSoldierNames
+soldierCosts = [soldierCost,soldierLAWCost,soldierATCost,soldierAACost,soldierMGCost,soldierGrenadierCost,soldierSteyrCost,sniperCost,medicCost,soldierMinerCost,blackOpsCost,soldierCrewCost,soldierPilotCost,soldierEastCost,soldierLAWEastCost,soldierATEastCost,soldierAAEastCost,soldierMGEastCost,soldierGrenadierEastCost,soldierHeavyGrenadierEastCost,soldierAK101EastCost,sniperEastCost,medicEastCost,soldierMinerEastCost,blackOpsEastCost,soldierCrewEastCost,soldierPilotEastCost] + resistanceSoldierCosts + miscSoldierCosts
+soldierTypes = [soldierType,soldierLAWType,soldierATType,soldierAAType,soldierMGType,soldierGrenadierType,soldierSteyrType,sniperType,medicType,soldierMinerType,blackOpsType,soldierCrewType,soldierPilotType,soldierEastType,soldierLAWEastType,soldierATEastType,soldierAAEastType,soldierMGEastType,soldierGrenadierEastType,soldierHeavyGrenadierEastType,soldierAK101EastType,sniperEastType,medicEastType,soldierMinerEastType,blackOpsEastType,soldierCrewEastType,soldierPilotEastType,lastEastUnit+1,lastEastUnit+2,lastEastUnit+3,lastEastUnit+4,lastEastUnit+5,lastEastUnit+6,lastEastUnit+7,lastEastUnit+8,lastEastUnit+9,lastEastUnit+10,lastEastUnit+11,lastEastUnit+12,lastEastUnit+13,lastEastUnit+14,lastEastUnit+19,lastEastUnit+20,lastEastUnit+21]
+
+structureNames = ["",Localize "STRBARRACKS",Localize "STRLIGHTVEHICLEFACTORY",Localize "STRHEAVYVEHICLEFACTORY",Localize "STRAIRFACTORY","","","","",Localize "STRCONTROLCENTER",Localize "STRAMMODEPOT",Localize "STRREPAIRDEPOT",Localize "STROBSERVATIONTOWER",Localize "STRHELICOPTERPAD",Localize "STRFIELDHOSPITAL",Localize "STRM2MG",Localize "STRM2STATION",Localize "STRM2FORTIFICATION",Localize "STRHEMG",Localize "STRHESTATION",Localize "STRHEFORTIFICATION",Localize "STRAAMG",Localize "STRAASTATION",Localize "STR120MORTAR",Localize "STRSANDBAGS",Localize "STRLARGEWALL","","",Localize "STRWEAPONSCRATE",Localize "STRAMMOCRATE",Localize "STRHEAVYWEAPONSCRATE",Localize "STRHEAVYAMMOCRATE"]
+structureCosts = [0,infantryFactoryCost,lightFactoryCost,heavyFactoryCost,airFactoryCost,0,0,0,0,controlCenterCost,ammoDepotCost,repairDepotCost,observationTowerCost,helicopterPadCost,fieldHospitalCost,M2GunCost,M2StationCost,M2FortificationCost,HEGunCost,HEStationCost,HEFortificationCost,AAGunCost,AAStationCost,mortarCost,sandbagCost,largeWallCost,0,0,weaponsCrateCost,ammoCrateCost,heavyWeaponsCrateCost,heavyAmmoCrateCost]
+
+upgradeNames = ["",Localize "STRINFANTRY",Localize "STRLIGHTVEHICLES",Localize "STRHEAVYVEHICLES",Localize "STRAIRCRAFT",Localize "STRBLACKOPS",Localize "STRACROCKETS",Localize "STRACAT",Localize "STRRADAR"]
+upgradeCosts = [0,upgradeInfantryCost,upgradeLightCost,upgradeHeavyCost,upgradeAirCost,upgradeBlackOpsCost,upgradeAircraftRocketsCost,upgradeAircraftATCost,upgradeRadarCost]
+upgradeTimes = [0,upgradeInfantryTime,upgradeLightTime,upgradeHeavyTime,upgradeAirTime,upgradeBlackOpsTime,upgradeAircraftRocketsTime,upgradeAircraftATTime,upgradeRadarTime]
+
+? (debug):upgradeTimes = [0,4,4,4,4,4,4,4]
+
+customTemplate = 0
+
+;West
+G3Type = 1
+G36Type = 2
+M16Type = 3
+M16GLType = 4
+M21Type = 5
+M4Type = 6
+M60MGType = 7
+MM1Type = 8
+MP5Type = 9
+SteyrType = 10
+XMSType = 11
+
+AAType = 1
+ATType = 2
+laserDesignatorType = 3
+LAWType = 4
+
+berettaType = 1
+glockType = 2
+
+;East
+GL6G30Type = 1
+AK47Type = 2
+AK47GLType = 3
+AK74Type = 4
+AK74GLType = 5
+AK74SUType = 6
+AK101Type = 7
+bizonType = 8
+PKType = 9
+DragunovType = 10
+
+skorpianType = 1
+tokarevType = 2
+
+;Both
+flareType = 0
+flareGreenType = 1
+flareRedType = 2
+flareYellowType = 3
+grenadeType = 4
+grenadeShellType = 5
+mineType = 6
+rifleMortarType = 7
+bombType = 8
+smokeGrenadeType = 9
+smokeGrenadeGreenType = 10
+smokeGrenadeRedType = 11
+
+westPrimaryWeapons = ["","HKG3","MFCTI116G36A","M16","M16GrenadeLauncher","M21","M4","M60","MFCTI116MM1","HK","MFCTI116Steyr","XMS"]
+westPrimaryNames = [Localize "STRNONE",Localize "STRG3",Localize "STRG36A",Localize "STRM16",Localize "STRM16GL",Localize "STRM21",Localize "STRM4",Localize "STRM60MG",Localize "STRMM1",Localize "STRMP5SD",Localize "STRSTEYR",Localize "STRXMS"]
+westPrimaryImages = ["","\O\Guns\w_HKG3","\G36A\w_g36","\dtaExt\equip\w\w_m16","\dtaExt\equip\w\w_M16GrenadeLauncher","\dtaExt\equip\w\w_m21","\dtaExt\equip\w\w_m4","\dtaExt\equip\w\w_m60","\MM-1\mm-1","\dtaExt\equip\w\w_hk","\Steyr\w_steyr","\XMS\w_XMS"]
+westPrimaryAmmo = ["","HKG3Mag","MFCTI116G36aMag","M16","M16","M21","M4","M60","MFCTI116MM1Mag","HK","MFCTI116SteyrMag","M4"]
+westPrimaryCosts = [0,15,50,15,25,65,20,30,40,25,45,35]
+westPrimaryAmmoCosts = [0,5,5,5,5,5,5,10,15,5,5,5]
+westPrimaryAmmoSpaces = [0,1,1,1,1,1,1,2,4,1,1,1]
+
+westSecondaryWeapons = ["","AALauncher","CarlGustavLauncher","LaserDesignator","LAWLauncher"]
+westSecondaryNames = [Localize "STRNONE",Localize "STRSTINGER",Localize "STRCARLGUSTAV",Localize "STRLASER",Localize "STRLAW"]
+westSecondaryImages = ["","\dtaExt\equip\w\w_aalauncher","\dtaExt\equip\w\w_carlgustavlauncher","\dtaExt\equip\w\w_carlgustavlauncher","\dtaExt\equip\w\w_lawlauncher"]
+westSecondaryAmmo = ["","AALauncher","CarlGustavLauncher","LaserDesignator","LAWLauncher"]
+westSecondaryCosts = [0,100,100,250,75]
+westSecondaryAmmoCosts = [0,75,75,0,40]
+westSecondaryAmmoSpaces = [0,6,6,6,2]
+
+westSidearms = ["","Beretta","Glock"]
+westSidearmNames = [Localize "STRNONE",Localize "STRBERETTA",Localize "STRGLOCK"]
+westSidearmImages = ["","\O\Guns\bereta","\O\Guns\Glock"]
+westSidearmAmmo = ["","BerettaMag","GlockMag"]
+westSidearmCosts = [0,5,5]
+westSidearmAmmoCosts = [0,1,1]
+
+eastPrimaryWeapons = ["","MFCTI1166G30","AK47","AK47GrenadeLauncher","Ak74","AK74GrenadeLauncher","Ak74Su","MFCTI116AK101","Bizon","PK","SVDDragunov"]
+eastPrimaryNames = [Localize "STRNONE",Localize "STR6G30",Localize "STRAK47",Localize "STRAK47GL",Localize "STRAK74",Localize "STRAK74GL",Localize "STRAK74SU",Localize "STRAK101",Localize "STRBIZON",Localize "STRPK",Localize "STRDRAGUNOV"]
+eastPrimaryImages = ["","\6G30\6g30","\dtaExt\equip\w\w_ak47","\dtaExt\equip\w\w_AK47GrenadeLauncher","\dtaExt\equip\w\w_AK74","\dtaExt\equip\w\w_AK74GrenadeLauncher","\dtaExt\equip\w\w_AK74su","\mfcti1.16\AK101.paa","\bizon\w_bizon","\dtaExt\equip\w\w_pk","\dtaExt\equip\w\w_svddragunov"]
+eastPrimaryAmmo = ["","MFCTI1166g30Mag","AK47","AK47","Ak74","Ak74","Ak74","MFCTI116AK101Mag","BizonMag","PK","SVDDragunov"]
+eastPrimaryCosts = [0,35,10,15,15,20,15,40,25,15,55]
+eastPrimaryAmmoCosts = [0,15,5,5,5,5,5,5,5,10,5]
+eastPrimaryAmmoSpaces = [0,2,1,1,1,1,1,1,1,2,1]
+
+eastSecondaryWeapons = ["","9K32Launcher","AT4Launcher","LaserDesignator","RPGLauncher"]
+eastSecondaryNames = [Localize "STRNONE",Localize "STR9K32",Localize "STRAT4",Localize "STRLASER",Localize "STRRPG"]
+eastSecondaryImages = ["","\dtaExt\equip\w\w_9k32launcher","\dtaExt\equip\w\w_at4launcher","\dtaExt\equip\w\w_carlgustavlauncher","\dtaExt\equip\w\w_rpglauncher"]
+eastSecondaryAmmo = ["","9K32Launcher","AT4Launcher","LaserDesignator","RPGLauncher"]
+eastSecondaryCosts = [0,100,100,250,75]
+eastSecondaryAmmoCosts = [0,75,75,0,40]
+eastSecondaryAmmoSpaces = [0,6,6,6,2]
+
+eastSidearms = ["","Skorpion","Tokarev"]
+eastSidearmNames = [Localize "STRNONE",Localize "STRSKORPIAN",Localize "STRTOKAREV"]
+eastSidearmImages = ["","\O\Guns\skorpion","\O\Guns\tokarev"]
+eastSidearmAmmo = ["","SkorpionMag","TokarevMag"]
+eastSidearmCosts = [0,5,5]
+eastSidearmAmmoCosts = [0,1,1]
+
+miscWeapons = ["Flare","FlareGreen","FlareRed","FlareYellow","HandGrenade","GrenadeLauncher","Mine","Mortar","Pipebomb","SmokeShell","SmokeShellGreen","SmokeShellRed"]
+miscNames = [Localize "STRFLARE",Localize "STRFLAREGREEN",Localize "STRFLARERED",Localize "STRFLAREYELLOW",Localize "STRGRENADE",Localize "STRGRENADESHELL",Localize "STRMINE",Localize "STRMORTAR",Localize "STRSATCHEL",Localize "STRSMOKE",Localize "STRSMOKEGREEN",Localize "STRSMOKERED"]
+miscImages = ["\dtaExt\equip\m\m_flare","\dtaExt\equip\m\m_flaregreen","\dtaExt\equip\m\m_flarered","\dtaExt\equip\m\m_flareyellow","\dtaExt\equip\m\m_handgrenade","\dtaExt\equip\m\m_grenadelauncher","\dtaExt\equip\m\m_mine","\dtaExt\equip\m\m_mortar","\dtaExt\equip\m\m_pipebomb","\dtaExt\equip\m\m_smokeshell","\dtaExt\equip\m\m_smokeshell","\dtaExt\equip\m\m_smokeshellred"]
+miscCosts = [2,2,2,2,2,2,10,5,10,2,2,2]
+miscSpaces = [1,1,1,1,1,2,2,2,2,1,1,1]
+
+;Store types of weapons & amounts for a custom loadout.
+customWeapons = [0,0,0,0,0]
+
+;Store amounts of each misc type for a custom loadout.
+customMisc = [0,0,0,0,0,0,0,0,0,0,0,0]
+
+miscEquipment = ["Binocular","NVGoggles"]
+miscEquipmentNames = ["Binoculars","NV Goggles"]
+miscEquipmentImages = ["\dtaExt\equip\w\w_binocular","\dtaExt\equip\w\w_nvgoggles"]
+miscEquipmentCosts = [5,15]
+
+westTemplateNames = [Localize "STRCUSTOM",Localize "STRG3LAW",Localize "STRG36LAW",Localize "STRM4LAW",Localize "STRM16AA",Localize "STRM16AT",Localize "STRM16LAW",Localize "STRM16GL",Localize "STRM21",Localize "STRM21LAW",Localize "STRM60MG",Localize "STRMM1",Localize "STRMP5SD",Localize "STRMP5SDBOMBS",Localize "STRMP5SDLASER",Localize "STRMP5SDLAW",Localize "STRSTEYRLAW",Localize "STRXMSLAW"]
+westTemplatePrimary = [0,G3Type,G36Type,M4Type,M16Type,M16Type,M16Type,M16GLType,M21Type,M21Type,M60MGType,MM1Type,MP5Type,MP5Type,MP5Type,MP5Type,steyrType,XMSType]
+westTemplatePrimaryAmmo = [0,5,5,5,4,4,5,4,8,6,4,2,8,4,4,6,5,5]
+westTemplateSecondary = [0,LAWType,LAWType,LAWType,AAType,ATType,LAWType,0,0,LAWType,0,0,0,0,laserDesignatorType,LAWType,LAWType,LAWType]
+westTemplateSecondaryAmmo = [0,2,2,2,1,1,2,0,0,2,0,0,0,0,1,2,2,2]
+westTemplateSidearms = [0,berettaType,berettaType,berettaType,berettaType,berettaType,berettaType,berettaType,berettaType,berettaType,berettaType,berettaType,berettaType,berettaType,berettaType,berettaType,berettaType,berettaType]
+westTemplateMisc = [0,grenadeType,grenadeType,grenadeType,0,0,grenadeType,grenadeShellType,smokeGrenadeType,0,grenadeType,smokeGrenadeType,smokeGrenadeType,bombType,0,0,grenadeType,grenadeType]
+westTemplateAmount = [0,1,1,1,0,0,1,3,2,0,2,2,2,3,0,0,1,1]
+westTemplateMisc1 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+westTemplateAmount1 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+westTemplateCosts = []
+
+eastTemplateNames = [Localize "STRCUSTOM",Localize "STR6G30",Localize "STRAK47RPG",Localize "STRAK47GL",Localize "STRAK74AA",Localize "STRAK74AT",Localize "STRAK74MINES",Localize "STRAK74RPG",Localize "STRAK74GL",Localize "STRAK74SU",Localize "STRBIZON",Localize "STRBIZONBOMBS",Localize "STRBIZONLASER",Localize "STRBIZONRPG",Localize "STRPK",Localize "STRAK101",Localize "STRAK101RPG",Localize "STRDRAGUNOV",Localize "STRDRAGUNOVRPG"]
+eastTemplatePrimary = [0,GL6G30Type,AK47Type,AK47GLType,AK74Type,AK74Type,AK74Type,AK74Type,AK74GLType,AK74SUType,bizonType,bizonType,bizonType,bizonType,PKType,AK101Type,AK101Type,dragunovType,dragunovType]
+eastTemplatePrimaryAmmo = [0,4,5,4,4,4,4,5,4,5,8,4,4,5,4,8,6,9,6]
+eastTemplateSecondary = [0,0,LAWType,0,AAType,ATType,0,LAWType,0,LAWType,0,0,laserDesignatorType,LAWType,0,0,LAWType,0,LAWType]
+eastTemplateSecondaryAmmo = [0,0,2,0,1,1,0,2,0,2,0,0,1,2,0,0,2,0,2]
+eastTemplateSidearms = [0,skorpianType,skorpianType,skorpianType,skorpianType,skorpianType,skorpianType,skorpianType,skorpianType,skorpianType,skorpianType,skorpianType,skorpianType,skorpianType,skorpianType,skorpianType,skorpianType,skorpianType,skorpianType]
+eastTemplateMisc = [0,smokeGrenadeType,grenadeType,grenadeShellType,0,0,mineType,grenadeType,grenadeShellType,grenadeType,smokeGrenadeType,bombType,0,grenadeType,grenadeType,grenadeType,0,smokeGrenadeType,0]
+eastTemplateAmount = [0,2,1,3,0,0,3,1,3,1,2,3,0,1,2,2,0,1,0]
+eastTemplateMisc1 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+eastTemplateAmount1 = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+eastTemplateCosts = []
+
+_count = 0
+_totalTemplates = Count westTemplateNames
+
+#CalculateWestTemplateCosts
+
+	_cost = (westPrimaryCosts Select (westTemplatePrimary Select _count)) + (westSecondaryCosts Select (westTemplateSecondary Select _count)) + (westSidearmCosts Select (westTemplateSidearms Select _count))
+	_cost = _cost + ((westPrimaryAmmoCosts Select (westTemplatePrimary Select _count)) * (westTemplatePrimaryAmmo Select _count))
+	_cost = _cost + ((westSecondaryAmmoCosts Select (westTemplateSecondary Select _count)) * (westTemplateSecondaryAmmo Select _count))
+	_cost = _cost + (((miscCosts Select (westTemplateMisc Select _count)) * (westTemplateAmount Select _count)) + ((miscCosts Select (westTemplateMisc1 Select _count)) * (westTemplateAmount1 Select _count)))
+
+	westTemplateCosts = westTemplateCosts + [_cost]
+	_count = _count + 1
+	? (_count < _totalTemplates):goto "CalculateWestTemplateCosts"
+
+_count = 0
+_totalTemplates = Count eastTemplateNames
+
+#CalculateEastTemplateCosts
+
+	_cost = (eastPrimaryCosts Select (eastTemplatePrimary Select _count)) + (eastSecondaryCosts Select (eastTemplateSecondary Select _count)) + (eastSidearmCosts Select (eastTemplateSidearms Select _count))
+	_cost = _cost + ((eastPrimaryAmmoCosts Select (eastTemplatePrimary Select _count)) * (eastTemplatePrimaryAmmo Select _count))
+	_cost = _cost + ((eastSecondaryAmmoCosts Select (eastTemplateSecondary Select _count)) * (eastTemplateSecondaryAmmo Select _count))
+	_cost = _cost + (((miscCosts Select (eastTemplateMisc Select _count)) * (eastTemplateAmount Select _count)) + ((miscCosts Select (eastTemplateMisc1 Select _count)) * (eastTemplateAmount1 Select _count)))
+
+	eastTemplateCosts = eastTemplateCosts + [_cost]
+	_count = _count + 1
+	? (_count < _totalTemplates):goto "CalculateEastTemplateCosts"
+
+;Music to play.
+songs = ["Track1","Track2","Track3","Track5","Track6","Track7","Track8","Track11","Track15","RTrack1a","RTrack4","RTrack5"]
+;base0Positions = [[0,0],[-23,33],[23,33],[-30,-40],[40,0],[0,0],[0,0],[0,0],[0,0],[0,29],[22,-40],[47,33],[0,0],[-47,33],[-68,76],[87,76],[-68,-85],[87,-85],[5,76],[5,-85],[-78,-3],[99,-4]]
+;base0Directions = [0,0,0,180,90,0,0,0,0,0,180,0,0,0,0,0,180,180,0,180,270,90]
+
+;Base templates
+base0Positions = [[0,0],[-23,33],[23,33],[-30,-40],[40,0],[0,0],[0,0],[0,0],[0,0],[0,29],[22,-40],[47,33],[0,0],[0,0],[-47,33],[-68,76],[87,76],[-68,-85],[87,-85],[5,76],[5,-85],[-78,-3],[99,-4],[-64,14],[-64,-17]]
+base0Directions = [0,0,0,180,90,0,0,0,0,0,180,0,0,0,0,0,0,180,180,0,180,270,90,270,270]
+
+base1Positions = [[0,0],[-35,-14],[-35,-44],[-8,45],[-9,-58],[0,0],[0,0],[0,0],[0,0],[-42,12],[29,-66],[28,45],[0,0],[0,0],[-35,32],[43,84],[-70,86],[-73,-105],[41,-103],[-17,87],[-26,-105],[-81,19],[49,21],[48,-22],[48,-45]]
+base1Directions = [0,270,270,0,180,0,0,0,0,270,180,0,0,0,270,0,0,180,180,0,180,270,90,90,90]
+
+base2Positions = [[0,0],[-20,-56],[-83,-54],[-81,-15],[19,-22],[0,0],[0,0],[0,0],[0,0],[-24,-18],[27,-59],[27,7],[0,0],[0,0],[-28,7],[72,53],[-90,53],[-90,-84],[72,-84],[-8,53],[-9,-84],[-99,9],[79,-8],[-24,39],[9,39]]
+base2Directions = [0,270,90,90,90,0,0,0,0,270,90,90,0,0,270,0,0,180,180,0,180,270,90,0,0]
+
+airBase0Positions = [[0,0],[-34,5],[-34,-24],[-9,66],[-93,68],[0,0],[0,0],[0,0],[0,0],[-30,31],[-97,-26],[-97,7],[0,0],[0,0],[-34,52],[34,135],[-91,135],[-88,-55],[36,-55],[-25,135],[-35,-55],[-99,96],[44,51],[34,70],[34,30]]
+airBase0Directions = [0,270,270,0,90,0,0,0,0,270,90,90,0,0,270,0,0,180,180,0,180,270,90,90,90]
+
+airBase1Positions = [[0,0],[-40,5],[-41,-17],[-1,66],[67,10],[0,0],[0,0],[0,0],[0,0],[-40,31],[26,-16],[24,38],[0,0],[0,0],[-40,52],[51,131],[-74,131],[-71,-59],[53,-59],[-9,131],[-11,-59],[-83,92],[61,47],[6,-47],[-28,-47]]
+airBase1Directions = [0,270,270,0,270,0,0,0,0,270,90,90,0,0,270,0,0,180,180,0,180,270,90,180,180]
+
+basePositions = [base0Positions,base1Positions,base2Positions,airBase0Positions,airBase1Positions]
+baseDirections = [base0Directions,base1Directions,base2Directions,airBase0Directions,airBase1Directions]
+airBase = [3,4]
+
+;Vehicle weapons that only use one magazine.
+singleReloads = ["MFCTI116M2A2MachineGun7_6","MFCTI116M60MachineGun7_6","MFCTI116M1MachineGun7_6","MFCTI116PKT","MFCTI116MI17MachineGun12_7","MFCTI116MI17MachineGun12_7","MFCTI116AH1MachineGun20","MFCTI116AH64MachineGun30","MFCTI116MI24MachineGun30","MFCTI116VulcanCannon","MFCTI116ShilkaCannon","Cannon25HE","MachineGun30A10","HellfireLauncherCobra","HellfireLauncherApach","MFCTI116AIM9Launcher","HellfireLauncherHind","MFCTI116AA11Launcher","HellfireLauncherKamov","MaverickLauncher","ZuniLauncherOH","ZuniLauncher38","Rocket57x64","MFCTI116Rocket80x40","LaserGuidedBombLauncher","MFCTI116EastLaserGuidedBombLauncher"]
+
+;Vehicle weapons that AI will use to fire at targets like the MHQ.
+AIMainWeapons = ["MFCTI116BMP1Gun","MFCTI116M60Gun","MFCTI116M1Gun","MFCTI116M1A1Gun","MFCTI116T72Gun","MFCTI116T72BGun","MFCTI116T80Gun","MFCTI116T80BGun","MFCTI116T80UGun","MFCTI116TOW2Launcher","MFCTI116AT3Launcher","MFCTI116AT5Launcher","MFCTI116AT5BLauncher","HellfireLauncherCobra","HellfireLauncherApach","MFCTI116AIM9Launcher","HellfireLauncherHind","MFCTI116AA11Launcher","HellfireLauncherKamov"]
+
+statsStarted = true

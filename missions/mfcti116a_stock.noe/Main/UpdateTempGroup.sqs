@@ -1,0 +1,21 @@
+;This routine insures that the temp groups can never be destroyed since the 1st member will be kept alive.
+;A temp group is where a unit is first created before joining it's own group or another.
+
+#Update
+~.5
+
+	;East's temp group.
+	_tempGroup = Units EastTempGroup
+	_temp = _tempGroup Select 0
+
+	;If death occurs perform a resurrection
+	? !(Alive _temp):_temp SetDammage 0
+
+	;West's temp group.
+	_tempGroup = Units WestTempGroup
+	_temp = _tempGroup Select 0
+
+	;If death occurs perform a resurrection
+	? !(Alive _temp):_temp SetDammage 0
+
+	goto "Update"

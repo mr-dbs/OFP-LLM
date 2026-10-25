@@ -1,0 +1,27 @@
+;Last modified 5/26/3
+;Add this to script caller.
+;Script usage:  [Location] exec "InitStartingLocations.sqs"
+
+? !(Local LocalServerObject):Exit
+
+_location = _this Select 0
+_firstTemplate = _this Select 1
+_lastTemplate = _this Select 2
+
+;The first town to be set should call this so the arrays are declared.
+? !(startedLocationsInit):goto "InitStartingLocations"
+
+#AddLocation
+
+startingLocations = startingLocations + [_location]
+firstTemplates = firstTemplates + [_firstTemplate]
+lastTemplates = lastTemplates + [_lastTemplate]
+
+Exit
+
+#InitStartingLocations
+
+startedLocationsInit = true
+startingLocations = [_location]
+firstTemplates = [_firstTemplate]
+lastTemplates = [_lastTemplate]

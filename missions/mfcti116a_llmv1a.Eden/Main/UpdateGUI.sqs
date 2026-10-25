@@ -1,0 +1,13 @@
+;Last modified 1/24/3
+;Script usage: [] Exec "UpdateGUI.sqs"
+
+_lastDialog = false
+
+#Update
+~.25
+
+	? (_lastDialog) && !(dialog):buildMenuInUse = false;resourceMenuInUse = false;repairBuildMenuInUse = false;optionsMenuInUse = false;infantryMenuInUse = false;menuInUse = false;controlCenterMenuInUse;commandMenuInUse = false
+
+	_lastDialog = dialog
+
+goto "Update"

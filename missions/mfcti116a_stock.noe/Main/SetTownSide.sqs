@@ -1,0 +1,38 @@
+;Last modified 4/15/3
+;Script usage:  [Unit,Town] Exec "SetTownSide.sqs"
+
+_units = _this Select 0
+_town = _this Select 1
+
+_count = 0
+_westUnits = 0
+_eastUnits = 0
+_resistanceUnits = 0
+_totalUnits = Count _units
+
+;Count qualifying units.
+#CountUnit
+
+	_unit = _units Select _count
+	_position = GetPos _unit
+	_count = _count + 1
+
+	? (Side _unit == west) && (_position Select 2 < 3):_westUnits = _westUnits + 1
+	? (Side _unit == east) && (_position Select 2 < 3):_eastUnits = _eastUnits + 1
+	? (Side _unit == resistance) && (_position Select 2 < 3):_resistanceUnits = _resistanceUnits + 1
+
+	? (_count < _totalUnits):goto "CountUnit"
+
+? (_westUnits > _eastUnits) && (_westUnits > _resistanceUnits):_side = 0;goto "SetTownSide"
+? (_eastUnits > _westUnits) && (_eastUnits > _resistanceUnits):_side = 1;goto "SetTownSide"
+? (_resistanceUnits > _westUnits) && (_resistanceUnits > _eastUnits):_side = 2;goto "SetTownSide"
+
+Exit
+
+#SetTownSide
+
+	@ !(setTown)
+
+	setTown = true;PublicVariable "setTownSide"
+	setTownSideTown = _town;PublicVariable "setTownSideTown"
+	setTownSide = _side;PublicVariable "setTownSide"

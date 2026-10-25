@@ -1,0 +1,24 @@
+;Last modified 5/21/3
+;Script usage:  [Group,true/false,Factory,Resources] Exec "BuyLightAA.sqs"
+;Use to make AI randomly purchase an AA.
+
+_side = _this Select 0
+_group = _this Select 1
+_teamPurchase = _this Select 2
+_factory = _this Select 3
+_resources = _this Select 4
+
+? (_side == east):goto "BuyEast"
+
+#BuyWest
+
+	_vehicleType = vulcanType
+	? !(westUpgradedLight) || (_resources < vulcanCost):Exit
+	[_side,_factory,_vehicleType,noScript,_group,_teamPurchase] Exec "Main\BuyVehicle.sqs"
+	Exit
+
+#BuyEast
+
+	_vehicleType = shilkaType
+	? !(eastUpgradedLight) || (_resources < shilkaCost):Exit
+	[_side,_factory,_vehicleType,noScript,_group,_teamPurchase] Exec "Main\BuyVehicle.sqs"

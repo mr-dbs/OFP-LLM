@@ -1,0 +1,25 @@
+;Last modified 11/21/2
+
+_count = 0
+_totalColumns = Count coordsColumn
+
+#GetManualWaypoint
+
+	_column = lbData[IDCCommandMenuWPColumn,lbCurSel IDCCommandMenuWPColumn]
+	_row = lbData[IDCCommandMenuWPRow,lbCurSel IDCCommandMenuWPRow]
+
+	_column1 = lbData[IDCCommandMenuPreciseWPColumn1,lbCurSel IDCCommandMenuPreciseWPColumn1]
+	_column2 = lbData[IDCCommandMenuPreciseWPColumn2,lbCurSel IDCCommandMenuPreciseWPColumn2]
+	_row1 = lbData[IDCCommandMenuPreciseWPRow1,lbCurSel IDCCommandMenuPreciseWPRow1]
+	_row2 = lbData[IDCCommandMenuPreciseWPRow2,lbCurSel IDCCommandMenuPreciseWPRow2]
+
+	? (_column == (coordsColumn Select _count)):commandWaypointColumn = _count
+	? (_row == (coordsRow Select _count)):commandWaypointRow = _count
+	? (_column1 == (coordsColumn Select _count)):commandPreciseWaypointColumn1 = _count
+	? (_column2 == (coordsColumn Select _count)):commandPreciseWaypointColumn2 = _count
+	? (_row1 == (coordsRow Select _count)):commandPreciseWaypointRow1 = _count
+	? (_row2 == (coordsRow Select _count)):commandPreciseWaypointRow2 = _count
+
+	_count = _count  + 1
+
+	? (_count < _totalColumns):goto "GetManualWaypoint"

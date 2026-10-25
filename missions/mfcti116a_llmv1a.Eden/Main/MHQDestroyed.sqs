@@ -1,0 +1,33 @@
+;Last modified 6/17/3
+;If someone from the same side destroys their MHQ let everyone know.
+;Script usage:  [[UnitKilled,Killer]] Exec "MHQDestroyed.sqs"
+;Script usage:  Unit AddEventHandler ["killed",{[_this,side] Exec "Main\UnitKilled.sqs"}]
+;Bug:  The game doesn't return a vehicle when this script is called by an event handler.
+;Bug:  The game doesn't return the victim's side properly.  Victim is always a civilian.
+
+_eventArray = _this Select 0
+_victim = _eventArray Select 0
+_killer = _eventArray Select 1
+_victimSide = _this Select 1
+_group = Group _killer
+
+? (_side == resistance) || (_side == civilian):Exit
+? (_killer == _victim):Exit
+
+;Determine side.  Side command cannot be relied on if unit has already been team-killing.
+_side = resistance
+? (_group In westGroups):_side = west
+? (_group In eastGroups):_side = east
+? (_side != _victimSide):Exit
+
+? (_group == WestCommanderTeam) || (_group == EastCommanderTeam):_groupValue = groupCommander
+? (_group == WestAlphaTeam) || (_group == EastAlphaTeam):_groupValue = groupAlpha
+? (_group == WestBravoTeam) || (_group == EastBravoTeam):_groupValue = groupBravo
+? (_group == WestCharlieTeam) || (_group == EastCharlieTeam):_groupValue = groupCharlie
+? (_group == WestDeltaTeam) || (_group == EastDeltaTeam):_groupValue = groupDelta
+? (_group == WestEchoTeam) || (_group == EastEchoTeam):_groupValue = groupEcho
+? (_group == WestFoxtrotTeam) || (_group == EastFoxtrotTeam):_groupValue = groupFoxtrot
+? (_group == WestGolfTeam) || (_group == EastGolfTeam):_groupValue = groupGolf
+? (_group == WestHotelTeam) || (_group == EastHotelTeam):_groupValue = groupHotel
+
+[_side,groupCommander,messageMHQFriendlyFire,_groupValue] Exec "Main\SendSideMessage.sqs"

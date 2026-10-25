@@ -1,0 +1,24 @@
+;Last modified 10/7/2
+
+;Puts in request to the server to subtract resources to a side.  Useful when dealing with lag.
+;Script Usage:  [Side,Amount] Exec "SubtractResources.sqs"
+
+_side = _this Select 0
+_amount = _this Select 1
+
+? (_side == east):goto "SubtractEastResources"
+
+#SubtractWestResources
+
+	;Wait until server has processed any other request.
+	@ (subtractWestResources == 0)
+
+	subtractWestResources = _amount;PublicVariable "subtractWestResources"
+	Exit
+
+#SubtractEastResources
+
+	;Wait until server has processed any other request.
+	@ (subtractEastResources == 0)
+
+	subtractEastResources = _amount;PublicVariable "subtractEastResources"

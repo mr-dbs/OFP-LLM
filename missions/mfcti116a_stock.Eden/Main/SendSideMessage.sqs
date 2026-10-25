@@ -1,0 +1,25 @@
+;Last modified 5/7/3
+;Script usage:  [Side,GroupNumber,MessageType,Value1,Value2] Exec "SendSideMessage.sqs"
+
+_side = _this Select 0
+_groupValue = _this Select 1
+_message = _this Select 2
+_value1 = _this Select 3
+_value2 = _this Select 4
+
+? (_side == east):goto "EastMessage"
+
+#WestMessage
+
+	westMessageValue1 = _value1;PublicVariable "westMessageValue1"
+	westMessageValue2 = _value2;PublicVariable "westMessageValue2"
+	westMessage = _message;PublicVariable "westMessage"
+	westPlayerMessageGroupFrom = _groupValue;PublicVariable "westPlayerMessageGroupFrom"
+	Exit
+
+#EastMessage
+
+	eastMessageValue1 = _value1;PublicVariable "eastMessageValue1"
+	eastMessageValue2 = _value2;PublicVariable "eastMessageValue2"
+	eastMessage = _message;PublicVariable "eastMessage"
+	eastPlayerMessageGroupFrom = _groupValue;PublicVariable "eastPlayerMessageGroupFrom"

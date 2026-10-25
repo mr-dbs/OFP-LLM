@@ -1,0 +1,280 @@
+;Last modified 1/30/4
+;Note that if _buildingList is an empty array then _deploymentLocation is used and there is no build time but twice the cost.
+;Script Usage:[Player,VehicleType,BuildingCreatedAt,true/false] Exec "AddVehicleToPlayer.sqs"
+
+_names = unitNames
+? (limitedRadar):_names = unitLRNames
+
+_unit = _this Select 0
+_unitType = _this Select 1
+_building = _this Select 2
+_mannedVehicle = _this Select 3
+_reinforce = _this Select 4
+_vehicle = _names Select _unitType
+_side = Side _unit
+_cost = unitCosts Select _unitType
+_unmannedCost = unmannedUnitCosts Select _unitType
+
+? (cheapTransportAC) && ((_unitType In westAircraftTransports) || (_unitType In eastAircraftTransports)):_cost = _cost * cheapTransportACMultiplier;_unmannedCost = _unmannedCost * cheapTransportACMultiplier
+? (expensiveAssaultAC) && ((_unitType In westAssaultAircraft) || (_unitType In eastAssaultAircraft)):_cost = _cost * expensiveAssaultACMultiplier;_unmannedCost = _unmannedCost * expensiveAssaultACMultiplier
+
+? (IsNull _building):Exit
+? (!_mannedVehicle):_cost = _unmannedCost
+
+_buildTime = unitBuildTimes Select _unitType
+_group = Group _unit
+
+;Determine crew needed for vehicle.
+_driver = ""
+_gunner = ""
+_commander = ""
+_driverCost = 0
+_gunnerCost = 0
+_commanderCost = 0
+
+? (_side != west) && (_side != east) && !(_reinforce):Hint Localize "STRTRAITORS";Exit
+
+;If no unit was passed then create an empty vehicle.
+? (!_mannedVehicle):goto "CheckGroupSize"
+
+? (_unitType In westUnarmed):_driver = _names Select soldierType;_driverCost = unitCosts Select soldierType
+
+;Make the driver a medic for an ambulance.
+? (_unitType == ambulanceType):_driver = _names Select medicType;_driverCost = unitCosts Select medicType
+? (_unitType In westLight):_driver = _names Select soldierType;_driverCost = unitCosts Select soldierType;_gunner = _names Select soldierType;_gunnerCost = unitCosts Select soldierType
+? (_unitType In westHeavy):_driver = _names Select soldierType;_driverCost = unitCosts Select soldierType;_gunner = _names Select soldierType;_gunnerCost = unitCosts Select soldierType;_commander = _names Select soldierType;_commanderCost = unitCosts Select soldierType
+? (_unitType In westAir):_driver = _names Select soldierPilotType;_driverCost = unitCosts Select soldierPilotType;_gunner = _names Select soldierPilotType;_gunnerCost = unitCosts Select soldierPilotType
+? (_unitType In westOneManAir):_driver = _names Select soldierPilotType;_driverCost = unitCosts Select soldierPilotType
+
+? (_unitType In eastUnarmed):_driver = _names Select soldierEastType;_driverCost = unitCosts Select soldierEastType
+
+;Make the driver a medic for an ambulance.
+? (_unitType == ambulanceEastType):_driver = _names Select medicEastType;_driverCosts = unitCosts Select medicEastType
+
+? (_unitType In eastLight):_driver = _names Select soldierEastType;_driverCost = unitCosts Select soldierEastType;_gunner = _names Select soldierEastType;_gunnerCost = unitCosts Select soldierEastType
+? (_unitType In eastHeavy):_driver = _names Select soldierEastType;_driverCost = unitCosts Select soldierEastType;_gunner = _names Select soldierEastType;_gunnerCosts = unitCosts Select soldierEastType;_commander = _names Select soldierEastType;_commanderCost = unitCosts Select soldierEastType
+? (_unitType In eastAir):_driver = _names Select soldierPilotEastType;_driverCost = unitCosts Select soldierPilotEastType;_gunner = _names Select soldierPilotEastType;_gunnerCost = unitCosts Select soldierPilotEastType
+? (_unitType In eastOneManAir):_driver = _names Select soldierPilotEastType;_driverCost = unitCosts Select soldierPilotEastType
+
+;Determine maximum size that group may be and still allow vehicle & crew to be added.
+#CheckGroupSize
+
+_maxSize = 12
+
+? (_driver != ""):_maxSize = _maxSize - 1
+? (_gunner != ""):_maxSize = _maxSize - 1
+? (_commander != ""):_maxSize = _maxSize - 1
+
+? (_reinforce):goto "CheckSize"
+
+? (GetDammage _building == 1):Exit
+? !(_building In buildingsBuilt):Hint(Localize "STRBUILDINGNOTINARRAY")
+? (_building In buildingsInUse):[_unitType,_building,_mannedVehicle,ObjNull] Exec "Main\AddToQueue.sqs";Exit
+
+? (_unit != Leader WestCommanderTeam) && (_unit != Leader EastCommanderTeam):goto "CheckPlayerResources"
+
+_resources = westResources
+
+? (_side == east):_resources = eastResources
+
+#CheckResources
+
+	_needed = _cost - _resources
+
+	? (_needed > 0):_error = Format["%1  (%2 $%3 %4.)",Localize "STRNOTENOUGHRESOURCES",Localize "STRNEED",_needed,Localize "STRMORE"];Hint(_error);Exit
+
+;Do not exceed max group size.
+? (Count Units _group > _maxSize):Hint Localize "STRCANTREINFORCE";Exit
+? (_side == east):goto "CheckEastVehicleTotal"
+
+#CheckWestVehicleTotal
+
+	;Wait until server has finished any other requests.
+	@ (!countWestVehicles)
+
+	;Request server does a vehicle count.
+	countWestVehicles = true;PublicVariable "countWestVehicles"
+
+	;Wait until server has finished request.
+	@ (!countWestVehicles)
+
+	;If the the total vehicle count is too high then exit now.
+	? (totalWestVehicles >= maxVehicles):player SideChat Localize "STRCANTCREATEMORE";Exit
+
+	goto "SubtractResources"
+
+#CheckEastVehicleTotal
+
+	;Wait until server has finished any other requests.
+	@ (!countEastVehicles)
+
+	;Request server does a vehicle count.
+	countEastVehicles = true;PublicVariable "countEastVehicles"
+
+	;Wait until server has finished request.
+	@ (!countEastVehicles)
+
+	;If the the total vehicle count is too high then exit now.
+	? (totalEastVehicles >= maxVehicles):player SideChat Localize "STRCANTCREATEMORE";Exit
+
+#SubtractResources
+
+	[Group _unit,_cost] Exec "Main\SubtractTeamResources.sqs"
+
+[_unit,_cost / purchaseValuePerPoint] Exec "Main\AddPlayerPoints.sqs"
+
+;Wait until a previous building lock is done.
+? (_side == east):goto "WaitForEast"
+
+@ !(westRequestBuildingInUseMP)
+westRequestBuildingInUseMP = true;PublicVariable "westRequestBuildingInUseMP"
+goto "SetBuildingInUse"
+
+#WaitForEast
+
+@ !(eastRequestBuildingInUseMP)
+eastRequestBuildingInUseMP = true;PublicVariable "eastRequestBuildingInUseMP"
+
+;This locks the building from other players until construction is complete.
+#SetBuildingInUse
+
+? (_side == west):westBuildingInUseMP = _building;PublicVariable "westBuildingInUseMP"
+? (_side == west):westBuildingInUseStateMP = true;PublicVariable "westBuildingInUseStateMP"
+
+? (_side == east):eastBuildingInUseMP = _building;PublicVariable "eastBuildingInUseMP"
+? (_side == east):eastBuildingInUseStateMP = true;PublicVariable "eastBuildingInUseStateMP"
+
+;Wait until the unit is built.
+~_buildTime
+
+? (_side == west):westBuildingInUseMP = _building;PublicVariable "westBuildingInUseMP"
+? (_side == west):westBuildingInUseStateMP = false;PublicVariable "westBuildingInUseStateMP"
+
+? (_side == east):eastBuildingInUseMP = _building;PublicVariable "eastBuildingInUseMP"
+? (_side == east):eastBuildingInUseStateMP = false;PublicVariable "eastBuildingInUseStateMP"
+
+;If the building was destroyed while unit was being built then exit now.
+? (GetDammage _building == 1):Exit
+
+#CheckSize
+
+_createEmpty = false
+
+;If the group has grown beyond size-limit since construction started then exit.
+? (Count Units _group > _maxSize):_createEmpty = true
+
+;Create vehicle.
+#CreateVehicle
+
+_direction = (GetDir _building + 180) % 360
+_distance = 14
+
+;Place aircraft a little further from their factories.
+? (_vehicle In westAirNames)||(_vehicle In eastAirNames):_distance = 25
+? (_vehicle In westLRAirNames)||(_vehicle In eastLRAirNames):_distance = 25
+? (_unitType In westOneManAir) || (_unitType In eastOneManAir):_distance = 35
+
+_destination = [(GetPos _building Select 0)+((sin _direction)*_distance),(GetPos _building Select 1)+((cos _direction)*_distance),GetPos _building Select 2]
+_newVehicle = ObjNull
+_newVehicle = _vehicle CreateVehicle _destination
+_direction = (GetDir _building + 90) % 360
+_newVehicle SetDir _direction
+
+~.1
+@ (!IsNull _newVehicle)
+
+[_newVehicle,_side,_group] Exec "Main\VehicleCleanUp.sqs"
+[_side,_vehicle,_newVehicle] Exec "Main\AddVehicleToServerList.sqs"
+[_newVehicle,_unitType,_side] Exec "Loadouts\EquipVehicle.sqs"
+
+;If no unit was passed (empty vehicle) then don't create a crew.
+? (!_mannedVehicle):goto "Debug"
+? (_driver == "")||(_createEmpty):goto "CreateGunner"
+
+#CreateDriver
+
+	;Create a driver.
+	_driver CreateUnit [_destination,_group,"newDriver = this",1,"PRIVATE"]
+	~0.1
+	newDriver MoveInDriver _newVehicle
+	[newDriver,_driverCost * bountyPercentage] Exec "Main\UnitCleanUp.sqs"
+
+#CreateGunner
+
+	? (_gunner == "")||(_createEmpty):goto "CreateCommander"
+
+	;Create a gunner.
+	_gunner CreateUnit [_destination,_group,"newGunner = this",1,"PRIVATE"]
+	~0.1
+	newGunner MoveInGunner _newVehicle
+	[newGunner,_gunnerCost * bountyPercentage] Exec "Main\UnitCleanUp.sqs"
+
+#CreateCommander
+
+	? (_commander == "")||(_createEmpty):goto "Debug"
+
+	;Create a commander.
+	_commander CreateUnit [_destination,_group,"newCommander = this",1,"PRIVATE"]
+	~0.1
+	newCommander MoveInCommander _newVehicle
+	[newCommander,_commanderCost * bountyPercentage] Exec "Main\UnitCleanUp.sqs"
+
+#Debug
+~0.5
+
+	;Wait until any previous notifications of created salvage, ammo, & repair trucks are complete.
+	@ (IsNull westSalvageTruck) && (IsNull eastSalvageTruck)
+	@ (IsNull westAmmoTruck) && (IsNull eastAmmoTruck)
+	@ (IsNull westRepairTruck) && (IsNull eastRepairTruck)
+
+	;If new vehicle is a salvage, ammo, or repair truck post it to the server.
+	? (_unitType == salvageTruckType):westSalvageTruck = _newVehicle;PublicVariable "westSalvageTruck"
+	? (_unitType == salvageTruckEastType):eastSalvageTruck = _newVehicle;PublicVariable "eastSalvageTruck"
+
+	? (_unitType == ammoTruckType):westAmmoTruck = _newVehicle;PublicVariable "westAmmoTruck"
+	? (_unitType == ammoTruckEastType):eastAmmoTruck = _newVehicle;PublicVariable "eastAmmoTruck"
+
+	? (_unitType == repairTruckType):westRepairTruck = _newVehicle;PublicVariable "westRepairTruck"
+	? (_unitType == repairTruckEastType):eastRepairTruck = _newVehicle;PublicVariable "eastRepairTruck"
+
+	? (debug):_message = Format["%1 (%2) built at %3 (%4).",_vehicle,_newVehicle,_building,_buildingName]
+	? (debug):player GlobalChat (_message)
+
+#AddMarker
+
+	? (_side == west):westUnitBuiltMP = _newVehicle;PublicVariable "westUnitBuiltMP"
+	? (_side == east):eastUnitBuiltMP = _newVehicle;PublicVariable "eastUnitBuiltMP"
+
+Exit
+
+#CheckPlayerResources
+
+	_resources = 0
+
+	? (_side == east):goto "CheckEastPlayerResources"
+
+#CheckWestPlayerResources
+
+	? (_unit == Leader WestAlphaTeam):_resources = westAlphaResources;goto "CheckResources"
+	? (_unit == Leader WestBravoTeam):_resources = westBravoResources;goto "CheckResources"
+	? (_unit == Leader WestCharlieTeam):_resources = westCharlieResources;goto "CheckResources"
+	? (_unit == Leader WestDeltaTeam):_resources = westDeltaResources;goto "CheckResources"
+	? (_unit == Leader WestEchoTeam):_resources = westEchoResources;goto "CheckResources"
+	? (_unit == Leader WestFoxtrotTeam):_resources = westFoxtrotResources;goto "CheckResources"
+	? (_unit == Leader WestGolfTeam):_resources = westGolfResources;goto "CheckResources"
+	? (_unit == Leader WestHotelTeam):_resources = westHotelResources;goto "CheckResources"
+
+	Exit
+
+#CheckEastPlayerResources
+
+	? (_unit == Leader EastAlphaTeam):_resources = eastAlphaResources;goto "CheckResources"
+	? (_unit == Leader EastBravoTeam):_resources = eastBravoResources;goto "CheckResources"
+	? (_unit == Leader EastCharlieTeam):_resources = eastCharlieResources;goto "CheckResources"
+	? (_unit == Leader EastDeltaTeam):_resources = eastDeltaResources;goto "CheckResources"
+	? (_unit == Leader EastEchoTeam):_resources = eastEchoResources;goto "CheckResources"
+	? (_unit == Leader EastFoxtrotTeam):_resources = eastFoxtrotResources;goto "CheckResources"
+	? (_unit == Leader EastGolfTeam):_resources = eastGolfResources;goto "CheckResources"
+	? (_unit == Leader EastHotelTeam):_resources = eastHotelResources;goto "CheckResources"
+
+	Exit

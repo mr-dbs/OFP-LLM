@@ -1,0 +1,33 @@
+;Last modified 11/11/3
+
+_side = _this Select 0
+
+? (_side == east):goto "AddToEast"
+
+#AddToWest
+
+	_unitType = addToWestPlayerUnit
+	_building = addToWestPlayerBuilding
+
+	addToWestPlayer = ObjNull;PublicVariable "addToWestPlayer"
+	addToWestPlayerUnit = 0;PublicVariable "addToWestPlayerUnit"
+	addToWestPlayerBuilding = ObjNull;PublicVariable "addToWestPlayerBuilding"
+
+	? (_unitType <= lastWestSoldier):[player,_unitType,_building,true] Exec "Main\AddUnitToPlayer.sqs";Exit
+
+	[player,_unitType,_building,true,true] Exec "Main\AddVehicleToPlayer.sqs"
+
+	Exit
+
+#AddToEast
+
+	_unitType = addToEastPlayerUnit
+	_building = addToEastPlayerBuilding
+
+	addToEastPlayer = ObjNull;PublicVariable "addToEastPlayer"
+	addToEastPlayerUnit = 0;PublicVariable "addToEastPlayerUnit"
+	addToEastPlayerBuilding = ObjNull;PublicVariable "addToEastPlayerBuilding"
+
+	? (_unitType <= lastEastSoldier):[player,_unitType,_building,true] Exec "Main\AddUnitToPlayer.sqs";Exit
+
+	[player,_unitType,_building,true,true] Exec "Main\AddVehicleToPlayer.sqs"

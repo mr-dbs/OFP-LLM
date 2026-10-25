@@ -1,0 +1,16 @@
+;Last modified 1/26/3
+;Script usage:  [Side,Town,true/false] Exec "SetTownAreaSide.sqs"
+
+_side = _this Select 0
+_town = _this Select 1
+_setSide = _this Select 2
+
+? (_side == west):_sideValue = 0
+? (_side == east):_sideValue = 1
+
+@ !(setTownArea)
+
+setTownArea = true;PublicVariable "setTownArea"
+setTownAreaTown = _town;PublicVariable "setTownAreaTown"
+setTownAreaSide = _sideValue;PublicVariable "setTownAreaSide"
+setTownAreaSet = _setSide;PublicVariable "setTownAreaSet"

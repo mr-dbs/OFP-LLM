@@ -1,0 +1,61 @@
+;Last modified 8/30/3
+
+;Puts in request to the server to add resources to a unit's team.
+;Script Usage:  [Unit,Amount] Exec "AddResourcesToTeam.sqs"
+
+_unit = _this Select 0
+_amount = _this Select 1
+_group = Group _unit
+_side = Side _group
+
+? (_group != WestCommanderTeam) && (_group != EastCommanderTeam):goto "AddTeamResources"
+? (_side == east):goto "AddEastResources"
+? (_side != west):Exit
+
+#AddWestResources
+
+	;Wait until server has processed any other request.
+	@ (addWestResources == 0)
+
+	addWestResources = _amount;PublicVariable "addWestResources"
+	Exit
+
+#AddEastResources
+
+	;Wait until server has processed any other request.
+	@ (addEastResources == 0)
+
+	addEastResources = _amount;PublicVariable "addEastResources"
+	Exit
+
+#AddTeamResources
+
+	_groupValue = -1
+
+	? (_group == WestCommanderTeam) || (_group == EastCommanderTeam):_groupValue = groupCommander
+	? (_group == WestAlphaTeam) || (_group == EastAlphaTeam):_groupValue = groupAlpha
+	? (_group == WestBravoTeam) || (_group == EastBravoTeam):_groupValue = groupBravo
+	? (_group == WestCharlieTeam) || (_group == EastCharlieTeam):_groupValue = groupCharlie
+	? (_group == WestDeltaTeam) || (_group == EastDeltaTeam):_groupValue = groupDelta
+	? (_group == WestEchoTeam) || (_group == EastEchoTeam):_groupValue = groupEcho
+	? (_group == WestFoxtrotTeam) || (_group == EastFoxtrotTeam):_groupValue = groupFoxtrot
+	? (_group == WestGolfTeam) || (_group == EastGolfTeam):_groupValue = groupGolf
+	? (_group == WestHotelTeam) || (_group == EastHotelTeam):_groupValue = groupHotel
+
+	? (_side == east):goto "AddEastTeamResources"
+
+#AddWestTeamResources
+
+	@ (addWestResourcesToTeam == -1)
+
+	addWestResourcesToTeam = _groupValue;PublicVariable "addWestResourcesToTeam"
+	addWestResourcesToTeamAmount = _amount;PublicVariable "addWestResourcesToTeamAmount"
+
+	Exit
+
+#AddEastTeamResources
+
+	@ (addEastResourcesToTeam == -1)
+
+	addEastResourcesToTeam = _groupValue;PublicVariable "addEastResourcesToTeam"
+	addEastResourcesToTeamAmount = _amount;PublicVariable "addEastResourcesToTeamAmount"

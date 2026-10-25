@@ -1,0 +1,66 @@
+;Last modified 4/27/3
+;Script usage:  [] Exec "SetTownSideServer.sqs"
+
+;Only run this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = "West"
+? (setTownSide == 1):_side = "East"
+? (setTownSide == 2):_side = "N/A"
+
+_count = 0
+_totalTowns = Count towns
+
+;Find the town in list that matches setTownSideTown.
+#FindTown
+
+	? ((towns Select _count) == setTownSideTown):goto "SetSide"
+
+	_count = _count + 1
+
+	? (_count < _totalTowns):goto "FindTown"
+
+;	Hint ("ERROR:  Could not set town's side.  Town was not found on list!")
+	goto "Clear"
+
+;Set town's side.
+#SetSide
+
+	;If the town is already owned by the proper side then exit the script.
+	_lastSide = townSides Select _count
+	_lastSideValue = -1
+
+	? (_lastSide == "West"):_lastSideValue = 0
+	? (_lastSide == "East"):_lastSideValue = 1
+	? (_lastSide == "N/A"):_lastSideValue = 2
+
+	? (_lastSide == _side):goto "Clear"
+
+	townSides Set [_count,_side]
+
+	? (_lastSide == "West"):townWestTimes Set [_count,time]
+	? (_lastSide == "East"):townEastTimes Set [_count,time]
+
+	;Set the flag graphics to the appropriate side.
+	? (_side == "West"):setTownSideTown SetFlagTexture "usa_vlajka.pac"
+	? (_side == "East"):setTownSideTown SetFlagTexture "rus_vlajka.pac"
+	? (_side == "N/A"):setTownSideTown SetFlagTexture ""
+
+	? (setTownSide == 0):setTownSideTown SetFlagSide west
+	? (setTownSide == 1):setTownSideTown SetFlagSide east
+	? (setTownSide == 2):setTownSideTown SetFlagSide resistance
+
+	setTownSideTown SetFlagOwner ObjNull
+
+	setTownMP = setTownSideTown;PublicVariable "setTownMP"
+	setTownSideMP = setTownSide;PublicVariable "setTownSideMP"
+	setTownIndexMP = _count;PublicVariable "setTownIndexMP"
+	setTownLastSideMP = _lastSideValue;PublicVariable "setTownLastSideMP"
+
+	? (_side == "West"):[west,setTownMP,_count] Exec "Main\AwardTownBounty.sqs"
+	? (_side == "East"):[east,setTownMP,_count] Exec "Main\AwardTownBounty.sqs"
+
+#Clear
+
+	setTownSideTown = ObjNull;PublicVariable "setTownSideTown"
+	setTown = false;PublicVariable "setTown"

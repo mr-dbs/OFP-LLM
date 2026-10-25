@@ -1,0 +1,146 @@
+;Last modified 9/4/3
+
+_commanderTeam = EastCommanderTeam;_mobileHQ = EastMobileHQ;_text = Localize "STRWESTWINS"
+? (eastWinsGame):_commanderTeam = WestCommanderTeam;_mobileHQ = WestMobileHQ;_text = Localize "STREASTWINS"
+
+;If team points are current or not being executed on server then skip delay.
+? (pointsToWin > 0) || !(Local LocalServerObject):goto "PlayMusic"
+
+;Wait a while for player scores to be transmitted.
+~3
+
+#PlayMusic
+
+	PlayMusic ["Track12",0]
+
+;Wait until server has finished any other score requests.
+@ (!requestScore)
+
+;Request server does a score calculation.
+requestScore = true;PublicVariable "requestScore"
+
+;Wait until server has finished current request.
+@ (!requestScore)
+
+_return = "SetCamera"
+goto "InitDialog"
+
+#SetCamera
+
+	_camera = "camera" CamCreate GetPos Leader (_commanderTeam)
+	_camera cameraEffect["Internal","Back"]
+	_camera CamSetFOV 1
+
+	_cameraCount = 0
+
+;Create a cinematic sequence of the loser's destroyed remains.
+#CameraLoop
+
+	_cameraCount = _cameraCount + 1
+
+	? (_cameraCount > 2):goto "TheEnd"
+
+	;Show the losing commander.
+	_camera CamSetTarget Leader (_commanderTeam)
+	_camera CamSetRelPos[0,0,20]
+	_camera camCommit 0
+
+	;Wait for the camera to be commited before continuing.
+	@CamCommitted _camera
+
+	_camera CamSetRelPos[0,0,5]
+	_camera camCommit 5
+
+	@CamCommitted _camera
+
+	;Show the Mobile HQ.
+	_camera CamSetTarget _mobileHQ
+	_camera CamSetRelPos[5,5,5]
+	_camera camCommit 0
+
+	@CamCommitted _camera
+
+	_camera CamSetRelPos[10,20,20]
+	_camera camCommit 5
+
+	@CamCommitted _camera
+
+	? !(dialog):_return = "CameraBarracks";goto "InitDialog"
+
+	#CameraBarracks
+
+	? !(IsNull loserBarracks):_return = "CameraLight";_building = loserBarracks;goto "CameraBuilding"
+
+	#CameraLight
+
+	? !(IsNull loserLight):_return = "CameraHeavy";_building = loserLight;goto "CameraBuilding"
+
+	#CameraHeavy
+
+	? !(IsNull loserHeavy):_return = "CameraAir";_building = loserHeavy;goto "CameraBuilding"
+
+	#CameraAir
+
+	? !(IsNull loserAir):_return = "CameraLoop";_building = loserAir;goto "CameraBuilding"
+
+	? !(dialog):_return = "CameraLoop";goto "InitDialog"
+
+	goto "CameraLoop"
+
+	;Have the camera pan around a building.
+	#CameraBuilding
+
+		_camera CamSetTarget _building
+		_camera CamSetRelPos[10,10,10]
+		_camera camCommit 0
+
+		@CamCommitted _camera
+
+		_camera CamSetRelPos[Random 30 - 15,Random 30 - 15,Random 20 + 5]
+		_camera camCommit 5
+
+		@CamCommitted _camera
+
+	goto _return
+
+#TheEnd
+
+	closeDialog 0
+	[] Exec "Main\DisplayCredits.sqs"
+
+	~10
+
+	"1" ObjStatus "DONE"
+	"2" ObjStatus "DONE"
+
+	~1
+
+	gameOver = true
+	ForceEnd
+
+#InitDialog
+
+	closeDialog 0
+	_endOfGameDialog = CreateDialog "EndOfGame"
+
+	CtrlSetText [IDCMenuInfo,_text]
+
+	CtrlSetText [IDCMenuList,Format["%1",totalWestCasualties]]
+	CtrlSetText [IDCMenuList + 1,Format["%1",totalWestVehiclesLost]]
+	CtrlSetText [IDCMenuList + 2,Format["%1",totalEastCasualties]]
+	CtrlSetText [IDCMenuList + 3,Format["%1",totalEastVehiclesLost]]
+	CtrlSetText [IDCMenuList + 4,Format["%1",totalResistanceCasualties]]
+	CtrlSetText [IDCMenuList + 5,Format["%1",totalResistanceVehiclesLost]]
+	CtrlSetText [IDCMenuList + 6,Format["%1",totalCivilianCasualties]]
+	CtrlSetText [IDCMenuList + 7,Format["%1",totalCivilianVehiclesLost]]
+
+	CtrlSetText [IDCWestResources,Format["%1: %2",Localize "STRWESTRESOURCES",westResources]]
+	CtrlSetText [IDCWestIncome,Format["%1: %2",Localize "STRWESTTOTALINCOME",westIncome]]
+	CtrlSetText [IDCWestPoints,Format["%1: %2",Localize "STRWESTPOINTS",westTotalPoints]]
+	CtrlSetText [IDCWestTownsHeld,Format["%1: %2",Localize "STRWESTTOWNSHELD",westTownsHeld]]
+	CtrlSetText [IDCEastResources,Format["%1: %2",Localize "STREASTRESOURCES",eastResources]]
+	CtrlSetText [IDCEastIncome,Format["%1: %2",Localize "STREASTTOTALINCOME",eastIncome]]
+	CtrlSetText [IDCEastPoints,Format["%1: %2",Localize "STREASTPOINTS",eastTotalPoints]]
+	CtrlSetText [IDCEastTownsHeld,Format["%1: %2",Localize "STREASTTOWNSHELD",eastTownsHeld]]
+
+	goto _return

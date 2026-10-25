@@ -1,0 +1,846 @@
+;Last modified 11/23/3
+
+_unit = player
+_side = Side _unit
+_group = Group _unit
+
+_menuInUse = false
+loadoutLoadTemplate = false
+loadoutBuy = false
+loadoutBuyTemplate = false
+loadoutSaveTemplate = false
+loadoutMiscAdd = false
+loadoutMiscSubtract = false
+
+_GLTypes = [flareType,flareGreenType,flareRedType,flareYellowType,grenadeShellType]
+
+_space = 0
+_tradeInValue = 0
+_cost = 0
+_initComplete = false
+
+_currentPrimary = 0
+_currentPrimaryAmmo = 0
+_currentSecondary = 0
+_currentSecondaryAmmo = 0
+_currentSidearm = 0
+_currentMisc = 0
+_currentMiscQuantity = 0
+_currentTemplate = 0
+_closeLoadout = false
+
+_lastPrimary = 0
+_lastSecondary = 0
+_lastSidearm = 0
+_lastMisc = 0
+
+;[] Exec "Stats.sqs"
+;westResources = 1000
+;eastResources = 1000
+~.5
+
+_misc = []
+_customMisc = []
+_count = 0
+_totalMisc = Count miscWeapons
+
+#InitMisc
+
+	_customMisc = _customMisc + [0]
+	_misc = _misc + [0]
+	_count = _count + 1
+
+	? (_count < _totalMisc):goto "InitMisc"
+
+? (_side == east):goto "SetEast"
+
+#SetWest
+
+	_primaryWeapons = westPrimaryWeapons
+	_primaryAmmo = westPrimaryAmmo
+	_primaryNames = westPrimaryNames
+	_primaryImages = westPrimaryImages
+	_primaryCosts = westPrimaryCosts
+	_primaryAmmoCosts = westPrimaryAmmoCosts
+	_primaryAmmoSpaces = westPrimaryAmmoSpaces
+
+	_secondaryWeapons = westSecondaryWeapons
+	_secondaryAmmo = westSecondaryAmmo
+	_secondaryNames = westSecondaryNames
+	_secondaryImages = westSecondaryImages
+	_secondaryCosts = westSecondaryCosts
+	_secondaryAmmoCosts = westSecondaryAmmoCosts
+	_secondaryAmmoSpaces = westSecondaryAmmoSpaces
+
+	_sidearms = westSidearms
+	_sidearmAmmo = westSidearmAmmo
+	_sidearmNames = westSidearmNames
+	_sidearmImages = westSidearmImages
+	_sidearmCosts = westSidearmCosts
+
+	_templateNames = westTemplateNames
+	_templatePrimary = westTemplatePrimary
+	_templatePrimaryAmmo = westTemplatePrimaryAmmo
+	_templateSecondary = westTemplateSecondary
+	_templateSecondaryAmmo = westTemplateSecondaryAmmo
+	_templateSidearms = westTemplateSidearms
+	_templateMisc = westTemplateMisc
+	_templateAmount = westTemplateAmount
+	_templateMisc1 = westTemplateMisc1
+	_templateAmount1 = westTemplateAmount1
+	_templateCosts = westTemplateCosts
+
+	goto "Update"
+
+#SetEast
+
+	_primaryWeapons = eastPrimaryWeapons
+	_primaryAmmo = eastPrimaryAmmo
+	_primaryNames = eastPrimaryNames
+	_primaryImages = eastPrimaryImages
+	_primaryCosts = eastPrimaryCosts
+	_primaryAmmoCosts = eastPrimaryAmmoCosts
+	_primaryAmmoSpaces = eastPrimaryAmmoSpaces
+
+	_secondaryWeapons = eastSecondaryWeapons
+	_secondaryAmmo = eastSecondaryAmmo
+	_secondaryNames = eastSecondaryNames
+	_secondaryImages = eastSecondaryImages
+	_secondaryCosts = eastSecondaryCosts
+	_secondaryAmmoCosts = eastSecondaryAmmoCosts
+	_secondaryAmmoSpaces = eastSecondaryAmmoSpaces
+
+	_sidearms = eastSidearms
+	_sidearmAmmo = eastSidearmAmmo
+	_sidearmNames = eastSidearmNames
+	_sidearmImages = eastSidearmImages
+	_sidearmCosts = eastSidearmCosts
+
+	_templateNames = eastTemplateNames
+	_templatePrimary = eastTemplatePrimary
+	_templatePrimaryAmmo = eastTemplatePrimaryAmmo
+	_templateSecondary = eastTemplateSecondary
+	_templateSecondaryAmmo = eastTemplateSecondaryAmmo
+	_templateSidearms = eastTemplateSidearms
+	_templateMisc = eastTemplateMisc
+	_templateAmount = eastTemplateAmount
+	_templateMisc1 = eastTemplateMisc1
+	_templateAmount1 = eastTemplateAmount1
+	_templateCosts = eastTemplateCosts
+
+#Update
+~0.05
+
+	? !(Alive _unit) || (Side _unit != west && Side _unit != east):Exit
+	? !(_menuInUse):goto "InitMenu"
+	? !(dialog):Exit
+	? (loadoutLoadTemplate):_return = "UpdateCost";goto "LoadTemplate"
+	? (loadoutBuyTemplate):goto "BuyTemplate"
+	? (loadoutSaveTemplate):goto "SaveTemplate"
+	? (loadoutBuy):goto "BuyLoadout"
+	? (loadoutBuyCustomAndExit):goto "BuyCustomLoadout"
+	? (loadoutPrimaryAdd):goto "AddPrimaryAmmo"
+	? (loadoutPrimarySubtract):goto "SubtractPrimaryAmmo"
+	? (loadoutSecondaryAdd):goto "AddSecondaryAmmo"
+	? (loadoutSecondarySubtract):goto "SubtractSecondaryAmmo"
+	? (loadoutMiscAdd):goto "AddMiscQuantity"
+	? (loadoutMiscSubtract):goto "SubtractMiscQuantity"
+	? (loadoutClear):_return = "UpdateCost";goto "ClearLoadout"
+	? (loadoutReset):goto "ResetLoadout"
+	? (loadoutCancel):goto "Close"
+
+	_currentPrimary = lbCurSel IDCLoadoutPrimaryList
+	_currentSecondary = lbCurSel IDCLoadoutSecondaryList
+	_currentSidearm = lbCurSel IDCLoadoutSidearmList
+	_currentMisc = lbValue[IDCLoadoutMiscList,lbCurSel IDCLoadoutMiscList]
+
+	? (_currentPrimary != _lastPrimary):goto "ChangePrimary"
+	? (_currentSecondary != _lastSecondary):goto "ChangeSecondary"
+	? (_currentSidearm != _lastSidearm):goto "ChangeSidearm"
+	? (_currentMisc != _lastMisc):goto "ChangeMisc"
+
+	#UpdateMisc
+	
+		? !(_initComplete):_return = "UpdateResources";goto "UpdateMiscList"
+
+	#UpdateResources
+
+		_return = "UpdateCost"
+		goto "GetResources"
+
+	#UpdateCost
+
+		_return = "UpdateSpace"
+		goto "GetCost"
+
+	#UpdateSpace
+
+		_return = "UpdateValues"
+		goto "GetSpace"
+
+	#UpdateValues
+
+		;Display resources
+		lbClear IDCLoadoutResources
+		CtrlSetText [IDCLoadoutResources,Format["%1: %2",Localize "STRYOURRESOURCES",_resources]]
+
+		;Display space available.
+		CtrlSetText [IDCLoadoutSpace,Format ["%1: %2/10",Localize "STRSPACE",_space]]
+
+		;Display cost.
+		_costText = Localize "STRCOST"
+		_costValue = _cost - _tradeInValue
+
+;		? (_costValue < 0):_costText = Localize "STRREFUND";_costValue = Abs(_cost - _tradeInValue)
+		? (_costValue < 0):_costValue = 0
+
+		? (Localize "STRCURRENCYPOSITION" != "Back"):_costText = _costText + Format [": $%1",_costValue]
+		? (Localize "STRCURRENCYPOSITION" == "Back"):_costText = _costText + Format [": %1$",_costValue]
+
+		_tradeInText = Format ["%1: $%2",Localize "STRTRADEIN",_tradeInValue]
+		? (Localize "STRCURRENCYPOSITION" == "Back"):_tradeInText = Format ["%1: %2$",Localize "STRTRADEIN",_tradeInValue]
+
+		CtrlSetText [IDCLoadoutCost,_costText]
+		CtrlSetText [IDCLoadoutTradeIn,_tradeInText]
+		CtrlSetText [IDCLoadoutBuy,Localize "STRBUY"]
+;		? (_tradeInValue > _cost):CtrlSetText [IDCLoadoutBuy,Localize "STRSELL"]
+		CtrlSetText [IDCLoadoutPrimaryAmmo,Format["%1: %2",Localize "STRAMMOSHORT",_currentPrimaryAmmo]]
+		CtrlSetText [IDCLoadoutSecondaryAmmo,Format["%1: %2",Localize "STRAMMOSHORT",_currentSecondaryAmmo]]
+		CtrlSetText [IDCLoadoutMiscAmmo,Format["%1: %2",Localize "STRQTY",_currentMiscQuantity]]
+
+		goto "Update"
+
+;Creates the resource menu.
+#InitMenu
+
+	_menuInUse = true
+
+	;Create the resource menu.
+	_resourceMenu = CreateDialog Format ["LoadoutMenu%1",GUISkin]
+
+	_count = 1
+	_totalWeapons = Count _primaryNames
+	lbAdd[IDCLoadoutPrimaryList,_primaryNames Select 0]
+
+	#AddPrimary
+
+		_spacer = " "
+		? (_primaryCosts Select _count > 99):_spacer = ""
+
+		_text = Format ["$%1%2 %3",_primaryCosts Select _count,_spacer,_primaryNames Select _count]
+		? (Localize "STRCURRENCYPOSITION" == "Back"):_text = Format ["%1$%2 %3",_primaryCosts Select _count,_spacer,_primaryNames Select _count]
+
+		_selection = lbAdd[IDCLoadoutPrimaryList,_text]
+		_count = _count + 1
+
+		? (_count < _totalWeapons):goto "AddPrimary"
+
+	_count = 1
+	_totalWeapons = Count _secondaryNames
+	lbAdd[IDCLoadoutSecondaryList,_secondaryNames Select 0]
+
+	#AddSecondary
+
+		_spacer = " "
+		? (_secondaryCosts Select _count > 99):_spacer = ""
+
+		_text = Format ["$%1%2 %3",_secondaryCosts Select _count,_spacer,_secondaryNames Select _count]
+		? (Localize "STRCURRENCYPOSITION" == "Back"):_text = Format ["%1$%2 %3",_secondaryCosts Select _count,_spacer,_secondaryNames Select _count]
+
+		lbAdd[IDCLoadoutSecondaryList,_text]
+		_count = _count + 1
+
+		? (_count < _totalWeapons):goto "AddSecondary"
+
+	_count = 1
+	_totalWeapons = Count _sidearmNames
+	lbAdd[IDCLoadoutSidearmList,_sidearmNames Select 0]
+
+	? (_totalWeapons <= 1):goto "ClearTemplateList"
+
+	#AddSidearm
+
+		_spacer = " "
+		? (_sidermCosts Select _count > 99):_spacer = ""
+
+		_text = Format ["$%1%2 %3",_sidearmCosts Select _count,_spacer,_sidearmNames Select _count]
+		? (Localize "STRCURRENCYPOSITION" == "Back"):_text = Format ["%1$%2 %3",_sidearmCosts Select _count,_spacer,_sidearmNames Select _count]
+
+		_selection = lbAdd[IDCLoadoutSidearmList,_text]
+		_count = _count + 1
+
+		? (_count < _totalWeapons):goto "AddSidearm"
+
+	#ClearTemplateList
+
+	lbClear IDCLoadoutTemplateList
+
+	_count = 0
+	_totalLoadouts = Count _templateNames
+
+	? (_side == east):_totalLoadouts = Count eastTemplateNames
+
+	#AddTemplateToList
+
+		_spacer = " "
+		? (_templateCosts Select _count > 99):_spacer = ""
+
+		_text = Format["$%1%2 %3",_templateCosts Select _count,_spacer,_templateNames Select _count]
+		? (Localize "STRCURRENCYPOSITION" == "Back"):_text = Format["%1$%2 %3",_templateCosts Select _count,_spacer,_templateNames Select _count]
+
+		;Set text and data for list entry.
+		_selection = lbAdd[IDCLoadoutTemplateList,_text]
+		_count = _count  + 1
+
+		? (_count < _totalLoadouts):goto "AddTemplateToList"
+
+	? (_initComplete):goto "Update"
+	goto "GetCurrentLoadout"
+
+#UpdateMiscList
+
+	_miscCount = 0
+	_totalWeapons = Count miscNames
+	lbClear IDCLoadoutMiscList
+
+	#AddMisc
+
+		_spacer = " "
+		? (miscCosts Select _miscCount > 9):_spacer = ""
+
+		? (_side == west) && (_miscCount == rifleMortarType) && !(_currentPrimary In [M16Type,M4Type]):_misc Set [_miscCount,0];goto "AddNextMisc"
+		? (_side == west) && (_miscCount In _GLTypes) && (_currentPrimary != M16GLType):_misc Set [_miscCount,0];goto "AddNextMisc"
+		? (_side == east) && (_miscCount == rifleMortarType):_misc Set [_miscCount,0];goto "AddNextMisc"
+		? (_side == east) && (_miscCount In _GLTypes) && !(_currentPrimary In [AK47GLType,AK74GLType]):_misc Set [_miscCount,0];goto "AddNextMisc"
+
+		_text = Format ["$%1ea%2 %3:%4 %5",miscCosts Select _miscCount,_spacer,Localize "STRQTY",_misc Select _miscCount,miscNames Select _miscCount]
+		? (Localize "STRCURRENCYPOSITION" == "Back"):_text = Format ["%1$ ea%2 %3:%4 %5",miscCosts Select _miscCount,_spacer,Localize "STRQTY",_misc Select _miscCount,miscNames Select _miscCount]
+
+		_selection = lbAdd[IDCLoadoutMiscList,_text]
+		lbSetValue [IDCLoadoutMiscList,_selection,_miscCount]
+
+		#AddNextMisc
+
+			_miscCount = _miscCount + 1
+			? (_miscCount < _totalWeapons):goto "AddMisc"
+
+		goto _return
+
+#GetCurrentLoadout
+
+	_count = 0
+	_totalPrimary = Count _primaryWeapons
+	_totalSecondary = Count _secondaryWeapons
+	_totalSidearms = Count _sidearms
+	_return = "GetPrimary"
+	goto "ClearLoadout"
+
+	#GetPrimary
+
+		? (_unit HasWeapon (_primaryWeapons Select _count)):_currentPrimary = _count;goto "GetPrimaryAmmo"
+
+		_count = _count + 1
+		? (_count < _totalPrimary):goto "GetPrimary"
+
+		_count = 0
+		goto "GetSecondary"
+
+	#GetPrimaryAmmo
+
+		_currentPrimaryAmmo = "_x == (_primaryAmmo Select _count)" Count (Magazines _unit)
+		_count = 0
+
+	#GetSecondary
+
+		? (_unit HasWeapon (_secondaryWeapons Select _count)):_currentSecondary = _count;goto "GetSecondaryAmmo"
+		_count = _count + 1
+		? (_count < _totalSecondary):goto "GetSecondary"
+
+		_count = 0
+		goto "GetSidearm"
+
+	#GetSecondaryAmmo
+
+		_currentSecondaryAmmo = "_x == (_secondaryAmmo Select _count)" Count (Magazines _unit)
+		_count = 0
+
+	#GetSidearm
+
+		? (_unit HasWeapon (_sidearms Select _count)):_currentSidearm = _count;goto "GetSidearmAmmo"
+		_count = _count + 1
+		? (_count < _totalSidearms):goto "GetSidearm"
+
+		_count = 0
+		goto "GetMisc"
+
+	#GetSidearmAmmo
+
+		_currentSidearmAmmo = "_x == (_sidearmAmmo Select _count)" Count (Magazines _unit)
+
+	#GetMisc
+
+		_count = 0
+
+		#GetMiscAmount
+
+			_miscAmount = "_x == (miscWeapons Select _count)" Count (Magazines _unit)
+			? (_miscAmount > 0):_misc Set [_count,_miscAmount]
+
+			_count = _count + 1
+			? (_count < _totalMisc):goto "GetMiscAmount"
+
+	_setListsReturn = "UpdateMisc"
+	goto "SetLists"
+
+#AddPrimaryAmmo
+
+	loadoutPrimaryAdd = false
+
+	? (_currentPrimary == 0):goto "Update"
+	? (10 - _space < (_primaryAmmoSpaces Select _currentPrimary)):goto "Update"
+
+	_currentPrimaryAmmo = _currentPrimaryAmmo + 1
+
+	goto "UpdateSpace"
+
+#SubtractPrimaryAmmo
+
+	loadoutPrimarySubtract = false
+
+	? (_currentPrimary == 0):goto "Update"
+
+	_currentPrimaryAmmo = _currentPrimaryAmmo - 1
+
+	? (_currentPrimaryAmmo < 0):_currentPrimaryAmmo = 0
+	goto "UpdateSpace"
+
+#AddSecondaryAmmo
+
+	loadoutSecondaryAdd = false
+
+	? (_currentSecondary == 0):goto "Update"
+	? (10 - _space < (_secondaryAmmoSpaces Select _currentSecondary)):goto "Update"
+
+	_currentSecondaryAmmo = _currentSecondaryAmmo + 1
+	goto "UpdateSpace"
+
+#SubtractSecondaryAmmo
+
+	loadoutSecondarySubtract = false
+
+	? (_currentSecondary == 0):goto "Update"
+
+	_currentSecondaryAmmo = _currentSecondaryAmmo - 1
+
+	? (_currentSecondaryAmmo < 0):_currentSecondaryAmmo = 0
+	goto "UpdateSpace"
+
+#AddMiscQuantity
+
+	loadoutMiscAdd = false
+	_miscSelection = lbValue[IDCLoadoutMiscList,lbCurSel IDCLoadoutMiscList]
+
+	? (_miscSelection < 0):goto "Update"
+
+	_miscAmount = (_misc Select _miscSelection) + 1
+
+	? (10 - _space < (miscSpaces Select _miscSelection)):goto "Update"
+
+	_misc Set [_miscSelection,_miscAmount]
+	_currentMiscQuantity = _miscAmount
+	_return = "UpdateSpace"
+	goto "UpdateMiscList"
+
+#SubtractMiscQuantity
+
+	loadoutMiscSubtract = false
+	_miscSelection = lbValue[IDCLoadoutMiscList,lbCurSel IDCLoadoutMiscList]
+
+	? (_miscSelection < 0):goto "Update"
+
+	_miscAmount = (_misc Select _miscSelection) - 1
+	? (_miscAmount < 0):_miscAmount = 0
+
+	_misc Set [_miscSelection,_miscAmount]
+	_currentMiscQuantity = _miscAmount
+	_return = "UpdateSpace"
+	goto "UpdateMiscList"
+
+#Close
+
+	loadoutCancel = false
+	CloseDialog 0
+	Exit
+
+#ChangePrimary
+
+	lbClear IDCLoadoutPrimary
+	_selection = lbAdd[IDCLoadoutPrimary,""]
+
+	? (_side == west) && (_currentPrimary In [MM1Type,M60MGType]):_currentSecondary = 0;lbSetCurSel [IDCLoadoutSecondaryList,_currentSecondary]
+	? (_side == east) && (_currentPrimary In [GL6G30Type,PKType]):_currentSecondary = 0;lbSetCurSel [IDCLoadoutSecondaryList,_currentSecondary]
+	? (_currentPrimary > 0):lbSetPicture [IDCLoadoutPrimary,_selection,_primaryImages Select _currentPrimary]
+
+	_lastPrimary = _currentPrimary
+	_lastAmmo = _currentPrimaryAmmo
+	_currentPrimaryAmmo = 0
+
+	_return = "ChangePrimaryAmmo"
+	goto "GetSpace"
+
+	#ChangePrimaryAmmo
+
+		? (_currentPrimary == 0):goto "Update"
+
+		_maxAmmo = (10 - _space) / (_primaryAmmoSpaces Select _currentPrimary)
+		_maxAmmo = _maxAmmo - (_maxAmmo % 1)
+
+		? (_maxAmmo >= _lastAmmo):_currentPrimaryAmmo = _lastAmmo
+		? (_maxAmmo < _lastAmmo):_currentPrimaryAmmo = _maxAmmo
+
+		_return = "Update";goto "UpdateMiscList"
+
+#ChangeSecondary
+
+	lbClear IDCLoadoutSecondary
+	_selection = lbAdd[IDCLoadoutSecondary,""]
+
+	? (_side == west) && (_currentPrimary In [MM1Type,M60MGType]):_currentSecondary = 0;lbSetCurSel [IDCLoadoutSecondaryList,_currentSecondary]
+	? (_side == east) && (_currentPrimary In [GL6G30Type,PKType]):_currentSecondary = 0;lbSetCurSel [IDCLoadoutSecondaryList,_currentSecondary]
+	? (_currentSecondary > 0):lbSetPicture [IDCLoadoutSecondary,_selection,_secondaryImages Select _currentSecondary]
+	_lastSecondary = _currentSecondary
+
+	_lastAmmo = _currentSecondaryAmmo
+	_currentSecondaryAmmo = 0
+
+	_return = "ChangeSecondaryAmmo"
+	goto "GetSpace"
+
+	#ChangeSecondaryAmmo
+
+		? (_currentSecondary == 0):goto "Update"
+
+		_maxAmmo = (10 - _space) / (_secondaryAmmoSpaces Select _currentSecondary)
+		_maxAmmo = _maxAmmo - (_maxAmmo % 1)
+
+		? (_maxAmmo >= _lastAmmo):_currentSecondaryAmmo = _lastAmmo
+		? (_maxAmmo < _lastAmmo):_currentSecondaryAmmo = _maxAmmo
+
+		goto "Update"
+
+#ChangeSidearm
+
+	lbClear IDCLoadoutSidearm
+	_selection = lbAdd[IDCLoadoutSidearm,""]
+	_lastSidearm = _currentSidearm
+	? (_currentSidearm == 0):goto "Update"
+	? (_currentSidearm > 0):lbSetPicture [IDCLoadoutSidearm,_selection,_sidearmImages Select _currentSidearm]
+
+	goto "Update"
+
+#ChangeMisc
+
+	lbClear IDCLoadoutMisc
+	_selection = lbAdd[IDCLoadoutMisc,""]
+
+	? (_currentMisc >= 0):lbSetPicture [IDCLoadoutMisc,_selection,miscImages Select _currentMisc]
+	_lastMisc = _currentMisc
+	? (_currentMisc >= 0):_currentMiscQuantity = _misc Select _currentMisc
+	goto "Update"
+
+#ClearLoadout
+
+	loadoutClear = false
+	_currentPrimary = 0
+	_currentPrimaryAmmo = 0
+	_currentSecondary = 0
+	_currentSecondaryAmmo = 0
+	_currentSidearm = 0
+	_miscCount = 0
+
+	#ClearMisc
+
+		_misc Set [_miscCount,0]
+		_miscCount = _miscCount + 1
+
+		? (_miscCount < _totalMisc):goto "ClearMisc"
+
+	_setListsReturn = _return
+	_return = "SetLists"
+	goto "UpdateMiscList"
+
+#ResetLoadout
+
+	loadOutReset = false
+	_initComplete = false
+	goto "GetCurrentLoadout"
+
+#GetResources
+
+	_resources = 0
+
+	? (_side == east):goto "GetEastResources"
+
+#GetWestResources
+
+	? (_group == WestCommanderTeam):_resources = westResources
+	? (_group == westAlphaTeam):_resources = westAlphaResources
+	? (_group == westBravoTeam):_resources = westBravoResources
+	? (_group == westCharlieTeam):_resources = westCharlieResources
+	? (_group == westDeltaTeam):_resources = westDeltaResources
+	? (_group == westEchoTeam):_resources = westEchoResources
+	? (_group == westFoxtrotTeam):_resources = westFoxtrotResources
+	? (_group == westGolfTeam):_resources = westGolfResources
+	? (_group == westHotelTeam):_resources = westHotelResources
+
+	goto _return
+
+#GetEastResources
+
+	? (_group == EastCommanderTeam):_resources = eastResources
+	? (_group == eastAlphaTeam):_resources = eastAlphaResources
+	? (_group == eastBravoTeam):_resources = eastBravoResources
+	? (_group == eastCharlieTeam):_resources = eastCharlieResources
+	? (_group == eastDeltaTeam):_resources = eastDeltaResources
+	? (_group == eastEchoTeam):_resources = eastEchoResources
+	? (_group == eastFoxtrotTeam):_resources = eastFoxtrotResources
+	? (_group == eastGolfTeam):_resources = eastGolfResources
+	? (_group == eastHotelTeam):_resources = eastHotelResources
+
+	goto _return
+
+#GetSpace
+
+	_space = (_primaryAmmoSpaces Select _currentPrimary) * _currentPrimaryAmmo
+	_space = _space + (_secondaryAmmoSpaces Select _currentSecondary) * _currentSecondaryAmmo
+
+	_spaceCount = 0
+
+	#GetMiscSpace
+
+		_space = _space + (_misc Select _spaceCount) * (miscSpaces Select _spaceCount)
+		_spaceCount = _spaceCount + 1
+
+		? (_spaceCount < _totalMisc):goto "GetMiscSpace"
+
+	goto _return
+
+#GetCost
+
+	;Primary & ammo.
+	_cost = _primaryCosts Select _currentPrimary
+	_cost = _cost + (_primaryAmmoCosts Select _currentPrimary) * _currentPrimaryAmmo
+
+	;Secondary & ammo.
+	_cost = _cost + (_secondaryCosts Select _currentSecondary)
+	_cost = _cost + (_secondaryAmmoCosts Select _currentSecondary) * _currentSecondaryAmmo
+
+	;Sidarm & ammo (all one cost).
+	_cost = _cost + (_sidearmCosts Select _currentSidearm)
+
+	_costCount = 0
+
+	#GetMiscCost
+
+		_cost = _cost + (_misc Select _costCount) * (miscCosts Select _costCount)
+		_costCount = _costCount + 1
+
+		? (_costCount < _totalMisc):goto "GetMiscCost"
+
+	? !(_initComplete):_tradeInValue = _cost;_initComplete = true
+
+	goto _return
+
+#BuyCustomLoadout
+
+	lbSetCurSel [IDCLoadoutTemplateList,customTemplate]
+	loadoutBuyCustomAndExit = false
+
+	goto "BuyTemplate"
+
+	loadoutBuy = true
+	_return = "UpdateCost"
+	goto "LoadTemplate"
+
+#BuyLoadout
+
+	loadoutBuy = false
+	_costValue = _cost - _tradeInValue
+
+	? (_costValue > _resources):goto "Update"
+;	? (_costValue < 0):[_unit,Abs (_costValue)] Exec "Main\AddResourcesToTeam.sqs"
+	? (_costValue > 0):[Group _unit,Abs (_costValue)] Exec "Main\SubtractTeamResources.sqs"
+
+	goto "SetLoadout"
+
+#BuyTemplate
+
+	loadoutBuyTemplate = false
+
+	? (lbCurSel IDCLoadoutTemplateList < 0):goto "Update"
+
+	loadoutBuy = true
+;	_closeLoadout = true
+	_return = "UpdateCost"
+	goto "LoadTemplate"
+
+#LoadTemplate
+
+	loadoutLoadTemplate = false
+	_template = lbCurSel IDCLoadoutTemplateList
+	_count = 0
+
+	? (_template < 0):goto "Update"
+	? (_template == customTemplate):goto "LoadCustom"
+
+	_currentPrimary = _templatePrimary Select _template
+	_currentPrimaryAmmo = _templatePrimaryAmmo Select _template
+	_currentSecondary = _templateSecondary Select _template
+	_currentSecondaryAmmo = _templateSecondaryAmmo Select _template
+	_currentSidearm = _templateSidearms Select _template
+	goto "LoadMisc"
+
+	#LoadCustom
+
+		_currentPrimary = customWeapons Select 0
+		_currentPrimaryAmmo = customWeapons Select 1
+		_currentSecondary = customWeapons Select 2
+		_currentSecondaryAmmo = customWeapons Select 3
+		_currentSidearm = customWeapons Select 4
+
+	;Load custom misc or clear current misc.
+	#LoadMisc
+
+		? (_template != customTemplate):_misc Set [_count,0]
+		? (_template == customTemplate):_misc Set [_count,customMisc Select _count]
+
+		_count = _count + 1
+		? (_count < _totalMisc):goto "LoadMisc"
+
+	_setListsReturn = _return
+	_return = "SetLists"
+
+	? (_template == customTemplate):goto "UpdateMiscList"
+
+	;Load predefined template's misc.
+	_misc Set [_templateMisc Select _template,_templateAmount Select _template]
+	_misc Set [_templateMisc1 Select _template,_templateAmount1 Select _template]
+
+	goto "UpdateMiscList"
+
+#SaveTemplate
+
+	loadoutSaveTemplate = false
+	customWeapons = [_currentPrimary,_currentPrimaryAmmo,_currentSecondary,_currentSecondaryAmmo,_currentSidearm]
+
+	_count = 0
+	_cost = (_primaryCosts Select _currentPrimary) + (_secondaryCosts Select _currentSecondary) + (_sidearmCosts Select _currentSidearm)
+	_cost = _cost + ((_primaryAmmoCosts Select _currentPrimary) * _currentPrimaryAmmo)
+	_cost = _cost + ((_secondaryAmmoCosts Select _currentSecondary) * _currentSecondaryAmmo)
+
+	#SaveMisc
+
+		customMisc Set [_count,_misc Select _count]
+		_cost = _cost + ((miscCosts Select _count) * (_misc Select _count))
+		_count = _count + 1
+
+		? (_count < _totalMisc):goto "SaveMisc"
+
+	? (_side == west):westTemplateCosts Set [customTemplate,_cost]
+	? (_side == east):eastTemplateCosts Set [customTemplate,_cost]
+
+	goto "ClearTemplateList"
+
+	goto "Update"
+
+#SetLists
+
+	lbSetCurSel [IDCLoadoutPrimaryList,_currentPrimary]
+	lbSetCurSel [IDCLoadoutSecondaryList,_currentSecondary]
+	lbSetCurSel [IDCLoadoutSidearmList,_currentSidearm]
+
+	goto _setListsReturn
+
+#SetLoadout
+
+	RemoveAllWeapons _unit
+
+	;Equip primary.
+	_count = 0
+
+	? (_currentPrimary == 0):goto "CheckLoadoutSecondary"
+	? (_currentPrimaryAmmo == 0):goto "SetLoadoutPrimary"
+
+	#SetLoadoutPrimaryAmmo
+
+		_count = _count + 1
+		_unit AddMagazine (_primaryAmmo Select _currentPrimary)
+
+		? (_count < _currentPrimaryAmmo):goto "SetLoadoutPrimaryAmmo"
+
+	#SetLoadoutPrimary
+
+		_unit AddWeapon (_primaryWeapons Select _currentPrimary)
+		_unit selectWeapon (_primaryWeapons Select _currentPrimary)
+
+	;Equip secondary.
+	_count = 0
+
+	#CheckLoadoutSecondary
+
+		? (_currentSecondary == 0):goto "SetLoadoutSidearm"
+		? (_currentSecondaryAmmo == 0):goto "SetLoadoutSecondary"
+
+	#SetLoadoutSecondaryAmmo
+
+		_count = _count + 1
+		_unit AddMagazine (_secondaryAmmo Select _currentSecondary)
+
+		? (_count < _currentSecondaryAmmo):goto "SetLoadoutSecondaryAmmo"
+
+	#SetLoadoutSecondary
+
+		_unit AddWeapon (_secondaryWeapons Select _currentSecondary)
+
+	#SetLoadoutSidearm
+
+		_count = 0
+
+		? (_currentSidearm == 0):goto "SetLoadoutMisc"
+
+		#SetSidearmAmmo
+
+			_count = _count + 1
+			_unit AddMagazine (_sidearmAmmo Select _currentSidearm)
+;			_unit AddWeapon (_sidearmAmmo Select _currentSidearm)
+
+			? (_count < 4):goto "SetSidearmAmmo"
+
+			_unit AddWeapon (_sidearms Select _currentSidearm)
+
+	_count = 0
+
+	#SetLoadoutMisc
+
+		? ((_misc Select _count) == 0):goto "SetLoadoutMiscNext"
+
+		_amountCount = 0
+
+		#SetLoadoutMiscAmount
+
+			_amountCount = _amountCount + 1
+			_unit AddMagazine (miscWeapons Select _count)
+
+			? (_amountCount < (_misc Select _count)):goto "SetLoadoutMiscAmount"
+
+		#SetLoadoutMiscNext
+
+			_count = _count + 1
+			? (_count < _totalMisc):goto "SetLoadoutMisc"
+
+	_unit AddWeapon "Binocular"
+
+	? (acceleratedTime || nightMission):_unit AddWeapon "NVGoggles"
+
+	CloseDialog 0
+	Exit

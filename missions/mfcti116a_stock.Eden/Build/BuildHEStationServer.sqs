@@ -1,0 +1,112 @@
+;Last modified 2/19/4
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_destination = _this Select 1
+_direction = _this Select 2
+
+_M2Name = "M2StaticMG"
+
+? !(publicServer):_M2Name = "MFCTI116HEStaticMG"
+? (_side == east):_M2Name = _M2Name + "E"
+? !(publicServer) && (limitedRadar):_M2Name = _M2Name + "LR"
+
+#CreateM2
+
+	;Create building, props, gun, & gunner.
+	_M2 = _M2Name CreateVehicle _destination
+	_M2  SetDir _direction
+	_M2  SetPos _destination
+	_M2 SetPos [(_destination Select 0)+((sin _direction)*0.5),(_destination Select 1)+((cos _direction)*.5),(_destination Select 2)]
+
+	;Load the gun with high-explosive rounds for the public server version.
+	? (publicServer):_M2 RemoveMagazine "Browning";_M2 RemoveWeapon "Browning";_M2 AddWeapon "MachineGun30";_M2 AddMagazine "MachineGun30"
+
+	[_side,_M2,HEStationType] Exec "Main\UpdateStationaryGun.sqs"
+
+	? (_side == east):goto "AddHEStationToEast"
+
+#AddHEStationToWest
+
+	;Add it to the list of factories & increment the total count.
+	westHEStation = westHEStation + [_M2]
+	westHEStationDamage = westHEStationDamage + [500]
+
+	;Send the new building to other players.
+	westBuildingBuiltMP = _M2;PublicVariable "westBuildingBuiltMP"
+	westBuildingBuiltTypeMP = HEStationType;PublicVariable "westBuildingBuiltTypeMP"
+
+	totalWestStationaryHEs = totalWestStationaryHEs + 1;PublicVariable "totalWestStationaryHEs"
+
+	goto "AddObjects"
+	Exit
+
+#AddHEStationToEast
+
+	;Add it to the list of factories & increment the total count.
+	eastHEStation = eastHEStation + [_M2]
+	eastHEStationDamage = eastHEStationDamage + [500]
+
+	;Send the new building to other players.
+	eastBuildingBuiltMP = _M2;PublicVariable "eastBuildingBuiltMP"
+	eastBuildingBuiltTypeMP = HEStationType;PublicVariable "eastBuildingBuiltTypeMP"
+
+	totalEastStationaryHEs = totalEastStationaryHEs + 1;PublicVariable "totalEastStationaryHEs"
+
+#AddObjects
+
+	;Create props for the station.
+	_sign = "MFCTI116DangerSign" CreateVehicle _destination
+
+	_sandbags1 = "FenceWood" CreateVehicle _destination
+	_sandbags1a = "FenceWood" CreateVehicle _destination
+	_sandbags2 = "FenceWood" CreateVehicle _destination
+	_sandbags2a = "FenceWood" CreateVehicle _destination
+	_sandbags3 = "FenceWood" CreateVehicle _destination
+	_sandbags3a = "FenceWood" CreateVehicle _destination
+
+	_direction = GetDir _M2
+	_position = GetPos _M2
+
+	_sign SetDir _direction
+	_sandbags1 SetDir _direction
+	_sandbags1a SetDir _direction
+	_sandbags2 SetDir _direction
+	_sandbags2a SetDir _direction
+	_sandbags3 SetDir _direction
+	_sandbags3a SetDir _direction
+
+	_sign SetPos _position
+	_sandbags1 SetPos _position
+	_sandbags1a SetPos _position
+	_sandbags2 SetPos _position
+	_sandbags2a SetPos _position
+	_sandbags3 SetPos _position
+	_sandbags3a SetPos _position
+	_sandbags1 SetDir (_direction + 90) % 360
+	_sandbags1a SetDir (_direction + 90) % 360
+
+	_sign SetPos [(_position Select 0)-((sin _direction)*4),(_position Select 1)-((cos _direction)*4),(_position Select 2)]
+
+	_sandbags1 SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)]
+	_sandbags1a SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)+.3]
+
+	_direction = (_direction + 90) % 360
+	_sandbags2 SetDir _direction
+	_sandbags2 SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)]
+	_sandbags2 SetDir (_direction + 90) % 360
+	_sandbags2a SetDir _direction
+	_sandbags2a SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)+.3]
+	_sandbags2a SetDir (_direction + 90) % 360
+
+	_direction = (_direction - 180) % 360
+	_sandbags3 SetDir _direction
+	_sandbags3 SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)]
+	_sandbags3 SetDir (_direction + 90) % 360
+	_sandbags3a SetDir _direction
+	_sandbags3a SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)+.3]
+	_sandbags3a SetDir (_direction + 90) % 360
+
+	[_M2,[_sandbags1,_sandbags1a,_sandbags2,_sandbags2a,_sandbags3,_sandbags3a,_sign]] Exec "Main\StationaryGunCleanUp.sqs"

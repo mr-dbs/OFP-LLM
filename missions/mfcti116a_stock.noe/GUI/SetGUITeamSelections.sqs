@@ -1,0 +1,45 @@
+;Last modified 11/11/3
+
+_side = _this Select 0
+_idc = _this Select 1
+_commanderIncluded = _this Select 2
+_selectAll = _this Select 3
+
+;Start at 1 since the commander's team is 0.
+_count = 0
+
+? !(_commanderIncluded):_count = 1
+
+_totalTeams = Count teamDesignations
+lbClear _idc
+
+;Add an entry onto the team selection combobox.
+#AddTeamSelection
+
+	_group = westGroups Select _count;_playerGroups = westPlayerGroups
+	? (_side == east):_group = eastGroups Select _count;_playerGroups = eastPlayerGroups
+	
+	_text = Format["%1-%2",teamDesignations Select _count,Localize "STRDISABLED"]
+	? !(IsNull _group):_text = teamDesignations Select _count
+	? (_group in _playerGroups):_text = Format["%1-%2",teamDesignations Select _count,Name Leader _group]
+
+	_selection = lbAdd[_idc,_text]
+	lbSetData [_idc,_selection,teamDesignations Select _count]
+
+	#AddTeamSelectionCount
+
+		_count = _count  + 1
+
+	? (_count < _totalTeams):goto "AddTeamSelection"
+	? !(_selectAll):goto "SetCurrentSelection"
+
+	;Add an 'ALL' selection to the bottom of the list.
+	_selection = lbAdd[IDCCommandMenuTeamSelect,Localize "STRALL"]
+	_text = Localize "STRALL"
+	lbSetData [IDCCommandMenuTeamSelect,_selection,_text]
+
+#SetCurrentSelection
+
+	;Set the selected combobox entry to the current commander-selected team.
+	? (_side == west):lbSetCurSel[_idc,westSelectedGroup - 1]
+	? (_side == east):lbSetCurSel[_idc,eastSelectedGroup - 1]

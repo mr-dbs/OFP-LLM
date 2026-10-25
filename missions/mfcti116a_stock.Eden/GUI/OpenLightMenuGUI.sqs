@@ -1,0 +1,4 @@
+;Last modified 4/29/3
+;Open the light vehicle factory menu.
+
+openMenuType = lightFactoryType

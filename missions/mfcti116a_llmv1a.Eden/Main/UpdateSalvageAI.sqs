@@ -1,0 +1,147 @@
+;Last modified 6/18/3
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_unit = _this Select 0
+_side = Side _unit
+_vehicle = Vehicle _unit
+
+_unit SetSpeedMode "FULL"
+_unit SetBehaviour "CARELESS"
+
+#Update
+~updateAIDelay
+
+#FindSalvage
+
+	? (GetDammage _vehicle == 1)||!(Alive _unit)||(Vehicle _unit != _vehicle):goto "SalvageDestroyed"
+	? (IsNull _vehicle):Exit
+
+	_count = 0
+	_nearestDistance = salvagerTravelRange + 1
+	_nearestSalvage = ObjNull
+	_totalSalvagableVehicles = Count vehicles
+
+	;Check for any destroyed vehicles.
+	#CheckForSalvage
+
+		_salvage = vehicles Select _count
+		_count = _count + 1
+
+		? !(IsNull _salvage) && (GetDammage _salvage == 1) && (_unit Distance _salvage < _nearestDistance):_nearestSalvage = _salvage;_nearestDistance = _unit Distance _salvage
+		? (_count < Count vehicles):goto "CheckForSalvage"
+		? (IsNull _nearestSalvage):goto "MoveToNearestFriendlyDepot"
+
+	#MoveToSalvage
+
+		_unit DoMove GetPos _nearestSalvage
+
+	goto "Update"
+
+#SalvageDestroyed
+
+	;Have the commander transmit message to everyone on his/her side that a salvage truck was destroyed.
+	[_side,groupCommander,messageSalvagerDestroyed,0,0] Exec "Main\SendSideMessage.sqs"
+
+	;If vehicle remains empty for 3 minutes destroy it.
+	_idleTime = 0
+
+	#WaitForDriver
+	~5
+
+		_idleTime = _idleTime + 5
+
+		? !(IsNull Driver _vehicle) && (Alive Driver _vehicle):Exit
+		? (IsNull _vehicle) || (GetDammage _vehicle == 1):Exit
+		? (_idleTime > 180):_vehicle SetDammage 1;Exit
+
+		goto "WaitForDriver"
+
+;AI routines for moving to neareast friendly repair depot.
+#MoveToNearestFriendlyDepot
+
+	_count = 0
+
+	? (_side == west):_depotList = westRepairDepot
+	? (_side == east):_depotList = eastRepairDepot
+	
+	_maxDepots = Count _depotList
+	_closestTarget = ObjNull
+	_nearestDistance = salvagerTravelRange / 4
+
+	? (_maxDepots < 1):goto "MoveToNearestFriendlyTown"
+
+	;Check for a closer target.
+	#FindNearestDepot
+
+		_depot = _depotList Select _count
+		_count =_count + 1
+
+		;If already in range of a depot then quit looking now.
+		? (_unit Distance _depot < 25):goto "Update"
+
+		;If a closer depot was found.
+		? (_unit Distance _depot < _nearestDistance):_nearestDistance = _unit Distance _depot;_closestTarget = _depot
+		? (_count < _maxDepots):goto "FindNearestDepot"
+
+		;If no depots werer found try to find the closest town in range.
+		? (IsNull _closestTarget):goto "MoveToNearestFriendlyTown"
+
+		? (debug):_mes = Format["Independant salvager is moving to nearest depot (%1 - %2).",_nearestDepot,GetPos _closestTarget];player SideChat(_mes)
+		_unit DoMove GetPos _closestTarget
+
+#MoveToNearestFriendlyTown
+
+	;If a town was previously chosen and in range then do a patrol.
+	? (!IsNull _closestTarget) && (_unit Distance _closestTarget < salvagerTravelRange / 4):goto "Update"
+
+	;BUILD A LIST OF FRIENDLY TOWNS
+	#CreateTownList
+
+	_closestTarget = ObjNull
+	_closestDistance = salvagerTravelRange + 1
+	_tempTargets = []
+	_tempTargetDistances = []
+
+	_count = 0
+	_maxTargets = Count towns
+	_closestTarget = ObjNull
+	? (_maxTargets < 1):goto "Update"
+
+	#CheckTowns
+
+	;If a town is taken then add it to the list.
+	? (_side == west):_tempSide = "west"
+	? (_side == east):_tempSide = "east"
+
+	? (townSides Select _count == _tempSide):_tempTargets = _tempTargets + [towns Select _count];_tempTargetDistances = _tempTargetDistances + [_unit Distance (towns Select _count)]
+
+	_count = _count + 1
+
+	? (_count < _maxTargets):goto "CheckTowns"
+
+	;DETERMINE WHICH TOWN IS CLOSEST
+	_count = 0
+	_maxTargets = Count _tempTargets
+
+	?(_maxTargets < 1):goto "Update"
+
+	;Check for a closer target.
+	#CheckNearestTowns
+
+	? (_tempTargetDistances Select _count < _closestDistance)&&(_tempTargetDistances Select _count > 100):_closestDistance = _tempTargetDistances Select _count;_closestTarget = _tempTargets Select _count
+
+	_count =_count + 1
+
+	? (_count < _maxTargets):goto "CheckNearestTowns"
+
+	#MoveToNearestTown
+
+	? (Count _tempTargets < 1):goto "Update"
+	? (IsNull _closestTarget):goto "Update"
+
+	? (debug):_mes = Format["Independant salvager is moving to %1 (%2).",_closestTarget,GetPos _closestTarget];player SideChat (_mes)
+	_unit DoMove GetPos _closestTarget
+
+	goto "Update"

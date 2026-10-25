@@ -1,0 +1,107 @@
+;Last modified 2/19/4
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_destination = _this Select 1
+_direction = _this Select 2
+
+? (publicServer):Exit
+
+_AAName = "MFCTI116AAStaticMG"
+? (_side == east):_AAName = _AAName + "E"
+? (limitedRadar):_AAName = _AAName + "LR"
+
+#CreateAA
+
+	;Create building, props, gun, & gunner.
+	_AA = _AAName CreateVehicle _destination
+	_AA  SetDir _direction
+	_AA  SetPos _destination
+	_AA SetPos [(_destination Select 0)+((sin _direction)*0.5),(_destination Select 1)+((cos _direction)*.5),(_destination Select 2)]
+	_AA AddEventHandler ["fired",{_this Exec "Main\UpdateAAMissile.sqs"}]
+
+	[_side,_AA,AAStationType] Exec "Main\UpdateStationaryGun.sqs"
+
+	? (_side == east):goto "AddAAStationToEast"
+
+#AddAAStationToWest
+
+	;Add it to the list of factories & increment the total count.
+	westAAStation = westAAStation + [_AA]
+	westAAStationDamage = westAAStationDamage + [500]
+
+	;Send the new building to other players.
+	westBuildingBuiltMP = _AA;PublicVariable "westBuildingBuiltMP"
+	westBuildingBuiltTypeMP = AAStationType;PublicVariable "westBuildingBuiltTypeMP"
+
+	totalWestStationaryAAs = totalWestStationaryAAs + 1;PublicVariable "totalWestStationaryAAs"
+
+	goto "AddObjects"
+	Exit
+
+#AddAAStationToEast
+
+	;Add it to the list of factories & increment the total count.
+	eastAAStation = eastAAStation + [_AA]
+	eastAAStationDamage = eastAAStationDamage + [500]
+
+	;Send the new building to other players.
+	eastBuildingBuiltMP = _AA;PublicVariable "eastBuildingBuiltMP"
+	eastBuildingBuiltTypeMP = AAStationType;PublicVariable "eastBuildingBuiltTypeMP"
+
+	totalEastStationaryAAs = totalEastStationaryAAs + 1;PublicVariable "totalEastStationaryAAs"
+
+#AddObjects
+
+	;Create props for the station.
+	_sandbags1 = "FenceWood" CreateVehicle _destination
+	_sandbags1a = "FenceWood" CreateVehicle _destination
+	_sandbags2 = "FenceWood" CreateVehicle _destination
+	_sandbags2a = "FenceWood" CreateVehicle _destination
+	_sandbags3 = "FenceWood" CreateVehicle _destination
+	_sandbags3a = "FenceWood" CreateVehicle _destination
+	_crate = "MFCTI116EmptyCrate" CreateVehicle _destination
+
+	_direction = GetDir _AA
+	_position = GetPos _AA
+
+	_sandbags1 SetDir _direction
+	_sandbags1a SetDir _direction
+	_sandbags2 SetDir _direction
+	_sandbags2a SetDir _direction
+	_sandbags3 SetDir _direction
+	_sandbags3a SetDir _direction
+	_crate SetDir _direction
+
+	_sandbags1 SetPos _position
+	_sandbags1a SetPos _position
+	_sandbags2 SetPos _position
+	_sandbags2a SetPos _position
+	_sandbags3 SetPos _position
+	_sandbags3a SetPos _position
+	_sandbags1 SetDir (_direction + 90) % 360
+	_sandbags1a SetDir (_direction + 90) % 360
+	_crate SetPos _position
+
+	_sandbags1 SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)]
+	_sandbags1a SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)+.3]
+	_crate SetPos [(_position Select 0)-((sin _direction)*4),(_position Select 1)-((cos _direction)*4),(_position Select 2)]
+
+	_direction = (_direction + 90) % 360
+	_sandbags2 SetDir _direction
+	_sandbags2 SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)]
+	_sandbags2 SetDir (_direction + 90) % 360
+	_sandbags2a SetDir _direction
+	_sandbags2a SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)+.3]
+	_sandbags2a SetDir (_direction + 90) % 360
+
+	_direction = (_direction - 180) % 360
+	_sandbags3 SetDir _direction
+	_sandbags3 SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)]
+	_sandbags3 SetDir (_direction + 90) % 360
+	_sandbags3a SetDir _direction
+	_sandbags3a SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)+.3]
+	_sandbags3a SetDir (_direction + 90) % 360
+
+	[_AA,[_sandbags1,_sandbags1a,_sandbags2,_sandbags2a,_sandbags3,_sandbags3a,_crate]] Exec "Main\StationaryGunCleanUp.sqs"

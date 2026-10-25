@@ -1,0 +1,153 @@
+;Last modified 2/19/4
+;Script usage: [] exec "UpdateSalvageTrucks.sqs"
+
+@ (serverStarted)
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_names = unitNames
+? (limitedRadar):_names = unitLRNames
+
+_totalSalvageTypes = _names
+
+#UpdateWest
+~5
+
+	_unitCount = 0
+	_side = west
+
+	#UpdateWestUnit
+
+		_vehicle = ObjNull
+		_vehicle = westSalvageTrucks Select _unitCount
+		_unitCount = _unitCount + 1
+
+		? !(IsNull _vehicle):_return = "UpdateNextWestUnit";goto "FindSalvage"
+
+		#UpdateNextWestUnit
+
+			;Size could change in mid-loop if a vehicle is salvaged.
+			? (_unitCount < Count westSalvageTrucks):goto "UpdateWestUnit"
+
+#UpdateEast
+
+	_unitCount = 0
+	_side = east
+
+	#UpdateEastUnit
+
+		_vehicle = ObjNull
+		_vehicle = eastSalvageTrucks Select _unitCount
+		_unitCount = _unitCount + 1
+
+		? !(IsNull _vehicle):_return = "UpdateNextEastUnit";goto "FindSalvage"
+
+		#UpdateNextEastUnit
+
+			;Size could change in mid-loop if a vehicle is salvaged.
+			? (_unitCount < Count eastSalvageTrucks):goto "UpdateEastUnit"
+
+	goto "UpdateWest"
+
+#FindSalvage
+
+	? (GetDammage _vehicle == 1)||(IsNull Driver _vehicle)||!(Alive Driver _vehicle):goto _return
+
+	_count = 0
+
+	;Check for any destroyed vehicles.
+	#CheckForSalvage
+
+		_salvage = vehicles Select _count
+		_count = _count + 1
+
+		? (_count >= Count vehicles):goto _return
+		? (IsNull _salvage)||(GetDammage _salvage < 1)||(_vehicle Distance _salvage > 25):goto "CheckForSalvage"
+
+		goto "GetUnitStats"
+
+	;Add the salvage to resources.
+	#SalvageUnit
+
+		_points = _salvageValue / salvageValuePerPoint
+
+		? (Side Driver _vehicle == west):Goto "WestSalvage"
+		? (Side Driver _vehicle == east):Goto "EastSalvage"
+
+		goto _return
+
+		#WestSalvage
+
+			[west,groupCommander,messageSalvagedVehicle,_unitStatsCount,_salvageValue] Exec "Main\SendSideMessage.sqs"
+
+			? !((Group Driver _vehicle) In westPlayerGroups):[west,_salvageValue] Exec "Main\AddResources.sqs";goto "Delete"
+			? (_points > 0):[Leader Driver _vehicle,_points] Exec "Main\AddPlayerPoints.sqs"
+
+			;If a player team then give half the salvaged resources to that team.
+			[west,_salvageValue / 2] Exec "Main\AddResources.sqs"
+			[Driver _vehicle,_salvageValue / 2] Exec "Main\AddResourcesToTeam.sqs"
+
+			goto "Delete"
+
+		#EastSalvage
+
+			[east,groupCommander,messageSalvagedVehicle,_unitStatsCount,_salvageValue] Exec "Main\SendSideMessage.sqs"
+
+			? !((Group Driver _vehicle) In eastPlayerGroups):[east,_salvageValue] Exec "Main\AddResources.sqs";goto "Delete"
+			? (_points > 0):[Leader Driver _vehicle,_points] Exec "Main\AddPlayerPoints.sqs"
+
+			;If a player team then give half the salvaged resources to that team.
+			[east,_salvageValue / 2] Exec "Main\AddResources.sqs"
+			[Driver _vehicle,_salvageValue / 2] Exec "Main\AddResourcesToTeam.sqs"
+
+		#Delete
+
+			[_salvage] Exec "Main\DeleteVehicle.sqs"
+
+		 goto _return
+
+#GetUnitStats
+
+	? (Debug):player SideChat("Looking up salvagable vehicle's stats.")
+
+	_unitStatsCount = 0
+	_totalStatsUnits = Count _names
+	_salvageValue = 0
+	_salvageName = "a vehicle not in the server lists"
+
+	;If the salvaged vehicle is a salvage truck then don't use CountType (it would report an HMMV/BRDM instead).
+	? !(publicServer) && ("MFCTI116WestSalvager" CountType [_salvage] > 0):_salvageValue = salvageTruckCost * salvageRate;_unitStatsCount = salvageTruckType;goto "SalvageUnit"
+	? !(publicServer) && ("MFCTI116EastSalvager" CountType [_salvage] > 0):_salvageValue = salvageTruckEastCost * salvageRate;_unitStatsCount = salvageTruckEastType;goto "SalvageUnit"
+
+	;If the salvaged vehicle is a salvage truck then don't use CountType (it would report an HMMV/BRDM instead).
+	? (_salvage In westSalvageTrucks):_salvageValue = salvageTruckCost * salvageRate;_unitStatsCount = salvageTruckType;goto "SalvageUnit"
+	? (_salvage In eastSalvageTrucks):_salvageValue = salvageTruckEastCost * salvageRate;_unitStatsCount = salvageTruckEastType;goto "SalvageUnit"
+
+	#FindMatchingUnit
+
+		_name = _names Select _unitStatsCount
+		_unitsFound = (_name CountType [_salvage])
+		_unitsFound1 = 0
+		_bradleysFound = 0
+		_kamovsFound = 0
+
+		;Some vehicles such as BMP2s will return from a CountType as a BMP.  Do a special check for these.
+		? (_name == "BMP"):_unitsFound1 = ("BMP2" CountType [_salvage])
+		? (_name == "M113"):_unitsFound1 = ("vulcan" CountType [_salvage]);_bradleysFound = ("bradley" CountType [_salvage])
+		? (_name == "Mi24"):_kamovsFound = ("Kamov" CountType [_salvage])
+
+		_cost = unitCosts Select _unitStatsCount
+		? (cheapTransportAC) && ((_unitType In westAircraftTransports) || (_unitType In westAircraftTransports)):_cost = _cost * cheapTransportACMultiplier
+		? (expensiveAssaultAC) && ((_unitType In westAssaultAircraft) || (_unitType In westAssaultAircraft)):_cost = _cost * expensiveAssaultACMultiplier
+
+		? (_kamovsFound > 0):_unitStatsCount = V80Type;_salvageValue = _cost * salvageRate;_salvageName = unitDescriptions Select _unitStatsCount;goto "SalvageUnit"
+		? (_bradleysFound > 0):_unitStatsCount = M2A2Type;_salvageValue = _cost * salvageRate;_salvageName = unitDescriptions Select _unitStatsCount;goto "SalvageUnit"
+		? (_unitsFound1 > 0):_unitStatsCount = _unitStatsCount + 1;_salvageValue = _cost * salvageRate;_salvageName = unitDescriptions Select _unitStatsCount;goto "SalvageUnit"
+		? (_unitsFound > 0):_salvageValue = _cost * salvageRate;_salvageName = unitDescriptions Select _unitStatsCount;goto "SalvageUnit"
+
+		_unitStatsCount = _unitStatsCount + 1
+
+		? (_unitStatsCount < _totalStatsUnits):goto "FindMatchingUnit"
+
+		goto _return

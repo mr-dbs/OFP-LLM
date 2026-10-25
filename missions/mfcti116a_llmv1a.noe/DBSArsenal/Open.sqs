@@ -1,0 +1,5 @@
+;DBS Arsenal - action handler.
+
+? (dbsArsOpen):Exit
+? (dialog):CloseDialog 0
+[] Exec "DBSArsenal\Arsenal.sqs"

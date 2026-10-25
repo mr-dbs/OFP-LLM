@@ -1,0 +1,39 @@
+;Last modified 3/30/3
+;Script usage:[Side] Exec "AddToQueuePlayer.sqs"
+
+_side = _this Select 0
+
+Hint Format["%1.\n%2",Localize "STRBUILDINGINUSE",Localize "STRADDINGTOQUEUE"]
+
+? (_side == east):goto "AddToEast"
+? (GetDammage _building >= 1):Exit
+
+#AddToWest
+
+	buildingQueue = buildingQueue + [westAddToQueueBuilding]
+	unitQueue = unitQueue + [westAddToQueue]
+	mannedUnitQueue = mannedUnitQueue + [westAddToQueueManned]
+	teamQueue = teamQueue + [westAddToQueueTeam]
+
+	westAddToQueue = 0;PublicVariable "westAddToQueue"
+	westAddToQueuePlayer = ObjNull;PublicVariable "westAddToQueuePlayer"
+	westAddToQueueTeam = ObjNull;PublicVariable "westAddToQueueTeam"
+	westAddToQueueManned = false;PublicVariable "westAddToQueueManned"
+	westAddToQueueBuilding = ObjNull;PublicVariable "westAddToQueueBuilding"
+
+	Exit
+
+#AddToEast
+
+	buildingQueue = buildingQueue + [eastAddToQueueBuilding]
+	unitQueue = unitQueue + [eastAddToQueue]
+	mannedUnitQueue = mannedUnitQueue + [eastAddToQueueManned]
+	teamQueue = teamQueue + [eastAddToQueueTeam]
+
+	eastAddToQueue = 0;PublicVariable "eastAddToQueue"
+	eastAddToQueuePlayer = ObjNull;PublicVariable "eastAddToQueuePlayer"
+	eastAddToQueueTeam = ObjNull;PublicVariable "eastAddToQueueTeam"
+	eastAddToQueueManned = false;PublicVariable "eastAddToQueueManned"
+	eastAddToQueueBuilding = ObjNull;PublicVariable "eastAddToQueueBuilding"
+
+	Exit

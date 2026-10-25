@@ -1,0 +1,23 @@
+;Last modified 12/14/2
+;Add this to script caller.
+;Script usage:  [Vehicle] exec "InitCivilian.sqs"
+
+? !(Local LocalServerObject):Exit
+
+_destination= _this Select 0
+
+;The first town to be set should call this so the arrays are declared.
+? !(startedCivilianDestinationInit):goto "InitCivilianDestinationArrays"
+
+#AddCivilianDestination
+
+civilianDestinations = civilianDestinations + [_destination]
+
+Exit
+
+#InitCivilianDestinationArrays
+
+startedCivilianDestinationInit = true
+civilianDestinations = []
+
+goto "AddCivilianDestination"

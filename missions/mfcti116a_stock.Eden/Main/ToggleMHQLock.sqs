@@ -1,0 +1,25 @@
+;Last modified 4/13/3
+
+_vehicle = _this Select 0
+_unit = _this Select 1
+_action = _this Select 2
+_side = Side _unit
+
+_vehicle RemoveAction _action
+
+? (_side == west) && (_vehicle == WestMobileHQ):goto "ToggleWest"
+? (_side == east) && (_vehicle == EastMobileHQ):goto "ToggleEast"
+
+Exit
+
+#ToggleWest
+
+	? (unlockWestMHQ):unlockWestMHQ = false;PublicVariable "unlockWestMHQ";WestMobileHQ AddAction [Localize "STRUNLOCKMHQ","Main\ToggleMHQLock.sqs"];Exit
+	? !(unlockWestMHQ):unlockWestMHQ = true;PublicVariable "unlockWestMHQ";WestMobileHQ AddAction [Localize "STRLOCKMHQ","Main\ToggleMHQLock.sqs"];Exit
+
+	Exit
+
+#ToggleEast
+	
+	? (unlockEastMHQ):unlockEastMHQ = false;PublicVariable "unlockEastMHQ";EastMobileHQ AddAction [Localize "STRUNLOCKMHQ","Main\ToggleMHQLock.sqs"];Exit
+	? !(unlockEastMHQ):unlockEastMHQ = true;PublicVariable "unlockEastMHQ";EastMobileHQ AddAction [Localize "STRLOCKMHQ","Main\ToggleMHQLock.sqs"];Exit

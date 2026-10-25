@@ -1,0 +1,53 @@
+;Last modified 12/31/3
+Private ["_amount","_currentGroup","_last","_points"]
+_amount = 0
+_currentGroup = ObjNull
+_last = 0
+_points = 0
+
+;Puts in request to the server to add points to a player's score.
+;Script Usage:  [Player,Amount] Exec "AddPlayerPoints.sqs"
+
+_unit = _this Select 0
+_amount = _this Select 1
+_group = Group _unit
+_side = Side _group
+
+? (_side != west) && (_side != east):Exit
+? !(_group In westPlayerGroups) && !(_group In eastPlayerGroups):Exit
+
+_sideText = "West"
+? (_side == east):_sideText = "East"
+
+_count = 0
+_totalTeams = Count teamDesignations
+
+#GetTeamInfo
+
+	Call Format["_currentGroup = %1%2Team",_sideText,teamMapDesignations Select _count]
+	? (_currentGroup == _group):Call Format["%1%2LastPoints = %1%2Points;PublicVariable ""%1%2LastPoints"";%1%2Points = %1%2Points + _amount;PublicVariable ""%1%2Points"";_points = %1%2Points;_last = %1%2LastPoints",_sideText,teamMapDesignations Select _count];goto "SetPoints"
+
+	_count = _count + 1
+	? (_count < _totalTeams):goto "GetTeamInfo"
+
+#SetPoints
+
+	? (_side == east):goto "AddEastPlayerPoints"
+
+#AddWestPlayerPoints
+
+	addWestPlayerPointsPlayer = _unit;PublicVariable "addWestPlayerPointsPlayer"
+	addWestPlayerPoints = _points;PublicVariable "addWestPlayerPoints"
+	addWestPlayerPointsLast = _last;PublicVariable "addWestPlayerPointsLast"
+	addWestPlayerPointsID = Random 50000;PublicVariable "addWestPlayerPointsID"
+
+	Exit
+
+#AddEastPlayerPoints
+
+	addEastPlayerPointsPlayer = _unit;PublicVariable "addEastPlayerPointsPlayer"
+	addEastPlayerPoints = _points;PublicVariable "addEastPlayerPoints"
+	addEastPlayerPointsLast = _last;PublicVariable "addEastPlayerPointsLast"
+	addEastPlayerPointsID = Random 50000;PublicVariable "addEastPlayerPointsID"
+
+	Exit

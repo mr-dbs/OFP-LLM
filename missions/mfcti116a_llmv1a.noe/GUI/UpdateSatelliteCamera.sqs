@@ -1,0 +1,336 @@
+;Last modified 2/3/4
+
+@ (serverStarted)
+
+_names = unitNames
+? (limitedRadar):_names = unitLRNames
+
+_unit = _this select 1
+_side = Side _unit
+
+_currentGroup = 0
+_lastGroup = 1
+_textLife = ""
+_lastTextLife = "x"
+_lastUpdate = 0
+_zoom = 50
+_maxZoom = 300
+_started = false
+
+_lastVehicle = ObjNull
+cameraSatelliteMode = true
+_lastMode = cameraSatelliteMode
+
+? (Side _unit == west):_mobileHQ = WestMobileHQ;_groupList = westGroups;goto "Init"
+? (Side _unit == east):_mobileHQ = EastMobileHQ;_groupList = eastGroups;goto "Init"
+
+Exit
+
+#Update
+~0.02
+
+	? !(Alive _unit):goto "ExitCamera"
+	? (GetDammage _mobileHQ == 1) || (_unit Distance _mobileHQ > 25):goto "ExitCamera"
+
+	? (cameraSatelliteMode):goto "UpdateOverheadCamera"
+
+	_position = GetPos Vehicle Leader (_groupList Select _currentGroup)
+	_direction = GetDir Vehicle Leader (_groupList Select _currentGroup)
+
+	_camera CamSetPos [(_position Select 0)+((sin _direction)*_distance),(_position Select 1)+((cos _direction)*_distance),(_position Select 2)+_z]
+	;_direction = (_direction + 180) %360
+	_cameraTarget SetPos [(_position Select 0)+((sin _direction)*20),(_position Select 1)+((cos _direction)*20),(_position Select 2)+_z]
+	_camera camCommit 0
+
+	goto "WaitForCamera"
+
+	#UpdateOverheadCamera
+	_cameraTarget SetPos (GetPos Vehicle Leader (_groupList Select _currentGroup))
+	_camera CamSetRelPos[0,-(_zoom / 5),_zoom]
+	_camera camCommit 0
+
+	#WaitForCamera
+	@CamCommitted _camera
+
+	#CheckActions
+
+		;Handle camera actions.
+		? (cameraMenuNext):goto "SelectNextGroup"
+		? (cameraMenuPrevious):goto "SelectPreviousGroup"
+
+	#CheckRemainingActions
+
+		? (_currentGroup < 0):_currentGroup = _totalGroups - 1
+		? (cameraMenuZoomIn):goto "ZoomIn"
+		? (cameraMenuZoomOut):goto "ZoomOut"
+		? (cameraMenuExit):goto "ExitCamera"
+		? (_lastMode && !cameraSatelliteMode) || (!_lastMode && cameraSatelliteMode):goto "ToggleCameraMode"
+
+		;If viewer is a commander select the team so orders can be issued.
+		? (_unit == Leader WestCommanderTeam) && (_currentGroup != groupCommander):westSelectedGroup = _currentGroup;PublicVariable "westSelectedGroup"
+		? (_unit == Leader EastCommanderTeam) && (_currentGroup != groupCommander):eastSelectedGroup = _currentGroup;PublicVariable "eastSelectedGroup"
+
+		_setValue = true
+		_return = "CheckTeamStatus"
+
+		? (_currentGroup == groupCommander):_setValue = false;_return = "UpdateInfoDisplay"
+		? (_side == west) && ((westGroups Select westSelectedGroup) In westPlayerGroups):_setValue = false;_return = "UpdateInfoDisplay"
+		? (_side == east) && ((eastGroups Select eastSelectedGroup) In eastPlayerGroups):_setValue = false;_return = "UpdateInfoDisplay"
+
+		goto "SetButtons"
+
+		#CheckTeamStatus
+
+			_return = "CheckTeams";goto "GetTeamStatus"
+
+		#CheckTeams
+
+			? (_independentSelected):_return = "UpdateInfoDisplay";goto "SetIndependentButtons"
+
+	#UpdateInfoDisplay
+
+		;If selection becomes -1 then the menu was exited by the ESC key.
+		? (lbValue[IDCMenuInfo,lbCurSel IDCMenuInfo] != 1):goto "ExitCamera"
+
+		;Show resources & total workers.
+		_text = Format["%1 (%2)",teamDesignations Select _currentGroup,Localize "STRAI"]
+		_text1 = Localize "STRLEADERISALIVE"
+
+		;If the team is player controlled label it as such.
+		? (_side == west) && ((westGroups Select _currentGroup) In westPlayerGroups):_text = Format["%1 (%2)",teamDesignations Select _currentGroup,Name Leader (westGroups Select _currentGroup)]
+		? (_side == east) && ((eastGroups Select _currentGroup) In eastPlayerGroups):_text = Format["%1 (%2)",teamDesignations Select _currentGroup,Name Leader (eastGroups Select _currentGroup)]
+
+		? !(Alive Leader (_groupList Select _currentGroup)):_text1 = Localize "STRLEADERISDEAD"
+
+		lbClear IDCMenuInfo
+		_selection = lbAdd[IDCMenuInfo,_text]
+		_selection1 = lbAdd[IDCMenuInfo,_text1]
+
+		lbSetValue[IDCMenuInfo,_selection,1]
+		lbSetValue[IDCMenuInfo,_selection1,1]
+
+	#GetVehicle
+
+		_leader = Leader (_groupList Select _currentGroup)
+		_vehicle = Vehicle _leader
+		? (_vehicle == _leader):_lastVehicle = _vehicle;_distance = 1;_z = 1.5;goto "Update"
+		 ? (_vehicle == _lastVehicle):goto "Update"
+		_lastVehicle = _vehicle
+
+		_unitStatsCount = 0
+		_totalStatsUnits = Count _names
+
+		#FindMatchingVehicle
+
+		_name = _names Select _unitStatsCount
+		_unitsFound = (_name CountType [_vehicle])
+		_busFound = ("Bus" CountType [_vehicle])
+		_unitsFound1 = 0;_bradleysFound = 0;_kamovsFound = 0;_fuelUralsFound = 0;_repairUralsFound = 0;_ammoTrucksFound = 0;_fuelTrucksFound = 0;_repairTrucksFound = 0
+
+		;Some vehicles such as BMP2s will return from a CountType as a BMP.  Do a special check for these.
+		? (_name == "M113"):_unitsFound1 = ("vulcan" CountType [_vehicle]);_bradleysFound = ("bradley" CountType [_vehicle])
+		? (_name == "Truck5T"):_fuelTrucksFound = ("Truck5TRefuel" CountType [_vehicle]);_repairTrucksFound = ("Truck5TRepair" CountType [_vehicle]);_ammoTrucksFound = ("Truck5TReammo" CountType [_vehicle])
+		? (_name == "Ural"):_fuelUralsFound = ("UralRefuel" CountType [_vehicle]);_repairUralsFound = ("UralRepair" CountType [_vehicle])
+		? (_name == "Mi24"):_kamovsFound = ("Kamov" CountType [_vehicle])
+
+		? (_kamovsFound > 0):_unitStatsCount = V80Type;goto "MatchFound"
+		? (_bradleysFound > 0):_unitStatsCount = M2A2Type;goto "MatchFound"
+		? (_fuelUralsFound > 0):_unitStatsCount = fuelTruckEastType;goto "MatchFound"
+		? (_repairUralsFound > 0):_unitStatsCount = repairTruckEastType;goto "MatchFound"
+		? (_ammoTrucksFound > 0):_unitStatsCount = ammoTruckType;goto "MatchFound"
+		? (_fuelTrucksFound > 0):_unitStatsCount = fuelTruckType;goto "MatchFound"
+		? (_repairTrucksFound > 0):_unitStatsCount = repairTruckType;goto "MatchFound"
+		? (_unitsFound1 > 0):_unitStatsCount = _unitStatsCount + 1;goto "MatchFound"
+		? (_unitsFound > 0):goto "MatchFound"
+
+		_unitStatsCount = _unitStatsCount + 1
+
+		? (_unitStatsCount < _totalStatsUnits):goto "FindMatchingVehicle"
+
+	goto "Update"
+
+	#MatchFound
+
+		_z = 1.5;_distance = 4
+
+		;Get camera position for vehicle.
+		? (_unitStatsCount In aircraftCamera):_z = 0;_distance = 6.5
+		? (_unitStatsCount In largeAircraftCamera):_z = 0.5;_distance = 9.5
+		? (_unitStatsCount In APCCamera):_z = 2.25;_distance = 3
+		? (_unitStatsCount In largeAPCCamera):_z = 2.35;_distance = 4
+		? (_unitStatsCount In westTankCamera):_z = 1.5;_distance = 2.5
+		? (_unitStatsCount In eastTankCamera):_z = 1.25;_distance = 2
+
+		? (_unitStatsCount == truckType):_z = 2.75;_distance = 3
+		? (_unitStatsCount == fuelTruckType):_z = 2.75;_distance = 5.25
+		? (_unitStatsCount == hummerType) || (_unitStatsCount == salvageTruckType):_z = 1.5;_distance = 1.25
+		? (_unitStatsCount == jeepType) || (_unitStatsCount == jeepMGType):_z = 1.4;_distance = 0.25
+		? (_unitStatsCount == ammoTruckType):_z = 2.65;_distance = 3.1
+		? (_unitStatsCount == repairTruckType):_z = 2.75;_distance = 5.75
+
+		? (_unitStatsCount == UAZType):_z = 1.5;_distance = 0.2
+		? (_unitStatsCount == BRDMType) || (_unitStatsCount == salvageTruckEastType):_z = 2;_distance = 1.25
+		? (_unitStatsCount == fuelTruckEastType):_z = 2.2;_distance = 5.8
+		? (_unitStatsCount == truckEastType) || (_unitStatsCount == ammoTruckEastType):_z = 2.2;_distance = 2.85
+		? (_unitStatsCount == repairTruckEastType):_z = 2.1;_distance = 5.8
+		? (_busFound > 0):_distance = 7.25
+
+	goto "Update"
+
+#Init
+
+	;Check that a working Control Center is in range or the Mobile HQ is not destroyed before going to camera.
+	? (GetDammage _mobileHQ == 1):Hint (Localize "STRMHQDESTROYED");goto "ExitCamera"
+
+	_totalGroups = Count _groupList
+
+	;Create the camera.
+	_camera = "camera" CamCreate GetPos Vehicle Leader (_groupList Select _currentGroup)
+	_cameraTarget = "Logic" camCreate GetPos Vehicle Leader (_groupList Select _currentGroup)
+	_cameraTarget SetDir 0
+
+	;Set camera's position and target.
+	_camera CamSetTarget _cameraTarget
+	_camera CamSetRelPos[0,-25,50]
+
+	_camera camCommit 0
+	_camera CamSetFOV 1
+	_camera cameraEffect["Internal","Back"]
+
+	;Wait for the camera to be commited before continuing.
+	@CamCommitted _camera
+
+	~0.25
+
+	;Create the camera buttons.
+	_menuName = "CameraMenu"
+
+	? (_unit == Leader WestCommanderTeam)||(_unit == Leader EastCommanderTeam):_menuName = "CommanderCameraMenu"
+
+	_cameraMenu = CreateDialog _menuName
+
+	;Init team info box.
+	_selection = lbAdd[IDCMenuInfo,""]
+	lbSetValue [IDCMenuInfo,_selection,1]
+	lbSetCurSel [IDCMenuInfo,0]
+
+	goto "ToggleCameraMode"
+
+#ZoomIn
+
+	cameraMenuZoomIn = false
+	_zoom = _zoom - 10
+
+	? (_zoom < 10):_zoom = 10
+
+	goto "Update"
+
+#ZoomOut
+
+	cameraMenuZoomOut = false
+	_zoom = _zoom + 10
+
+	? (_zoom > _maxZoom):_zoom = _maxZoom
+
+	goto "Update"
+
+#ExitCamera
+
+	CloseDialog 0
+	cameraMenuExit = false
+
+	_camera CameraEffect["TERMINATE","BACK"]
+	CamDestroy _camera
+	CutText["","BLACK IN",.2]
+	TitleText["","PLAIN DOWN"]
+	Exit
+
+;Make non-independent controls invisible.
+#SetIndependentButtons
+
+	CtrlShow [IDCCommandMenuCommand,false]
+	CtrlShow [IDCCommandMenuDisembark,false]
+	CtrlShow [IDCCommandMenuEmbarkTransport,false]
+	CtrlShow [IDCCommandMenuDisembarkTransport,false]
+	goto _return
+
+#SetButtons
+
+	CtrlShow [IDCCommandMenuCommand,_setValue]
+	CtrlShow [IDCCommandMenuDisembark,_setValue]
+	CtrlShow [IDCCommandMenuEmbarkTransport,_setValue]
+	CtrlShow [IDCCommandMenuDisembarkTransport,_setValue]
+	CtrlShow [IDCCommandMenuMoveToWP,_setValue]
+	CtrlShow [IDCCommandMenuTakeTowns,_setValue]
+	CtrlShow [IDCCommandMenuDefendTowns,_setValue]
+	CtrlShow [IDCCommandMenuSearch,_setValue]
+	goto _return
+
+#GetTeamStatus
+
+	? (_side == west):goto "GetWestTeamStatus"
+	? (_side == east):goto "GetEastTeamStatus"
+
+	goto "Update"
+
+#GetWestTeamStatus
+
+	? (westSelectedGroup == groupAlpha):_independentSelected = westAlphaIndependent
+	? (westSelectedGroup == groupBravo):_independentSelected = westBravoIndependent
+	? (westSelectedGroup == groupCharlie)_independentSelected = westCharlieIndependent
+	? (westSelectedGroup == groupDelta):_independentSelected = westDeltaIndependent
+	? (westSelectedGroup == groupEcho):_independentSelected = westEchoIndependent
+	? (westSelectedGroup == groupFoxtrot):_independentSelected = westFoxtrotIndependent
+	? (westSelectedGroup == groupGolf):_independentSelected = westGolfIndependent
+	? (westSelectedGroup == groupHotel):_independentSelected = westHotelIndependent
+
+	goto _return
+
+#GetEastTeamStatus
+
+	? (eastSelectedGroup == groupAlpha):_independentSelected = eastAlphaIndependent
+	? (eastSelectedGroup == groupBravo):_independentSelected = eastBravoIndependent
+	? (eastSelectedGroup == groupCharlie):_independentSelected = eastCharlieIndependent
+	? (eastSelectedGroup == groupDelta):_independentSelected = eastDeltaIndependent
+	? (eastSelectedGroup == groupEcho):_independentSelected = eastEchoIndependent
+	? (eastSelectedGroup == groupFoxtrot):_independentSelected = eastFoxtrotIndependent
+	? (eastSelectedGroup == groupGolf):_independentSelected = eastGolfIndependent
+	? (eastSelectedGroup == groupHotel):_independentSelected = eastHotelIndependent
+
+	goto _return
+
+#ToggleCameraMode
+	
+	? !(cameraSatelliteMode):CtrlSetText  [IDCMenuButton,Localize "STRSATELLITECAMERA"]
+	? (cameraSatelliteMode):CtrlSetText  [IDCMenuButton,Localize "STRUNITCAMERA"]
+
+	_lastMode = cameraSatelliteMode
+
+	? !(_started):_started = true;goto "SelectNextGroup"
+	goto "Update"
+
+#SelectNextGroup
+
+	cameraMenuNext = false
+
+	#GetNextGroup
+	
+		_currentGroup = (_currentGroup + 1) % _totalGroups
+
+		? (IsNull (_groupList Select _currentGroup)):goto "GetNextGroup"
+		? (Format ["%1",_groupList Select _currentGroup] == "scalar bool array string 0xfcffffef"):goto "GetNextGroup"
+
+	goto "CheckRemainingActions"
+
+#SelectPreviousGroup
+
+	cameraMenuPrevious = false
+
+	#GetPreviousGroup
+
+		_currentGroup = (_currentGroup - 1) % _totalGroups
+		? (_currentGroup < 0):_currentGroup =  _totalGroups - 1
+		? (IsNull (_groupList Select _currentGroup)):goto "GetPreviousGroup"
+		? (Format ["%1",_groupList Select _currentGroup] == "scalar bool array string 0xfcffffef"):goto "GetPreviousGroup"
+
+	goto "CheckRemainingActions"

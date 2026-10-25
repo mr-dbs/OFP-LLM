@@ -1,0 +1,108 @@
+;Last modified 11/23/3
+;Routines for ammo truck build menu.
+
+_unit = _this select 0
+_side = Side _unit
+
+openAmmoBuildMenu = false
+ammoBuildMenuInUse = false
+buildMenuBuild = false
+_actionsAdded = false
+
+#Update
+~0.5
+
+	? !(Alive _unit)||(Side _unit != west && Side _unit != east):_unit RemoveAction _actionID;Exit
+
+	_count = 0
+	_inRange = false
+	_totalTrucks = Count ammoTrucks
+
+	? (_totalTrucks < 1):goto "Update"
+
+	#CheckTruck
+
+		_truck = ammoTrucks Select _count
+		_count = _count + 1
+
+		? (GetDammage _truck < 1) && (_unit Distance _truck < ammoTruckBuildRange):_inRange = true;goto "CheckActions"
+		? (_count < _totalTrucks):goto "CheckTruck"
+		? !(_inRange) && (_actionsAdded):_unit RemoveAction _actionID;_actionsAdded = false
+
+		goto "Update"
+
+	#CheckActions
+
+		? (_inRange) && !(_actionsAdded):_actionID = _unit AddAction [Localize "STRAMMOTRUCKOPTIONS","GUI\OpenAmmoTruckMenuGUI.sqs"];_actionsAdded = true
+
+		? (openAmmoBuildMenu):goto "InitBuildMenu"
+		? !(ammoBuildMenuInUse):goto "Update"
+		? (buildMenuBuild):goto "BuildCrate"
+
+		;If the value is not 1 then the menu was closed with the ESC key.
+		? !(dialog):ammoBuildMenuInUse = false
+		_lastCrateSelection = _crateSelection
+
+		;Store current structure selection.
+		? (ammoBuildMenuInUse):_crateSelection = lbCurSel IDCMenuList
+
+		;If selection becomes -1 then the menu was exited by the ESC key.  Restore selection choice.
+		? (_crateSelection < 0):_crateSelection = _lastCrateSelection
+
+	#UpdateInfoBox
+
+		lbClear IDCMenuInfo
+		[_unit,IDCMenuInfo,Format ["%1:",Localize "STRRESOURCES"]] Exec "GUI\SetGUIResources.sqs"
+
+		goto "Update"
+
+;Creates the build menu.
+#InitBuildMenu
+
+	openAmmoBuildMenu = false
+	ammoBuildMenuInUse = true
+
+	;Create the build menu.
+	_buildMenu = CreateDialog Format ["AmmoConstructionMenu%1",GUISkin]
+
+
+	lbClear IDCMenuInfo
+	lbAdd[IDCMenuInfo,""]
+
+	_count = weaponsCrateType
+	_totalCrates = Count structureNames
+	_IDC = IDCMenuList
+
+	;Add an entry onto the crate selection combobox.
+	#AddAmmoSelection
+
+		_spacer = ""
+		? (structureCosts Select _count < 100):_spacer = " "
+		? (structureCosts Select _count < 1000):_spacer = _spacer + " "
+
+		_layout = "$%1 %2%3"
+		? (Localize "STRCURRENCYPOSITION" == "Back"):_layout = "%1$ %2%3"
+		_text = Format[_layout,structureCosts Select _count,_spacer,structureNames Select _count]
+
+		_selection = lbAdd[_IDC,_text]
+		lbSetValue [_IDC,_selection,_count]
+
+		_count = _count  + 1
+
+		? (_count < _totalCrates):goto "AddAmmoSelection"
+
+		;Set cursor to last selected crate.
+		lbSetCurSel [IDCMenuList,_crateSelection]
+
+		goto "Update"
+
+#BuildCrate
+
+	buildMenuBuild = false
+	ammoBuildMenuInUse = false
+
+	_structureType = lbValue[IDCMenuList,_crateSelection]
+	[_unit,_structureType] Exec "Build\BuildStructure.sqs"
+
+	CloseDialog 0
+	goto "Update"

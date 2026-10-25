@@ -1,0 +1,149 @@
+;Last modified 5/6/3
+;Add this to script caller.
+;Script usage:  [Side,UpgradeType] Exec "UpdateUpgrade.sqs"
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_upgradeType = _this Select 1
+
+? (_upgradeType == infantryFactoryType):_cost = upgradeInfantryCost;_time = upgradeInfantryTime
+? (_upgradeType == blackOpsUpgradeType):_cost = upgradeBlackOpsCost;_time = upgradeBlackOpsTime
+? (_upgradeType == lightFactoryType):_cost = upgradeLightCost;_time = upgradeLightTime
+? (_upgradeType == heavyFactoryType):_cost = upgradeHeavyCost;_time = upgradeHeavyTime
+? (_upgradeType == airFactoryType):_cost = upgradeAirCost;_time = upgradeAirTime
+? (_upgradeType == aircraftRocketsUpgradeType):_cost = upgradeAircraftRocketsCost;_time = upgradeAircraftRocketsTime
+? (_upgradeType == aircraftATUpgradeType):_cost = upgradeAircraftATCost;_time = upgradeAircraftATTime
+? (_upgradeType == radarUpgradeType):_cost = upgradeRadarCost;_time = upgradeRadarTime
+
+? (_side == west):goto "StartWest"
+? (_side == east):goto "StartEast"
+
+Exit
+
+#StartWest
+
+	westRequestUpgrade = 0;PublicVariable "westRequestUpgrade"
+
+	;If an upgrade is already in progress then stop.
+	? (westUpgradeInProgress):Exit
+
+	_buildingList = westControlCenter
+	_buildingListDamage = westControlCenterDamage
+	_buildingListBuildTime = westControlCenterBuildTime
+
+	;Exit if west does not have enough resources to get upgrade.
+	? (westResources >= _cost):goto "CheckControlCenters"
+
+	Exit
+
+#StartEast
+
+	eastRequestUpgrade = 0;PublicVariable "eastRequestUpgrade"
+
+	;If an upgrade is already in progress then stop.
+	? (eastUpgradeInProgress):Exit
+
+	_buildingList = eastControlCenter
+	_buildingListDamage = eastControlCenterDamage
+	_buildingListBuildTime = eastControlCenterBuildTime
+
+	;Exit if east does not have enough resources to get upgrade.
+	? (eastResources >= _cost):goto "CheckControlCenters"
+
+	Exit
+
+#CheckControlCenters
+
+	_count = 0
+	_maxBuildings = Count _buildingList
+
+#CountControlCenters
+
+	_building = _buildingList Select _count
+	_damage = _buildingListDamage Select _count
+
+	;Check if building has been destroyed & is not currently damaged.
+	? (GetDammage _building != 1) && (_damage == 500) && !(_building In _buildingsInUseServer):goto "Upgrade"
+
+	_count = _count + 1
+
+	;Otherwise move on to the next building.
+	? (_count < _maxBuildings):goto "CountControlCenters"
+
+#Upgrade
+
+	;Subtract the upgrade's cost from the resource pool.
+	? (_side == west):goto "UpgradeWest"
+	? (_side == east):goto "UpgradeEast"
+	
+	Exit
+
+#UpgradeWest
+	
+	westResources = westResources - _cost;PublicVariable "westResources"
+	westBuildingInUseMP = _building;PublicVariable "westBuildingInUseMP"
+	westBuildingInUseStateMP = true;PublicVariable "westBuildingInUseStateMP"
+	westUpgradeInProgress = true;PublicVariable "westUpgradeInProgress"
+	westUpgradeInProgressType = _upgradeType;PublicVariable "westUpgradeInProgressType"
+
+	~_time
+
+	westBuildingInUseMP = _building;PublicVariable "westBuildingInUseMP"
+	westBuildingInUseStateMP = false;PublicVariable "westBuildingInUseStateMP"
+	westUpgradeInProgress = false;PublicVariable "westUpgradeInProgress"
+	westUpgradeInProgressType = 0;PublicVariable "westUpgradeInProgressType"
+
+	;If the building was destroyed then cancel the upgrade.
+	? (GetDammage _building == 1):Exit
+
+	;Have the commander transmit an upgrade complete message to everyone on his/her side.
+	westMessage = messageUpgraded + _upgradeType;PublicVariable "westMessage";westPlayerMessageGroupFrom = groupCommander;PublicVariable "westPlayerMessageGroupFrom"
+
+	redrawWestUpgrades = true;PublicVariable "redrawWestUpgrades"
+
+	? (_upgradeType == infantryFactoryType):westUpgradedInfantry = true;PublicVariable "westUpgradedInfantry"
+	? (_upgradeType == blackOpsUpgradeType):westUpgradedBlackOps = true;PublicVariable "westUpgradedBlackOps"
+	? (_upgradeType == lightFactoryType):westUpgradedLight = true;PublicVariable "westUpgradedLight"
+	? (_upgradeType == heavyFactoryType):westUpgradedHeavy = true;PublicVariable "westUpgradedHeavy"
+	? (_upgradeType == airFactoryType):westUpgradedAir = true;PublicVariable "westUpgradedAir"
+	? (_upgradeType == aircraftRocketsUpgradeType):westUpgradedAircraftRockets = true;PublicVariable "westUpgradedAircraftRockets"
+	? (_upgradeType == aircraftATUpgradeType):westUpgradedAircraftAT = true;PublicVariable "westUpgradedAircraftAT"
+	? (_upgradeType == radarUpgradeType):westUpgradedRadar = true;PublicVariable "westUpgradedRadar"
+
+	Exit
+
+#UpgradeEast
+	
+	eastResources = eastResources - _cost;PublicVariable "eastResources"
+	eastBuildingInUseMP = _building;PublicVariable "eastBuildingInUseMP"
+	eastBuildingInUseStateMP = true;PublicVariable "eastBuildingInUseStateMP"
+	eastUpgradeInProgress = true;PublicVariable "eastUpgradeInProgress"
+	eastUpgradeInProgressType = _upgradeType;PublicVariable "eastUpgradeInProgressType"
+
+	~_time
+
+	eastBuildingInUseMP = _building;PublicVariable "eastBuildingInUseMP"
+	eastBuildingInUseStateMP = false;PublicVariable "eastBuildingInUseStateMP"
+	eastUpgradeInProgress = false;PublicVariable "eastUpgradeInProgress"
+	eastUpgradeInProgressType = 0;PublicVariable "eastUpgradeInProgressType"
+
+	;If the building was destroyed then cancel the upgrade.
+	? (GetDammage _building == 1):Exit
+
+	;Have the commander transmit an upgrade complete message to everyone on his/her side.
+	eastMessage = messageUpgraded + _upgradeType;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = groupCommander;PublicVariable "eastPlayerMessageGroupFrom"
+
+	redrawEastUpgrades = true;PublicVariable "redrawEastUpgrades"
+
+	? (_upgradeType == infantryFactoryType):eastUpgradedInfantry = true;PublicVariable "eastUpgradedInfantry"
+	? (_upgradeType == blackOpsUpgradeType):eastUpgradedBlackOps = true;PublicVariable "eastUpgradedBlackOps"
+	? (_upgradeType == lightFactoryType):eastUpgradedLight = true;PublicVariable "eastUpgradedLight"
+	? (_upgradeType == heavyFactoryType):eastUpgradedHeavy = true;PublicVariable "eastUpgradedHeavy"
+	? (_upgradeType == airFactoryType):eastUpgradedAir = true;PublicVariable "eastUpgradedAir"
+	? (_upgradeType == aircraftRocketsUpgradeType):eastUpgradedAircraftRockets = true;PublicVariable "eastUpgradedAircraftRockets"
+	? (_upgradeType == aircraftATUpgradeType):eastUpgradedAircraftAT = true;PublicVariable "eastUpgradedAircraftAT"
+	? (_upgradeType == radarUpgradeType):eastUpgradedRadar = true;PublicVariable "eastUpgradedRadar"
+
+	Exit

@@ -1,0 +1,75 @@
+;Last modified 4/15/3
+;Use on a group to give it AI control.
+;Script usage: [Group] Exec "UpdateAICommunications.sqs"
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_group = _this select 0
+_side = Side _group
+_lastGroupSize = Count Units _group
+_teamDesignation = groupCommander
+
+? (_side == west):goto "GetWestTeamNumber"
+? (_side == east):goto "GetEastTeamNumber"
+
+Exit
+
+#GetWestTeamNumber
+
+	? (_group == WestAlphaTeam):_teamDesignation = groupAlpha
+	? (_group == WestBravoTeam):_teamDesignation = groupBravo
+	? (_group == WestCharlieTeam):_teamDesignation = groupCharlie
+	? (_group == WestDeltaTeam):_teamDesignation = groupDelta
+	? (_group == WestEchoTeam):_teamDesignation = groupEcho
+	? (_group == WestFoxtrotTeam):_teamDesignation = groupFoxtrot
+	? (_group == WestGolfTeam):_teamDesignation = groupGolf
+	? (_group == WestHotelTeam):_teamDesignation = groupHotel
+	? (_teamDesignation == groupCommander):Exit
+	goto "Update"
+
+#GetEastTeamNumber
+
+	? (_group == EastAlphaTeam):_teamDesignation = groupAlpha
+	? (_group == EastBravoTeam):_teamDesignation = groupBravo
+	? (_group == EastCharlieTeam):_teamDesignation = groupCharlie
+	? (_group == EastDeltaTeam):_teamDesignation = groupDelta
+	? (_group == EastEchoTeam):_teamDesignation = groupEcho
+	? (_group == EastFoxtrotTeam):_teamDesignation = groupFoxtrot
+	? (_group == EastGolfTeam):_teamDesignation = groupGolf
+	? (_group == EastHotelTeam):_teamDesignation = groupHotel
+	? (_teamDesignation == groupCommander):Exit
+
+#Update
+~5
+
+	_currentGroupSize = Count Units _group
+
+	? (_group In westPlayerGroups) || (_group In eastPlayerGroups):goto "Update"
+	? (_lastGroupSize > _currentGroupSize) && (_currentGroupSize > 0):goto "ReportCasualties"
+
+	_lastGroupSize = _currentGroupSize
+	goto "Update"
+
+#ReportCasualties
+
+	? (_side == east):goto "EastCasualties"
+	
+	#WestCasualties
+	
+		westPlayerMessage = messageAICasualties;PublicVariable "westPlayerMessage"
+		westPlayerMessagePlayer = Leader WestCommanderTeam;PublicVariable "westPlayerMessagePlayer"
+		westPlayerMessageGroupFrom = _teamDesignation;PublicVariable "westPlayerMessageGroupFrom"
+		goto "Delay"
+
+	#EastCasualties
+	
+		eastPlayerMessage = messageAICasualties;PublicVariable "eastPlayerMessage"
+		eastPlayerMessagePlayer = Leader EastCommanderTeam;PublicVariable "eastPlayerMessagePlayer"
+		eastPlayerMessageGroupFrom = _teamDesignation;PublicVariable "eastPlayerMessageGroupFrom"
+
+#Delay
+~60
+
+	_lastGroupSize = Count Units _group
+	goto "Update"

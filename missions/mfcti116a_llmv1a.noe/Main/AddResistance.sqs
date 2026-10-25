@@ -1,0 +1,178 @@
+;Last modified 2/19/4
+;Script usage:  [Town,Range] exec "AddResistance.sqs"
+? !(Local LocalServerObject):Exit
+
+@ (serverStarted)
+
+_town = _this Select 0
+_range = _this Select 1
+
+? (_range < 20):_range = 20
+
+_townPosition = GetPos _town
+
+_count = 0
+_totalTowns = Count towns
+
+#GetValue
+
+	#CheckTown
+
+		_currentTown = towns Select _count
+
+		? (_currentTown == _town):goto "SetValue"
+
+		_count = _count + 1
+
+		? (_count < _totalTowns):goto "CheckTown"
+
+#SetValue
+
+	_value = townValues Select _count
+
+	_resistanceSize = _value * resistanceRatio
+
+	;Add an extra group for large towns.
+	? (_value >= 350):_resistanceSize = _resistanceSize + 8
+
+	_totalGroups = _resistanceSize / 12 + 1
+
+	;Remove fractions.
+	_groupSize = _groupSize - (_groupSize % 1)
+	_totalGroups = _totalGroups - (_totalGroups % 1)
+
+	? (_groupSize > 12):_groupSize = 12
+	? (_totalGroups > 5):_totalGroups = 5
+
+;player sidechat format ["Adding resistance.  Value: %1",_value]
+
+_count = 0
+
+#CreateGroup
+
+	;Set group's starting point.
+	_direction = Random 360
+	_distance = 15 + Random (_range - 15)
+	_destination = [(_townPosition Select 0)+((sin _direction)*_distance),(_townPosition Select 1)+((cos _direction)*_distance),_townPosition Select 2]
+
+;	"OfficerG" CreateUnit [_destination,GrpNull,"newResistance = this",1,"LIEUTENANT"]
+	"OfficerG" CreateUnit [_destination,ResistanceTempGroup,"",1,"PRIVATE"]
+	~0.005
+
+	_groupLeader = (Units ResistanceTempGroup) Select (Count Units ResistanceTempGroup - 1)
+	[_groupLeader,150 * bountyPercentage] Exec "Main\UnitCleanUp.sqs"
+
+	[_groupLeader] Join GrpNull
+	_group = Group _groupLeader
+	_position = GetPos _groupLeader
+	_groupCount = 0
+	_groupSize = _resistanceSize
+	_resistanceSize = _resistanceSize - 12
+
+	? (_groupSize > 12):_groupSize = 12
+
+	#CreateUnit
+
+		_direction = Random 360
+		_distance = Random 5
+		_destination = [(_position Select 0)+((sin _direction)*_distance),(_position Select 1)+((cos _direction)*_distance),_position Select 2]
+
+		;0 - Soldier, 1 - LAW, 2 - AT, 3 - AA, 4 - MG, 5 - Grenadier, 6 - Medic, 8 - Medic, 9 - Sniper
+		_unitType = 0
+		_type = Random 1000
+
+		;Make it even nastier for insane opposition.
+		? (opposition == insaneOpValue):_type = _type - Random 100
+
+		? (_type < 750):_unitType = 4
+		? (_type < 600):_unitType = 5
+		? (_type < 525):_unitType = 8
+		? (_type < 450):_unitType = 1
+		? (_type < 275):_unitType = 2
+		? (_type < 200):_unitType = 3
+		? (_type < 125):_unitType = 9
+		? (_type < 50):goto "CreateVehicle"
+
+		(resistanceSoldierNames Select _unitType) CreateUnit [_destination,_group,"",Random 1,"PRIVATE"]
+		~0.005
+
+		_newUnit = (Units _group) Select (Count Units _group - 1)
+		[_newUnit,75 * bountyPercentage] Exec "Main\UnitCleanUp.sqs"
+
+		_groupCount = _groupCount + 1
+		;_return = "CreateNextUnit";goto "SetPosition"
+
+		#CreateNextUnit
+
+			? (_groupCount < _groupSize):goto "CreateUnit"
+
+
+	[_groupLeader,_town] Exec "Main\UpdateResistance.sqs"
+	_count = _count + 1
+
+	? (_count < _totalGroups):goto "CreateGroup"
+
+	~2
+
+Exit
+
+#CreateVehicle
+
+	;14 - BMP, 15 - T55, 16 - T72, 17 - T80
+
+	_unitType = 14
+	_type = Random 1000
+
+	;Increase chance of a more powerful vehicle for insane opposition.
+	? (opposition == insaneOpValue):_type = _type - Random 200
+
+	? (_type < 400):_unitType = 15
+	? (_type < 250):_unitType = 16
+	? (_type < 100):_unitType = 17
+
+	_vehicleName = resistanceNames Select _unitType
+	_crewName = resistanceNames Select 0
+	_newVehicle = _vehicleName CreateVehicle _destination
+	~0.05
+	_newVehicle SetDir Random 360
+
+	[_newVehicle,resistance,ObjNull] Exec "Main\VehicleCleanUp.sqs"
+	;[resistance,_vehicleName,_newVehicle] Exec "Main\AddVehicleToServerList.sqs"
+
+	_crewName CreateUnit [_destination,ResistanceTempGroup,"",1,"PRIVATE"]
+	~0.005
+
+	_newDriver = (Units ResistanceTempGroup) Select (Count Units ResistanceTempGroup - 1)
+	_newDriver MoveInDriver _newVehicle
+
+	[_newDriver] Join _group
+	[newDriver,(resistanceUnitCosts Select 0) * bountyPercentage] Exec "Main\UnitCleanUp.sqs"
+
+	_crewName CreateUnit [_destination,ResistanceTempGroup,"",1,"PRIVATE"]
+	~0.005
+	_newGunner = (Units ResistanceTempGroup) Select (Count Units ResistanceTempGroup - 1)
+	_newGunner MoveInGunner _newVehicle
+
+	[_newGunner] Join _group
+	[_newGunner,(resistanceUnitCosts Select 0) * bountyPercentage] Exec "Main\UnitCleanUp.sqs"
+
+	_groupCount = _groupCount + 2
+
+	goto "CreateNextUnit"
+
+;Set unit at a random distance from the leader.  If the destination is within the flag retry.
+#SetPosition
+
+	_direction = Random 360
+	_distance = 10 + Random 50
+	_newDestination = [(_position Select 0)+((sin _direction)*_distance),(_position Select 1)+((cos _direction)*_distance),_position Select 2]
+
+	;Calculate distance.
+	_x = abs ((_newDestination Select 0) - (_townPosition Select 0))
+	_y = abs ((_newDestination Select 1) - (_townPosition Select 1))
+	_length = sqrt (_x * _x + _y * _y)
+
+	? (_length < 11):goto "SetPosition"
+
+	_newUnit SetPos _newDestination
+	goto _return

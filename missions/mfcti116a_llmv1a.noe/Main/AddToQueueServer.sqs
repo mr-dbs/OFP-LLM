@@ -1,0 +1,34 @@
+;Last modified 12/2/2
+;Script usage:[UnitType,Building,Manned,Team] Exec "AddToQueueServer.sqs"
+
+_side = _this Select 0
+_unitType = _this Select 1
+_building = _this Select 2
+_manned = _this Select 3
+_team = _this Select 4
+
+? (_side == east):goto "AddToEast"
+
+#AddToWest
+
+	;Only queue items for a player.
+	? !(WestCommanderTeam In westPlayerGroups):Exit
+
+	westAddToQueue = _unitType;PublicVariable "westAddToQueue"
+	westAddToQueuePlayer = Leader WestCommanderTeam;PublicVariable "westAddToQueuePlayer"
+	westAddToQueueTeam = _team;PublicVariable "westAddToQueueTeam"
+	westAddToQueueManned = _manned;PublicVariable "westAddToQueueManned"
+	westAddToQueueBuilding = _building;PublicVariable "westAddToQueueBuilding"
+
+	Exit
+
+#AddToEast
+
+	;Only queue items for a player.
+	? !(EastCommanderTeam In eastPlayerGroups):Exit
+
+	eastAddToQueue = _unitType;PublicVariable "eastAddToQueue"
+	eastAddToQueuePlayer = Leader EastCommanderTeam;PublicVariable "eastAddToQueuePlayer"
+	eastAddToQueueTeam = _team;PublicVariable "eastAddToQueueTeam"
+	eastAddToQueueManned = _manned;PublicVariable "eastAddToQueueManned"
+	eastAddToQueueBuilding = _building;PublicVariable "eastAddToQueueBuilding"

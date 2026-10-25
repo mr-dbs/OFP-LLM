@@ -1,0 +1,67 @@
+; LLM\AirBuy.sqs (version 1)
+; Buys anti-air soldiers into teams for the air response of relay version 32. Server only.
+; Usage: [side, [[team number, soldiers], ...]] exec "LLM\AirBuy.sqs"   (team 0 is the commander's own team)
+; One soldier at a time: each is built at the barracks, joins his team wherever it is, and runs out to it.
+; A purchase made while the barracks is busy would be dropped, so this waits for it between soldiers.
+; Paid from the side's funds (ReinforceGroupServer.sqs checks them).
+
+? !(Local LocalServerObject) : Exit
+
+_side = _this select 0
+_list = _this select 1
+_sideText = "West"
+? (_side == east) : _sideText = "East"
+_groups = westGroups
+? (_side == east) : _groups = eastGroups
+_soldier = soldierAAType
+? (_side == east) : _soldier = soldierAAEastType
+_barrList = []
+_barr = objNull
+_group = grpNull
+_i = 0
+
+#NextTeam
+
+	? (_i >= count _list) : Exit
+	_entry = _list select _i
+	_i = _i + 1
+	_t = _entry select 0
+	_n = _entry select 1
+	? (_t < 0) or (_t >= count _groups) : goto "NextTeam"
+	_group = _groups select _t
+	? (isNull _group) : goto "NextTeam"
+	_k = 0
+
+	#BuyOne
+
+		? (_k >= _n) : goto "NextTeam"
+		Call Format ["_barrList = %1InfantryFactory", _sideText]
+		_barr = objNull
+		_b = 0
+
+		#FindBarracks
+
+			? (_b >= count _barrList) : goto "FindBarracksDone"
+			? (alive (_barrList select _b)) and (isNull _barr) : _barr = _barrList select _b
+			_b = _b + 1
+			goto "FindBarracks"
+
+		#FindBarracksDone
+
+		? (isNull _barr) : Exit
+		_wait = 0
+
+		#WaitBarracks
+
+			? !(_barr in buildingsInUseServer) : goto "Buy"
+			~1
+			_wait = _wait + 1
+			? (_wait < 120) : goto "WaitBarracks"
+			goto "NextTeam"
+
+		#Buy
+
+		[_side, _barr, _soldier, noScript, _group, false] Exec "Main\BuyUnit.sqs"
+		~((unitBuildTimes select _soldier) + 2)
+		_k = _k + 1
+		goto "BuyOne"

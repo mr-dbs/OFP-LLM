@@ -1,0 +1,4 @@
+;Last modified 4/29/3
+;Open the heavy vehicle factory menu.
+
+openMenuType = heavyFactoryType

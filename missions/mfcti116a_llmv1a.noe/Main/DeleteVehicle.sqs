@@ -1,0 +1,56 @@
+;Last modified 10/7/2
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_unit = _this Select 0
+
+;Remove vehicle from any lists.
+? (_unit In westLightVehicles):westLightVehicles = westLightVehicles - [_unit]
+? (_unit In westMiscVehicles):westMiscVehicles = westMiscVehicles - [_unit]
+? (_unit In westHeavyVehicles):westHeavyVehicles = westHeavyVehicles - [_unit]
+? (_unit In westAirVehicles):westAirVehicles = westAirVehicles - [_unit]
+? (_unit In westTransports):westTransports = westTransports - [_unit]
+
+? (_unit In eastLightVehicles):eastLightVehicles = eastLightVehicles - [_unit]
+? (_unit In eastMiscVehicles):eastMiscVehicles = eastMiscVehicles - [_unit]
+? (_unit In eastHeavyVehicles):eastHeavyVehicles = eastHeavyVehicles - [_unit]
+? (_unit In eastAirVehicles):eastAirVehicles = eastAirVehicles - [_unit]
+? (_unit In eastTransports):eastTransports = eastTransports - [_unit]
+
+? (_unit In vehicles):vehicles = vehicles - [_unit]
+? (_unit In westVehicles):westVehicles = westVehicles - [_unit]
+? (_unit In eastVehicles):eastVehicles = eastVehicles - [_unit]
+
+? (_unit In westSalvageTrucks):westSalvageTrucks = westSalvageTrucks - [_unit]
+? (_unit In eastSalvageTrucks):eastSalvageTrucks = eastSalvageTrucks - [_unit]
+
+? (_unit In westAmmoTrucks):westAmmoTrucks = westAmmoTrucks - [_unit]
+? (_unit In eastAmmoTrucks):eastAmmoTrucks = eastAmmoTrucks - [_unit]
+
+? (_unit In westRepairTrucks):westRepairTrucks = westRepairTrucks - [_unit]
+? (_unit In eastRepairTrucks):eastRepairTrucks = eastRepairTrucks - [_unit]
+
+;Remove vehicle marker.
+;? (_unit In westMarkerVehicles):westMarkerVehicles = westMarkerVehicles - [_unit]
+;? (_unit In eastMarkerVehicles):eastMarkerVehicles = eastMarkerVehicles - [_unit]
+
+_count = 0
+
+? (Side _unit == west):_totalMarkerVehicles = Count westMarkerVehicles
+? (Side _unit == east):_totalMarkerVehicles = Count eastMarkerVehicles
+
+#FindUnit
+
+	;Clear vehicle marker list of vehicle.
+	? (Side _unit == west) && (westMarkerVehicles Select _count == _unit):westMarkerVehicles Set [_count,ObjNull];goto "DeleteUnit"
+	? (Side _unit == east) && (eastMarkerVehicles Select _count == _unit):eastMarkerVehicles Set [_count,ObjNull];goto "DeleteUnit"
+
+	_count = _count + 1
+
+	? (_count < _totalMarkerVehicles):goto "FindUnit"
+
+#DeleteUnit
+~0.25
+
+	DeleteVehicle _unit

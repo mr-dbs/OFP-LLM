@@ -1,0 +1,62 @@
+;DBS Arsenal - init. Exec once per client from Main\InitPlayer.sqs.
+;Settings are the first block. Everything else is plumbing.
+
+dbsArsInitDone = false
+
+;=== SETTINGS ===
+;true once the CWR engine has the dbsSetBody command (see DBSArsenal\README_DBSArsenal.md).
+;false: AI skin change still works (respawn-in-place), player skin change is disabled.
+dbsArsEngineBody = false
+
+;true: presets are saved to <CWR user dir>\Config\DBSArsenal_Presets.cfg with saveConfig/loadConfig.
+;Set false on an engine without those commands; presets then last for the session only.
+dbsArsPersist = true
+dbsArsPresetFile = "DBSArsenal_Presets.cfg"
+
+;true: skin list starts filtered to the unit's own side.
+dbsArsOwnSideFirst = true
+;=== END SETTINGS ===
+
+;Standalone mode: [anything] Exec "DBSArsenal\Init.sqs" skips all MFCTI hooks (menus, bounty cleanup).
+dbsArsMFCTI = true
+? (Count _this > 0):dbsArsMFCTI = false
+
+dbsArsOpen = false
+dbsArsBtn = ""
+dbsArsSwapped = false
+dbsArsSkinDone = true
+dbsArsSkinResult = objNull
+dbsArsNew = objNull
+dbsArsSquadDone = true
+dbsArsPresets = []
+
+dbsArsIdcUnits = 9001
+dbsArsIdcItems = 9002
+dbsArsIdcInfo = 9003
+dbsArsIdcPresets = 9004
+dbsArsIdcName = 9005
+dbsArsIdcCat = 9006
+dbsArsIdcStatus = 9007
+dbsArsIdcMag = 9008
+dbsArsIdcSide = 9009
+
+dbsArsFnIndex = preprocessFile "DBSArsenal\fn_index.sqf"
+dbsArsFnName = preprocessFile "DBSArsenal\fn_name.sqf"
+dbsArsFnGet = preprocessFile "DBSArsenal\fn_getLoadout.sqf"
+dbsArsFnApplyGear = preprocessFile "DBSArsenal\fn_applyGear.sqf"
+dbsArsFnSetWeapon = preprocessFile "DBSArsenal\fn_setWeapon.sqf"
+dbsArsFnSidearm = preprocessFile "DBSArsenal\fn_sidearm.sqf"
+dbsArsFnDescribe = preprocessFile "DBSArsenal\fn_describe.sqf"
+dbsArsFnFillUnits = preprocessFile "DBSArsenal\fn_fillUnits.sqf"
+dbsArsFnFillItems = preprocessFile "DBSArsenal\fn_fillItems.sqf"
+dbsArsFnFillInfo = preprocessFile "DBSArsenal\fn_fillInfo.sqf"
+dbsArsFnFillPresets = preprocessFile "DBSArsenal\fn_fillPresets.sqf"
+dbsArsFnPresetSave = preprocessFile "DBSArsenal\fn_presetSave.sqf"
+dbsArsFnPresetDelete = preprocessFile "DBSArsenal\fn_presetDelete.sqf"
+
+call preprocessFile "DBSArsenal\Catalog.sqf"
+call preprocessFile "DBSArsenal\fn_buildIndex.sqf"
+
+? (dbsArsPersist):[] Exec "DBSArsenal\PresetsLoad.sqs"
+
+dbsArsInitDone = true

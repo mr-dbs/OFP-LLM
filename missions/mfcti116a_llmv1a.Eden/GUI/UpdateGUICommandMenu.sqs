@@ -1,0 +1,168 @@
+;Last modified 2/19/4
+;Routines for Commander's menu.
+
+_unit = _this select 0
+_side = Side _unit
+
+openCommandMenu = false
+openMapCommandMenu = false
+commandMenuInUse = false
+toggleFireMission = false
+
+_actionID = _unit AddAction [Localize "STROPENCOMMANDMENU","GUI\OpenCommandMenuGUI.sqs"]
+
+#Update
+~0.5
+
+	? !(Alive _unit) || (Side _unit != west && Side _unit != east):goto "RemoveMenuActions"
+
+	#CheckActions
+
+		? (openCommandMenu) || (openMapCommandMenu):goto "InitCommandMenu"
+		? !(commandMenuInUse):ForceMap false;goto "Update"
+
+		_selectedTeam = lbData[IDCCommandMenuTeamSelect,lbCurSel IDCCommandMenuTeamSelect]
+
+		;If data is not valid then the menu was exited with ESC.  Set commandMenuInUse false.
+		? !(_selectedTeam In teamDesignations)&&(_selectedTeam != Localize "STRALL"):commandMenuInUse = false;goto "Update"
+
+		[_side,IDCCommandMenuTeamSelect,false,true] Exec "GUI\GetGUISelectedTeam.sqs"
+		[] Exec "GUI\GetGUIWaypointCoords.sqs"
+
+		_playerSelected = false
+		_independentSelected = false
+		_setValue = true
+		_return = "CheckTeamStatus"
+
+		? (_side == west) && ((westGroups Select westSelectedGroup) In westPlayerGroups) && !(westSelectedAll):_setValue = false;_return = "Update"
+		? (_side == east) && ((eastGroups Select eastSelectedGroup) In eastPlayerGroups) && !(eastSelectedAll):_setValue = false;_return = "Update"
+
+		? (_side == west):_fireMission = westFireMission;_request = westRequestFireMission
+		? (_side == east):_fireMission = eastFireMission;_request = eastRequestFireMission
+
+		? (MFCTI116NoMortars && _request):toggleFireMission = false;Hint Localize "STRNOFIREMISSION"
+
+		? (_fireMission && toggleFireMission):goto "StopFireMission"
+		? (_request && toggleFireMission):goto "AcceptFireMission"
+
+		toggleFireMission = false
+		goto "SetButtons"
+
+		#CheckTeamStatus
+
+			_return = "CheckTeams";goto "GetTeamStatus"
+
+		#CheckTeams
+
+			? (_independentSelected):_return = "Update";goto "SetIndependentButtons"
+
+		goto "Update"
+
+;Creates the command menu.
+#InitCommandMenu
+
+	;Create the command menu.
+	? (openCommandMenu):_commandMenu = CreateDialog Format ["CommandMenu%1",GUISkin]
+	? (openMapCommandMenu):ForceMap true;_commandMenu = CreateDialog Format ["MapCommandMenu%1",GUISkin]
+
+	? (_side == west) && (westFireMission):CtrlSetText [IDCCommandMenuFireMission,Localize "STRSTOPFIREMISSION"]
+	? (_side == east) && (eastFireMission):CtrlSetText [IDCCommandMenuFireMission,Localize "STRSTOPFIREMISSION"]
+
+	openCommandMenu = false
+	openMapCommandMenu = false
+	commandMenuInUse = true
+
+	[_side,IDCCommandMenuTeamSelect,false,true] Exec "GUI\SetGUITeamSelections.sqs"
+	[] Exec "GUI\SetGUIWaypointCoords.sqs"
+
+	goto "Update"
+
+#RemoveMenuActions
+
+	_unit RemoveAction _actionID
+
+Exit
+
+;Make non-independent controls invisible.
+#SetIndependentButtons
+
+	CtrlShow [IDCCommandMenuCommand,false]
+	CtrlShow [IDCCommandMenuDisembark,false]
+	CtrlShow [IDCCommandMenuEmbarkTransport,false]
+	CtrlShow [IDCCommandMenuDisembarkTransport,false]
+	goto _return
+
+#SetButtons
+
+	CtrlShow [IDCCommandMenuCommand,_setValue]
+	CtrlShow [IDCCommandMenuDisembark,_setValue]
+	CtrlShow [IDCCommandMenuEmbarkTransport,_setValue]
+	CtrlShow [IDCCommandMenuDisembarkTransport,_setValue]
+	CtrlShow [IDCCommandMenuMoveToWP,_setValue]
+	CtrlShow [IDCCommandMenuTakeTowns,_setValue]
+	CtrlShow [IDCCommandMenuDefendTowns,_setValue]
+	CtrlShow [IDCCommandMenuSearch,_setValue]
+	goto _return
+
+#GetTeamStatus
+
+	? (_side == west):goto "GetWestTeamStatus"
+	? (_side == east):goto "GetEastTeamStatus"
+
+	goto "Update"
+
+#GetWestTeamStatus
+
+	? (westSelectedGroup == groupAlpha):_independentSelected = westAlphaIndependent
+	? (westSelectedGroup == groupBravo):_independentSelected = westBravoIndependent
+	? (westSelectedGroup == groupCharlie):_independentSelected = westCharlieIndependent
+	? (westSelectedGroup == groupDelta):_independentSelected = westDeltaIndependent
+	? (westSelectedGroup == groupEcho):_independentSelected = westEchoIndependent
+	? (westSelectedGroup == groupFoxtrot):_independentSelected = westFoxtrotIndependent
+	? (westSelectedGroup == groupGolf):_independentSelected = westGolfIndependent
+	? (westSelectedGroup == groupHotel):_independentSelected = westHotelIndependent
+	? (westSelectedAll):_independentSelected = true
+
+	goto _return
+
+#GetEastTeamStatus
+
+	? (eastSelectedGroup == groupAlpha):_independentSelected = eastAlphaIndependent
+	? (eastSelectedGroup == groupBravo):_independentSelected = eastBravoIndependent
+	? (eastSelectedGroup == groupCharlie):_independentSelected = eastCharlieIndependent
+	? (eastSelectedGroup == groupDelta):_independentSelected = eastDeltaIndependent
+	? (eastSelectedGroup == groupEcho):_independentSelected = eastEchoIndependent
+	? (eastSelectedGroup == groupFoxtrot):_independentSelected = eastFoxtrotIndependent
+	? (eastSelectedGroup == groupGolf):_independentSelected = eastGolfIndependent
+	? (eastSelectedGroup == groupHotel):_independentSelected = eastHotelIndependent
+	? (eastSelectedAll):_independentSelected = true
+
+	goto _return
+
+#AcceptFireMission
+
+	toggleFireMission = false
+	CtrlSetText [IDCCommandMenuFireMission,Localize "STRSTOPFIREMISSION"]
+	[player] Exec "Main\AcceptFireMission.sqs"
+	goto "Update"
+
+#StopFireMission
+
+	toggleFireMission = false
+	CtrlSetText [IDCCommandMenuFireMission,Localize "STRACCEPTFIREMISSION"]
+
+	? (_side == east):goto "StopEastFireMission"
+
+	#StopWestFireMission
+
+		westFireMission = false;PublicVariable "westFireMission"
+		westFireMissionX = 0;PublicVariable "westFireMissionX"
+		westFireMissionY = 0;PublicVariable "westFireMissionY"
+		goto "Update"
+
+	#StopEastFireMission
+
+		eastFireMission = false;PublicVariable "eastFireMission"
+		eastFireMissionX = 0;PublicVariable "eastFireMissionX"
+		eastFireMissionY = 0;PublicVariable "eastFireMissionY"
+		goto "Update"

@@ -1,0 +1,50 @@
+;DBS Arsenal - change a unit's skin (soldier class) and keep its loadout.
+;Usage: dbsArsSkinDone = false;[unit,"Class"] Exec "DBSArsenal\SetSkin.sqs";@ dbsArsSkinDone
+;Result unit in dbsArsSkinResult (same unit if nothing changed).
+;Engine path (dbsArsEngineBody): moves the unit's brain into a new body. Works for player and AI.
+;Script path: AI only. Deletes the AI and creates a new one of the new class in the same group and spot.
+
+_unit = _this Select 0
+_class = _this Select 1
+dbsArsSkinResult = _unit
+
+? (IsNull _unit) or not (Alive _unit):dbsArsSkinDone = true;Exit
+? (Vehicle _unit != _unit):Hint "Arsenal: unit must be on foot to change skin.";dbsArsSkinDone = true;Exit
+? (TypeOf _unit == _class):dbsArsSkinDone = true;Exit
+
+? (dbsArsEngineBody):[_unit,_class] Exec "DBSArsenal\SetSkinEngine.sqs";Exit
+
+? (_unit == player):Hint "Arsenal: player skin change needs the CWR dbsSetBody engine command.\nBuild the patch, then set dbsArsEngineBody = true in DBSArsenal\Init.sqs.";dbsArsSkinDone = true;Exit
+
+_lo = [_unit] call dbsArsFnGet
+_grp = Group _unit
+_pos = GetPos _unit
+_dir = GetDir _unit
+_dam = GetDammage _unit
+_skill = Skill _unit
+_side = Side _unit
+
+;Group has room: create the new body first so a bad class costs nothing.
+;Group full (12): the old body has to go first to free the slot.
+dbsArsNew = objNull
+_deleted = false
+? (Count Units _grp >= 12):DeleteVehicle _unit;_deleted = true
+~0.1
+
+_class CreateUnit [_pos,_grp,"dbsArsNew = this",_skill]
+~0.1
+
+? (IsNull dbsArsNew) and not (_deleted):Hint Format ["Arsenal: could not create %1.",_class];dbsArsSkinDone = true;Exit
+? (IsNull dbsArsNew):Hint Format ["Arsenal: could not create %1. Unit lost its slot.",_class];dbsArsSkinResult = objNull;dbsArsSkinDone = true;Exit
+? not (_deleted):DeleteVehicle _unit
+
+_new = dbsArsNew
+_new SetPos _pos
+_new SetDir _dir
+_new SetDammage _dam
+[_new,_lo Select 1,_lo Select 2] call dbsArsFnApplyGear
+
+? (dbsArsMFCTI) and ((_side == west) or (_side == east)):[_new,50] Exec "Main\UnitCleanUp.sqs"
+
+dbsArsSkinResult = _new
+dbsArsSkinDone = true

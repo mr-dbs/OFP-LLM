@@ -1,0 +1,80 @@
+;Last modified 10/8/2
+;Client-side script.
+;Call this to assign a marker to track a group on the map.
+;Script usage:  [] exec "UpdatePlayerMarkers.sqs"
+
+_side = Side player
+
+;East & west team names are the same size so either can be counted.
+_totalMarkers = Count westTeamNames
+
+;Set marker visibility
+#Init
+
+	_count = 0
+
+	#SetMarker
+
+		_westMarker = Format ["%1 Marker",westTeamNames Select _count]
+		_eastMarker = Format ["%1 Marker",eastTeamNames Select _count]
+
+		_westMarker SetMarkerPos GetPos HiddenMarkers
+		_eastMarker SetMarkerPos GetPos HiddenMarkers
+
+		;Make markers visible to proper sides only.
+		? (_side == west):_eastMarker SetMarkerType "empty"
+		? (_side == east):_westMarker SetMarkerType "empty"
+
+		_count = _count + 1
+
+		? (_count < _totalMarkers):goto "SetMarker"
+
+		? (_side == west):goto "UpdateWest"
+		? (_side == east):goto "UpdateEast"
+
+#UpdateWest
+~0.5
+
+	_count = 0
+
+	? (_totalMarkers < 1):goto "UpdateWest"
+
+	#CheckWestMarker
+
+		_markerPlayer = Leader (westMarkerGroups Select _count)
+		_marker = Format ["%1 Marker",westTeamNames Select _count]
+		_markerType = "Dot"
+
+		? !(Alive _markerPlayer):_markerType = "Marker"
+
+		_marker SetMarkerPos GetPos _markerPlayer
+		_marker SetMarkerType _markerType
+		_count = _count + 1
+
+		? (_count < _totalMarkers):goto "CheckWestMarker"
+
+	goto "UpdateWest"
+
+#UpdateEast
+~0.5
+
+	_count = 0
+
+	? (_totalMarkers < 1):goto "UpdateEast"
+
+	#CheckEastMarker
+
+;		_markerPlayer = Leader (eastMarkerPlayers Select _count)
+		_markerPlayer = Leader (eastMarkerGroups Select _count)
+		_marker = Format ["%1 Marker",eastTeamNames Select _count]
+		_markerType = "Dot"
+
+		? !(Alive _markerPlayer):_markerType = "Marker"
+
+		_marker SetMarkerPos GetPos _markerPlayer
+		_marker SetMarkerType _markerType
+		_count = _count + 1
+
+		? (_count < _totalMarkers):goto "CheckEastMarker"
+
+	goto "UpdateEast"

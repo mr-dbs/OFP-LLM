@@ -1,0 +1,5 @@
+;Last modified 8/30/3
+
+;Open a ammo truck's menu.
+
+openAmmoBuildMenu = true

@@ -1,0 +1,45 @@
+;Last modified 2/19/4
+_launcher = _this Select 0
+
+_missile = ObjNull
+_missile = NearestObject[_launcher,"MFCTI116AA"]
+? (IsNull _missile):Exit
+
+_timeElapsed = 0
+_aircraft = westAirNames + eastAirNames
+? (limitedRadar):_aircraft = westLRAirNames + eastLRAirNames
+
+#FindTarget
+~.01
+
+	? (IsNull _missile):Exit
+	? (GetDammage _missile >= 1):Exit
+
+	_count = 0
+	_totalAircraft = Count _aircraft
+
+	#CheckTargetRange
+
+		_target = ObjNull
+		_target = NearestObject [_missile,_aircraft Select _count]
+
+		? (IsNull _target):goto "CheckNextTargetRange"
+		? ((GetPos _target) Select 2 < 25):goto "CheckNextTargetRange"
+		? (_target Distance _missile < 25):goto "DetonateMissile"
+
+		#CheckNextTargetRange
+
+			_count = _count + 1
+			? (_count < _totalAircraft):goto "CheckTargetRange"
+
+	_timeElapsed = _timeElapsed + .01
+	? (_timeElapsed < 4):goto "FindTarget"
+
+	Exit
+
+#DetonateMissile
+
+	_missile SetVelocity [0,0,0]
+	"MFCTI116FakeAA" CamCreate GetPos _missile
+	"MFCTI116InvisibleAA" CamCreate GetPos _missile
+	DeleteVehicle _missile

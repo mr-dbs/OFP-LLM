@@ -1,0 +1,781 @@
+; LLM\Report.sqs (version 19)
+; Reports one side's situation to the LLM relay every cycle. Server only.
+; Usage: [east] exec "LLM\Report.sqs"
+;
+; With llmMode 0 it only reports. With llmMode 1 it also carries out the orders that come back:
+; a role and an order for each AI team on this side.
+
+? !(Local LocalServerObject) : Exit
+
+_side = _this select 0
+
+_sideText = "West"
+_groups = westGroups
+_seenEnemy = llmSeenEastByWest
+_seenGuer = llmSeenGuerByWest
+? (_side == east) : _sideText = "East"; _groups = eastGroups; _seenEnemy = llmSeenWestByEast; _seenGuer = llmSeenGuerByEast
+
+_totalTowns = count towns
+_totalTeams = count _groups
+_waitLimit = 150
+_cycle = 0
+
+; Every variable that is filled in by a "Call Format" line further down must exist here first.
+; A variable first created inside a Call is thrown away when the Call ends.
+_funds = 0
+_built = []
+_mhq = objNull
+_found = objNull
+_role = -1
+_script = -1
+_indep = false
+_teamFunds = 0
+_human = false
+_new = false
+_batch = []
+_depots = []
+_oldRole = -1
+_oldCode = -1
+_oldTown = -1
+_mortars = 0
+_guns = []
+_places = []
+_fire = []
+_mortarBusy = false
+_hooked = []
+_shots = 0
+_fireOn = false
+_airBuy = []
+_heList = []
+_heStations = 0
+_heManned = 0
+_heAsked = 0
+_gunsAll = []
+_cmdHuman = false
+_barrList = []
+_guards = 0
+
+; When the LLM commands this side, hold every team where it stands until the first orders arrive.
+; Without this the leaders walk off under the stock opening order for the first few minutes.
+_holdSide = false
+? (_side == east) and (llmEastControl) : _holdSide = true
+? (_side == west) and (llmWestControl) : _holdSide = true
+? (not _holdSide) : goto "HoldDone"
+_t = 1
+
+#HoldTeam
+
+	_group = _groups select _t
+	? (isNull _group) : goto "HoldNext"
+	_goal = getPos (leader _group)
+	Call Format ["%1%2Independent = true; PublicVariable ""%1%2Independent""; llm%1Dest Set [_t, _goal]; %1%2TeamScript = newOrderScript; PublicVariable ""%1%2TeamScript""", _sideText, teamMapDesignations select _t]
+
+	#HoldNext
+
+	_t = _t + 1
+	? (_t < _totalTeams) : goto "HoldTeam"
+
+~3
+_t = 1
+
+#HoldMove
+
+	? not (isNull (_groups select _t)) : Call Format ["%1%2TeamScript = moveToWaypointScript; PublicVariable ""%1%2TeamScript""", _sideText, teamMapDesignations select _t]
+	_t = _t + 1
+	? (_t < _totalTeams) : goto "HoldMove"
+
+#HoldDone
+
+; Key terrain and landing zones: name and map position. They do not move, so this is built once.
+_pointsOut = []
+_totalPoints = count llmPoints
+_n = 0
+? (_totalPoints < 1) : goto "Cycle"
+
+#AddPoint
+
+	_where = getPos ((llmPoints select _n) select 1)
+	_pointsOut = _pointsOut + [[(llmPoints select _n) select 0, _where select 0, _where select 1]]
+	_n = _n + 1
+	? (_n < _totalPoints) : goto "AddPoint"
+
+#Cycle
+
+	_cycle = _cycle + 1
+
+	; ----- towns: name, value, owner (0 nobody, 1 us, 2 the enemy), map position -----
+	_townsOut = []
+	_t = 0
+
+	#AddTown
+
+		_holder = townSides select _t
+		_owner = 0
+		? (_holder == _sideText) : _owner = 1
+		? (_holder != _sideText) and (_holder != "N/A") : _owner = 2
+		_where = getPos (towns select _t)
+		_townsOut = _townsOut + [[townNames select _t, townValues select _t, _owner, _where select 0, _where select 1]]
+		_t = _t + 1
+		? (_t < _totalTowns) : goto "AddTown"
+
+	; ----- the side as a whole: funds, buildings, mobile HQ, enemy base -----
+	Call Format ["_funds = %1Resources", _sideText]
+	Call Format ["_built = [Count %1ControlCenter, Count %1InfantryFactory, Count %1LightFactory, Count %1HeavyFactory, Count %1AirFactory, Count %1AmmoDepot, Count %1RepairDepot, Count %1FieldHospital]", _sideText]
+	Call Format ["_mhq = %1MobileHQ", _sideText]
+	Call Format ["_found = %1BaseFound", _sideText]
+
+	_mhqAlive = alive _mhq
+	_from = _mhq
+	_nearReturn = "MhqNear"
+	goto "NearestTown"
+
+	#MhqNear
+
+	_mhqNear = _best
+	_baseSeen = false
+	_baseNear = -1
+	? (isNull _found) : goto "SideDone"
+
+	_baseSeen = true
+	_from = _found
+	_nearReturn = "BaseNear"
+	goto "NearestTown"
+
+	#BaseNear
+
+	_baseNear = _best
+
+	#SideDone
+
+	; "Base" means the repair depot if there is one, otherwise the mobile HQ.
+	_basePos = getPos _mhq
+	Call Format ["_depots = %1RepairDepot", _sideText]
+	? ((count _depots) > 0) : _basePos = getPos (_depots select 0)
+
+	; Mortars, and how many of them are manned and still have shells.
+	_mortars = 0
+	_guns = []
+	Call Format ["_mortars = total%1StationaryMortars; _guns = %1Mortar", _sideText]
+	_mortarAmmo = 0
+	_g = 0
+
+	#MortarAmmo
+
+		? (_g >= count _guns) : goto "MortarAmmoDone"
+		_gun = _guns select _g
+		; Version 17: each mortar counts the rounds it fires (once per mortar).
+		? (alive _gun) and not (_gun in _hooked) : Call Format ["_gun addEventHandler [""fired"", {llm%1Shots = llm%1Shots + 1}]", _sideText]; _hooked = _hooked + [_gun]
+		? (alive _gun) and (alive (gunner _gun)) and (someAmmo _gun) : _mortarAmmo = _mortarAmmo + 1
+		_g = _g + 1
+		goto "MortarAmmo"
+
+	#MortarAmmoDone
+
+	; Version 16: a side the LLM commands keeps two mortars at its base. They are built through the request a
+	; player's build uses (Build\BuildStructureServer.sqs), 35 m east and west of the base, and paid for here.
+	; A team the relay names as the mortar crew defends the base and mans them (the stock defend script does that).
+	Call Format ["_mortarBusy = add%1Structure", _sideText]
+	? (not _holdSide) or (not _mhqAlive) or (_mortars >= 2) or (_mortarBusy) or (_funds < (mortarCost + 500)) : goto "MortarBuildDone"
+	? (MFCTI116NoMortars) or (publicServer) : goto "MortarBuildDone"
+	_mdir = 90 + (180 * _mortars)
+	_mx = (_basePos select 0) + ((sin _mdir) * 25)
+	_my = (_basePos select 1) + ((cos _mdir) * 25)
+	Call Format ["%1Resources = %1Resources - mortarCost; PublicVariable ""%1Resources""; add%1StructureType = mortarType; PublicVariable ""add%1StructureType""; add%1StructurePlayer = leader (_groups select 0); PublicVariable ""add%1StructurePlayer""; add%1StructureX = _mx; PublicVariable ""add%1StructureX""; add%1StructureY = _my; PublicVariable ""add%1StructureY""; add%1StructureZ = 0; PublicVariable ""add%1StructureZ""; add%1StructureDirection = _mdir; PublicVariable ""add%1StructureDirection""; add%1StructureAlign = false; PublicVariable ""add%1StructureAlign""; add%1Structure = true; PublicVariable ""add%1Structure""", _sideText]
+
+	#MortarBuildDone
+
+	; Version 18: the commander's guard. A side the LLM commands keeps llmBaseHE HE stations at its base besides
+	; the two mortars, and its commander buys one soldier per gun into his own team. Each guard on foot is sent to
+	; a gun nobody mans. A man in a static gun stays there; the commander's group runs no stock team script.
+	_heList = []
+	Call Format ["_heList = %1HEStation", _sideText]
+	_heStations = 0
+	_heManned = 0
+	_gunsAll = []
+	_g = 0
+
+	#HECount
+
+		? (_g >= count _heList) : goto "HECountDone"
+		_gun = _heList select _g
+		? (alive _gun) : _heStations = _heStations + 1; _gunsAll = _gunsAll + [_gun]
+		? (alive _gun) and (alive (gunner _gun)) : _heManned = _heManned + 1
+		_g = _g + 1
+		goto "HECount"
+
+	#HECountDone
+
+	_g = 0
+
+	#MortarGuns
+
+		? (_g >= count _guns) : goto "MortarGunsDone"
+		? (alive (_guns select _g)) : _gunsAll = _gunsAll + [_guns select _g]
+		_g = _g + 1
+		goto "MortarGuns"
+
+	#MortarGunsDone
+
+	; The HE stations go 45 m out on the four diagonals, after the mortars. A second ring, 8 m further out, replaces
+	; any that are destroyed. At most three times llmBaseHE requests in a game, so a spot that cannot be built on
+	; does not take the side's money for ever.
+	Call Format ["_mortarBusy = add%1Structure", _sideText]
+	? (not _holdSide) or (not _mhqAlive) or (_mortars < 2) or (_heStations >= llmBaseHE) or (_mortarBusy) : goto "HEBuildDone"
+	? (_funds < (HEStationCost + 500)) or (_heAsked >= (llmBaseHE * 3)) or (publicServer) : goto "HEBuildDone"
+	_mdir = 45 + (90 * (_heAsked % 4))
+	_ring = 45 + (8 * ((_heAsked - (_heAsked % 4)) / 4))
+	_mx = (_basePos select 0) + ((sin _mdir) * _ring)
+	_my = (_basePos select 1) + ((cos _mdir) * _ring)
+	Call Format ["%1Resources = %1Resources - HEStationCost; PublicVariable ""%1Resources""; add%1StructureType = HEStationType; PublicVariable ""add%1StructureType""; add%1StructurePlayer = leader (_groups select 0); PublicVariable ""add%1StructurePlayer""; add%1StructureX = _mx; PublicVariable ""add%1StructureX""; add%1StructureY = _my; PublicVariable ""add%1StructureY""; add%1StructureZ = 0; PublicVariable ""add%1StructureZ""; add%1StructureDirection = _mdir; PublicVariable ""add%1StructureDirection""; add%1StructureAlign = false; PublicVariable ""add%1StructureAlign""; add%1Structure = true; PublicVariable ""add%1Structure""", _sideText]
+	_heAsked = _heAsked + 1
+
+	#HEBuildDone
+
+	; The guard: the commander's own men, the commander himself left out.
+	_cmdTeam = _groups select 0
+	_cmdHuman = false
+	Call Format ["_cmdHuman = (_cmdTeam In %1PlayerGroups)", _sideText]
+	_guardList = []
+	_members = units _cmdTeam
+	_g = 0
+
+	#GuardCount
+
+		? (_g >= count _members) : goto "GuardCountDone"
+		_unit = _members select _g
+		? (alive _unit) and (_unit != leader _cmdTeam) : _guardList = _guardList + [_unit]
+		_g = _g + 1
+		goto "GuardCount"
+
+	#GuardCountDone
+
+	_guards = count _guardList
+
+	; One soldier a report, while there are more guns than guards. The barracks may be busy; then nothing is bought
+	; and the next report tries again. Paid from the side's funds, as a player commander's purchase is.
+	? (not _holdSide) or (_cmdHuman) or (isNull _cmdTeam) or (_guards >= (count _gunsAll)) or (_guards >= llmGuardMax) : goto "GuardBuyDone"
+	_barrList = []
+	Call Format ["_barrList = %1InfantryFactory", _sideText]
+	_barr = objNull
+	_g = 0
+
+	#FindBarracks
+
+		? (_g >= count _barrList) : goto "FindBarracksDone"
+		? (alive (_barrList select _g)) and (isNull _barr) : _barr = _barrList select _g
+		_g = _g + 1
+		goto "FindBarracks"
+
+	#FindBarracksDone
+
+	? (isNull _barr) or (_funds < (soldierCost + 500)) : goto "GuardBuyDone"
+	_soldier = soldierType
+	? (_side == east) : _soldier = soldierEastType
+	[_side, _barr, _soldier, noScript, _cmdTeam, false] Exec "Main\BuyUnit.sqs"
+
+	#GuardBuyDone
+
+	; Every guard on foot is sent to the first gun that nobody mans and no other guard was sent to this report.
+	_promised = []
+	_g = 0
+
+	#GuardAssign
+
+		? (_g >= count _guardList) : goto "GuardAssignDone"
+		_unit = _guardList select _g
+		_g = _g + 1
+		? (not _holdSide) or (_cmdHuman) or ((vehicle _unit) != _unit) : goto "GuardAssign"
+		_k = 0
+
+		#GuardFindGun
+
+			? (_k >= count _gunsAll) : goto "GuardAssign"
+			_gun = _gunsAll select _k
+			_k = _k + 1
+			? (_gun in _promised) : goto "GuardFindGun"
+			? (not (isNull (gunner _gun))) and (alive (gunner _gun)) : goto "GuardFindGun"
+			_unit AssignAsGunner _gun
+			[_unit] OrderGetIn true
+			_promised = _promised + [_gun]
+			goto "GuardAssign"
+
+	#GuardAssignDone
+
+	; Version 17: the 13th number is the rounds the side's mortars have fired this game.
+	Call Format ["_shots = llm%1Shots", _sideText]
+	; Version 18: then the HE stations, how many of them are manned, and the commander's guard.
+	_sideOut = [_funds, _built, _mhqAlive, _mhqNear, _baseSeen, _baseNear, _basePos select 0, _basePos select 1, _mortars, _mortarAmmo, MFCTI116NoMortars, publicServer, _shots, _heStations, _heManned, _guards]
+
+	; ----- teams (number 0 is the commander's own team and has no role or order) -----
+	; name, led by a player, role, order, independent, team funds, men alive, nearest town,
+	; distance to it, fleeing, can move, make-up, map position, distance to base,
+	; the leader's seat (0 on foot, 1 driver, 2 gunner, 3 commander, 4 passenger), his speed,
+	; whether he has finished his last move order, members more than 150 m from him,
+	; and for the vehicle he is in: its height above the ground and its damage (0 to 1),
+	; whether it was told to stop, whether its engine runs, its fuel (0 to 1), and three facts about the
+	; crewman who commands it (the game picks him by seat, not by rank, so he is often not the leader):
+	; is he in a different subgroup from the leader, does that subgroup hold an order, and how many
+	; metres away is the man that subgroup follows.
+	; Then three texts from the engine's diagnostic commands, sent only while the leader stands still and
+	; only if the game has them (llmHasDiag): what the unit that commands his vehicle is doing, what he
+	; himself is doing, and every subgroup of the team with the order it holds
+	_teamsOut = []
+	_t = 0
+
+	#AddTeam
+
+		_group = _groups select _t
+		? (isNull _group) : goto "NextTeam"
+
+		_role = -1
+		_script = -1
+		_indep = false
+		_teamFunds = 0
+		? (_t > 0) : Call Format ["_role = %1%2Role; _script = %1%2TeamScript; _indep = %1%2Independent; _teamFunds = %1%2Resources", _sideText, teamMapDesignations select _t]
+		Call Format ["_human = (_group In %1PlayerGroups)", _sideText]
+
+		_members = units _group
+		_men = "alive _x" count _members
+		_best = -1
+		_bestDist = -1
+		_flee = false
+		_walk = true
+		_kit = []
+		_where = [0, 0, 0]
+		_baseDist = -1
+		_seat = 0
+		_speed = 0
+		_ready = true
+		_far = 0
+		_height = 0
+		_hurt = 0
+		_halt = false
+		_engine = false
+		_fuel = 0
+		_split = false
+		_subBusy = false
+		_leadDist = 0
+		_headA = objNull
+		_headB = objNull
+		_diagV = ""
+		_diagL = ""
+		_diagG = ""
+		? (_men < 1) : goto "TeamDone"
+
+		_unit = leader _group
+		_where = getPos _unit
+		_baseDist = ((_where select 0) - (_basePos select 0)) ^ 2 + ((_where select 1) - (_basePos select 1)) ^ 2
+		_baseDist = sqrt _baseDist
+		_flee = fleeing _unit
+		_walk = canStand _unit
+		? ((vehicle _unit) != _unit) : _walk = canMove (vehicle _unit)
+		_ride = vehicle _unit
+		? (_ride != _unit) : _seat = 4
+		? (_ride != _unit) and (_unit == (driver _ride)) : _seat = 1
+		? (_ride != _unit) and (_unit == (gunner _ride)) : _seat = 2
+		? (_ride != _unit) and (_unit == (commander _ride)) : _seat = 3
+		_speed = speed _ride
+		_speed = _speed - (_speed % 1)
+		_ready = unitReady _unit
+		_height = (getPos _ride) select 2
+		_height = _height - (_height % 0.1)
+		_hurt = getDammage _ride
+		_hurt = _hurt - (_hurt % 0.01)
+		? (_ride != _unit) : _halt = stopped _ride; _engine = isEngineOn _ride; _fuel = fuel _ride
+		_fuel = _fuel - (_fuel % 0.01)
+		; formLeader gives the man who leads the subgroup: of the leader himself, then of whoever commands his vehicle.
+		_headA = formLeader _unit
+		_headB = formLeader _ride
+		? (_ride != _unit) and (not (isNull _headA)) and (not (isNull _headB)) and (_headA != _headB) : _split = true
+		? (_ride != _unit) and (not (isNull _headB)) : _subBusy = not (unitReady _headB); _leadDist = (vehicle _headB) distance _ride
+		_leadDist = _leadDist - (_leadDist % 1)
+		; Inside a Call, so a game without these commands never meets them.
+		? (llmHasDiag) and (_speed == 0) : call "_diagV = llmUnitInfo _ride; _diagL = llmUnitInfo _unit; _diagG = llmGroupInfo _unit"
+		_from = _unit
+		_nearReturn = "TeamNear"
+		goto "NearestTown"
+
+		#TeamNear
+
+		; Make-up. A man: type, launcher, riding.
+		; A vehicle, listed once: type, "V", can move, can fire, has ammo, fuel, has a live gunner, has a live driver.
+		; Any man not yet tagged gets a handler so we hear what killed him.
+		_tag = format ["llm%1Deaths = llm%1Deaths + [[%2, _this select 1, _this select 0]]", _sideText, _t]
+		_vehs = []
+		_m = 0
+
+		#AddMember
+
+			_man = _members select _m
+			? (not (alive _man)) : goto "NextMember"
+			Call Format ["_new = not (_man In llm%1Tagged)", _sideText]
+			? (_new) : _man addEventHandler ["killed", _tag]; Call Format ["llm%1Tagged = llm%1Tagged + [_man]", _sideText]
+			_veh = vehicle _man
+			? ((_man distance _unit) > 150) : _far = _far + 1
+			? (_veh == _man) : _kit = _kit + [[typeOf _man, secondaryWeapon _man, false]]; goto "NextMember"
+			? (_veh in _vehs) : goto "CheckRider"
+			_vehs = _vehs + [_veh]
+			_kit = _kit + [[typeOf _veh, "V", canMove _veh, canFire _veh, someAmmo _veh, fuel _veh, alive (gunner _veh), alive (driver _veh)]]
+
+			#CheckRider
+
+			? (_man == (driver _veh)) or (_man == (gunner _veh)) or (_man == (commander _veh)) : goto "NextMember"
+			_kit = _kit + [[typeOf _man, secondaryWeapon _man, true]]
+
+			#NextMember
+
+			_m = _m + 1
+			? (_m < count _members) : goto "AddMember"
+
+		#TeamDone
+
+		_teamsOut = _teamsOut + [[teamMapDesignations select _t, _human, _role, _script, _indep, _teamFunds, _men, _best, _bestDist, _flee, _walk, _kit, _where select 0, _where select 1, _baseDist, _seat, _speed, _ready, _far, _height, _hurt, _halt, _engine, _fuel, _split, _subBusy, _leadDist, _diagV, _diagL, _diagG]]
+
+		#NextTeam
+
+		_t = _t + 1
+		? (_t < _totalTeams) : goto "AddTeam"
+
+	; ----- what the side can see right now: the other side, then the town resistance -----
+	; One entry per soldier or vehicle: type, nearest town, is it a man, is it moving, 0 enemy or 1 resistance,
+	; and its map position.
+	_enemyOut = []
+	_seen = list _seenEnemy
+	_whose = 0
+	_seenReturn = "SeenGuer"
+	goto "AddSeenList"
+
+	#SeenGuer
+
+	_seen = list _seenGuer
+	_whose = 1
+	_seenReturn = "SeenDone"
+	goto "AddSeenList"
+
+	#SeenDone
+
+	; ----- enemy we had seen that has since died, and which of our teams did it -----
+	_killsOut = []
+	Call Format ["_batch = llm%1Kills; llm%1Kills = []", _sideText]
+	_totalKills = count _batch
+	_k = 0
+	? (_totalKills < 1) : goto "KillsDone"
+
+	#AddKill
+
+		_victim = (_batch select _k) select 0
+		_killer = (_batch select _k) select 1
+		_by = -1
+		_t = 0
+
+		#KillBy
+
+			? ((group _killer) == (_groups select _t)) : _by = _t
+			_t = _t + 1
+			? (_t < _totalTeams) : goto "KillBy"
+
+		_from = _victim
+		_nearReturn = "KillNear"
+		goto "NearestTown"
+
+		#KillNear
+
+		_killsOut = _killsOut + [[typeOf _victim, _best, _by]]
+		_k = _k + 1
+		? (_k < _totalKills) : goto "AddKill"
+
+	#KillsDone
+
+	; ----- our own men killed since the last report: team, what killed him, was it a crash or our own side -----
+	_deathsOut = []
+	Call Format ["_batch = llm%1Deaths; llm%1Deaths = []", _sideText]
+	_totalDeaths = count _batch
+	_k = 0
+	? (_totalDeaths < 1) : goto "DeathsDone"
+
+	#AddDeath
+
+		_killer = (_batch select _k) select 1
+		_victim = (_batch select _k) select 2
+		_what = "unknown"
+		_own = false
+		_kp = [-1, -1, 0]
+		_ks = 2
+		? (not (isNull _killer)) and ((side _killer) == resistance) : _ks = 1
+		? (not (isNull _killer)) and ((side _killer) != resistance) and ((side _killer) != _side) and ((side _killer) != civilian) : _ks = 0
+		? (not (isNull _killer)) : _what = typeOf (vehicle _killer); _own = ((side _killer) == _side) or (_killer == _victim) or ((vehicle _killer) == (vehicle _victim))
+		? (not (isNull _killer)) : _kp = getPos (vehicle _killer)
+		_kx = (_kp select 0) - ((_kp select 0) % 1)
+		_ky = (_kp select 1) - ((_kp select 1) % 1)
+		_deathsOut = _deathsOut + [[(_batch select _k) select 0, _what, _own, _kx, _ky, _ks]]
+		_k = _k + 1
+		? (_k < _totalDeaths) : goto "AddDeath"
+
+	#DeathsDone
+
+	; ----- send the report -----
+	; The 12th entry is the version of this report's layout. The relay refuses a layout it does not know.
+	; The 13th is how many towns the recount (LLM\TownWatch.sqs) has handed to West, East and the resistance.
+	; The 14th says whether this game has the engine's diagnostic commands (see LLM\Init.sqs).
+	; The 15th says which of this project's engine changes the game has: 0, 1 or 2 (see LLM\Init.sqs).
+	; Layout 14: sightings carry a map position, deaths the killer's position, the side its mortars.
+	; Version 15 adds to layout 14: the killer's side (0 enemy, 1 resistance, 2 other) and whether mortars are
+	; switched off by the addon or the server (MFCTI116NoMortars, publicServer).
+	_state = ["MFCTI", _sideText, time, llmMode, _townsOut, _sideOut, _teamsOut, _enemyOut, _killsOut, _deathsOut, _pointsOut, 14, llmRecounts, llmHasDiag, llmEngineLevel]
+	_id = llmRequest (format ["%1", _state])
+	? (_id < 0) : goto "Sleep"
+
+	_waited = 0
+
+	#WaitReply
+
+		~1
+		_waited = _waited + 1
+		_reply = llmResult _id
+		? (_reply == "") and (_waited < _waitLimit) : goto "WaitReply"
+
+	; ----- carry out the orders that came back (llmMode 1 only) -----
+	; One entry per team number: role, order, town, send again.
+	; again: 1 = send the same order again.
+	;        2 = the team has stood still for minutes although its order tells it to move. Order every member,
+	;            one by one, to the team's goal. A unit order gets through where the group order does not.
+	;        3 = the same, and first set each vehicle down 50 m towards the goal, clear of whatever holds it.
+	;            Never within 300 m of base, and never with a human player within 1000 m to see it jump.
+	;        2 and 3 apply only when the order itself is unchanged; otherwise the new order is carried out.
+	; order: 1 go to a town (town -2 means back to base, 100 or more means key terrain point number town - 100,
+	;        200 or more means place number town - 200 from the places sent with this reply),
+	;        2 attack the enemy base,
+	;        3 pick towns itself, 4 defend where it stands, -1 leave this team alone.
+	? (llmMode < 1) or (_reply == "") : goto "Sleep"
+	? ((substr [_reply, 0, 1]) != "[") : goto "Sleep"
+
+	_answer = call _reply
+	? ((_answer select 0) != 1) : goto "Sleep"
+
+	_orders = _answer select 1
+	? ((count _orders) < _totalTeams) : goto "Sleep"
+
+	; Version 14: the 4th part is a list of places [x, y] for order 1 with town 200 + n,
+	; the 5th a fire mission [x, y] for the side's mortars ([] for none).
+	_places = []
+	_fire = []
+	? ((count _answer) > 3) : _places = _answer select 3
+	? ((count _answer) > 4) : _fire = _answer select 4
+	; Version 17: the 6th part is the team number of the mortar crew (-1 for none). That team buys no more men
+	; once it has llmCrewMax (Main\UpdateIndependentAI.sqs).
+	? ((count _answer) > 5) : Call Format ["llm%1Crew = _answer select 5", _sideText]
+	; Version 19: the 7th part lists anti-air soldiers to buy now, [[team number, soldiers], ...] (relay version 32).
+	_airBuy = []
+	? ((count _answer) > 6) : _airBuy = _answer select 6
+	? (_holdSide) and ((count _airBuy) > 0) : [_side, _airBuy] exec "LLM\AirBuy.sqs"
+	? ((count _fire) == 2) : Call Format ["%1FireMissionX = _fire select 0; PublicVariable ""%1FireMissionX""; %1FireMissionY = _fire select 1; PublicVariable ""%1FireMissionY""; %1FireMission = true; PublicVariable ""%1FireMission""", _sideText]; _fireOn = true
+	? ((count _fire) == 0) and (_fireOn) : Call Format ["%1FireMission = false; PublicVariable ""%1FireMission""", _sideText]; _fireOn = false
+
+	_pending = []
+	_t = 1
+
+	#ApplyTeam
+
+		_order = _orders select _t
+		_newRole = _order select 0
+		_code = _order select 1
+		_town = _order select 2
+		_again = _order select 3
+		_group = _groups select _t
+		? (_code < 0) or (isNull _group) : goto "NextApply"
+
+		_name = teamMapDesignations select _t
+		Call Format ["_oldRole = llm%1Role select _t; _oldCode = llm%1Code select _t; _oldTown = llm%1Town select _t", _sideText]
+
+		? (_newRole >= 0) and (_newRole != _oldRole) : Call Format ["%1%2Role = _newRole; PublicVariable ""%1%2Role""; llm%1Role Set [_t, _newRole]", _sideText, _name]
+		? (_again >= 2) and (_code == _oldCode) and (_town == _oldTown) : goto "Kick"
+		? (_code == _oldCode) and (_town == _oldTown) and (_again == 0) : goto "NextApply"
+
+		Call Format ["%1%2Independent = true; PublicVariable ""%1%2Independent""; llm%1Code Set [_t, _code]; llm%1Town Set [_t, _town]", _sideText, _name]
+		? (_code == 2) : Call Format ["%1%2TeamScript = searchAndDestroyScript; PublicVariable ""%1%2TeamScript""", _sideText, _name]
+		? (_code == 3) : Call Format ["%1%2TeamScript = takeTownsAndBasesScript; PublicVariable ""%1%2TeamScript""", _sideText, _name]
+		? (_code == 4) : Call Format ["%1%2TeamScript = defendBaseScript; PublicVariable ""%1%2TeamScript""", _sideText, _name]
+		? (_code != 1) : goto "NextApply"
+
+		; Go to a place. The stock team script only moves when it sees "new order" and then "move to waypoint".
+		_goal = _basePos
+		? (_town >= 0) and (_town < _totalTowns) : _goal = getPos (towns select _town)
+		? (_town >= 100) and ((_town - 100) < _totalPoints) : _goal = getPos ((llmPoints select (_town - 100)) select 1)
+		? (_town >= 200) and ((_town - 200) < (count _places)) : _goal = [(_places select (_town - 200)) select 0, (_places select (_town - 200)) select 1, 0]
+		Call Format ["llm%1Dest Set [_t, _goal]; %1%2TeamScript = newOrderScript; PublicVariable ""%1%2TeamScript""", _sideText, _name]
+		_pending = _pending + [_t]
+		goto "NextApply"
+
+		; ----- a team that stands still (again 2 or 3) -----
+		#Kick
+
+		; Only a formed team that was sent to a place (order 1) or is taking towns (order 3).
+		? (_code != 1) and (_code != 3) : goto "NextApply"
+		? (("alive _x" count (units _group)) < minIndependentSize) : goto "NextApply"
+
+		; Its goal: the place it was sent to, or else the nearest town that is not ours,
+		; which is where the stock team script is sending it.
+		_goal = _basePos
+		? (_code == 1) and (_town >= 0) and (_town < _totalTowns) : _goal = getPos (towns select _town)
+		? (_code == 1) and (_town >= 100) and ((_town - 100) < _totalPoints) : _goal = getPos ((llmPoints select (_town - 100)) select 1)
+		? (_code == 1) and (_town >= 200) and ((_town - 200) < (count _places)) : _goal = [(_places select (_town - 200)) select 0, (_places select (_town - 200)) select 1, 0]
+		? (_code == 1) : goto "KickGoalSet"
+		_lead = leader _group
+		_bestDist = 1000000
+		_n = 0
+
+		#KickTown
+
+			_dist = _lead distance (towns select _n)
+			? ((townSides select _n) != _sideText) and (_dist > 25) and (_dist < _bestDist) : _bestDist = _dist; _goal = getPos (towns select _n)
+			_n = _n + 1
+			? (_n < _totalTowns) : goto "KickTown"
+
+		#KickGoalSet
+
+		_members = units _group
+		? ((count _members) < 1) : goto "NextApply"
+		_from = getPos (vehicle (leader _group))
+		_dx = (_goal select 0) - (_from select 0)
+		_dy = (_goal select 1) - (_from select 1)
+		_len = sqrt ((_dx * _dx) + (_dy * _dy))
+		_bx = (_from select 0) - (_basePos select 0)
+		_by = (_from select 1) - (_basePos select 1)
+		_fromBase = sqrt ((_bx * _bx) + (_by * _by))
+
+		; again 3, and only away from the base buildings: set each vehicle down in a line that starts
+		; 50 m towards the goal, 15 m apart.
+		? (_again < 3) or (_len < 150) or (_fromBase < 300) : goto "KickOrders"
+
+		; Not where a human player could watch it happen: none within 1000 m, on either side.
+		_humans = []
+		? ((count westPlayerGroups) > 0) : _humans = _humans + westPlayerGroups
+		? ((count eastPlayerGroups) > 0) : _humans = _humans + eastPlayerGroups
+		_watched = false
+		_h = 0
+
+		#KickWatched
+
+			? (_h >= count _humans) : goto "KickWatchedDone"
+			? (((leader (_humans select _h)) distance (vehicle (leader _group))) < 1000) : _watched = true
+			_h = _h + 1
+			goto "KickWatched"
+
+		#KickWatchedDone
+
+		? (_watched) : goto "KickOrders"
+		_moved = []
+		_slot = 0
+		_u = 0
+
+		#KickBump
+
+			_man = _members select _u
+			_veh = vehicle _man
+			? (_veh == _man) or (_veh in _moved) : goto "KickBumpNext"
+			_moved = _moved + [_veh]
+			; Not a static gun (it has no driver) and not an aircraft.
+			? (isNull (driver _veh)) or (("Air" countType [_veh]) > 0) : goto "KickBumpNext"
+			_out = 50 + (15 * _slot)
+			_veh setPos [(_from select 0) + ((_dx / _len) * _out), (_from select 1) + ((_dy / _len) * _out), 0]
+			_slot = _slot + 1
+
+			#KickBumpNext
+
+			_u = _u + 1
+			? (_u < count _members) : goto "KickBump"
+
+		#KickOrders
+
+		_u = 0
+
+		#KickUnit
+
+			_man = _members select _u
+			? (alive _man) : _man doMove [(_goal select 0) + (12 * (sin (_u * 50))), (_goal select 1) + (12 * (cos (_u * 50))), 0]
+			_u = _u + 1
+			? (_u < count _members) : goto "KickUnit"
+
+		#NextApply
+
+		_t = _t + 1
+		? (_t < _totalTeams) : goto "ApplyTeam"
+
+	? ((count _pending) < 1) : goto "Sleep"
+
+	~3
+	_p = 0
+
+	#SendMove
+
+		Call Format ["%1%2TeamScript = moveToWaypointScript; PublicVariable ""%1%2TeamScript""", _sideText, teamMapDesignations select (_pending select _p)]
+		_p = _p + 1
+		? (_p < count _pending) : goto "SendMove"
+
+	#Sleep
+
+	~llmCycleSeconds
+	goto "Cycle"
+
+
+; ---------------------------------------------------------------------------
+; Shared pieces, used like subroutines: set the inputs, set a return label, goto.
+; ---------------------------------------------------------------------------
+
+; In: _from (an object), _nearReturn (label). Out: _best (town number), _bestDist (metres).
+#NearestTown
+
+	_best = -1
+	_bestDist = 1000000
+	_n = 0
+
+	#NearestTownNext
+
+		_dist = _from distance (towns select _n)
+		? (_dist < _bestDist) : _bestDist = _dist; _best = _n
+		_n = _n + 1
+		? (_n < _totalTowns) : goto "NearestTownNext"
+
+	goto _nearReturn
+
+; In: _seen (a trigger's list), _whose (0 or 1), _seenReturn (label). Adds to _enemyOut.
+#AddSeenList
+
+	_totalSeen = count _seen
+	_e = 0
+	? (_totalSeen < 1) : goto _seenReturn
+
+	#AddSeen
+
+		; The list belongs to a live trigger and can shrink while it is being read.
+		? (_e >= count _seen) : goto _seenReturn
+		_target = _seen select _e
+		? (isNull _target) : goto "NextSeen"
+		? (not (alive _target)) : goto "NextSeen"
+		Call Format ["_new = not (_target In llm%1Tracked)", _sideText]
+		? (_new) : _target addEventHandler ["killed", format ["llm%1Kills = llm%1Kills + [_this]", _sideText]]; Call Format ["llm%1Tracked = llm%1Tracked + [_target]", _sideText]
+
+		_best = -1
+		_bestDist = 1000000
+		_n = 0
+
+		#SeenNearest
+
+			_dist = _target distance (towns select _n)
+			? (_dist < _bestDist) : _bestDist = _dist; _best = _n
+			_n = _n + 1
+			? (_n < _totalTowns) : goto "SeenNearest"
+
+		_isMan = ("Man" countType [_target]) > 0
+		_moving = ((speed _target) > 2) or ((speed _target) < -2)
+		_tp = getPos _target
+		_tx = (_tp select 0) - ((_tp select 0) % 1)
+		_ty = (_tp select 1) - ((_tp select 1) % 1)
+		_enemyOut = _enemyOut + [[typeOf _target, _best, _isMan, _moving, _whose, _tx, _ty]]
+
+		#NextSeen
+
+		_e = _e + 1
+		? (_e < _totalSeen) : goto "AddSeen"
+
+	goto _seenReturn

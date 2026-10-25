@@ -1,0 +1,37 @@
+;Last modified 12/24/3
+
+@ (serverStarted)
+
+_credits =				Format["%1\n",Localize "STRMODNAME"]
+_credits = _credits +	Format["%1\n",Localize "STRWEBSITE"]
+_credits = _credits +	Format["%1\n",Localize "STRCREDITS1"]
+_credits = _credits +	Format["%1\n",Localize "STRCREDITS2"]
+_credits = _credits +	Format["%1\n",Localize "STRCREDITS3"]
+_credits = _credits +	Format["%1\n",Localize "STRCREDITS4"]
+_credits = _credits +	Format["%1\n",Localize "STRCREDITS5"]
+_credits = _credits +	Format["%1\n",Localize "STRCREDITS6"]
+_credits = _credits +	Format["%1\n",Localize "STRCREDITS7"]
+
+
+;Display server parameters at game start.
+_text = ""
+
+? (fastGame):_text = _text + Format["[%1] ",Localize "STRPARAM1B"]
+? (limitedRadar):_text = _text + Format["[%1] ",Localize "STRPARAM1C"]
+? (lessUnits):_text = _text + Format["[%1] ",Localize "STRPARAM1D"]
+? (nightMission):_text = _text + Format["[%1] ",Localize "STRPARAM1E"]
+? (townsToWin > 0):_text = _text + Format["[%1: %2] ",Localize "STRTOWNSTOWIN",townsToWin]
+? (pointsToWin > 0):_text = _text + Format["[%1: %2] ",Localize "STRPOINTSTOWIN",pointsToWin]
+? (coopValue == westCoopValue):_text = _text + Format["[%1] ",Localize "STRPARAMCOOP1A"]
+? (coopValue == eastCoopValue):_text = _text + Format["[%1] ",Localize "STRPARAMCOOP1B"]
+? (opposition == lightOpValue):_text = _text + Format["[%1] ",Localize "STRPARAMCOOP2A"]
+? (opposition == averageOpValue):_text = _text + Format["[%1] ",Localize "STRPARAMCOOP2B"]
+? (opposition == heavyOpValue):_text = _text + Format["[%1] ",Localize "STRPARAMCOOP2C"]
+? (opposition == insaneOpValue):_text = _text + Format["[%1] ",Localize "STRPARAMCOOP2D"]
+? (defendTheBase):_text = _text + Format["[%1]",Localize "STRPARAMCOOP2E"]
+
+_message = Format["%1: ",Localize "STRGAMEPROPERTIES"] + _text
+_credits = _credits + "\n"
+_credits = _credits + _message
+
+TitleText[_credits,"Plain"]

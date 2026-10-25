@@ -1,0 +1,132 @@
+;Last modified 12/31/3
+private ["_westVote","_eastVote","_westTeam","_eastTeam","_option"]
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+;OFP bug?  If variables are not given a value in advance the call statement doesn't properly assign them one.
+_westVote = 0
+_eastVote = 0
+_westTeam = ObjNull
+_eastTeam = ObjNull
+_option = 0
+
+_totalTeams = Count teamDesignations 
+_totalVotes = Count voteVariables
+
+_count = 0
+_votes = []
+
+#AddVote
+
+	_votes = _votes + [0]
+	_count = _count + 1
+	? (_count < _totalVotes):goto "AddVote"
+
+#Update
+~10
+
+	_totalPlayers = Count westPlayerGroups + Count eastPlayerGroups
+
+	#ClearVotes
+
+		_count = 0
+
+		#ClearVote
+
+			_votes Set [_count,0]
+			_count = _count + 1
+			? (_count < _totalVotes):goto "ClearVote"
+
+	_count = 0
+
+	#GetVotes
+
+		Call Format["_westVote = west%1Votes",teamMapDesignations Select _count]
+		Call Format["_westTeam = west%1Team",teamMapDesignations Select _count]
+		Call Format["_eastVote = east%1Votes",teamMapDesignations Select _count]
+		Call Format["_eastTeam = east%1Team",teamMapDesignations Select _count]
+
+		#GetWestVotes
+
+			;Only count votes for player teams.
+			? !(_westTeam In westPlayerGroups):goto "GetEastVotes"
+
+			_value = _westVote
+			_return = "GetEastVotes"
+			goto "DecodeBits"
+
+		#GetEastVotes
+
+			;Only count votes for player teams.
+			? !(_eastTeam In eastPlayerGroups):goto "GetNextVotes"
+
+			_value = _eastVote
+			_return = "GetNextVotes"
+			goto "DecodeBits"
+
+		#GetNextVotes
+
+			_count = _count + 1
+			? (_count < _totalTeams):goto "GetVotes"
+
+	;Use votes to determine option settings.
+	#SetOptions
+
+		_count = 0
+
+		#SetOption
+
+			_optionOn = false
+
+			;If votes are at a two thirds majority set option on.
+			;Fix (added): with no human players there is nothing to count, and dividing by zero fills the server log.
+			? (_totalPlayers < 1):goto "SetNextOption"
+			? ((_votes Select _count) / _totalPlayers >= 0.666):_optionOn = true
+
+			Call Format["_option = %1",voteVariables Select _count]
+
+			;To reduce network traffic only transmit value if a change occurred.
+			? (!_option && _optionOn) || (_option && !_optionOn):goto "ChangeOption"
+
+			#SetNextOption
+
+				_count = _count + 1
+				? (_count < _totalVotes):goto "SetOption"
+
+	goto "Update"
+
+#ChangeOption
+
+	Call Format["%1 = %2;PublicVariable ""%1""",voteVariables Select _count,_optionOn]
+
+	_optionNumeric = 0
+	? (_optionOn):_optionNumeric = 1
+
+	[west,groupCommander,messageOptionVoted,_count,_optionNumeric] Exec "Main\SendSideMessage.sqs"
+	[east,groupCommander,messageOptionVoted,_count,_optionNumeric] Exec "Main\SendSideMessage.sqs"
+	~2
+
+	[west,groupCommander,messageNull,0,0] Exec "Main\SendSideMessage.sqs"
+	[east,groupCommander,messageNull,0,0] Exec "Main\SendSideMessage.sqs"
+	~2
+
+	goto "SetNextOption"
+
+;Take value and decode it's individual bits.
+#DecodeBits
+
+	;n - 1
+	_bitCount = _totalVotes - 1
+
+	;Get current most significant bit and then remove it from the value.
+	#DecodeBit
+
+		_bitMask = 2 ^ _bitCount
+
+		? (_value >= _bitMask):_value = _value - _bitMask;_votes Set [_bitCount,(_votes Select _bitCount) + 1]
+
+		_bitCount = _bitCount - 1
+		? (_bitCount >= 0):goto "DecodeBit"
+
+		goto _return

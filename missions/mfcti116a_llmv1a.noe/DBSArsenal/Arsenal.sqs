@@ -1,0 +1,247 @@
+;DBS Arsenal - main dialog loop.
+;Camera orbits the selected unit. Changes apply to the live unit as you click.
+;Buttons write a command string into dbsArsBtn. Lists are polled for selection changes.
+
+? (dbsArsOpen):Exit
+? (Vehicle player != player):Hint "Arsenal: get out of the vehicle first.";Exit
+dbsArsOpen = true
+dbsArsBtn = ""
+
+_unit = player
+_cat = 1
+_sideAll = not (dbsArsOwnSideFirst)
+_camAng = 0
+_camDist = 3.2
+_camH = 1.4
+_pendingSkin = ""
+_pendingTime = 0
+_units = []
+_lastUnitSel = -1
+_lastItemSel = -1
+_ret = ""
+
+_ok = CreateDialog "DBSArsenalMenu"
+ShowCinemaBorder false
+_cam = "camera" CamCreate GetPos player
+_cam CameraEffect ["internal","back"]
+
+[] call dbsArsFnFillPresets
+_ret = "Loop"
+goto "RefreshAll"
+
+#Loop
+~0.05
+
+	? not (dialog):goto "Close"
+	? not (Alive player):goto "Close"
+	? (IsNull _unit) or not (Alive _unit):_unit = player;_ret = "Loop";goto "RefreshAll"
+
+	_p = GetPos (Vehicle _unit)
+	_a = (GetDir (Vehicle _unit)) + _camAng
+	_cam CamSetTarget [_p Select 0,_p Select 1,1.0]
+	_cam CamSetPos [(_p Select 0) + ((sin _a) * _camDist),(_p Select 1) + ((cos _a) * _camDist),_camH]
+	_cam CamCommit 0
+
+	? (dbsArsBtn != ""):_cmd = dbsArsBtn;dbsArsBtn = "";goto "Command"
+
+	_sel = lbCurSel dbsArsIdcUnits
+	? (_sel >= 0) and (_sel != _lastUnitSel):_lastUnitSel = _sel;goto "UnitChanged"
+
+	_sel = lbCurSel dbsArsIdcItems
+	? (_sel >= 0) and (_sel != _lastItemSel):_lastItemSel = _sel;goto "ItemChanged"
+
+	? (_pendingSkin != "") and (_time >= _pendingTime):goto "ApplySkin"
+
+	goto "Loop"
+
+;---------- Selection handlers ----------
+
+#UnitChanged
+
+	_new = _units Select (lbValue [dbsArsIdcUnits,_sel])
+	? (_new == _unit):goto "Loop"
+	? (_unit != player) and (Alive _unit):_unit Stop false
+	_unit = _new
+	_pendingSkin = ""
+	_ret = "Loop"
+	goto "RefreshAll"
+
+#ItemChanged
+
+	_class = lbData [dbsArsIdcItems,_sel]
+	? (_cat == 0):_pendingSkin = _class;_pendingTime = _time + 0.6;CtrlSetText [dbsArsIdcStatus,Format ["Skin: %1 ...",[_class] call dbsArsFnName]];goto "Loop"
+	? (_cat == 4):goto "Loop"
+	[_unit,_cat,_class] call dbsArsFnSetWeapon
+	CtrlSetText [dbsArsIdcStatus,Format ["Equipped: %1",[_class] call dbsArsFnName]]
+	_ret = "Loop"
+	goto "RefreshInfo"
+
+#ApplySkin
+
+	_class = _pendingSkin
+	_pendingSkin = ""
+	CtrlSetText [dbsArsIdcStatus,Format ["Changing skin to %1 ...",[_class] call dbsArsFnName]]
+	dbsArsSkinDone = false
+	[_unit,_class] Exec "DBSArsenal\SetSkin.sqs"
+	@ (dbsArsSkinDone)
+	? (IsNull dbsArsSkinResult):_unit = player
+	? not (IsNull dbsArsSkinResult):_unit = dbsArsSkinResult
+	CtrlSetText [dbsArsIdcStatus,Format ["Skin: %1",[TypeOf _unit] call dbsArsFnName]]
+	_ret = "Loop"
+	goto "RefreshAll"
+
+;---------- Button commands ----------
+
+#Command
+
+	? (_cmd == "CLOSE"):goto "Close"
+	? (_cmd == "CAT0"):_cat = 0;_ret = "Loop";goto "RefreshItems"
+	? (_cmd == "CAT1"):_cat = 1;_ret = "Loop";goto "RefreshItems"
+	? (_cmd == "CAT2"):_cat = 2;_ret = "Loop";goto "RefreshItems"
+	? (_cmd == "CAT3"):_cat = 3;_ret = "Loop";goto "RefreshItems"
+	? (_cmd == "CAT4"):_cat = 4;_ret = "Loop";goto "RefreshItems"
+	? (_cmd == "SIDE"):_sideAll = not (_sideAll);_cat = 0;_ret = "Loop";goto "RefreshItems"
+
+	? (_cmd == "ROTL"):_camAng = (_camAng + 330) mod 360;goto "Loop"
+	? (_cmd == "ROTR"):_camAng = (_camAng + 30) mod 360;goto "Loop"
+	? (_cmd == "ZIN") and (_camDist > 1.4):_camDist = _camDist - 0.4;goto "Loop"
+	? (_cmd == "ZOUT") and (_camDist < 8):_camDist = _camDist + 0.4;goto "Loop"
+	? (_cmd == "UP") and (_camH < 3.5):_camH = _camH + 0.25;goto "Loop"
+	? (_cmd == "DOWN") and (_camH > 0.3):_camH = _camH - 0.25;goto "Loop"
+
+	? (_cmd == "ADD"):goto "ItemAdd"
+	? (_cmd == "REM"):goto "ItemRemove"
+	? (_cmd == "MAGADD"):goto "MagAdd"
+	? (_cmd == "MAGSUB"):goto "MagSub"
+
+	? (_cmd == "SAVE"):goto "PresetSave"
+	? (_cmd == "LOAD"):goto "PresetLoad"
+	? (_cmd == "DEL"):goto "PresetDelete"
+	? (_cmd == "SQUAD"):goto "PresetSquad"
+
+	goto "Loop"
+
+#ItemAdd
+
+	? (_cat != 4):CtrlSetText [dbsArsIdcStatus,"Add/Remove works on the ITEMS tab."];goto "Loop"
+	_i = lbCurSel dbsArsIdcItems
+	? (_i < 0):goto "Loop"
+	_class = lbData [dbsArsIdcItems,_i]
+	? (lbValue [dbsArsIdcItems,_i] == 1):_unit AddWeapon _class
+	? (lbValue [dbsArsIdcItems,_i] == 0):_unit AddMagazine _class
+	CtrlSetText [dbsArsIdcStatus,Format ["Added: %1",[_class] call dbsArsFnName]]
+	_ret = "Loop"
+	goto "RefreshInfo"
+
+#ItemRemove
+
+	? (_cat != 4):CtrlSetText [dbsArsIdcStatus,"Add/Remove works on the ITEMS tab."];goto "Loop"
+	_i = lbCurSel dbsArsIdcItems
+	? (_i < 0):goto "Loop"
+	_class = lbData [dbsArsIdcItems,_i]
+	? (lbValue [dbsArsIdcItems,_i] == 1):_unit RemoveWeapon _class
+	? (lbValue [dbsArsIdcItems,_i] == 0):_unit RemoveMagazine _class
+	CtrlSetText [dbsArsIdcStatus,Format ["Removed: %1",[_class] call dbsArsFnName]]
+	_ret = "Loop"
+	goto "RefreshInfo"
+
+#MagAdd
+
+	? (PrimaryWeapon _unit == ""):goto "Loop"
+	_i = [PrimaryWeapon _unit] call dbsArsFnIndex
+	_m = PrimaryWeapon _unit
+	? (_i >= 0):_m = (dbsArsWpnMags Select _i) Select 0
+	_unit AddMagazine _m
+	_ret = "Loop"
+	goto "RefreshInfo"
+
+#MagSub
+
+	? (PrimaryWeapon _unit == ""):goto "Loop"
+	_i = [PrimaryWeapon _unit] call dbsArsFnIndex
+	_m = PrimaryWeapon _unit
+	? (_i >= 0):_m = (dbsArsWpnMags Select _i) Select 0
+	_unit RemoveMagazine _m
+	_ret = "Loop"
+	goto "RefreshInfo"
+
+#PresetSave
+
+	_name = CtrlText dbsArsIdcName
+	? (_name == ""):_name = Format ["Preset %1",(Count dbsArsPresets) + 1]
+	[_name,_unit] call dbsArsFnPresetSave
+	[] Exec "DBSArsenal\PresetsSave.sqs"
+	[] call dbsArsFnFillPresets
+	CtrlSetText [dbsArsIdcStatus,Format ["Saved preset: %1",_name]]
+	goto "Loop"
+
+#PresetLoad
+
+	_i = lbCurSel dbsArsIdcPresets
+	? (_i < 0) or (_i >= Count dbsArsPresets):CtrlSetText [dbsArsIdcStatus,"Select a preset first."];goto "Loop"
+	_p = dbsArsPresets Select _i
+	[_unit,_p Select 2,_p Select 3] call dbsArsFnApplyGear
+	CtrlSetText [dbsArsIdcStatus,Format ["Loaded preset: %1",_p Select 0]]
+	CtrlSetText [dbsArsIdcName,_p Select 0]
+	? (TypeOf _unit != (_p Select 1)):_pendingSkin = _p Select 1;_pendingTime = _time
+	_ret = "Loop"
+	goto "RefreshInfo"
+
+#PresetDelete
+
+	_i = lbCurSel dbsArsIdcPresets
+	? (_i < 0) or (_i >= Count dbsArsPresets):CtrlSetText [dbsArsIdcStatus,"Select a preset first."];goto "Loop"
+	_name = (dbsArsPresets Select _i) Select 0
+	[_i] call dbsArsFnPresetDelete
+	[] Exec "DBSArsenal\PresetsSave.sqs"
+	[] call dbsArsFnFillPresets
+	CtrlSetText [dbsArsIdcStatus,Format ["Deleted preset: %1",_name]]
+	goto "Loop"
+
+#PresetSquad
+
+	_i = lbCurSel dbsArsIdcPresets
+	? (_i < 0) or (_i >= Count dbsArsPresets):CtrlSetText [dbsArsIdcStatus,"Select a preset first."];goto "Loop"
+	CtrlSetText [dbsArsIdcStatus,Format ["Applying %1 to squad AI ...",(dbsArsPresets Select _i) Select 0]]
+	? (_unit != player) and (Alive _unit):_unit Stop false
+	_unit = player
+	dbsArsSquadDone = false
+	[_i] Exec "DBSArsenal\ApplySquad.sqs"
+	@ (dbsArsSquadDone)
+	CtrlSetText [dbsArsIdcStatus,"Squad updated."]
+	_ret = "Loop"
+	goto "RefreshAll"
+
+;---------- Refresh subroutines (return through _ret) ----------
+
+#RefreshAll
+
+	_r = [_unit] call dbsArsFnFillUnits
+	_units = _r Select 0
+	_lastUnitSel = _r Select 1
+	? (_unit != player) and (Vehicle _unit == _unit):_unit Stop true
+	CtrlSetText [dbsArsIdcSide,"Skins: own side"]
+	? (_sideAll):CtrlSetText [dbsArsIdcSide,"Skins: all sides"]
+
+#RefreshItems
+
+	_catNames = ["SKIN","PRIMARY","LAUNCHER","SIDEARM","ITEMS (use Add / Remove)"]
+	CtrlSetText [dbsArsIdcCat,_catNames Select _cat]
+	CtrlSetText [dbsArsIdcSide,"Skins: own side"]
+	? (_sideAll):CtrlSetText [dbsArsIdcSide,"Skins: all sides"]
+	_lastItemSel = [_unit,_cat,_sideAll] call dbsArsFnFillItems
+	? (_lastItemSel < 0):_lastItemSel = -2
+
+#RefreshInfo
+
+	[_unit] call dbsArsFnFillInfo
+	goto _ret
+
+#Close
+
+	? (dialog):CloseDialog 0
+	_cam CameraEffect ["terminate","back"]
+	CamDestroy _cam
+	? (_unit != player) and (Alive _unit):_unit Stop false
+	dbsArsOpen = false
+	Exit

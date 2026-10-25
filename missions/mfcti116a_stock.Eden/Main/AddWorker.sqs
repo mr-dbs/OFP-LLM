@@ -1,0 +1,30 @@
+;Last modified 4/27/3
+;Script Usage:  [] Exec "AddWorker.sqs"]
+
+_unit = _this Select 0
+_side = Side _unit
+
+? (_side != west) && (_side != east):Exit
+? (_side == west):_mobileHQ = WestMobileHQ
+? (_side == east):_mobileHQ = EastMobileHQ
+
+#CreateDeployedWorker
+
+	? (_side == west) && (westResources >= workerCost):goto "DeployWorker"
+	? (_side == east) && (eastResources >= workerCost):goto "DeployWorker"
+
+	Hint Localize "STRCANTCREATEWORKER"
+	Exit
+
+	;Create worker at Mobile HQ at an increased cost.
+	#DeployWorker
+
+		? (_side == west):_mobileHQ = WestMobileHQ
+		? (_side == east):_mobileHQ = EastMobileHQ
+
+		? (GetDammage _mobileHQ == 1):Hint Localize "STRCANTCREATEWORKER1";Exit
+
+		? (_side == west):deployWestWorker = true;PublicVariable "deployWestWorker"
+		? (_side == east):deployEastWorker = true;PublicVariable "deployEastWorker"
+
+		Exit

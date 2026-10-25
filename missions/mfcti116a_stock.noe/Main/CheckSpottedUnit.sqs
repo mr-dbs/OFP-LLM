@@ -1,0 +1,29 @@
+;Last modified 10/16/3
+;If unit has not been spotted by side yet then award point(s) if a player spots it.
+? !(Local LocalServerObject):Exit
+
+_team = _this Select 0
+_spottedUnit = _this Select 1
+_side = Side _team
+
+? (_side != west) && (_side != east):Exit
+
+? (_side == west) && (_spottedUnit In westSpottedUnits):Exit
+? (_side == west):westSpottedUnits = westSpottedUnits + [_spottedUnit]
+
+? (_side == east) && (_spottedUnit In eastSpottedUnits):Exit
+? (_side == east):eastSpottedUnits = eastSpottedUnits + [_spottedUnit]
+
+? !(_team In westPlayerGroups) && !(_team In eastPlayerGroups):Exit
+
+_buildings = eastAmmoDepot + eastRepairDepot + eastFieldHospital
+_majorBuildings = eastInfantryFactory + eastLightFactory + eastHeavyFactory + eastAirFactory + eastControlCenter 
+? (_side == east):_buildings = westAmmoDepot + westRepairDepot + westFieldHospital;_majorBuildings = westInfantryFactory + westLightFactory + westHeavyFactory + westAirFactory + westControlCenter 
+
+_points = 0.25
+? (_spottedUnit In _buildings):_points = 1
+? (_spottedUnit In _majorBuildings):_points = 3
+? (Vehicle _spottedUnit In vehicles):_points = .5
+? (Vehicle _spottedUnit == WestMobileHQ) || (Vehicle _spottedUnit == EastMobileHQ):_points = 5
+
+[Leader _team,_points] Exec "Main\AddPlayerPoints.sqs"

@@ -1,0 +1,20 @@
+;DBS Arsenal - body swap through the CWR engine command dbsSetBody.
+;Only Exec'd when dbsArsEngineBody is true, so engines without the command never parse this line.
+
+_unit = _this Select 0
+_class = _this Select 1
+_wasPlayer = (_unit == player)
+_lo = [_unit] call dbsArsFnGet
+
+? (_wasPlayer):dbsArsSwapped = true
+_new = _unit dbsSetBody _class
+
+? (IsNull _new):dbsArsSwapped = false;Hint Format ["Arsenal: engine refused body swap to %1.",_class];dbsArsSkinDone = true;Exit
+
+[_new,_lo Select 1,_lo Select 2] call dbsArsFnApplyGear
+
+? (_wasPlayer):[] Exec "DBSArsenal\Rebind.sqs"
+? (dbsArsMFCTI) and not (_wasPlayer) and ((Side _new == west) or (Side _new == east)):[_new,50] Exec "Main\UnitCleanUp.sqs"
+
+dbsArsSkinResult = _new
+dbsArsSkinDone = true

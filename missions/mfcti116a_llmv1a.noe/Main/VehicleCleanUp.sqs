@@ -1,0 +1,47 @@
+;Last modified 2/10/4
+;Script usage:  [Vehicle,Side,Bounty (Not used anymore)] Exec "VehicleCleanUp.sqs"
+_bounty = 0
+_unit = _this Select 0
+_side = _this Select 1
+_group = _this Select 2
+
+;Local variables can't be passed to event handler so determine side and then add event handler.
+? (_side == west):_unit AddEventHandler ["killed",{[_this,west] Exec "Main\UnitKilled.sqs"}]
+? (_side == east):_unit AddEventHandler ["killed",{[_this,east] Exec "Main\UnitKilled.sqs"}]
+? (_side == resistance):_unit AddEventHandler ["killed",{[_this,resistance] Exec "Main\UnitKilled.sqs"}]
+
+;Do not proceed further except on the server.
+? !(Local LocalServerObject):goto "Update"
+
+@ (serverStarted)
+
+? (_side == resistance):vehicles = vehicles + [_unit]
+
+#Update
+~30
+
+? (Debug) && !(_unit In vehicles):player SideChat ("A unit was already removed.  Exiting it's cleanup script.")
+? !(_unit In vehicles):Exit
+? (GetDammage _unit == 1):goto "CleanUp"
+
+goto "Update"
+
+#CleanUp
+
+	? (IsNull _group):goto "AddCasualty"
+	? (Local player) && (Group player == _group):totalTeamVehiclesLost = totalTeamVehiclesLost + 1
+
+	#AddCasualty
+
+		? (_side == west):totalWestVehiclesLost = totalWestVehiclesLost + 1;PublicVariable "totalWestVehiclesLost"
+		? (_side == east):totalEastVehiclesLost = totalEastVehiclesLost + 1;PublicVariable "totalEastVehiclesLost"
+		? (_side == resistance):totalResistanceVehiclesLost = totalResistanceVehiclesLost + 1;PublicVariable "totalResistanceVehiclesLost"
+		? (_side == civilian):totalCivilianVehiclesLost = totalCivilianVehiclesLost + 1;PublicVariable "totalCivilianVehiclesLost"
+
+	~480
+
+	? (debug):player SideChat("Cleaned up a vehicle.")
+	? (_side == resistance):vehicles = vehicles - [_unit];DeleteVehicle _unit;Exit
+	? (_side == civilian):DeleteVehicle _unit;Exit
+
+	[_unit] Exec "Main\DeleteVehicle.sqs"

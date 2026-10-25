@@ -1,0 +1,67 @@
+;Last modified 2/19/4
+private ["_currentGroup","_role"]
+_currentGroup = ObjNull
+_role = 0
+
+_unit = _this Select 0
+
+@ (serverStarted)
+
+_weapon = "M16"
+_magazine = "M16"
+_secondary = "LAWLauncher"
+_secondaryMagazine = "LAWLauncher"
+
+? (!publicServer && scopedWeapons):_weapon = "MFCTI116Steyr";_magazine = "MFCTI116SteyrMag"
+
+? (Side _unit != west):Exit
+? (Group _unit In westPlayerGroups):goto "EquipStandard"
+
+_count = 0
+_totalTeams = Count teamDesignations
+
+#GetTeamRole
+
+	Call Format["_currentGroup = west%1Team",teamMapDesignations Select _count]
+	? (_currentGroup == Group _unit):Call Format["_role = west%1Role",teamMapDesignations Select _count]
+
+	_count = _count + 1
+	? (_count < _totalTeams):goto "GetTeamRole"
+
+;If team is an independent AI then equip according to role.
+? (_role == blackOpsRole):_weapon = "HK";_magazine = "HK"
+? (_role == infantryAARole):_secondary = "AALauncher";_secondaryMagazine = "AALauncher"
+? (_role == infantryATRole):_secondary = "CarlGustavLauncher";_secondaryMagazine = "CarlGustavLauncher"
+
+#EquipStandard
+
+RemoveAllWeapons _unit 
+
+_unit AddMagazine _magazine
+_unit AddMagazine _magazine
+_unit AddMagazine _magazine
+_unit AddMagazine _magazine
+
+? (_role == infantryAARole || _role == infantryATRole):goto "Equip"
+
+_unit AddMagazine _magazine
+_unit AddMagazine _magazine
+
+#Equip
+
+_unit AddWeapon _weapon
+_unit selectWeapon _weapon
+
+_unit AddMagazine _secondaryMagazine
+_unit AddWeapon _secondary
+
+? (_role == infantryAARole || _role == infantryATRole):goto "EquipMisc"
+
+_unit AddMagazine "HandGrenade"
+_unit AddMagazine "HandGrenade"
+
+#EquipMisc
+
+_unit AddWeapon "Binocular"
+
+? (acceleratedTime || nightMission):_unit AddWeapon "NVGoggles"

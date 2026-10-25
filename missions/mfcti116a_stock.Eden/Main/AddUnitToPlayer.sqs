@@ -1,0 +1,132 @@
+;Last modified 9/26/3
+
+;Creates a unit, adds it to a group if needed, & runs a script on unit if needed.
+;Note that if _buildingList is an empty array then _deploymentLocation is used and there is no build time but twice the cost.
+;Script Usage:[UnitRequestingBuild,UnitTypeToBuild,Building] Exec "Main\AddUnitToPlayer.sqs"
+
+_unit = _this Select 0
+_unitType = _this Select 1
+_building = _this Select 2
+_reinforcement = _this Select 3
+
+_unitName = unitNames Select _unitType
+_side = Side _unit
+_cost = unitCosts Select _unitType
+_buildTime = unitBuildTimes Select _unitType
+_group = Group _unit
+
+? (_reinforcement):goto "CreateNewUnit"
+
+? (_side != west) && (_side != east):Hint Localize "STRTRAITORS";Exit
+
+;If building is damaged then report it to the player.
+? (GetDammage _building == 1):Hint Localize "STRBUILDINGDESTROYED";Exit
+
+;Technically this should not happen if it does the shit has hit the fan :(
+? !(_building In buildingsBuilt):Hint(Localize "STRBUILDINGNOTINARRAY")
+
+;If the building is in use report it to the player.
+? (_building In buildingsInUse):[_unitType,_building,false,ObjNull] Exec "Main\AddToQueue.sqs";Exit
+
+? (_unit != Leader WestCommanderTeam) && (_unit != Leader EastCommanderTeam):goto "CheckPlayerResources"
+
+_resources = westResources
+
+? (_side == east):_resources = eastResources
+
+#CheckResources
+
+	_needed = _cost - _resources
+
+	;If more resources are needed then available report an error to player.
+	? (_needed > 0):_error = Format["%1  (%2 $%3 %4.)",Localize "STRNOTENOUGHRESOURCES",Localize "STRNEED",_needed,Localize "STRMORE"];Hint(_error);Exit
+
+;Do not exceed max group size.
+? (Count Units _group > 11):Hint Localize "STRCANTREINFORCE";Exit
+
+;Subtract cost from resources and send new resource value to all players.
+[Group _unit,_cost] Exec "Main\SubtractTeamResources.sqs"
+[_unit,_cost / purchaseValuePerPoint] Exec "Main\AddPlayerPoints.sqs"
+
+;Wait until a previous building lock is done.
+? (_side == east):goto "WaitForEast"
+
+@ !(westRequestBuildingInUseMP)
+westRequestBuildingInUseMP = true;PublicVariable "westRequestBuildingInUseMP"
+goto "SetBuildingInUse"
+
+#WaitForEast
+
+@ !(eastRequestBuildingInUseMP)
+eastRequestBuildingInUseMP = true;PublicVariable "eastRequestBuildingInUseMP"
+
+;This locks the building from other players until construction is complete.
+#SetBuildingInUse
+
+? (_side == west):westBuildingInUseMP = _building;PublicVariable "westBuildingInUseMP"
+? (_side == west):westBuildingInUseStateMP = true;PublicVariable "westBuildingInUseStateMP"
+
+? (_side == east):eastBuildingInUseMP = _building;PublicVariable "eastBuildingInUseMP"
+? (_side == east):eastBuildingInUseStateMP = true;PublicVariable "eastBuildingInUseStateMP"
+
+;Wait until the unit is built.
+~_buildTime
+
+? (_side == west):westBuildingInUseMP = _building;PublicVariable "westBuildingInUseMP"
+? (_side == west):westBuildingInUseStateMP = false;PublicVariable "westBuildingInUseStateMP"
+
+? (_side == east):eastBuildingInUseMP = _building;PublicVariable "eastBuildingInUseMP"
+? (_side == east):eastBuildingInUseStateMP = false;PublicVariable "eastBuildingInUseStateMP"
+
+;If the building was destroyed while unit was being built then exit now.
+? (GetDammage _building == 1):Exit
+
+;If the group has grown beyond size-limit since construction started then exit.
+? (Count Units _group > 11):Hint Localize "STRCANTREINFORCE";Exit
+
+#CreateNewUnit
+
+_direction = (GetDir _building + 90) % 360
+_distance = 14
+_destination = [(GetPos _building Select 0)+((sin _direction)*_distance),(GetPos _building Select 1)+((cos _direction)*_distance),GetPos _building Select 2]
+
+_unitName CreateUnit [_destination,_group,"newDriver = this",1,"PRIVATE"]
+~0.25
+[newDriver,_cost * bountyPercentage] Exec "Main\UnitCleanUp.sqs"
+
+? (_unitType == blackOpsType) || (_unitType == blackOpsEastType):[_newUnit] Exec "Loadouts\EquipBlackOps.sqs"
+? (debug):_message = Format["%1 (%2) built at %3 (%4).",_unitName,_newUnit,_building,_buildingName];player SideChat (_message)
+
+Exit
+
+#CheckPlayerResources
+
+	_resources = 0
+
+	? (Side _unit == east):goto "CheckEastPlayerResources"
+
+#CheckWestPlayerResources
+
+	? (_unit == Leader WestAlphaTeam):_resources = westAlphaResources;goto "CheckResources"
+	? (_unit == Leader WestBravoTeam):_resources = westBravoResources;goto "CheckResources"
+	? (_unit == Leader WestCharlieTeam):_resources = westCharlieResources;goto "CheckResources"
+	? (_unit == Leader WestDeltaTeam):_resources = westDeltaResources;goto "CheckResources"
+	? (_unit == Leader WestEchoTeam):_resources = westEchoResources;goto "CheckResources"
+	? (_unit == Leader WestFoxtrotTeam):_resources = westFoxtrotResources;goto "CheckResources"
+	? (_unit == Leader WestGolfTeam):_resources = westGolfResources;goto "CheckResources"
+	? (_unit == Leader WestHotelTeam):_resources = westHotelResources;goto "CheckResources"
+
+	Exit
+
+#CheckEastPlayerResources
+
+	? (_unit == Leader EastAlphaTeam):_resources = eastAlphaResources;goto "CheckResources"
+	? (_unit == Leader EastBravoTeam):_resources = eastBravoResources;goto "CheckResources"
+	? (_unit == Leader EastCharlieTeam):_resources = eastCharlieResources;goto "CheckResources"
+	? (_unit == Leader EastDeltaTeam):_resources = eastDeltaResources;goto "CheckResources"
+	? (_unit == Leader EastEchoTeam):_resources = eastEchoResources;goto "CheckResources"
+	? (_unit == Leader EastFoxtrotTeam):_resources = eastFoxtrotResources;goto "CheckResources"
+	? (_unit == Leader EastGolfTeam):_resources = eastGolfResources;goto "CheckResources"
+	? (_unit == Leader EastHotelTeam):_resources = eastHotelResources;goto "CheckResources"
+
+	Exit

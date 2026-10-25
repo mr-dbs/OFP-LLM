@@ -1,0 +1,31 @@
+;Last modified 3/30/3
+
+_side = _this Select 0
+_idc = _this Select 1
+_commanderIncluded = _this Select 2
+_selectAll = _this Select 3
+
+;Start at 1 since the commander's team is 0.
+_count = 0
+_totalTeams = Count teamDesignations
+
+? !(_commanderIncluded):_count = 1
+
+#GetSelectedTeam
+
+	_selectedTeam = lbData[_idc,lbCurSel _idc]
+
+	? (_side == west)&&(_selectedTeam == (teamDesignations Select _count)):westSelectedGroup = _count;PublicVariable "westSelectedGroup"
+	? (_side == east)&&(_selectedTeam == (teamDesignations Select _count)):eastSelectedGroup = _count;PublicVariable "eastSelectedGroup"
+
+	_count = _count  + 1
+
+	? (_count < _totalTeams):goto "GetSelectedTeam"
+	? !(_selectAll):Exit
+
+	westSelectedAll = false;PublicVariable "westSelectedAll"
+	eastSelectedAll = false;PublicVariable "eastSelectedAll"
+
+	;If the 'ALL' selection was chosen.
+	? (_side == west) && (_selectedTeam == Localize "STRALL"):westSelectedAll = true;PublicVariable "westSelectedAll"
+	? (_side == east) && (_selectedTeam == Localize "STRALL"):eastSelectedAll = true;PublicVariable "eastSelectedAll"

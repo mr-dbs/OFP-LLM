@@ -1,0 +1,677 @@
+LANGUAGE,English,French,German,Dutch,Czech,Polish
+
+STRMODNAME,MF Conquer the Island 1.16A Coop,MFCTI 1.16A Coop (Conquete de l'Ile),MFCTI 1.16A Koop (Erobere die Insel),MFCTI 1.16A Coop (Verover het Eiland),MFCTI 1.16A Kooperativní (Dobytí ostrova),MFCTI 1.16A (Podbij wyspê)
+STRMODSHORTNAME,MFConquerTheIsland 1.16A Coop,MFCTI 1.16A Coop (ConqueteDel'Ile),MFCTI 1.16A Koop (ErobereDieInsel),MFCTI 1.16A Coop (VeroverHetEiland),MFCTI 1.16A Kooperativní (Dobytí ostrova),MFCTI 1.16A (Podbij wyspê)
+STRMODDESCRIPTION,"Eliminate all enemy barracks, factories, and the Mobile HQ.",,"Zerstöre alle gegnerischen Kasernen, Fabriken und das mobile HQ.","Vernietig alle vijandelijke baraken, fabrieken, en de Mobiele HQ.", Zniè všechny nepøátelské kasárny,"Zniszcz wszystkie baraki, fabryki i Mobile HQ."
+STRLANGUAGETYPE,English,French,German,Dutch,Czech,Polish
+STRWEBSITE,http://mfcti.sourceforge.net,http://mfcti.sourceforge.net,http://mfcti.sourceforge.net,http://mfcti.sourceforge.net,http://mfcti.sourceforge.net,http://mfcti.sourceforge.net
+
+STR5MINUTESLEFT,\n\n\n\n\n5 minutes left!,Plus que 5 minutes!,\n\n\n\n\n5 Minuten übrig!,\n\n\n\n\n5 resterende minuten !,\n\n\n\n\n5 minut do konce !,\n\n\n\n\n5 minut do koñca !
+STR15MINUTESLEFT,\n\n\n\n\n15 minutes left!,Plus que 5 minutes!,\n\n\n\n\n15 Minuten übrig!,\n\n\n\n\n15 resterende minuten !,\n\n\n\n\n15 minut do konce !,\n\n\n\n\n15 minut do koñca !
+STR120MORTAR,120mm Mortar,Mortier 120mm,120mm Mörser,120mm Mortier,120mm Minomet,120mm MoŸdzie¿
+STRMORTARS,Mortars,Mortiers,Mörser,Mortieren,Minomety,MoŸdzie¿e
+STRAAS,AAs,AAs,AAs,AAs,AA-èka,AAs
+STRAAMG,AA Machine Gun,Mitrailleuse AA,AA-Kanone,AA Machine Geweer, AA kanon,Dzia³o AA
+STRAASTATION,AA Station,Station AA,AA-Posten,AA Station,AA stanovištì,Stanowisko AA
+STRACCELERATEDTIME,Accelerated Time,Temps Accéléré,Beschleunigte Zeit,Voorbijvliegende Tijd,Zrychlenı èas, Przyœpieszony czas
+STRACCEPTFIREMISSION,Accept Fire Mission,Accepter mission de bombardement,Akzeptiere Feuerbefehl,Accepteer Vuurmissie ,Pøijmout palebnou misi,Akceptuj rozkaz ognia
+STRADD,Add,Ajout,Hinzufügen,Toevoegen, Pøidat,Dodaj
+STRADDEMPTY,Add Empty,Ajout sans equipage,Leer hinzufügen,Leeg Toevoegen,Pøidat prázdnı, Dodaj Pusty
+STRADDINGTOQUEUE,Adding to queue,Ajout a la queue.,Der Warteliste hinzugefügt,Wachtlijst Toevoegen,Pøidat do fronty,Dodaje do kolejki
+STRADDMANNED,Add Manned,Ajout avec equipage,Bemannt hinzufügen,Bemand Toevoegen,Pøidat s posádkou,Dodaj z za³og¹
+STRADDTO,Add To,Ajout a,Hinzufügen zu,Toevoegen Bij,Pøidat k,Dodaj do
+STRADDTOTEAM,Add to team,Ajout a l'equipe,Hinzufügen zu Team,Toevoegen aan Team,Pøidat k tımu,Dodaj do dru¿yny
+STRADDWORKER,Add Worker ($300),Ajouter travailleur (300$),Arbeiter ausbilden ($300),Werker Toevoegen ($300),Pøidat dìlníka ($300),Dodaj Robotnika ($300)
+STRACAT,Aircraft ATs,Vaisseaux AT,AG-Lenkraketen,Luchthaven Ats,Systém AT,System AT
+STRACATROCKETS,Aircraft AT Rockets,Roquettes AT d'aeronefs,AG-Raketen,Luchthaven AT Raketten,Rakety typu AT,Rakiety typu AT
+STRACROCKETS,Aircraft Rockets,helicopter-rockets,AG-Raketen,Luchthaven Raketten,Rakety (vzduch-....),Rakiety do Helikoptera
+STRAI,AI,IA,KI,AI,AI,AI
+STRAIR,Air,Aerien,Flug,Lucht,Vzduch,Powietrzny
+STRAIRCRAFT,Aircraft,Aeroport,Luftfahrzeug,Luchthaven,Vzdušné síly,Samolot
+STRAIRFACTORY,Aircraft Factory,Aeroport,Luftfahrzeugfabrik,Luchthaven Fabriek,Letecká továrna,Fabryka Samolotów
+STRALL,ALL,TOUS,ALLE,ALLEN,Všechny,Wszystkie
+STRALLAIR,All Air,Tous aeriens,Alle Luft,Alle lucht,Vše.vzdušné,Wszystkie Powietrzne
+STRALLARMOURED,All Armour,Tous tanks,Alle gepanzert,Alles gepanserd,Vše.obrnìné,Wszystkie pancerne
+STRALLINDEPENDENT,All AI Independent,tous AI independants,Alle KI unabhängig,Alle AI Onafhankelijk,Vše.AI(nezávislé),Wszystkie AI (samodzielne)
+STRALLMECHANIZED,All Mechanized,Tous mechanises,Alle mechanisiert,Alles gemechaniseerd,Vše mechanizované,Wszystkie zmechanizowane
+STRAMMOSHORT,Ammo,Qtite,Stk.,Munit.,Náb.,Amunicja
+STRAMMO,Ammo,Munitions,Munition,Munitie,Munice,Amunicja
+STRAMMOCRATE,Ammo Crate,Caisse de munitions,Munitionskiste,Munitiekist,Bedna s municí,Skrzynia amunicji
+STRAMMODEPOT,Ammo Depot,Depot de munitions,Munitionsdepot,Munitie Depot,Munièní sklad,Sk³ad amunicji
+STRAMMOTRUCKOPTIONS,Ammo Truck Options,Options du camion de munitions,Munitions-LKW Optionen,Munitie Truck Opties,Monosti - MUNIÈNÍ AUTO,Opcje Ciê¿arówki(AMMO)
+STRARMOUR,Armour,Blinde,Panzer,Panser,Obrnìné,Czo³gi
+STRARMOURHEAVY,Heavy Armour,Armure lourde,Schwere Panzer,Zware panser,Tìce obrnìné,Ciê¿kie Czo³gi
+STRAUTOALIGN,Auto-align Walls,Alignement automatique,Mauern autom. anordnen,Automatisch allinieren,Automatické nastavení,Wyrównaj œciany
+STRAWARDPLAYERPERCENT,Award Pool,budget recompense,Prämien-Pool,Budget,Prémie,Premie
+STRBACK,Back,Quitter,Zurück,Terug,Zpìt,Poprzednie
+STRBARRACKS,Barracks,Caserne,Kaserne,Barakken,Kasárny,Baraki
+STRBLACKOPS,Black Ops,Forces speciales,Black Ops,Speciale eenheden,Spec.jednotky,Spec.jednostki
+STRBOMBARDWAYPOINT,Bombard Waypoint,Bombarder Waypoint,Wegpunkt bombardieren,Bombardeer WP,Minometná palba na WP,WP Bomboardowania
+STRBUILDINGINUSE,Building in use,Batiment en cours d'utilisation,Gebäude wird benutzt!,Gebouw in gebruik,Objekt pracuje,Budynek w u¿yciu
+STRBUILDINGDESTROYED,Building is destroyed!,Le batiment est detruit!,Gebäude ist zerstört!,Gebouw is vernield!,Objekt je znièen!,Budynek zniszczony!
+STRBUILDINGNEXTUNIT,Building next unit in queue.,,Baue nächste Einheit der Warteliste.,Het bouwen van de volgende eenheid is in gebruik,Vytváøím další jednotku z fronty,Budujê nastêpn¹ jednostkê z kolejki
+STRBUILDINGNOTINARRAY,Building not in player's array!,Le batiment n'est pas dans la liste du joueur!,Gebäude ist nicht im Array des Spielers!,Gebouw is niet in de spelers array!,Objekt není v dosahu hráèe!,Budynek nie w zmiennej gracza
+STRBUY,Buy,Acheter,Kaufen,Kopen,Nakupovat,Kup
+STRBUYCRATE,Buy Crate,Acheter Caisse,Kiste bauen,Koop Kist,Postavit bednu,Kup skrzyniê
+STRBUYCUSTOM,Buy Custom Loadout $%1,Acheter Equipement personalise %1$,Ausrüstung kaufen $%1,Koop Standaard Uitrusting $%1,Kup osobní vızbroj $%1,Kup domyœlne wyposa¿enie $%1
+STRBUYMORTARSHELLS,Buy Mortar Shells ($%1),Acheter Munitions de Mortier (%1$),Mörsergranaten kaufen ($%1),Koop Mortier Bewapening ($%1),Kup náboje do minometu ($%1),Kup naboje do MoŸdzie¿a ($%1)
+STRBUYSALVAGER,Independent Salvager ($525),Vehicule automatique de recyclage (525$),autonomes Bergefahrzeug ($525),Onafhankelijke recyclage ($525),Nezávislı sbìraè šrotu ($525),Samodzielny odzyskiwacz ($525)
+STRBUYTEMPLATE,Buy Template & Exit,Acheter et sortir,Kaufen & Schließen,Kopen en afsluiten,Kup pøeddef. & zavøi,Kup domyœlne i wyjdŸ
+STRCANCEL,Cancel,Annuler,Abbrechen,Annuleren,Storno,Anuluj
+STRCANTCREATEMORE,Cannot create any more vehicles!  Max has been reached.,Ne peut pas creer plus de vehicules! Le maximum a ete atteint.,Kein Bau von Fahrzeugen möglich! Fahrzeuglimit wurde erreicht.,Er kunnen geen voertuigen meer gemaakt worden! Het Max is bereikt.,Nelze vytvoøit další vozidla! Je dosaen maximální povolenı poèet!,Nie mo¿na zbudowaæ wiêcej pojazdów! Maksymalna granica zosta³a osiagniêta.
+STRCANTCREATEWORKER,Cannot create worker!  Check for enough resources and ensure you are in range of the Mobile HQ.,Ne peut pas creer de travailleur! Assurez vous d'avoir assez de ressources et que vous etes a portee du QG mobile,Ausbildung von Arbeitern nicht möglich! Nicht ausreichend Ressourcen oder außerhalb der Reichweite des MHQ.,,,Niemo¿na zbudowaæ robotnika! SprawdŸ pieni¹dze i upewnij siê ¿e jesteœ w zasiêgu Mobilnego HQ.
+STRCANTCREATEWORKER1,Cannot create worker.  The Mobile HQ is destroyed!,Ne peut pas creer de travailleur the QG mobile est detruit!,Kann keinen Arbeiter ausbilden! Das MHQ ist zerstört.,De werkers willen niet meer werken. De Mobiele HQ is kapot!,Nelze vytvoøit dalšího dìlníka! Velitelskı transportér je znièen!,Niemo¿na zbudowaæ robotnika. Mobliny HQ zosta³ zniszczony!
+STRCANTPLACESTRUCTURE,Can't place structure here!,Impossible de placer le batiment ici!,Bau des Gebäudes hier nicht möglich!,Hier kan geen structuur geplaatst worden!,Objet zde nelze postavit!,Nie mo¿na tutaj postawiæ budynku!
+STRCANTREINFORCE,Can't reinforce.  Group is at max size!,Pas de renforts authorises.  L'equipe a atteint sa taille maximale!,Verstärkung nicht möglich! Maximale Gruppenstärke ist erreicht.,Er kan geen versterking komen. De groep is op zijn Max capaciteit!,Nelze pøidat posily! Skupina má maximální poèet jednotek!,Wsparcie niemo¿liwe. Maksymalna wielkoœæ grupy!
+STRCANTUPGRADE,Can't upgrade.  Currently working on another upgrade!,Nepeux pas ameliorer. Une amelioration est deja en cours!,Forschung nicht möglich! Ein anderes Upgrade ist noch nicht abgeschlossen.,Geen Upgrade. Momenteel aan een andere Upgrade bezig!,Nelze zahájit zdokonalování! Pracuje se na jiném úkolu!,Nie mo¿na ulepszyæ. Trwa ulepszanie poprzedniej pozycji!
+STRCANTUPGRADENOCONTROLCENTER,Can not upgrade without a functioning Control Center!,Impossible d'ameliorer sans un centre de controle operationnel!,Forschung ohne funktionierndes Kontrollzentrum nicht möglich!,Er kan niet worden geupgrade zonder een functionele Controle Centrum!,Nelze zdokonalovat jednotky bez funkèního Štábu posádky!, Nie mo¿na ulepszyæ bez Centrum Kontroli!
+STRCASUALTIES,Casualties,Pertes,Verluste,Slachtoffers,Obìti,Straty
+STRCHANGERESPAWNTO,Change respawn to:,Changee reapparition pour:,Respawn wechseln zu:,Verander Respawn naar:,Zmìnit bod RESPAWNu:,Zmieñ repawn do:
+STRCHEAPTRANSPORTAC,Cheap Transport Aircraft,Transports Aeriens peu chers,Billiger Transport-Heli,Goedkope Transport Luchthaven,Levnìjší pøepravní helikoptéry,Tanie Helikoptery Transportowe
+STRCIVILIAN,Civilians,Civils,Zivilisten,Burgers,Civilisté,Cywile
+STRCIVILIANCASUALTIES,Civilian Casualties,Pertes civiles,Zivile Verluste,Burger Slachtoffers,Obèan,Straty Cywilne
+STRCLEAR,Clear,nettoyer,Löschen,Klaar,Vyèistit...,Wyczyœæ
+STRCONTROLCENTER,Control Center,Centre de control,Kontrollzentrum,Controle Centrum,Štáb posádky,Centrum Kontroli
+STRCOST,Cost,Cout,Kosten,Kosten,Cena,Cena
+STRCURRENCYPOSITION,Front,Back,Front,Front,Front,Przód
+STRDARK,Dark,Fonce,Dunkel,Donker,Tmavé,Ciemny
+STRDEBUGPROMPT,Debug Prompt,Debug Prompt,Debug Prompt,Debug Prompt,Debug Prompt,Wyjœciw Kontrolne
+STRDESTROYEDFRIENDLYMHQ,destroyed same side's MHQ!,a detruit le MHQ de sa nation!,zerstörte das eigene MHQ!,Eigen HQ Vernietigd!,znièen vlastní velitelskı transportér!,Zniszczony HQ po tej samej stronie
+STRDISABLED,Disabled,Desactive,Deaktiviert,Uitgeschakeld,Zakázán,Dezaktywuj
+STRDISABLECOMMANDERONLYMHQ,Disable Commander Only MHQ Driving,Tous QG conducteur,MHQ entsperren,Uitschakelen dat enkel commandant met MHQ kan rijden,Povolit jízdu v MHQ pro všechny,Dezaktywuj Opcjê Prowadzenia MHQ Tylko Przez Dowódzcê
+STRDOUBLEINCOME,Double Income,Revenus Doubles,Doppeltes Einkommen,Dubbel Inkomen,Dvojnásobnı pøíjem,
+STREAST,East,Est,Osten,Oosten,Vıchod,Podwójny Dochód
+STREASTCASUALTIES,East Casualties,Pertes Est,Verluste Ost,Oost Slachtoffers,Vıchodní obìti,Wschód
+STREASTPOINTS,East Points,Points de l'Est,Punkte Ost,Oost Punten,Vıchodní body,Wschodnie Punkty
+STREASTWINS,East wins!,L'Est a gagne!,Ost gewinnt!,Oosten gewonnen!,Vıchod vyhrál!,Wschód Wygrywa!
+STREMPTY,Empty %1,vide %1,%1 (leer),leeg %1,%1 (prázdné),Pusty %1
+STREQUIP,Equip,Equiper,Ausrüsten,Uitrusting,Vybavení,Wyposa¿
+STRHEAVYAMMOCRATE,Heavy Ammo Crate,Caisse de munitions lourdes,Schwere Mun.-kiste,Zware Munitiekist,Bedna - tìká munice,Skrzynia Ciê¿kiej Amunicji
+STRHEAVYVEHICLES,Heavy Vehicles,Vehicules lourds,Schwere Panzer,Zware voertuigen,Tìká technika,Ciê¿kie Pojazdy
+STRHEAVYWEAPONSCRATE,Heavy Weapons Crate,Caisse d'armes lourdes,Schwere Waffenkiste,Zware Wapenkist,Bedna - tìké zbranì,Skrzynia z Ciê¿k¹ Broni¹
+STRHES,HEs,HEs,HEs,HEs,HEs,HEs
+STRHIGHERINCOME,Higher Income,Revenus plus eleves,Höheres Einkommen,Hoger Inkomen,Vyšší pøíjem,Wy¿szy Dochód
+STREASTRESOURCES,East Resources,Ressources de l'Est,Ressourcen Ost,Oost inkomsten,Vıchodní zdroje,Zasoby Wschodu
+STREASTTOTALINCOME,East Total Income,Revenue total de l'Est,Einkommen Ost,Oosten totale inkomen,Vıchodní totální pøíjem,Ca³y Dochód Wschodu
+STREASTTOWNSHELD,East Towns Held,Villes occupees par l'Est,Gehaltene Städte Ost,Oosten bezette steden,Mìsto drené vıchodem,Miasta Opanowane przez Wschód 
+STRENABLECOMMANDERONLYMHQ,Enable Commander Only MHQ Driver,Commandant QG conducteur,MHQ sperren,Inschakelen dat enkel commandant met MHQ kan rijden,Povolit jízdu v MHQ pouze pro velitele,Aktywuj Opcjê Prowadzenia MHQ Tylko Przez Dowódzcê
+STREXIT,Exit,Sortir,Beenden,Afsluiten,Konec,WyjdŸ
+STREXPENSIVEASSAULTAC,Expensive Assault Aircraft,Aeronefs d'attaque chers,Teurer Angriffs-Heli,Dure Aanvals Luchthaven,Draší helikoptéry,Drogie Helikoptery bojowe
+STRFALLENTORESISTANCE,has fallen to the resistance!,Est tombe aux mains de la resistance!,wurde vom Widerstand zurückerobert!,Is door het Verzet gevallen!,padlo do rukou partizánù!,zosta³o opanowane przez partyzantów!
+STRFIELDHOSPITAL,Field Hospital,Hopital de campagne,Feldlazarett,Veld Hospitaal,Polní nemocnice,Szpital Polowy
+STRFIREMISSIONINPROGRESS,A fire mission is already in progress.,Une mission de bombardement est deja en cours.,Ein Feuerbefehl wird bereits ausgeführt,Er is reeds een vuurmissie voorbereid.,Podpùrná støelba ji probíhá!,Rozkaz ognia ju¿ jest w postêpie.
+STRFORTHECAPTUREOF,for the capture of,pour la capture de,für die Eroberung von,Voor het veroveren van,za obsazení od,za zdobycie
+STRGIVE,Give,donner,Geben,Geven,Dát,Daj
+STRGUISKIN,GUI Skin,Couleur du menu,Menü-Layout,GUI Huid,Vzhled menu,Kolor menu
+STRHASTAKEN,has taken,a pris,eroberte,verovert,obsadil,opanowa³
+STRHEMG,HE Machine Gun,Mitrailleuse HE,HE-Kanone,HE Machinegeweer,HE kulomet,Karabin HE
+STRHESTATION,HE Station,Emplacement HE,HE-Posten,HE Station,HE stanovištì,Stacja HE
+STRHEFORTIFICATION,HE Fortification,Fortification HE,HE-Befestigung,HE Fortification,HE opevnìní,Fortyfikacja HE
+STRHEAVY,Heavy,Lourd,Schwer,Zwaar,Tìkı,Ciê¿ki
+STRHEAVYFACTORY,Heavy Factory,Usine lourde,Panzerfabrik,Zware Fabriek,Zbrojovka,Fabryka Czo³gów
+STRHEAVYVEHICLEFACTORY,Heavy Vehicle Factory,Usine lourde,Panzerfabrik,Zware Voertuigen Fabriek,Zbrojovka (tanky),Fabryka Czo³gów
+STRHELICOPTERPAD,Helicopter Pad,H,Heli-Landeplatz,Helicopter Pad,Helipad,L¹dowisko
+STRHOSPITAL,Hospital,Hopital,Lazarett,Hospitaal,Nemocnice,Szpital
+STRINCOME,Income,Revenus,Einkommen,Inkomen,Pøíjem,Dochód
+STRINDEPENDENT,Independent,Independant,Unabhängig,Onafhankelijk,Nezávislı,Niepodleg³y
+STRINFANTRY,Infantry,Infantrie,Infanterie,Infanterie,Pìchota,Piechota
+STRINFANTRYAA,AA Infantry,AA Infantrie,AA-Infanterie,AA Infanterie,AA pìchota,Piechota AA
+STRINFANTRYAT,AT Infantry,AT Infantrie,AT-Infanterie,AT Infanterie,AT pìchota,Piechota AT
+STRINFANTRYCQB,CQB Infantry,CQB Infantrie,CQB-Infanterie,CQB Infanterie,CBQ pìchota,Piechota CBQ
+STRINVALIDBUILDING,Invalid Building!,Batiment invalide!,Ungültiges Gebäude!,Verkeerd Gebouw!,Špatná stavba!,Budynek nie do u¿ycia!
+STRISDESTROYED,is destroyed,est detruit,wurde zerstört!,is vernietigd,je znièen(-a),jest zniszczony!
+STRISINUSE,is in use,est en cours d'utilisation,wird benutzt,is in gebruik,pouíván(-a),jest w u¿yciu
+STRLARGEWALL,Large Wall,Mur Large,Große Mauern,Grote Muur,Velká zeï,Wielki Mur
+STRLEADERISALIVE,Leader is alive,le commandant est en vie,Führer lebt,Leider leeft,Velitel je naivu,Dowódzca ¿ywy
+STRLEADERISDEAD,Leader is dead,Le commandant est mort,Führer ist tot,Leider is dood,Velitel je mrtvı,Dowódzca martwy
+STRLIGHT,Light,Clair,Hell,Licht,Svìtlé,Jasny
+STRLIGHTFACTORY,Light Factory,Usine legere,Fahrzeugfabrik,Lichte Fabriek,Automobilka,Fabryka Pojazdów
+STRLIGHTVEHICLES,Light Vehicles,Vehicules legers,Leichte Panzer,Lichte Voertuigen,Lehké obr.vozidla,Lekkie Pojazdy
+STRLIGHTVEHICLEFACTORY,Light Vehicle Factory,Usine legere,Fahrzeugfabrik,Lichte Voertuigen Fabriek,Automobilka,Fabryka Lekkich Pojazdów
+STRLOADOUTS,Loadouts,Equipements,Ausrüstung,Loadouts,Vızbroj,Uzbrojenie
+STRLOADTEMPLATE,Load Template,charger,Ausrüstung laden,Laad Template,Nahrát pracovní,Wczytaj szablon
+STRLOCKMHQ,Lock Mobile HQ,Fermer GG mobile,MHQ abschließen,Mobiele HQ opslot,Uzamkni velitelskı transportér,Zamknij Mobilny HQ
+STRLOGONTOCAMERA,Logon to Team Camera,centrer sur la camera d'equipe,in Team-Kamera einloggen,in Team camera inloggen,Spustit satelitní sledování,Zaloguj do kamery
+STRM2MG,M2 Machine Gun,Mitrailleuse M2,M2-Maschinengewehr,M2 Machinegeweer,M2 kulomet,Karabin M2
+STRM2S,M2s,M2s,M2s,M2s,M2s,M2s
+STRM2STATION,M2 Station,Emplacement M2,M2-Posten,M2 Station,M2 stanovištì,Stanowisko M2
+STRM2FORTIFICATION,M2 Fortification,Fortification M2,M2-Befestigung,M2 Fortification,M2 opevnìní,Fortyfikacja M2
+STRMAXAAS,Maximum stationary AA limit has been reached (%1)!,Nombre maximum de stations AA atteint (%1)!,Maximales stationäres AA-Limit erreicht (%1)!,Maximum limiet van de stationaire AA is bereikt (%1)!,Maximální poèet AA stanoviš byl dosaen (%1)!,Maksymalna iloœæ stacji AA zosta³a osi¹gniêta (%1)!
+STRMAXHES,Maximum stationary HE limit has been reached (%1)!,Nombre maximum de stations HE atteint (%1)!,Maximales stationäres HE-Limit erreicht (%1)!,Maximum limiet van de stationaire HE is bereikt (%1)!,Maximální poèet HE stanoviš byl dosaen (%1)!,Maksymalna iloœæ stacji HE zosta³a osi¹gniêta (%1)!
+STRMAXM2S,Maximum stationary M2 limit has been reached (%1)!,Nombre maximum de stations M2 atteint (%1)!,Maximales stationäres M2-Limit erreicht (%1)!,Maximum limiet van de stationaire M2 is bereikt (%1)!,Maximální poèet M2 stanoviš byl dosaen (%1)!,Maksymalna iloœæ stacji M2 zosta³a osi¹gniêta (%1)!
+STRMAXMORTARS,Maximum mortar limit has been reached (%1)!,Nombre maximum de mortiers atteint (%1)!,Maximales Mörser-Limit erreicht (%1)!,Maximum mortier limiet is bereikt (%1)!,Maximální poèet minometù byl dosaen (%1)!,Maksymalna iloœæ stacji MoŸdzie¿y zosta³a osi¹gniêta (%1)!
+STRMAXWORKERS,Maximum worker limit has been reached (%1)!,Nombre maximum d'ouvriers atteint (%1)!,Maximales Arbeiter-Limit erreicht (%1)!,Maximaal werker limiet is bereikt (%1)!,Maximální poèet dìlníkù byl dosaen (%1)!,Maksymalna iloœæ robotników zosta³a osi¹gniêta (%1)!
+STRMECHANIZED,Mechanized,Mechanise,Mechanisiert,Mechaniseerd,Mechanizovanı,Zmechanizowany
+STRMECHANIZEDAA,Mechanized AA,Mechanise AA,AA mechanisiert,AA Mechaniseerd,Mechanizovanı AA,Zmechanizowany AA
+STRMINUTEGAME,minute game,30 minutes de jeu,Minuten-Spiel,minuut spel,minut hry,minuty gry
+STRMOBILEHQ,Mobile HQ,QG mobile,MHQ,Mobiele HQ,Velitelskı transportér,Mobilny HQ
+STRMORE,more,plus,mehr,meer,,wiêcej
+STRMHQDESTROYED,The Mobile HQ is destroyed!,Le QG mobile est detruit!,Das MHQ wurde zerstört!,De Mobiele HQ is vernietigd!,Velitelskı transportér znièen!,Mobilny HQ zosta³ zniszczony!
+STRNA,N/A,N/A,N/V,N/A,N/A,N/A
+STRNEED,need,necessite,benötige,nodig,potøebuješ ještì,potrzebujesz
+STRNEEDUPGRADE,Need Upgrade,Necessite amelioration,Benötige Upgrade!,Benodigde Upgrade,Potøebuje zdokonalení,Potrzebujesz Ulepszeñ
+STRNEXT,Next,suivant,Nächster,Volgende,Další,Nastêpny
+STRNOACATAAROCKETS,No Aircraft AT/AA Rockets,Aeronef - Pas de roquettes guidees,keine AG/AA-Raketen,Geen Luchthaven AT/AA Raketten,ádné AA/AT rakety,Bez rakiet AA/AT
+STRNOACROCKETS,No Aircraft Rockets,Aeronef - Pas de roquettes,Keine AG-Raketen,Geen Luchthaven Raketten,ádné rakety (vzduch-..),Bez Rakiet
+STRNOBARRACKS,No barracks.,Pas de caserne.,Keine Kaserne.,Geen barakken,ádná kasárna,Bez Baraków
+STRNOFACTORY,No factory.,Pas d'usine.,Keine Fabrik.,Geen fabriek,ádná továrna,Bez Fabryk
+STRNOFIREMISSION,Mortars have been voted off.  No fire missions may be requested.,Votes pour les mortiers negatifs.Aucun mission de tirs n'est autorisee.,Mörserunterstützung nicht verfügbar,Mortieren zijn af gestemd.  Er zijn geen vuur missies gevraagd.,Minomety jsou zakázány. Nelze poadovat podpùrnou palbu.,MoŸdzie¿e zosta³y wy³¹czone przez g³osowanie.
+STRNOINDEPENDENT,No AI Independent,Pas d'AI independant,Keine KI unabhängig,Geen AI Onafhankelijk,Vyp. nezávislé AI,Bez niezale¿nych AI
+STRNOMORTARS,There are no mortars to commence a fire mission.,Il n'y a pas de mortier pour commencer une mission de tir.,Es gibt keine Mörser um einen Feuerbefehl zu erteilen,Er zijn geen mortieren om een vuurmissie te starten.,Nejsou k dispozici ádné minomety pro palbu.,Nie ma mo¿dzie¿y aby rozpocz¹æ atak.
+STRNOMORTARS1,No mortars,Pas de mortier,Keine Mörser,Geen mortieren,ádné minomety,Bez MoŸdzie¿y
+STRNOSTATIONARYLIMIT,Unlimited stationary defenses,Defenses stationaires illimites,Unendliche stationäre Vert.,Oneindige stationaire verdedigingen,Neomezenı poèet stanoviš,Nieograniczone stanowiska obrony
+STRNOTEAMRESPAWNING,No player team respawning,Pas de reapparition en tant que joueur de l'equipe,Team-Respawn nicht verfügbar,Geen teamspeler kan respawnen,Tımovı respawn není nastaven,Bez repawn'u w dru¿ynie gracza
+STRNOTENOUGHRESOURCES,Not enough resources,Pas assez de ressources,Nicht genug Ressourcen,Te weinig geld,Málo zdrojù,Niewystarczaj¹ca iloœæ zasobów
+STROFF,Off,off,Aus,Af,Vyp.,Wy³.
+STRON,On,on,An,Aan,Zap.,W³¹.
+STROBSERVATIONTOWER,Observation Tower,Tour d'observation,Beobachtungsturm,Observatie Toren,Rozhledna,Wie¿a obserwacyjna
+STROF,of,sur,von,van de,z,z
+STROPENBUILDMENU,Open Build Menu,Ouvre le menu de construction,Bau-Menü,Open Bouw Menu,Otveøít STAVEBNÍ MENU,Otwórz Menu Budowania
+STROPENCOMMANDMENU,Open Command Menu,Ouvre le menu de commandement,Kommando-Menü,Open Commando Menu,Otevøít MENU PØÍKAZÙ,Otwórz Menu Dowodzenia
+STROPTIONS,Options,Options,Optionen,Opties, - Monosti,Opcje
+STROPTIONSCONTROLCENTER,Control Center Options,Options du centre de controle,Kontrollzentrum Optionen,Controle Centrum Opties,Otevøít monosti ŠTÁBU POSÁDKY,Opcje Centrum Kontroli
+STRORDERINGTEAM,Ordering selected team to new waypoint.,Donnant l'ordre a l'equipe selectionnee de se rendre au point de passage.,Schicke ausgewähltes Team zum neuen Wegpunkt.,Stuur geselecteerd Team naar een andere waypoint,Rozkaz oznaèenım tımùm k pøesunu na novı WP,Wysy³am wybran¹ dru¿ynê do ustalonego WP
+STRPERCENT,%,%,%,%,%,%
+STRPLAYER,Player,Joueurs,Spieler,Speler,Hráè,Gracz
+STRPLAYERPOOL,Player Pool,Budget du joueur,Spieler-Pool,Spelerpool,Hráèùv pøíjem,Pula Gracza
+STRPLAYERRESOURCES,Player Resources,Ressources du joueur,Spieler-Ressourcen,Speler Verdiensten,Zdroje hráèe,Zasoby Gracza
+STRPLAYMUSIC,Play Music,Jouer la musique,Musik spielen,Speel Muziek,Hrát muziku,Graj Muzykê
+STRPOINTS,Points,Points,Punkte,Punten,Bodù,Punkty
+STRPOINTSTOWIN,Points to win,Points pour gagner,Punkte zum Sieg,Punten om te Winnen,Bodù do vítìzství,Punkty do wygrania
+STRPREVIOUS,Previous,Precedent,Vorheriger,Vorige,Pøedchozí,Poprzedni
+STRQTY,Qty,Qtite,Stk.,Qty,ks,Qty
+STRRADAR,Radar,Radar,Radar,Radar,Radar,Radar
+STRREFUND,Refund,rendre l'argent,Rückzahlung,Refund,Nahradit,Zwróæ
+STRRENEGADE,You are currently a renegade!  You will rejoin your side after death.,Vous etes en ce moment un traitre! VOus rejoindre votre camp apres votre mort.,Du bist momentan ein Abtrünniger! Du wirst dich deinem Team nach dem Tod wieder anschließen,Je bent momenteel een verrader!  Je behoort terug tot het team na je dood,Teï jsi odpadlík! Pøeøadíš se k tvé stranì po tvém zabití.,W tej chwili jesteœ renegatem! Do³¹czysz do twojej strony po œmierci.
+STRREPAIR,Repair,Reparation,Reparieren,Repareer,Oprava,Napraw
+STRREPAIRDEPOT,Repair Depot,Centre de reparation,Reparaturdepot,Reparatie Depot,Opravárenské depo,Centrum Napraw
+STRREPAIRTRUCKOPTIONS,Repair Truck Options,Options du camion d'assistance,Reparatur-LKW Optionen,Reparatie Truck Opties,Monosti - OPRAVÁRENSKÉ AUTO,Opcjê Ciê¿arówki Naprawczej
+STRREQUESTFIREMISSION,Request Fire Mission at WP,mission de bombardement au WP,Feuerbefehl auf WP anfordern,Aanvraag Vuurmissie bij WP,Poaduji palbu na WP(MINOMET),Za¿¹daj strza³u na WP
+STRRESET,Reset,Remettre,Zurücksetzen,Reset,Vynulovat,Resetuj
+STRRESISTANCE,Resistance,Resistance,Widerstand,Verzet,Partizáni,Partyzanci
+STRRESISTANCEBARRACKS,Resistance Barracks,Caserne de la resistance,Kaserne des Widerstands,Verzets Baraken,Partizánské kasárny,Partyzanckie Baraki
+STRRESISTANCECASUALTIES,Resistance Casualties,Pertes de la Resistance,Verluste Widerstand,Slachtoffers van het Verzet,Obìti partizánù,Straty Partyzantów
+STRRESISTANCEFACTORY,Resistance Factory,Usine de la resistance,Fabrik des Widerstands,Verzets Fabrieken,Továrna partizánù,Fabryka Partyzantów
+STRRESOURCES,Resources,Ressources,Ressourcen,Verdiensten,Zdroje,Zasoby
+STRRESPAWN,Respawn,Reaparition,Respawn,Respawn,Respawn,Respawn
+STRRESPAWNTIME,Time until respawn,Temps avant reapparition,Zeit bis Respawn,Tijd nodig om te Respawnen,Èas do respawnu,Czas do respwanu
+STRRESPAWNEDTOTEAM,Respawned into nearby team member.,Reapparu en tant que membre de l'equipe proche.,Als Team-Mitglied respawned.,Gerespawnd in de nabijheid van een team lid.,Respawnován do zbylého èlena skupiny,Respawnowany jako najbli¿szy cz³onek dru¿yny
+STRROLE,Role,Role,Rolle,Rol,Role,Role
+STRSALVAGER,Independent Salvager,Vehicule automatique de recyclage,autonomes Bergefahrzeug,Onafhankelijk recyclage voertuig,Nezávislı sbìraè šrotu,Samodzielny Odzyskiwacz
+STRSALVAGERS,Salvagers,Recycleurs,Bergefahrzeuge,Recycleerders,Sbìraè šrotu,Odzyskiwacze
+STRSANDBAGS,Sandbags,Sacs de sable,Sandsäcke,Zandzakken,Pytle s pískem,Worki z piaskiem
+STRSATELLITECAMERA,Satellite Camera,Camera satellite,Satelliten-Kamera,Satelliet Camera,Satelitní kamera,Kamera Satelitarna
+STRSAVECUSTOM,Save to Custom,sauvegarder,Ausrüstung speichern,Bewaar naar Standaard,Ulo jako Osobní ,Zapisz jako szablon
+STRSCORE,Score,score,Spielstand,Score,Skóre,Wynik
+STRSELL,Sell,vendre,Verkaufen,Verkopen,Prodat,Sprzedaj
+STRSETAITEAMS,Set AI Teams,donner l'ordre aux equipes AI,Setze KI-Teams,Plaats AI Teams,Nastavení AI tımù,Ustaw Dru¿yny AI
+STRSETWPTOCURRENT,Set WP to Current Position,Definir WP a la position actuelle,WP auf aktuelle Position setzen,Zet WP naar de huidige positie,Nastavit WP na aktuální pozici,Ustaw WP jako obecn¹ pozycjê
+STRSETWPTO,Set Waypoint To,Définir WP à,Setze WP bei,Zet WP naar,Nastavit WP na,Ustaw Wp do
+STRSHOW,Show,Afficher,Zeigen,Verschijn,Ukázat,Poka¿
+STRSIDE,Side,Nation,Seite,Ploeg,Strana,Strona
+STRSIDECASUALTIES,Side Casualties,Perte de la Nation,Seiten-Verluste,Ploeg Slachtoffers,Obìti strany,Straty strony
+STRSIDEPOINTS,Side Points,points de l'equipe,Team-Punkte,Team-Punten,Body strany,Punkty strony
+STRSIZE,Size,taille,Größe,Groep,vel.,Wielkoœæ
+STRSPACE,Space,espace,Kap.,Ruimte,Kapacita,Spacja
+STRSPETZNATZ,Spetz Natz,Spetz Natz,Spetz Natz,Para Commando,Speciální jednotka,Spetz Natz
+STRSTOPFIREMISSION,Stop Fire Mission,Arreter la mission de tir,Feuer einstellen,Stop Vuurmissie,Zastavit palbu minometu,Zatrzymaj atak
+STRTEAM,Team,equipe,Team,Team,Tım,Dru¿yna
+STRTEAMCASUALTIES,Team Casualties,Pertes de l'equipe,Team-Verluste,Team Slachtoffers,Obìti tımu,Straty Dru¿yny
+STRTEAMRESPAWN,Team Respawn,Reapparition de l'equipe,Team-Respawn,Team Respawn,Tımovı respawn,Respawn Dru¿yny
+STRTEAMRESPAWNING,Player team respawning,Reapparition en tant qu'equipier,Team-Respawn verfügbar,Teamspeler kan respawnen,Tımovı respawn,Respawn Dru¿yny Gracza
+STRTHE,The,Le/La,Der/Die/Das,Het, ,
+STRTOWNOCCUPATION,No Town Occupation (Income),Pas d'occupation des villes,Keine Stadt-Besatzung,Geen Bezette Steden (inkomen),Mìsta neobsazena (pøíjem),Bez Okupowania Miast (Dochód)
+STRTOWNSHELD,Towns Held,Villes occupees,Gehaltene Städte,Bezette Steden,Obsazená mìsta,Posiadane Miasta
+STRTOWNS,towns,villes,Städte,Steden,mìsta,miasta
+STRTOWNSTOWIN,Towns to win,Villes pour gagner,Städte zum Sieg,Steden om te winnen,Mìsta k vítìzství,Miasta do wygrania
+STRTRADEIN,Trade-In,Vente,Wert,Ruilen,Hodnota,Sprzeda¿
+STRTRAITORS,Traitors can't use this building!,Les traitres ne peuvent pas utiliser ce batiment!,Verräter können dieses Gebäude nicht benutzen!,Verraders kunnen geen gebruik maken van deze gebouwen!,Zrádci nemohou pouívat tuto budovu!,Zdrajcy nie mog¹ korzystaæ z tego budynku!
+STRTRANSFERRESOURCES,Transfer Resources,Transfert de ressources,Ressourcen übertragen,Verdiensten Weggeven,Pøesun zdrojù,Przeœlij zasoby
+STRTROOPS,Troops,Troupes,Truppen,Troepen,Vojsko,Wojsko
+STRUNDO,Undo,defaire,Widerrufen,Ongedaan Maken,Zpìt,Odwo³aj
+STRUNFLIPMHQ,Unflip Mobile HQ,Remmetre en place Qg mobile,MHQ umdrehen,Onflip Mobiele HQ,Posunout vel. transportér,WP Dowódzcy
+STRUNITCAMERA,Unit Camera,Camera d'unite,Team-Kamera,Team Camera,Kamera - pohled jednotky,WP Dowódzcy
+STRUNLOCKMHQ,Unlock Mobile HQ,deverouiller QG mobile,MHQ aufschließen,Mobiele HQ open doen,Odemknout velitelskı transportér,WP Dowódzcy
+STRUPGRADE,Upgrade,Ameliorer,Forschung,Upgrade,Upgrade,WP Dowódzcy
+STRUPGRADED,Upgraded,ameliore,Erforscht:,Geupgrade,Upgradováno,WP Dowódzcy
+STRUPGRADING,Upgrading,En cours d'amelioration,Aktuelle Forschung:,Upgraden,Probíhá upgrade,WP Dowódzcy
+STRUPGRADINGTO,Upgrading to,En cours d'amelioration a,Aktuelle Forschung:,Upgraden naar,Upgraduji na,WP Dowódzcy
+STRWEAPONSCRATE,Weapons Crate,Caisse d'armes,Waffenkiste,Wapenkist,Bedna se zbranìmi,WP Dowódzcy
+STRWEATHER,Weather,Météo,Wetter,Weer,Poèasí,WP Dowódzcy
+STRWEST,West,Ouest,West,West,Západ,WP Dowódzcy
+STRWESTCASUALTIES,West Casualties,Pertes de l'Ouest,Verluste West,West Slachtoffers,Obìti západu,WP Dowódzcy
+STRWESTPOINTS,West Points,Points de l'Ouest,Punkte West,West Punten,Body západu,WP Dowódzcy
+STRWESTRESOURCES,West Resources,REssources de l'Ouest,Ressourcen West,West Verdiensten,Zdroje západu,WP Dowódzcy
+STRWESTTOTALINCOME,West Total Income,Revenu total de l'Ouest,Einkommen West,West totale Inkomen,Celkovı pøíjem západu,WP Dowódzcy
+STRWESTTOWNSHELD,West Towns Held,Villes occupee par l'ouest,Gehaltene Städte West,West Veroverde Steden,Mìsta drená západem,WP Dowódzcy
+STRWESTWINS,West wins!,L'Ouest gagne!,West gewinnt!,West wint!,Západ zvítìzil!,WP Dowódzcy
+STRWORKERS,Workers,Travailleurs,Arbeiter,Werkers,Dìlníci,WP Dowódzcy
+STRVARIABLE,Variable,Variable,Variabel,Variabele,Promnìnná,WP Dowódzcy
+STRVEHICLES,Vehicles,Vehicules,Fahrzeuge,Voertuigen,Vozidla,WP Dowódzcy
+STRVEHICLESLOST,Vehicles Lost,Vehicules perdus,Fahrzeuge verloren,Verloren Voertuigen,Ztracená vozidla,WP Dowódzcy
+STRVOTEMENU,Vote Menu,Menu de Vote,Abstimm-Menü,Stem Menu,Menu voleb,WP Dowódzcy
+STRVOTESOFF,Votes Off,Votes off,Stimmen aus,uit,Proti,WP Dowódzcy
+STRVOTESON,Votes On,Votes on,Stimmen an,Verkiezing aan,Pro,WP Dowódzcy
+STRYOURECEIVE,You receive,Vous recevez,Du erhältst,U ontvangt,Pøijal jsi,WP Dowódzcy
+STRYOURRESOURCES,Your Resources,Vos ressources,Ressourcen,Uw Verdiensten,Tvé zdroje,WP Dowódzcy
+STRYOURVOTE,Your Vote,Votre Vote,Deine Wahl,Uw Stem,Tvá volba,WP Dowódzcy
+STRZOOMIN,Zoom In,Zoomer,Reinzoomen,Inzoomen,Pøiblíit,WP Dowódzcy
+STRZOOMOUT,Zoom Out,Dezoomer,Rauszoomen,uitzoomen,Oddálit,WP Dowódzcy
+,,,,,,WP Dowódzcy
+STRALPHA,Alpha,Alpha,Alpha,Alpha,Alpha,WP Dowódzcy
+STRBRAVO,Bravo,Bravo,Bravo,Bravo,Bravo,WP Dowódzcy
+STRCHARLIE,Charlie,Charlie,Charlie,Charlie,Charlie,WP Dowódzcy
+STRDELTA,Delta,Delta,Delta,Delta,Delta,WP Dowódzcy
+STRECHO,Echo,Echo,Echo,Echo,Echo,WP Dowódzcy
+STRFOXTROT,Foxtrot,Foxtrot,Foxtrot,Foxtrot,Foxtrot,WP Dowódzcy
+STRHOTEL,Hotel,Hotel,Hotel,Hotel,Hotel,WP Dowódzcy
+STRGOLF,Golf,Golf,Golf,Golf,Golf,WP Dowódzcy
+STRCOMMANDER,Commander,Commander,Kommandant,Commandant,Velitel,WP Dowódzcy
+STRALPHAWP,Alpha WP,Alpha WP,Alpha WP,Alpha WP,Alpha WP,WP Dowódzcy
+STRBRAVOWP,Bravo WP,Bravo WP,Bravo WP,Bravo WP,Bravo WP,WP Dowódzcy
+STRCHARLIEWP,Charlie WP,Charlie WP,Charlie WP,Charlie WP,Charlie WP,WP Dowódzcy
+STRDELTAWP,Delta WP,Delta WP,Delta WP,Delta WP,Delta WP,WP Dowódzcy
+STRECHOWP,Echo WP,Echo WP,Echo WP,Echo WP,Echo WP,WP Dowódzcy
+STRFOXTROTWP,Foxtrot WP,Foxtrot WP,Foxtrot WP,Foxtrot WP,Foxtrot WP,WP Dowódzcy
+STRHOTELWP,Hotel WP,Hotel WP,Hotel WP,Hotel WP,Hotel WP,WP Dowódzcy
+STRGOLFWP,Golf WP,Golf WP,Golf WP,Golf WP,Golf WP,WP Dowódzcy
+STRCOMMANDERWP,Commander WP,Commander WP,Kommandant WP,Commandant WP,Velitelovo WP,WP Dowódzcy
+
+STRMESCONTROLCENTERCONSTRUCTED,Control center constructed and ready for use.,Centre de controle construit et pret a l'usage.,Melde Bereitschaft des Kontrollzentrums!,Controle centrum gebouwd en klaar voor gebruik.,Štáb posádky postaven a pøipraven k pouití.,Centrum Kontroli zbudowane i gotowe do u¿ycia!
+STRMESBARRACKSCONSTRUCTED,Barracks constructed and ready for use.,Caserne  construite et prete a l'usage.,Die Kaserne steht zum Ausbilden von Truppen bereit!,Barakken gebouwd en klaar voor gebruik.,Kasárny postaveny a pøipraveny k pouití.,Baraki zbudowane i gotowe do u¿ycia!
+STRMESLIGHTCONSTRUCTED,Light vehicle factory constructed and ready for use.,Usine de vehicules legers construite et prete a l'usage,Fahrzeugfabrik meldet Einsatzbereitschaft!,Lichte voertuigen Fabriek gebouwd en klaar voor gebruik.,Automobilka postavena a pøipravena k pouítí.,Fabryka lekkich pojazdów zbudowana i gotowa do u¿ycia!
+STRMESHEAVYCONSTRUCTED,Heavy vehicle factory constructed and ready for use.,Usine de vehicules lourds construite et prete a l'usage.,Panzerfabrik ist Einsatzbereit!,Zware voertuigen Fabriek gebouwd en klaar voor gebruik.,Zbrojovka postavena a pøipravena k pouití.,Fabryka Ciê¿kich pojazdów zbudowana i gotowa do u¿ycia!
+STRMESAIRCONSTRUCTED,Aircraft factory constructed and ready for use.,Aeroport construit et pret a l'usage.,Flugzeug-Fabrik fertiggestellt und klar zur Produktion!,Luchthaven Fabriek gebouwd en klaar voor gebruik.,Letecká továrna postavena a pøipravena k pouítí.,Fabryka samolotów zbudowana i gotowa do u¿ycia!
+STRMESAMMOCONSTRUCTED,Ammo depot constructed and ready for use.,Depot de munition construit et pret a l'usage.,Munitionsdepot ist eingerichtet und wartet auf Nachfrage!,Munitie Depot gebouwd en klaar voor gebruik.,Munièní sklad postaven a pøipraven k pouití.,Sk³ad amunicji zbudowany i gotowy do u¿ycia!
+STRMESREPAIRCONSTRUCTED,Repair depot constructed and ready for use.,Centre de reparation construit et pret a l'usage.,Reparaturdepot errichtet und bereit zum Gebrauch!,Reparatie Depot gebouwd en klaar voor gebruik.,Opravárenské depo postaveno a pøipraveno k pouití.,Centrum naprawcze zbudowane i gotowe do u¿ycia!
+STRMESHOSPITALCONSTRUCTED,Field hospital constructed and ready for use.,Hopital de campagne construit et pret a l'usage.,Feldlazarett errichtet und bereit zur Versorgung von Verwundeten!,Veld Hospitaal gebouwd en klaar voor gebruik.,Polní nemocnice postavena a pøipravena k pouití.,Szpital Polowy zbudowany i gotowy do u¿ycia!
+STRMESFIREMISSION,Commencing with fire mission at %1%2%3%4 in one minute.,La mission de bombardement a %1%2%3%4 commence dans une minute.,Führe Feuerbefehl bei %1%2%3%4 in 1 Minute aus.,Beginnen met Vuurmissie bij %1%2%3%4 in een minuut,Zahájení minometné palby na %1%2%3%4 do jedné minuty.,Zarz¹dzam ogieñ na %1%2%3%4 w ci¹gu jednej minuty.
+STRMESREQUESTFIREMISSION,Requesting fire mission at %1%2%3%4.,Demande mission de bombardement a %1%2%3%4.,Fordere Mörserunterstützung bei %1%2%3%4 an.,Aanvraag Vuurmissie op  %1%2%3%4.,Poadována minometná palba na %1%2%3%4.,Zarz¹dzam ogieñ na %1%2%3%4.
+STRMESWORKERKILLED,A worker was killed!,Un travailleur a ete tue!,Ein Arbeiter wurde getötet!,Een werker is vermoord!,Dìlník byl zabit!,Robotnik zosta³ zabity!
+STRMESMHQDESTROYED,The Mobile HQ has been destroyed!,Le QG mobile a ete detruit!,Das MHQ wurde zerstört!,De Mobiele HQ is vernietigd!,Velitelskı transportér (MHQ) byl znièen!,Mobline HQ zosta³o zniszczone!
+STRMESENEMYMHQDESTROYED,The Enemy Mobile HQ has been destroyed!,Le QG mobile ennemi a ete detruit!,Bestätige Abschuss des feindlichen MHQs!,De Vijandelijke Mobiele HQ is vernietigd!,Nepøátelskı velitelskı transportér (MHQ) byl znièen!,Mobline HQ wroga zosta³o zniszczone!
+STRMESENEMYCOMMANDERKILLED,The enemy Commander was killed!  Received a,The commandant ennemi a ete tue!Vous recevez un,Der gegnerische Kommandant wurde getötet! Du erhältst einen,De Vijandelijke Commandant is vermoord! U ontvangt een,Nepøátelskı velitel byl zabit!,Wrogi dowódzca zosta³ zabity
+STRMESENEMYCOMMANDERKILLED1,bonus.,bonus.,Bonus.,bonus.,bonus.,Bonus.
+STRMESSALVAGERDESTROYED,An independent salvager was destroyed!,Un vehicule automatique de recyclage a ete detruit!,Ein autonomes Bergefahrzeug wurde zerstört!,Een onafhankelijk Recyclage voertuig is vernietigd!,Nezávislı sbìraè šrotu byl znièen!,Niezale¿ny odzyskiwacz zosta³ zniszczony!
+STRMESMAXVEHICLES,Maximum vehicle limit has been reached,Ne peut pas creer plus de vehicules! Le maximum a ete atteint,Das Fahrzeuglimit wurde erreicht!,Het Maximale voertuig limiet is bereikt.,Maximální poèet vozidel byl dosaen.,Limit iloœci pojazdów zosta³ osi¹gniêty.
+STRMESMAXSALVAGERS,Maximum independent salvager limit has been reached,Le nombre maximum de recycleur independant a ete atteint.,Maximales Bergungsfahrzeug-Limit erreicht,Maximum onafhankelijk recyclagelimiet is bereikt,Maximální poèet nezávislıch sbìraèù šrotu byl dosaen,Limit iloœci niezale¿nych odzyskiwaczy zosta³ osi¹gniêty.
+STRMESMAXGROUP,Max size has been reached for group.,Pas de renforts authorises.   L'equipe a atteint sa taille maximale.,Die maximale Gruppenstärke wurde erreicht!,Max hoeveelheid in deze groep is bereikt.,Maximální velikost byla dosaena u skupiny,Limit jednostek dla grupy zosta³ osi¹gniêty
+STRMESPLAYERDISCONNECTED,A PLAYER WAS DISCONNECTED.  SUBSTITUTING WITH AN AI PLAYER.,UN JOUEUR A ETE DECONNECTE. REMPLACEMENT PAR UN JOUEUR A INTELIGENCE ARTIFICIELLE EN COURS.,EIN SPIELER WURDE GETRENNT! ERSETZE DURCH EINEN KI-SPIELER.,EEN SPELER IS GEDISCONNECTEERD. HIJ WORDT VERVANGEN DOOR EEN AI SPELER.,HRÁÈ ODPOJEN.   NAHRAZEN AI HRÁÈEM.,GRACZ OPUŒCI£ GRÊ.  ZOSTA£ ZAST¥PIONY GRACZEM AI.
+STRMESCOMMANDERDISCONNECTED,THE COMMANDER WAS DISCONNECTED.  SUBSTITUTING WITH AN AI PLAYER.,LE COMMANDANT A ETE DECONNECTE. REMPLACEMENT PAR UN JOUEUR A INTELIGENCE ARTIFICIELLE EN COURS.,DER KOMMANDANT WURDE GETRENNT! ERSETZE DURCH EINEN KI-SPIELER.,DE COMMANDANT IS GEDISCONNECTEERD. HIJ WORDT VERVANGEN DOOR EEN AI SPELER.,VELITEL ODPOJEN.   NAHRAZEN AI HRÁÈEM.,DOWÓDZCA OPUŒCI£ GRÊ.  ZOSTA£ ZAST¥PIONY GRACZEM AI.
+STRMESCONTROLCENTERPLACED,Control center placed and ready for construction.,Centre de controle place et pret a la construction.,Erteile Baufreigabe für Kontrollzentrum!,Controle centrum geplaatst en klaar voor constructie.,Štáb posádky umístìn a pøipraven k vıstavbì.,Centrum Kontroli postawione i gotowe do budowy.
+STRMESBARRACKSPLACED,Barracks placed and ready for construction.,Caserne  placee et prete a la construction.,Kaserne platziert und bereit zum Aufbau!,Barakken geplaatst en klaar voor constructie.,Kasárny umístìny a pøipraveny k vıstavbì.,Baraki postawione i gotowe do budowy.
+STRMESLIGHTPLACED,Light vehicle factory placed and ready for construction.,Usine de vehicules legers placee et prete a la construction.,Fahrzeugfabrik wartet auf Fertigstellung!,Lichte voertuigen fabriek geplaatst en klaar voor constructie.,Automobilka umístìna a pøipravena k vıstavbì.,Fabryka Lekkich Pojazdów postawiona i gotowa do budowy.
+STRMESHEAVYPLACED,Heavy vehicle factory placed and ready for construction.,Usine de vehicules lourds placee et prete a la construction.,Panzerfabrik steht zum Aufbau bereit!,Zware voertuigen fabriek geplaatst en klaar voor constructie.,Zbrojovka umístìna a pøipravena k vıstavbì.,Fabryka Ciê¿kich Pojazdów postawiona i gotowa do budowy.
+STRMESAIRPLACED,Aircraft factory placed and ready for construction.,Aeroport place et pret a la construction.,Flugzeug-Fabrik platziert und bereit zur Fertigstellung!,Luchthaven geplaatst en klaar voor constructie.,Letecká továrna umístìna a pøipravena k vıstavbì.,Fabryka Samolotów postawiona i gotowa do budowy.
+STRMESAMMOPLACED,Ammo depot placed and ready for construction.,Depot de munitions place et pret a la construction.,Munitionsdepot steht bereit zum Aufbau!,Munitie Depot geplaatst en klaar voor constructie.,Munièní sklad umístìn a pøipraven k vıstavbì.,Sk³ad Amunicji postawiony i gotowy do budowy.
+STRMESREPAIRPLACED,Repair depot placed and ready for construction.,Centre de reparation place et pret a la construction.,Reparaturdepot platziert und bereit zum Aufbau!,Reparatie Depot geplaatst en klaar voor constructie.,Opravárenské depo umístìno a pøipraveno k vıstavbì.,Centrum Naprawcze postawione i gotowe do budowy.
+STRMESCONTROLCENTERDESTROYED,A control center was destroyed!,Un centre de controle a ete detruit!,Ein Kontrollzentrum hat einen schweren Treffer abbekommen!,Een controle centrum is vernietigd!,Štáb posádky byl znièen!,Centrum Kontroli zosta³o zniszczone!
+STRMESBARRACKSDESTROYED,A barracks was destroyed!,Une caserne a ete detruit!,Eine Kaserne wurde getroffen!,Een Barrak is vernietigd!,Kasárny byly znièeny!,Baraki zosta³y zniszczone!
+STRMESLIGHTDESTROYED,A light vehicle factory was destroyed!,Une usine de vehicules legers a ete detruit!,Eine unserer Fahrzeugfabriken liegt in Trümmern!,Een Lichte voertuig Fabriek is vernietigd!,Automobilka byla znièena!,Fabryka Lekkich Pojazdów zosta³a zniszczona!
+STRMESHEAVYDESTROYED,A heavy vehicle factory was destroyed!,Une usine de vehicules lourds a ete detruit!,Eine Panzerfabrik wurde vernichtet!,Een Zware voertuig Fabriek is vernietigd!,Zbrojovka byla znièena!,Fabryka Ciê¿kich Pojazdów zosta³a zniszczona!
+STRMESAIRDESTROYED,An aircraft factory was destroyed!,Un aeroport a ete detruit!,Eine Luftfahrzeugfabrik wurde zerstört!,Een Luchthaven Fabriek is vernietigd!,Letecké továrna byla znièena!,Fabryka Samolotów zosta³a zniszczona!
+STRMESAMMODESTROYED,An ammo depot was destroyed!,Un depot de munitions a ete detruit!,Ein Munitionsdepot wurde getroffen!,Een Munitie Depot is vernietigd!,Munièní sklad byl znièen!,Sk³ad Amunicji zosta³ zniszczony!
+STRMESREPAIRDESTROYED,A repair depot was destroyed!,Un centre de reparation a ete detruit!,Ein Reparaturdepot bekam einen Volltreffer!,Een Reparatie Depot is vernietigd!,Opravárenské depo bylo znièeno!,Centrum Napraw zosta³o zniszczone!
+
+STRMESOPTIONVOTED,[%1] has been voted %2.,[%1] a ete vote %2.,[%1] wurde %2 mal gewählt.,[%1] is %2 gestemd.,[%1] je zvoleno %2.,[%1] zosta³o przeg³osowane na %2.
+STRMESORDERMOVETOWP,Waypoint acknowledged.  Moving to position now.,Point de passage compris. Allant a la position des maintenant.,Wegpunkt bestätigt! Rücke zur Position vor.,WegPunt bevestigd.  Op verplaatsing naar WP.,Umístìní WP zaznamenáno. Zahájen pøesun na danou pozici.,Punkt drogi potwierdzony.  Przemieszczam siê do pozycji.
+STRMESORDERTAKETOWNS,Acknowledged.  Advancing on neutral or enemy towns.,Compris. Avancant aux villes neutres et ennemies.,Verstanden! Angriff auf neutrale oder gegnerische Städte.,Bevestigd.  Ga naar neutrale of vijandelijke steden.,Rozumím. Útoèit na neutrální nebo nepøátelská mìsta.,Potwierdzam.  Atakujê na neutralne lub wrogie miasta.
+STRMESORDERDEFEND,Acknowledged.  Proceeding to nearest base or friendly town for guard duty.,Compris.Allant a la base ou a la ville alliee la plus proche pour travail de defense.,Bestätigt! Sichere die nächste Basis oder freundliche Stadt.,Bevestigd.  Ga naar nabije basis of veroverde Stad om deze te bewaken.,Rozumím. Pøesun do nejbliší základny nebo pøátelského mìsta a chránit pozici.,Potwierdzam.  Przemieszczam siê do najbli¿szego miasta lub bazy na wartê.
+STRMESORDERDEFENDDENIED,There are no bases or friendly towns to defend.,Il n'y a aucune base ou villes alliees a defendre.,Es gibt keine Basen oder freundliche Städte in der Nähe zu verteidigen.,Er zijn geen basissen of vriendschappelijke steden om te bewaken.,Není zde ádné mìsto nebo základna k ochranì.,Nie ma ¿adnych baz lub miast do obrony.
+STRMESORDERSEARCH,Acknowledged.  Proceeding with a search and destroy mission.,Compris. Procedant a la mission de recherche et de destruction,Bestätige Befehl zur Aufnahme einer Suchen-und-Zerstören-Mission.,Bevestigd. Begonnen aan een zoek en vernietig commando.,Rozumím. Vyhledávat a nièit nepøátelské cíle.,Potwierdzam. Zaczynam misjê szukania i niszczenia.
+STRMESORDERCOMMANDVEHICLES,Acknowledged.  Taking command of any nearby vehicle(s).,Compris. Prenant le controle du vehicule le plus proche.,Bestätigt! Übernehmen jetzt die Kontrolle über nahegelegene Fahrzeuge.,Bevestigd. Commando nemen over alle nabije voertuigen.,Rozumím. Pøevzít pod velení nejbliší vozidlo(-a).,Potwierdzam.  Przejmujê dowodzenie nad najbli¿szym pojazdem(i).
+STRMESORDERDISEMBARKVEHICLES,Acknowledged.  Disembarking the team from any vehicle(s). ,Compris. Debarquant l'equipe de tout vehicules.,Verstanden! Team verlässt alle besetzten Fahrzeuge.,Bevestigd.  Laat het team uitstappen uit alle voertuigen. ,Rozumím. Celı tım vystoupí z vozidla(-del).,potwierdzam.  Wysadzam dru¿ynê z pojazdu(w)
+STRMESORDEREMBARKTRANSPORTS,Acknowledged.  Embarking in nearest transport(s).,Compris. Montant dans le vehicule de transport le plus proche. ,Bestätigt! Gehen an Bord des nächsten Transporters.,Bevestigd. Instappen in nabije transportvoertuigen.,Rozumím. Nastoupit do nejblišího prostøedku(-ù) pro transport.,Potwierdzam.  Wsiadam do najbli¿szego transportu.
+STRMESORDERDISEMBARKTRANSPORTS,Acknowledged.  Disembarking from any transport(s).,Compris.  Descendant de tout vehicules de transport.,Verstanden! Steigen aus allen Transportern aus.,Bevestigd. Uitstappen uit alle transportvoertuigen.,Rozumím. Pøesun za pomocí transportu ukonèit.,Potwierdzam.  Wysiadam z transportu.
+STRMESUPGRADEDINFANTRY,Infantry weapons upgraded.,Armes d'infantrie ameliorees.,Neue Infanteriewaffen erhältlich.,Infanteriewapens geupgrade.,Pìchota je rozšíøena(UPGRADE).,Bronie piechoty ulepszone.
+STRMESUPGRADEDLIGHT,Light vehicle construction upgraded.,Usine de vehicules legers amelioree.,Upgrade der Fahrzeugfabrik abgeschlossen!,Lichte voertuigen Constructie geupgrade.,Automobilka je rozšíøena(UPGRADE).,Lekkie Pojazdy ulepszone.
+STRMESUPGRADEDHEAVY,Heavy vehicle construction upgraded.,Usine de vehicules lourds amelioree.,Panzerfabrik ist upgegraded!,Zware voertuigen Constructie is geupgrade,Zbrojovka je rozšíøena(UPGRADE).,Ciê¿kie pojazdy ulepszone.
+STRMESUPGRADEDAIR,Aircraft construction upgraded.,Aeroport ameliore,Wir haben Freigabe für neue Lufteinheiten!,Luchthaven Constructie geupgrade.,Letecká továrna je rozšíøena(UPGRADE).,Samoloty ulepszone.
+STRMESUPGRADEDBLACKOPS,Upgraded to blackops.,Ameliore a Operation Speciales,Black Ops sind jetzt erhältlich!,Geupgrade naar Para Commando's,Pìchota rozšíøena na speciální jednotku(UPGRADE).,Specialne Jednostki ulepszone
+STRMESUPGRADEDRADAR,Upgraded Control Center(s) with radar.,Centre de controle ameliore avec radar,Kontrollzentren mit Radar aufgerüstet!,Controle centrum(s)  geupgrade met Radar,Štáp posádka je rozšíøen o radar(UPGRADE).,Centrum Kontroli ulepszone radarem
+STRMESUPGRADEDACROCKETS,Upgraded aircraft rockets.,Rockettes de vaisseaux ameliorees,Die Forschungen an Luft-Boden-Raketen sind abgeschlossen!,Luchthaven Raketten geupgrade.,Zbranì vzdušnıch sil rozšíøeny o rakety(UPGRADE).,Rakiety samolotów ulepszone.
+STRMESSALVAGEDVEHICLE,A,Un,Ein,Een,Jeden,Jeden
+STRMESSALVAGEDVEHICLE1,was salvaged for,A ete recycler pour,wurde geborgen für,is gerecycleerd voor,zrecyklováno za,zosta³ odzyzkany za
+STRMESFUNDSTRANSFERRED,You have been transferred $%1.,Vous transfert $%1.,Dir wurden $%1 überwiesen.,Er zijn  $%1 verdiensten aan u gegeven.,Odeslal jsi $%1,Dosta³eœ $%1
+STRMESREPAIRTRUCKINUSE,Working on structure.,Travaillant sur le batiment.,Arbeite an Gebäude.,Structuur wordt opgebouwd.,Probíhá práce na objektu.,Pracuje nad objektem.
+STRMESREPAIRTRUCKINUSE1,percent complete.,pourcents completes.,Prozent fertig.,percent klaar.,procent hotovo.,procent ukoñczono.
+STRMESBOUNTYRECEIVED,Your team has neutralized a,Votre equipe a neutralise un,Bestätige zerstörten,Uw team heeft een,Váš tım zneutralizoval,Twój odzia³ zneutralizowa³
+STRMESBOUNTYRECEIVED1,You receive,Vous recevez,Du erhältst,U ontvangt,Pøijal jsi,Dostajesz
+STRMESCASUALTIES,We're taking casualties!,Nous avons des blesses!,Stehen unter Beschuss! Melde Verluste!,We hebben Slachtoffers!,Máme ztráty na ivotech!,Mamy straty!
+STRMESCIVILIANKILLED,Your team has killed a civilian!  You are fined $%1.,Votre equipe a tue un civil! Vous est amende de $%1.,Dein Team hat einen Zivilisten getötet! Strafe: $%1.,Uw team heeft een burger gedood! U word veroordeeld  $%1,Tvùj tım zabil civilistu! Zaplatíš pokutu: $%1,Twoja dru¿yna zabi³a cywila!  Za karê zap³acisz $%1.
+STRMESREPAIRINGVEHICLE,Vehicle repaired by repair depot.,Vehicule repare par le centre de reparation.,Fahrzeuge durch Reparaturdepot repariert.,Voertuig gerepareerd door reparatie depot,Vozidlo bylo opraveno Opravárenskım depem.,Pojazd naprawiony przez Centrum Napraw
+STRMESREARMINGVEHICLE,Team's vehicle rearmed by ammo depot.,Vehicule des equipes rearme par le depot de munitions.,Fahrzeug durch Munitionsdepot neu bewaffnet.,Het voertuig van uw team is herladen bij het munitie depot.,Vozidlo tımu bylo pøezbrojeno v Munièním skladu.,Pojazd dru¿yny zosta³ dozbrojony przez Sk³ad Amunicji.
+STRMESENEMYSTRUCTURESPOTTED,Enemy structure found at,Structure ennemie reperee a,Melde Gegnergebäude bei den Koordinaten,Vijandelijke structuur gevonden op,Nepøátelské objekty objeveny v sektoru,Konstrukcja wroga znaleziona w sektorze
+STRMESENEMYSPOTTED,Enemy presence spotted at,Presence ennemie reperee a,Feindkontakt bei,Vijandelijke aanwezigheid gevonden op,Vìtší pochyb nepøátelskıch jenotek v sektoru,Obecnoœæ wroga zauwa¿ona w sektorze
+STRMESVEHICLEDESTROYEDBYFRIENDLY,A vehicle was destroyed by friendly fire from %2's team!  %2 was fined $%1.,Un vehicule a ete detruit par un tir colateral de l'equipe %2 !  %2 a ete amende de $%1.,Fahrzeug wurde durch Friendly Fire von %2's Team zerstört! Strafe für %2: $%1.,Een voertuig is vernietigd door een vriendschappelijk schot van %2's team!  %2 is veroordeeld $%1.,Vozidlo bylo znièeno tımem %2 (STØELBA DO VLASTNÍCH)!,Pojazd zosta³ zniszczony przez przyjazny ogieñ dru¿yny %2'a!
+
+STRSOLDIER,Soldier,Soldat,Soldat,Soldaat,Voják,¯o³nierz
+STRSOLDIERLAW,LAW Soldier,Soldat law,LAW-Soldat,LAW Soldaat,Raketometèík (LAW),¯o³nierz (LAW)
+STRSOLDIERAT,AT Soldier,Soldat AT,AT-Soldat,AT Soldaat,Voják (+AT),¯o³nierz (AT)
+STRSOLDIERAA,AA Soldier,Soldat AA,AA-Soldat,AA Soldaat,Voják (+AA),¯o³nierz (AA)
+STRSOLDIERMG,MG Soldier,Soldat MG,MG-Soldat,MG Soldaat,Kulometèík,¯o³nierz MG
+STRGRENADIER,Grenadier,Grenadier,Grenadier,Grenadier,Granátometèík,Grenadier
+STRHEAVYGRENADIER,Heavy grenadier,Grenadier lourd,Schwerer Grenadier,Zware grenadier,Tìkı granátník,C. Grenadier
+STRSOLDIERSTEYR,Steyr Soldier,Soldat Steyr,Steyr Soldat,Steyr Soldaat,Voják(STYER),¯o³nierz (STEYR)
+STRSNIPER,Sniper,Sniper,Scharfschütze,Sluipschutter,Odstøelovaè,Snajper
+STRMEDIC,Medic,Medecin,Sanitäter,Docter,Medik,Medyk
+STRMINER,Minelayer,Poseur de mine,Minenleger,Mijnenlegger,enista,Saper
+STRBLACKOPS,Black Ops,Force speciale,Black Ops,Para Commando's,Speciální jednotka,Jednostka Specjalna
+STRTANKER,Tanker,Tankier,Panzerfahrer,TankSoldaat,Tankista,Czo³gista
+STRPILOT,Pilot,Pilote,Pilot,Piloot,Pilot,Pilot
+STRHUMMER,Hummer,Hummer,Hummer,Hummer,Hummer,Hummer
+STRJEEP,Jeep,Jeep,Jeep,Jeep,Jeep,Jeep
+STRJEEPMG,MG Jeep,Jeep MG,MG-Jeep,MG Jeep,MG Jeep,Jeep z MG 
+STRTRUCK,Truck,Camion,LKW,Truck,Náklaïák,Ciê¿arówka
+STRFUELTRUCK,Fuel Truck,Camion d'essence,Treibstoff-LKW,Brandstof Truck,Cisterna,Cysterna
+STRM113AMBULANCE,M113 Ambulance,M113 Ambulance,M113 Ambulanz,M113 Ambulance,M113 Ambulance,M113 Ambulans
+STRM113,M113,M113,M113,M113,M113,M113
+STRVULCAN,Vulcan,Vulcan,Vulcan,Vulcan,Vulan,Vulcan
+STRREPAIRTRUCK,Repair Truck,Camion de reparation,Reparatur-LKW,Reparatie Truck,Opravárenské auto,Ciê¿arówka Naprawcza
+STRAMMOTRUCK,Ammo Truck,Camion de munition,Munitions-LKW,Munitie Truck,Munièní auto,Ciê¿arówka z Amunicj¹
+STRSALVAGEVEHICLE,Salvage Vehicle,Vehicule de recyclage,Bergungsfahrzeug,Recyclage Voertuig,Sbìraè šrotu,Odzyskiwacz
+STRM2A2,M2A2,M2A2,M2A2,M2A2,M2A2,M2A2
+STRM3A2,M3A2,M3A2,M3A2,M3A2,M3A2,M3A2
+STRM60,M60,M60,M60,M60,M60,M60
+STRM60A3,M60A3,M60A3,M60A3,M60A3,M60A3,M60A3
+STRM1,M1,M1,M1,M1,M1,M1
+STRM1A1,M1A1,M1A1,M1A1,M1A1,M1A1,M1A1
+STROH58,OH-58,OH-58,OH-58,OH-58,OH-58,OH-58
+STRUH60MG,UH-60MG,UH-60MG,UH-60MG,UH-60MG,UH-60MG,UH-60MG
+STRCH47D,CH-47D,CH-47D,CH-47D,CH-47D,CH-47D,CH-47D
+STRUH60,UH-60,UH-60,UH-60,UH-60,UH-60,UH-60
+STRAH1,AH-1,AH-1,AH-1,AH-1,AH-1,AH-1
+STRAH64,AH-64,AH-64,AH-64,AH-64,AH-64,AH-64
+STRAH64AA,AH-64 (AA),AH-64 (AA),AH-64 (AA),AH-64 (AA),AH-64 (AA),AH-64 (AA)
+STRA10,A-10,A-10,A-10,A-10,A-10,A-10
+STRA10LGB,A-10 LGB,A-10 LGB,A-10 LGB,A-10 LGB,A-10 LGB,A-10 LGB
+
+STRSOLDIERAK101,AK-101 Soldier,Soldat AK-101,AK-101 Soldat,AK-101 Soldaat,Voják s AK-101,¯o³nierz (AK-101)
+STRSOLDIERRPG,RPG Soldier,Soldat RPG,RPG-Soldat,RPG Soldaat,Voják (+RPG),¯o³nierz (RPG)
+STRSPETZNATZ,Spetz Natz,Spetz Natz,Spetz Natz,Parra Commando,Speciální jednotka,Spetz Natz
+STRUAZ,UAZ,UAZ,UAZ,UAZ,UAZ,UAZ
+STRBRDM,BRDM,BRDM,BRDM,BRDM,BRDM,BRDM
+STRURAL,Ural,Ural,Ural,Ural,Ural,Ural
+STRFUELURAL,Fuel Ural,Ural d'essence,Ural Treibstoff,Brandstof Ural,Cisterna - Ural,Ural Cysterna
+STRBMPAMBULANCE,BMP Ambulance,BMP Ambulance,BMP Ambulanz,BMP Ambulance,BVP Ambulance,BMP Ambulans
+STRSHILKA,Shilka,Shilka,Shilka,Shilka,Shilka,Shilka
+STRREPAIRURAL,Repair Ural,Ural de reparation,Ural Reparatur,Reparatie Ural,Opravárenskı Ural,Ural Naprawczy
+STRAMMOURAL,Ammo Ural,Ural de munition,Ural Munition,Munitie Ural,Munièní Ural,Ural z Amunicj¹
+STRBMP1,BMP-1,BMP-1,BMP-1,BMP-1,BVP-1,BWP-1
+STRBMP2,BMP-2,BMP-2,BMP-2,BMP-2,BVP-2,BWP-2
+STRBMP2E,BMP-2E,BMP-2E,BMP-2E,BMP-2E,BVP-2E,BWP-2E
+STRT72,T-72,T-72,T-72,T-72,T-72,T-72
+STRT72A,T-72A,T-72A,T-72A,T-72A,T-72A,T-72A
+STRT72B,T-72B,T-72B,T-72B,T-72B,T-72B,T-72B
+STRT80,T-80,T-80,T-80,T-80,T-80,T-80
+STRT80B,T-80B,T-80B,T-80B,T-80B,T-80B,T-80B
+STRT80U,T-80U,T-80U,T-80U,T-80U,T-80U,T-80U
+STRMI17TRANSPORT,Mi-17 Transport,Mi-17 Transport,Mi-17 Transport,Mi-17 Transport,Mi-17 Transportní,Mi-17 Transportowiec
+STRMI17,Mi-17,Mi-17,Mi-17,Mi-17,Mi-17,Mi-17
+STRMI24,Mi-24,Mi-24,Mi-24,Mi-24,Mi-24,Mi-24
+STRKA50,KA-50,KA-50,KA-50,KA-50,KA-50,KA-50
+STRKA50AA,KA-50 (AA),KA-50 (AA),KA-50 (AA),KA-50 (AA),KA-50 (AA),KA-50 (AA)
+STRSU25,SU-25,SU-25,SU-25,SU-25,SU-25,SU-25
+STRSU25LGB,SU-25 LGB,SU-25 LGB,SU-25 LGB,SU-25 LGB,SU-25 LGB,SU-25 LGB
+
+STRRESISTANCEBMP1,Resistance BMP-1,BMP-1 Resistance,BMP-1 Widerstand,Het Verzet BMP-1,Partizánské BVP-1,Partyzantckie BWP-1
+STRRESISTANCET72,Resistance T-72,T-72 Resistance,T-72 Widerstand,Het Verzet T-72,Partizánské T-72,Partyzantckie T-72
+STRRESISTANCET80,Resistance T-80,T-80 Resistance,T-80 Widerstand,Het Verzet T-80,Partizánské T-80,Partyzantckie T-80
+
+STROFFICER,Officer,Officier,Offizier,Officier,Dùstojník,Oficer
+STRT55,T-55,T-55,T-55,T-55,T-55,T-55
+
+STRWESTCOMMANDER,West Commander,Commandant Ouest,Kommandant West,commandant Westen,Západní velitel,Zachodni Dowódzca
+STREASTCOMMANDER,East Commander,Commandant Est,Kommandant Ost,commandant Oosten,Vıchodní velitel,Wschodni Dowódzca
+STRWESTMHQ,West Mobile HQ,HQ mobile Ouest,MHQ West,Westelijke Mobiele HQ,Západní velitelskı transportér,Zachodni MHQ
+STREASTMHQ,East Mobile HQ,HQ mobile Est,MHQ Ost,Oostelijke Mobiele HQ,Vıchodní velitelskı transportér,Wschodni MHQ
+
+STRNONE,None,Aucune,Keine,Geen,ádnı,¯adny
+STRG3,G3,G3,G3,G3,G3,G3
+STRG36A,G36A,G36A,G36A,G36A,G36A,G36A
+STRM16,M16,M16,M16,M16,M16,M16
+STRM16GL,M16GL,M16GL,M16GL,M16GL,M16GL,M16GL
+STRM21,M21,M21,M21,M21,M21,M21
+STRM4,M4,M4,M4,M4,M4,M4
+STRM60MG,M60,M60,M60,M60,M60,M60
+STRMM1,MM-1,MM-1,MM-1,MM-1,MM-1,MM-1
+STRMP5SD,MP5SD,MP5SD,MP5SD,MP5SD,MP5SD,MP5SD
+STRSTEYR,Steyr AUG,Steyr AUG,Steyr AUG,Steyr AUG,Steyr AUG,Steyr AUG
+STRXMS,XMS,XMS,XMS,XMS,XMS,XMS
+
+STRSTINGER,Stinger,Stinger,Stinger,Stinger,Stinger,Stinger
+STRCARLGUSTAV,CarlGustav,CarlGustav,CarlGustav,CarlGustav,CarlGustav,CarlGustav
+STRLASER,Laser Des.,Laser Des.,Laser Des.,Laser Des.,Laser Des.,Laser Des.
+STRLAW,LAW,LAW,LAW,LAW,LAW,LAW
+
+STRBERETTA,Beretta,Beretta,Beretta,Beretta,Beretta,Beretta
+STRGLOCK,Glock,Glock,Glock,Glock,Glock,Glock
+
+STR6G30,6G30,6G30,6G30,6G30,6G30,6G30
+STRAK47,AK-47,AK-47,AK-47,AK-47,AK-47,AK-47
+STRAK47GL,AK-47GL,AK-47GL,AK-47GL,AK-47GL,AK-47GL,AK-47GL
+STRAK74,AK-74,AK-74,AK-74,AK-74,AK-74,AK-74
+STRAK74GL,AK-74GL,AK-74GL,AK-74GL,AK-74GL,AK-74GL,AK-74GL
+STRAK74SU,AK74-SU,AK-74SU,AK-74SU,AK-74SU,AK-74SU,AK-74SU
+STRAK101,AK-101,AK-101,AK-101,AK-101,AK-101,AK-101
+STRBIZON,Bizon,Bizon,Bizon,Bizon,Bizon,Bizon
+STRPK,PK,PK,PK,PK,PK,PK
+STRDRAGUNOV,Dragunov,Dragunov,Dragunov,Dragunov,Dragunov,Dragunov
+
+STR9K32,9K32,9K32,9K32,9K32,9K32,9K32
+STRAT4,AT4,AT4,AT4,AT4,AT4,AT4
+STRRPG,RPG,RPG,RPG,RPG,RPG,RPG
+
+STRSKORPIAN,Skorpian,Skorpian,Skorpian,Skorpian,Škorpión,Skorpion
+STRTOKAREV,Tokarev,Tokarev,Tokarev,Tokarev,Tokarev,Tokarev
+
+STRFLARE,Flare,fusee,Signal,Lichtpistool,Svìtlice,Flara
+STRFLAREGREEN,Flare Green,fusee verte,Signal grün,Lichtpistool Groen,Svìtlice zelená,Zielona Flara
+STRFLARERED,Flare Red,fusee rouge,Signal rot,Lichtpistool Rood,,
+STRFLAREYELLOW,Flare Yellow,fusee jaune,Signal gelb,Lichtpistool Geel,Svìtlice lutá,¯ó³ta Flara
+STRGRENADE,Grenade,grenade,Handgranate,Handgranaat,Ruèní granát,Granat
+STRGRENADESHELL,Grenade Shell,grenade shell,Granate,Granaat,Granát (náboj),Granat (nabój)
+STRMINE,Mine,mine,Mine,Mijn,Mina,Mina
+STRMORTAR,Mortar,mortier,Mörser,Mortier,Minomet,MoŸdzie¿
+STRSATCHEL,Satchel,stachel,Sprengladung,Satchel,Nálo,£adunek
+STRSMOKE,Smoke,Fumigene,Nebel,RookGranaat,Dımovnice,Granat Dymny
+STRSMOKEGREEN,Smoke Green,Fumigene vert,Nebel grün,RookGranaat Groen,Dımovnice zelená,Granat Dymny (Zielony)
+STRSMOKERED,Smoke Red,Fumigene rouge,Nebel rot,RookGranaat Rood,Dımovnice èervená,Granat Dymny (Czerwony)
+
+STRCUSTOM,Custom,personnalise,Eigene,Standaard,Osobní,Inny
+STRG3LAW,G3/LAW,G3/LAW,G3/LAW,G3/LAW,G3/LAW,G3/LAW
+STRG36LAW,G36/LAW,G36/LAW,G36/LAW,G36/LAW,G36/LAW,G36/LAW
+STRM4LAW,M4/LAW,M4/LAW,M4/LAW,M4/LAW,M4/LAW,M4/LAW
+STRM16AA,M16/AA,M16/AA,M16/AA,M16/AA,M16/AA,M16/AA
+STRM16AT,M16/AT,M16/AT,M16/AT,M16/AT,M16/AT,M16/AT
+STRM16LAW,M16/LAW,M16/LAW,M16/LAW,M16/LAW,M16/LAW,M16/LAW
+STRM21LAW,M21/LAW,M21/LAW,M21/LAW,M21/LAW,M21/LAW,M21/LAW
+STRMP5SDBOMBS,MP5SD/Bombs,MP5SD/bombes,MP5SD/Bomben,MP5SD/Bomben,MP5SD/Vıbušniny,MP5SD/Bomby
+STRMP5SDLASER,MP5SD/Laser,MP5SD/Laser,MP5SD/Laser,MP5SD/Laser,MP5SD/Laser,MP5SD/Laser
+STRMP5SDLAW,MP5SD/LAW,MP5SD/LAW,MP5SD/LAW,MP5SD/LAW,MP5SD/LAW,MP5SD/LAW
+STRSTEYRLAW,Steyr AUG/LAW,Steyr AUG/LAW,Steyr AUG/LAW,Steyr AUG/LAW,Steyr AUG/LAW,Steyr AUG/LAW
+STRXMSLAW,XMS/LAW,XMS/LAW,XMS/LAW,XMS/LAW,XMS/LAW,XMS/LAW
+
+STRAK47RPG,AK-47/RPG,AK-47/RPG,AK-47/RPG,AK-47/RPG,AK-47/RPG,AK-47/RPG
+STRAK74AA,AK-74/AA,AK-74/AA,AK-74/AA,AK-74/AA,AK-74/AA,AK-74/AA
+STRAK74AT,AK-74/AT,AK-74/AT,AK-74/AT,AK-74/AT,AK-74/AT,AK-74/AT
+STRAK74MINES,AK-74/Mines,AK-74/Mines,AK-74/Minen,AK-74/Minen,AK-74/Miny,AK-74/Miny
+STRAK74RPG,AK-74/RPG,AK-74/RPG,AK-74/RPG,AK-74/RPG,AK-74/RPG,AK-74/RPG
+STRBIZONBOMBS,Bizon/Bombs,Bizon/Bombes,Bizon/Bomben,Bizon/Bomben,Bizon/Vıbušniny,Bizon/Bomby
+STRBIZONLASER,Bizon/Laser,Bizon/Laser,Bizon/Laser,Bizon/Laser,Bizon/Laser,Bizon/Laser
+STRBIZONRPG,Bizon/RPG,Bizon/RPG,Bizon/RPG,Bizon/RPG,Bizon/RPG,Bizon/RPG
+STRAK101RPG,AK-101/RPG,AK-101/RPG,AK-101/RPG,AK-101/RPG,AK-101/RPG,AK-101/RPG
+STRDRAGUNOVRPG,Dragunov/RPG,Dragunov/RPG,Dragunov/RPG,Dragunov/RPG,Dragunov/RPG,Dragunov/RPG
+
+STRBARRACKSCOMMANDER,Barracks (Commander),Caserne (Commandant),Kaserne (Kommandant),Baraken (commandant),Kasárny (Velitel),Baraki (Dowódzca)
+
+STRGAMEPROPERTIES,Game Properties,Propriétés,Spieleigenschaften,Speleigenschappen,Nastavení hry,Ustawienia Gry
+STRPARAM1LABEL,Side Properties,Propriétés de camp,Teameigenschaften,Teameigenschappen,Nastavení strany,Ustawienia Strony
+STRPARAM1A,None,Aucune,Keine,Geen,ádnı,¯adny
+STRPARAM1B,Fast Game,Jeu Rapide,Schnelles Spiel,Snel Spel,Rychlá hra,Szybka Gra
+STRPARAM1C,Limited Radar,Radar limite,Begrenzter Radar,Gelimiteerde Radar,Limitovanı radar,Limitowany Radar
+STRPARAM1D,Less Units,Moins d'unites,Weniger Einheiten,Weinig Eenheden,Málo jednotek,Ma³o Jednostek
+STRPARAM1E,Start at Night,Debute la nuit,Beginn bei Nacht,Start bij Nacht,Zaèátek v noci,Pocz¹tek w Nocy
+STRPARAM1F,"Fast,Radar","Rapide,Radar","Schnell,Radar","Snel,Radar","Rychlá, Radar","Szybka,Radar"
+STRPARAM1G,"Fast,Less","Rapide,Moins","Schnell,Weniger","Snel,Weinig","Rychlá, Málo","Szybka,Ma³o"
+STRPARAM1H,"Radar,Less","Radar,Moins","Radar,Weniger","Radar,Weinig","Radar, Málo","Radar,Ma³o"
+STRPARAM1I,"Fast,Radar,Less","Rapide,Radar,Moins","Schnell,Radar,Weniger","Snel,Radar,Weinig","Rychlá, Radar,Málo","Szybka,Radar,Ma³o"
+STRPARAM1J,"Fast,Night","Rapide,Nuit","Schnell,Nacht","Snel,Nacht","Rychlá,Noc","Szybka, Noc"
+STRPARAM1K,"Radar,Night","Radar,Nuit","Radar,Nacht","Radar,Nacht","Radar,Noc","Radar,Noc"
+STRPARAM1L,"Fast,Radar,Night","Rapide,Radar,Nuit","Schnell,Radar,Nacht","Snel,Radar,Nacht","Rychlá,Radar,Noc","Szybka,Radar,Noc"
+STRPARAM1M,"Less,Night","Moins,Nuit","Weniger,Nacht","Weinig,Nacht","Málo,Noc","Ma³o,Noc"
+STRPARAM1N,"Fast,Less,Night","Rapide,Moins,Nuit","Schnell,Weniger,Nacht","Snel,Weinig,Nacht","Rychlá,Málo,Noc","Szybka,Ma³o,Noc"
+STRPARAM1O,"Radar,Less,Night","Radar,Moins,Nuit","Radar,Weniger,Nacht","Radar,Weinig,Nacht","Radar,Málo,Noc","Radar,Ma³o,Noc"
+STRPARAM1P,"Fast,Radar,Less,Night","Rapide,Radar,Moins,Nuit","Schnell,Radar,Weniger,Nacht","Snel,Radar,Weinig,Nacht","Rychlá,Radar,Málo,Noc","Szybka,Radar,Ma³o,Noc"
+
+STRPARAM2LABEL,Victory,victoire,Sieg,Overwinning,Vítìzství,Zwyciêstwo
+STRPARAM2A,Destroy Enemy,detruire ennemi,Zerstoere Gegner,Vernietig de Vijand,Zniè nepøítele,Zniszcz Wroga
+STRPARAM2B,50 Points,50 Points,50 Punkte,50 Punten,50 bodù,50 Punktów
+STRPARAM2C,100 Points,100 Points,100 Punkte,100 Punten,100 bodù,100 Punktów
+STRPARAM2D,250 Points,250 Points,250 Punkte,250 Punten,250 bodù,250 Punktów
+STRPARAM2E,500 Points,500 Points,500 Punkte,500 Punten,500 bodù,500 Punktów
+STRPARAM2F,750 Points,750 Points,750 Punkte,750 Punten,750 bodù,750 Punktów
+STRPARAM2G,1000 Points,1000 Points,1000 Punkte,1000 Punten,1000 bodù,1000 Punktów
+STRPARAM2H,5 Towns,5 Towns,5 Staedte,5 Steden,5 mìst,5 Miast
+STRPARAM2I,10 Towns,10 Towns,10 Staedte,10 Steden,10 mìst,10 Miast
+STRPARAM2J,15 Towns,15 Towns,15 Staedte,15 Steden,15 mìst,15 Miast
+STRPARAM2K,All Towns,All Towns,Alle Staedte,Alle Steden,Všechny mìsta,Wszystkie Miasta
+STRPARAM2L,30 Minutes,30 Minutes,30 Minuten,30 Minuten,30 minut,30 Minut
+STRPARAM2M,60 Minutes,60 Minutes,60 Minuten,60 Minuten,60 minut,60 Minut
+STRPARAM2N,90 Minutes,90 Minutes,90 Minuten,90 Minuten,90 minut,90 Minut
+STRPARAM2O,120 Minutes,120 Minutes,120 Minuten,120 Minuten,120 minut,120 Minut
+
+STRPARAMCOOP1A,West Coop,Ouest Coop,West Coop,West Coop,Západní kooperace,Zachód Kooperacja
+STRPARAMCOOP1B,East Coop,Est Coop,Ost Coop,Oost Coop,Vıchodní kooperace,Wschód Kooperacja
+STRPARAMCOOP1C,"West,Less Units","Ouest,Moins d'Unites","West,Weniger Einheiten","West, Weinig Eenheden","Západ,Málo jednotek","Zachód,Ma³o Jednostek"
+STRPARAMCOOP1D,"East,Less Units","Est,Moins d'Unites","Ost,weniger Einheiten","Oost, Weinig Eenheden","Vıchod,Málo jednotek","Wschód,Ma³o Jednostek"
+STRPARAMCOOP1E,"West,Night","Ouest,Nuit","West,Nacht","West,Nacht","Západ,Noc","Zachód,Noc"
+STRPARAMCOOP1F,"East,Night","Est,Nuit","Ost,Nacht","Oost,Nacht","Vıchod,Noc","Wschód,Noc"
+STRPARAMCOOP1G,"West,Less,Night","Ouest,Moins,Nuit","West,weniger,Nacht","West,Weinig,Nacht","Západ,Málo,Noc","Zachód,Ma³o,Noc"
+STRPARAMCOOP1H,"East,Less,Night","Est,Moins,Nuit","Ost,weniger,Nacht","Oost,Weinig,Nacht","Vıchod,Málo,Noc","Wschód,Ma³o,Noc"
+
+STRPARAMCOOP2LABEL,Difficulty,Difficulte,Schwierigkeit,Moeilijkheid,Obtínost,Trudnosc
+STRPARAMCOOP2A,Light Opposition,opposition legere,Leichter Widerstand,Lichte Oppositie,Lehkı protivník,S³abe Przeciwstawienie
+STRPARAMCOOP2B,Average Opposition,opposition normale,Normaler Widerstand,Gemiddelde Oppositie,Prùmìrnı protivník,Normalne Przeciwstawienie
+STRPARAMCOOP2C,Heavy Opposition,opposition lourde,Schwerer Widerstand,Zware Oppositie,Tìkı protivník,Du¿e Przeciwstawienie
+STRPARAMCOOP2D,Insane Opposition,opposition folle,Irrer Widerstand,Zeer Zware Oppositie,Vynikající protivník,Ogromne Przeciwstawienie
+STRPARAMCOOP2E,Defend the Base,defendre la base,Verteidige die Basis,Verdedig De Basis,Obrana základny,Broñ bazê
+STRPARAMCOOP2F,"DTB,Average","DLB,normal","VdB,Leicht","VDB, Gemiddeld","Obrana,Prùmìrnı","Obrona,Normalny"
+STRPARAMCOOP2G,"DTB,Heavy","DLB,lourde","VdB,Schwer","VDB, Zwaar","Obrana,Tìkı","Obrona,Ciêzki"
+STRPARAMCOOP2H,"DTB,Insane","DLB,folle","VdB,Irre","VDB, Zeer Zwaar","Obrana,Vynikající","Obrona,Ogromny"
+
+STRPARAMMP1B,Full Town Income,Revenus de ville max,Volles Städte-Einkommen,Volledige Steden Inkomsten,Získání všech mìst,Dochody z Miast
+STRPARAMMP1C,Fast Game,jeu rapide,Schnelles Spiel,Snel Spel,Rychlá hra,Szybka gra
+STRPARAMMP1D,More Income,Plus de revenus,Mehr Einkommen,Meer Inkomen,Vìtší pøíjem,Wiêcej Dochodu
+STRPARAMMP1E,"Town,Income","ville,revenus","Stadt,Einkommen","Stad,Inkomen","Mìsta,Pøíjem","Miasta,Dochód"
+STRPARAMMP1F,"Fast,Income","rapide,revenus","Schnell,Einkommen","Snel,Inkomen","Rychlá,Pøíjem","Szbka,Dochód"
+STRPARAMMP1G,"Town,Fast","ville,rapide","Stadt,Schnell","Stad,Snel","Mìsta,Rychlá","Miasta,Szybka"
+STRPARAMMP1H,"Town,Fast,Income","ville,rapidre,revenus","Stadt,Schnell,Einkommen","Stad,Snel,Inkomen","Mìsta,Rychlá,Pøíjem","Miasta,Szybka,Dochód"
+STRPARAMMP1I,No AC Rockets,Pas de Roquettes,Keine AC Raketen,Geen AC Raketten,Bez raket typu AC,Bez rakiet typu AC
+STRPARAMMP1J,"Town,NoRoc","ville,pasroc","Stadt,k. Rak","Stad,GeenRak","Mìsta,BezRak",BezRak
+STRPARAMMP1K,"Fast,NoRoc","rapide,pasroc","Schnell,k. Rak","Snel,GeenRak","Rychlá,BezRak","Szybka,BezRak"
+STRPARAMMP1L,"Town,Fast,NoRoc","ville,rapide,pasroc","Stadt,Schnell,k. Rak","Stad,Snel,GeenRak","Mìsta,Rychlá,BezRak","Miasta,Szybka,BezRak"
+STRPARAMMP1M,"Income,NoRoc","revenus,pasderoc","Einkommen,k. Rak","Inkomen,GeenRak","Pøíjem,BezRak","Dochód,BezRak"
+STRPARAMMP1N,"Town,Income,NoRoc","ville,revenu,pasroc","Stadt,Einkommen,k. Rak","Stad,Inkomen,GeenRak","Mìsta,Pøíjem,BezRak","Miasta,Dochód,BezRak"
+STRPARAMMP1O,"Fast,Income,NoRoc","rapide,revenus,pasroc","Schnell,Einkommen,k. Rak","Snel,Inkomen,GeenRak","Rychlá,Pøíjem,BezRak","Szybka,Dochód,BezRak"
+STRPARAMMP1P,"Town,Fast,Inc,NoRoc","ville,rapide,rev,pasderoc","Stadt,Schnell,Eink,k. Rak","Stad,Snel,Ink,GeenRak","Mìsta,Rychlá,Pøij,BezRak","Mias,Szyb,Doch,BezRak"
+
+STRPARAMMP2LABEL,Victory,victoire,Sieg,Overwinning,Vítìzství,Zwyciêstwo
+STRPARAMMP2A,Destroy Enemy,detruire ennemi,Zerstöre Gegner,Vernietig Vijand,Zniè nepøítele,Zniszcz Wroga
+STRPARAMMP2B,50 Points,50 Points,50 Punkte,50 Punten,50 bodù,50 Punktów
+STRPARAMMP2C,100 Points,100 Points,100 Punkte,100 Punten,100 bodù,100 Punktów
+STRPARAMMP2D,250 Points,250 Points,250 Punkte,250 Punkte,250 bodù,250 Punktów
+STRPARAMMP2E,500 Points,500 Points,500 Punkte,500 Punkte,500 bodù,500 Punktów
+STRPARAMMP2F,750 Points,750 Points,750 Punkte,750 Punten,750 bodù,750 Punktów
+STRPARAMMP2G,1000 Points,1000 Points,1000 Punkte,1000 Punten,1000 bodù,1000 Punktów
+STRPARAMMP2H,5 Towns,5 Towns,5 Städte,5 Steden,5 mìst,5 Miast
+STRPARAMMP2I,10 Towns,10 Towns,10 Städte,10 Steden,10 mìst,10 Miast
+STRPARAMMP2J,15 Towns,15 Towns,15 Städte,15 Steden,15 mìst,15 Miast
+STRPARAMMP2K,All Towns,All Towns,Alle Städte,Alle Steden,Všechny mìsta,Wszystkie Miasta
+
+STRCREDITS1,Designed & coded by MF (Mike Melvin) mfcti@yahoo.com,Design et Programation par MF (Mike Melvin),Designed & programmiert von MF (Mike Melvin),Designed & coded by MF (Mike Melvin) mfcti@yahoo.com,Návrh a naprogramování MF (Mike Melvin) mfcti@yahoo.com,Zrobione i zakodowane przez MF (Mike Melvin) mfcti@yahoo.com
+STRCREDITS2,,Traduit par Corporal Hicks (Cyril Hartenstein),"Übersetzt von: Cuba (Steve Grünbauer), Phantomlord (Oliver Dobeneck), Weissbrot (Sven Simons)",Translated by Special Forces ES7,Pøeloil JBrzi,Przet³umaczone przez Master Miko (MW)
+STRCREDITS3,Beta Testers:,Beta Testeurs:,Beta Tester:,Beta Testers:,Betatesteøi:,Beta Testerzy:
+STRCREDITS4,Chatru (Rene Tobar) alacra@netzero.net (english or espanol),Chatru (Rene Tobar),Chatru (Rene Tobar),Chatru (Rene Tobar),Chatru (Rene Tobar),Chatru (Rene Tobar)
+STRCREDITS5,Quetzalcoatl (DM),Quetzalcoatl (DM),Quetzalcoatl (DM),Quetzalcoatl (DM),Quetzalcoatl (DM),Quetzalcoatl (DM)
+STRCREDITS6,,,,,,
+STRCREDITS7,To vote select 'Options' in action menu & then 'Vote Menu'.,"Pour voter, selectionnez 'options' dans le menu action, puis 'menu de vote'.",Um abzustimmen wähle 'Optionen' im Aktions-Menü & dann 'Abstimm-Menü'.,"Om te stemmen selecteer ""Opties"" in het actie menu & dan ""Stem Menu""","Pro nastavení zvolte ""Monosti"" v akèní nabídce a pak dále ""Menu voleb""","Aby zag³osowaæ, wybierz 'Opcje' w Menu Akcji i wtedy 'Menu G³osowañ'."
+
+STROPTIONSMENU,Options & Info,Menu d'option,Optionen & Informationen,Opties & Info,Monosti & Info,Opcje i Info
+STROPTIONSRESPAWN,Respawn Point,Reaparition,Respawn-Punkt,Respawn punt,Bod RESPAWNu,Punkt Repawn'u
+STROPTIONSHELP,Online Help,Aide en ligne,Online-Hilfe,Online Help,Online pomoc,Pomoc Online
+STROPTIONSQUEUE,Build Queue,Mettre en queue,Bauwarteschlange,Bouwen is stilgelegd,Objekty ve frontì,Kolejka Budowania
+STROPTIONSDELETE,Delete,Supprimer,Löschen,Delete,Smazat,Kasuj
+STROPTIONSDELETEALL,Delete All,Supprimer tout,Alle löschen,Delete All,Smazat všechno,Kasuj wszystkie
+
+STRHELPMENU,Help Menu,Menu d'aide,Hilfe-Menü,Help Menu,Menu nápovìdy,Menu Pomocy
+STRHELPGOALS,Mission Goals,Buts de missions,Missionsziele,Missie Doelen,Dùleité body mise,Cele misji
+STRHELPTEAM,Team Role,Role de l'equipe,Teamrolle,Team Rol,Úlohy tımu,Rola Dru¿yny
+STRHELPCOMMANDER,Commander Role,Role du commandant,Kommandantenrolle,Commandant Bevel,Úlohy velitele,Rola Dowódzcy
+STRHELPTIPS,Tips,Conseils,Tipps,Tips,Tipy,Wskazówki
+
+STRHELPGOALS1,To achieve a victory the enemy base and Mobile HQ must be destroyed.  Your side's Mobile HQ,Pour gagner vous devez detruire la base ennemie et son QG mobile. Votre Le QG mobile du,"Um den Sieg zu erreichen, müssen die gegnerischen Gebäude und das MHQ zerstört werden",Om te winnen moet de vijandelijke basis en de vijandelijke Mobiele HQ vernietigd worden,Dosáhnete vítìzství znièením nepøátelské základny a velitelského transportéru. Váš velitelskı transportér,"Aby wygraæ, zniszcz Mobliny HQ i bazê wroga"
+STRHELPGOALS2,is the only armoured vehicle at the start of the game.  Protect it at all costs (Let the,camp est le seul vehicule au debut du jeu.  Proteger le A tout prix (laissez le droit de,werden. Das MHQ deiner Seite ist das einzige gepanzerte Fahrzeug zu Spielbeginn.,is de enige tank in het begin van het spel. Bescherm hem goed. (Laat de,je to jediné obrnìné vozidlo na zaèátku hry. Ochraòuj ho za kadou cenu (Pouze,jest jedynym opancerzonym pojazdem na pocz¹tku gry. Broñ go za wszelk¹ cenê.
+STRHELPGOALS3,commander be responsible for moving it).,son deplacement au commandant),Beschütze es mit allen Mitteln (Der Kommandant sollte für das MHQ verantwortlich sein).,Commandant ervoor verantwoordelijk zijn).,velitel mùe s ním mùe jezdit).,(Dowódzca jest odpowiedzilny za jego ruch).
+STRHELPGOALS4,Earn income by taking over any labeled towns on the map (take the flag).,Gagnez de l'argent en prenant les villes placees sur la carte (prenez le drapeau).,Erhalte Einkommen durch Übernahme von Siedlungen (Flagge einnehmen).,Krijg inkomen door alle gelabelde steden te veroveren op de map. (Neem de vlag),Pøíjem penìz je vázán poètem obsazenıch mìst. (vzetím vlajky),"Zarabiaj zasoby, dziêki zdobywaniu miast oznaczonych (WeŸ Flagê)."
+STRHELPGOALS5,Increase income by leaving troops in towns (unless Enhanced Mode is enabled).,Augmentez vos revenus en laissant des troupes dans la ville.,Erhöhe das Einkommen durch Truppen in Städten (wenn Vorteil-Modus nicht an ist).,Verhoog het inkomen door troepen de steden te laten bewaken. (Behalve als Enhaced mode aan staat),Zvyš pøíjem ponecháním jednotek ve mìstì (neuíváš-li Rozšíøenı mód).,"Zarabiaj wiêcej, zostawiaj¹c jednostki w miastach (chyba, ¿e okupowanie ich jest wy³¹czone)."
+
+STRHELPGOALS6,Build additional defenses with a repair truck.,Contruisez d'autre defenses avec un camion de reparation.,Baue zusätzliche Verteidigungen mit einem Reparatur-LKW.,Bouw verdediging met een repair truck.,Postav další obranu za pomoci opravárenského vozu.,Buduj stanowiska obrony Ciê¿arówk¹ Naprawcz¹
+STRHELPGOALS7,Earn bounties by destroying enemy vehicles.,Gagnez des l'argent suplementaire en detruisant les vehicules ennemis.,Erhalte Prämien durch Zerstörung von gegnerischen Fahrzeugen.,Je krijgt een Bonus door vijandelijke voertuigen te vernietigen.,Získej prémii znièením nepøátelskıch vozidel.,Zdobywaj Bonusy dziêki niszczeniu pojazdów wroga.
+STRHELPGOALS8,Salvage destroyed vehicles for money with salvagers.,Recyclez les vehicules detruits pour de l'argent grace aux vehicules de recyclage.,Berge zerstörte Fahrzeuge gegen Ressourcen mit den Bergefahrzeugen.,Recycleer vernietigde voertuigen voor geld met een recyclage voertuig.,Mùeš zpeneit znièená vozidla za pomoci sbìraèù šrotu.,"Odzyskiwuj zniszczone jednostki Odzyskiwaczem, aby zdobywaæ pieni¹dze."
+
+STRHELPTEAMMENU,Team Leaders Help,Aide du Chef d'equipe,Teamführerhilfe,Team Leider Hulp,Nápovìda pro velitele tımu,Pomoc dla Dowódzców Dru¿yn
+STRHELPTEAM1,All players except the commander are team leaders (Alpha - Hotel).  The role of a team,Tous les joueurs sauf le commandant sont des chefs d'equipe (Alpha - Hotel).  Le role d'un,"Alle Spieler, mit Ausnahme des Kommandanten, sind Teamführer (Alpha - Hotel). Die Aufgaben",Alle spelers behalve de commandant zijn team leiders (Alpha - Hotel). Het doel van een Team,Všichni hráèi vyjma vrchního VELITELE jsou velitelé tımù (Alpha - Hotel). Úlohou tımového,Wszyscy gracze poza Dowódzc¹ s¹ dowódzcami dru¿yn (Alpha - Hotel). Rol¹ dowódzcy
+STRHELPTEAM2,"leader is to take and defend towns for income, find the enemy base, and destroy it.","chef d'equipe est de prendre et de defendre les villes pour ses revenus, trouver la base","eines Teamführers sind: Städte einnehmen, diese zu verteidigen, die gegnerische Basis zu","leider is om steden te veroveren/verdedigen voor inkomsten, vind de vijandelijke basis en vernietig ze.","velitele získávat a bránit mìsta kvùli pøíjmu, najít nepøátelskou základnu a znièit ji.","dru¿yny jest: zdobywanie i obrona miast dla zasobów, znalezienie bazy wroga i zniszczenie jej",
+STRHELPTEAM3,"Team leaders are the main means of earning income for a side.  The more income earned,",ennemie et la detruire.Les chefs d'equipe sont le meilleur moyen de gagner des revenus,"finden und sie zu zerstören. Teamführer sind hauptverantwortlich dafür, Geld zu",Team Leiders zijn de basis om inkomen te verkrijgen voor een ploeg. Hoe meer inkomsten,Velitelé tımù jsou klíèoví pro finanèní pøíjem strany. Èím víc získají,Dowódzcy dru¿yn s¹ bardzo wa¿ni w zdobywaniu zasobów.  Im wiêcej zarobi¹,
+STRHELPTEAM4,"the more quickly the commander can purchase upgrades, buildings, and reinforcements.","pour une nation. Plus vos revenus sont grand, plus vite le commandant peut acheter les","erwirtschaften. Je mehr Einkommen, umso schneller kann der Kommandant Upgrades, Gebäude",hoe sneller de commandant belangrijke dingen kan kopen.,tím rychleji mùe vrchní velitel vylepšovat  jednotky a budovy a poøizovat nové posily.,tym szybciej Dowódzca bêdzie móg³ rozwijaæ bazê.,
+STRHELPTEAM5,Each team leader has their own personal budget for equipment and reinforcements.,"ameliorations, batiments et renforts Les chefs d'equipe ont leur propore budget pour",und Verstärkung kaufen. Jeder Teamführer hat sein persönliches Budget für Ausrüstung,Iedere Team Leider heeft zijn eigen geld om wapens en versterking te kopen.,Kadı velitel tımu má vlastní rozpoèet na nákup nového vybavení a novıch posil.,Ka¿dy dowódzca dru¿yny ma w³asny bud¿et na wyposa¿enie i jednostki.,
+STRHELPTEAM6,,leur equipement et les renforts.,und Verstärkung.,,,,
+STRHELPTEAM7,Purchase soldiers and weapon loadouts at a barracks.,Achetez des soldats et changez vos armes a la caserne.,Kaufe Soldaten und Waffen bei einer Kaserne.,Koop soldaten en wapenuitrustingen aan de Barakken.,Nakup vojáky a svou vızbroj v kasárnách.,Kupuj jednostki i ekwipunek w barakach.,Kupuj jednostki i ekwipunek w barakach.
+STRHELPTEAM8,Purchase empty or manned vehicles at factories (types depend on factory).,Achetez des vehicules avec ou sans equipage aux usines (vehicules dependant de l'usine),Baue leere oder bemannte Fahrzeuge in einer Fabrik (Typ je nach Fabrik).,Koop lege of bemande voertuigen. (hangt af van het soort fabriek),"Nakup techniku, prázdnou nebo s posádkou, v továrnách (typ závisí na továrnì).",Kupuj puste lub obsadzone pojazdy w ró¿nych fabrykach.,
+STRHELPTEAM9,Pool resources and share transportation with other team leaders early on.,Mettez en commun les ressource et partagez les transports avec les autre chefs d'equipe.,"Zu Beginn ist es ratsam, Ressourcen und Fahrzeuge zu teilen.",Spaar geld en deel voertuigen met andere Team Leiders.,Shromaïuj peníze a efektivnì sdílej pøepravu s ostatními tımovımi veliteli.,GromadŸ zasoby i dziel siê z innymi dowódzcami dru¿yn.,
+
+STRHELPCOMMANDERMENU,Commander Help,Aide du Commandant,Kommandantenhilfe,Commandanthulp,Nápovìda pro velitele,Pomoc dla Dowódzcy,
+STRHELPCOMMANDER1,"The commander is responsible for building the base, purchasing upgrades, and reinforcing AI","le commandant doit construire la base, acheter les ameiorations, de renforcer les equipes","Der Kommandant ist verantwortlich für den Bau der Basis, Kauf von Upgrades und","De commandant is verantwoordelijk voor het bouwen van de basis, upgraden betalen, en versterking te kopen.","Vrchní velitel je odpovìdnı za vıstavbu základny, vylepšování jednotek a posilami pro AI","Dowódzca jest odpowiedzialny za budowanie bazy, ulepszanie i zaopatrywanie AI.",
+STRHELPCOMMANDER2,teams.  The commander can also issue orders to AI teams and set the player income levels.,IA.  Et de definir le revenu des joueurs,Verstärkung der KI-Teams. Der Kommandant kann den KI-Teams auch Befehle geben und,teams. De commandant kan ook bevelen geven aan (AI) teams en kan het inkomen van de speler verhogen.,tımù. Vrchní velitel také mùe vydat rozkazy pro AI tımy a nastavit úrovnì pøíjmù hráèù.,Dowódzca mo¿e wydawaæ rozkazy AI i ustawiaæ dochód gracza.,
+STRHELPCOMMANDER3,,,das Einkommen der Spieler regeln.,,,,
+STRHELPCOMMANDER4,,,,,,,
+STRHELPCOMMANDER5,"Control AI teams via the Radio, Command Menu, or Team Camera.","controlez les equipes IA via la radio,le menu de commandemment ou la camera d'equipe.","Kontrolliere KI-Teams per Funk, Kommando-Menü oder Team Kamera.","Bestuur AI teams via de Radio, Commando Menu, of Team Camera.","Kontrola AI tımù rádiem, pøíkazovım menu nebo tımovou kamerou.",Menu sterowania albo Kamerê Dru¿yny.,
+STRHELPCOMMANDER6,Set the command waypoint on the map by ALT-Clicking., Placez le point de passage du commandant en ALT-Cliquant sur la carte,Setze Kommandowegpunkte auf der Karte durch ALT-Klick.,Zet het commando WP op de map door ALT te drukken.,Nastav velitelské WP na mapì stiskem ALT+Click.,Ustaw WP dowódzcy na mapie przez klikniêcie myszy + ALT'u.,
+STRHELPCOMMANDER7,Set the command waypoint and order current team to it by SHIFT-Clicking.,Placez le point de passage du commandant et envoyez l'equipe en SHIFT-Cliquant sur la carte ,Setze Kommando-WPs und befehle das aktuelle Team durch SHIFT-Klick hin.,Zet het commando WP en ander huidig team op de map door SHIFT te drukken.,Nastav velitelské WP a rozkaz k pøesunu aktuálního tımu SHIPT+Click.,Ustaw WP dowódzcy na mapie oraz ka¿ iœæ tam wybranej dru¿ynie przez klikniêcie myszy + ALT'u.
+STRHELPCOMMANDER8,Transfer funds to other player via the Resource Menu.,Transferez les ressources aux autres joueurs via le menu Ressource,Transferiere Ressourcen an andere Spieler per Ressourcen-Menü.,Draag geld over aan andere spelers via het Verdiensten Menu,Pøesuò finance jinému hráèi pomocí menu zdrojù.,Przesy³aj zasoby to innego gracza przez Mrnu Zasobów
+
+STRHELPTIPS1,Leave the beginning armoured vehicle (Mobile HQ) for the commander.,Laissez le vehicule de depart (QG mobile) au commandant,Überlasse das gepanzerte Startfahrzeug (MHQ) dem Kommandanten.,Laat de tank in het begin (Mobiele HQ) achter voor de commandant.,Ponech vrchnímu veliteli obrnìnı velitelskı transportér (MHQ).,Zostaw opancerzony pojazd (MHQ)
+STRHELPTIPS2,Try not to abandon vehicles.  Each side has a working vehicle limit., N'abandonenz pas les vehicules.Chaque equipe a un nb authorise de vehicule limite.,"Versuche, Fahrzeuge nicht zurückzulassen. Jede Seite hat ein Fahrzeuglimit.",Hou er rekening mee dat iedere ploeg een limiet heeft op voertuigen (max 20).,Neplıtvej technikou. Kadá strana jich má omezenı poèet (max.20).,Nie zostawiaj jedostek zdolnych do u¿ytku. Ka¿da strona ma ich limit (20).
+STRHELPTIPS3,Set Waypoint marks a location on the map visible only to your side., Placez des points de passage titres visibles que pour votre nation sur la carte.,"Wegpunkt setzen markiert einen Ort auf der Karte, der nur für dein Team sichtbar ist.","Plaats een WP  locatie op de map, zichtbaar voor uw team",Vyznaè WP v urèité lokalitì na mapì (je viditelné jen pro tvou stranu).,Ustaw punkty WP widoczne tylko dla twojej strony.
+
+STRSHORTTAKETOWNS,Take Towns,attacker,Städte erobern,Verover Steden,Zaber mìsta,Zdobywaj Miasta
+STRSHORTDEFEND,Defend Nearest Town/Base,defendre,Verteidige Stadt/Basis,Verdedig Stad/Basis,Chránit mìsto/základnu,Broñ Najbli¿sz¹ Bazê/Miasto
+STRSHORTSEARCH,Search & Destroy,patrouiller,Suchen/Zerstören,Zoek en Vernietig,Najdi a zniè,Szukaj i Zniszcz
+STRSHORTCOMMANDVEHICLES,Command Nearby Vehicle(s),commander vehicules,Kommandiere Fahrzeuge,Commandeer voertuigen,Pouít nejbliší techniku,Kontroluj Najbli¿szym Pojazdem
+STRSHORTDISEMBARKVEHICLES,Disembark Vehicle(s),Descendre,Fahrzeuge verlassen,Uitstappen,Vystoupit z techniky,WyjdŸ z Pojazdu
+STRSHORTBOARD,Board Transport(s),Monter transports,Transporter bemannen,Beman Transport,Nastoupit do transportu,WejdŸ do Transportu
+STRSHORTDISEMBARKTRANSPORTs,Disembark Transport(s),Descendre transports,Transporter verlassen,Verlaat Transport,Vystoupit z transportu,WyjdŸ z Transportu
+
+STRCOMMANDMENU,Command Menu,Menu de commandement,Kommando-Menü,Commando Menu,Pøíkazové menu,Menu Kontroli
+STRCOMMANDRESOURCES,Transfer Resources,Transfert de ressources,Ressourcen übergeben,Verdiensten Weggeven,Pøesun zdrojù,Wyslij Zasoby
+STRCOMMANDMOVETO,Move to WP,Allez au WP,Bewege zum WP,Beweeg naar WP,Pøesun k WP,PrzejdŸ do WP
+STRCOMMANDTAKETOWNS,Take Towns,Prenez des villes,Städte erobern,Verover Steden,Zaber mìsta,Zdobywaj Miasta
+STRCOMMANDDEFEND,Defend Nearest Town/Base,Defendez ville/base proche,Verteidige nächste Stadt/Basis,Verdedig Nabijgelegen Stad/Basis,Chraò mìsto/základnu,Broñ Miasto/Bazê
+STRCOMMANDSEARCH,Search and Destroy,Recherchez et detruisez,Suchen und Zerstören,Zoek en Vernietig,Najdi a zniè,Szukaj i Zniszcz
+STRCOMMANDVEHICLES,Command Nearby Vehicle(s),Commandez les proches vehicules,Kommandiere nahe Fahrzeuge,Commandeer naburige voertuigen,Pouít nejbliší techniku,Kontroluj Najbli¿szym Pojazdem
+STRCOMMANDDISEMBARKVEHICLES,Disembark Vehicle(s),Descendez des vehicules,Fahrzeuge verlassen,Voertuigen verlaten,Vystoupit z techniky,WyjdŸ z Pojazdu
+STRCOMMANDBOARD,Board Transport(s),Montez dans les transports,Transporter bemannen,Transportvoertuig bemannen,Nastoupit do transportu,WejdŸ do Transportu
+STRCOMMANDDISEMBARKTRANSPORTS,Disembark Transport(s),Descendre des transports,Transporter verlassen,Transportvoertuig verlaten,Vystoupit z transporu,WyjdŸ z Transportu
+
+STRRESOURCEMENU,Resource Menu,Menu ressource,Ressourcen-Menü,Verdiensten Menu,Menu zdrojù,Menu Zasobów
+STRRESOURCEPLAYER,Player,Joueur,Spieler,Speler,Hráè,Gracz
+STRRESOURCEGIVE,Give Player,Donne au joueur,Gebe Spieler,Geef Speler,Dej hráèi,Daj Graczowi
+STRRESOURCEPLAYERPERCENT,Player Resources %,Pourcentage du budget aux joueurs,Spieler-Ressourcen %,Speler Verdiensten %,Zdroje pro hráèe %,Zasoby gracza %
+
+STRCONSTRUCTIONMENU,Building Construction,Construction de batiment,Baue Konstruktion,Bouw Constructie,Stavba objektù,Buduje Objekt
+STRCONSTRUCTIONSTRUCTURE,Build Structure,Construire batiment,Baue Gebäude,Bouw Structuur,Stavba budov,Zbuduj Objekt
+STRCONSTRUCTIONDEFENSE,Build Misc,Construire Divers,Baue Verteidigung,Bouw Verdediging,Stavba ostatní,Zbuduj Ró¿ne
+STRREPAIRMENU,Repair Truck,Camion de reparation,Reparatur-LKW,Verdedigings Constructie, Opravárenské auto,Ciê¿arówka Naprawcza
+
+STRTEAMSMENU,Teams,equipes,Teams,Teams,Tımy,Dru¿yny

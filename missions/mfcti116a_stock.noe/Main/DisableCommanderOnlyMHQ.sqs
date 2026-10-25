@@ -1,0 +1,22 @@
+;Last modified 1/24/2
+
+_vehicle = _this Select 0
+_unit = _this Select 1
+_side = Side _unit
+
+? (_side == west) && (_vehicle == WestMobileHQ):goto "ToggleWest"
+? (_side == east) && (_vehicle == EastMobileHQ):goto "ToggleEast"
+
+Exit
+
+#ToggleWest
+
+	? (unlockWestMHQ):unlockWestMHQ = false;PublicVariable "unlockWestMHQ";Exit
+	? (!unlockWestMHQ):unlockWestMHQ = true;PublicVariable "unlockWestMHQ";Exit
+
+	Exit
+
+#ToggleEast
+	
+	? (unlockEastMHQ):unlockEastMHQ = false;PublicVariable "unlockEastMHQ";Exit
+	? (!unlockEastMHQ):unlockEastMHQ = true;PublicVariable "unlockEastMHQ";Exit

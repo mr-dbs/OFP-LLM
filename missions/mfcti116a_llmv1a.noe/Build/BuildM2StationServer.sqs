@@ -1,0 +1,103 @@
+;Last modified 4/19/4
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_destination = _this Select 1
+_direction = _this Select 2
+
+_M2Name = "M2StaticMG"
+
+? !(publicServer):_M2Name = "MFCTI116M2StaticMG"
+? (_side == east):_M2Name = _M2Name + "E"
+? !(publicServer) && (limitedRadar):_M2Name = _M2Name + "LR"
+
+#CreateM2
+
+	;Create building, props, gun, & gunner.
+	_M2 = _M2Name CreateVehicle _destination
+	_M2  SetDir _direction
+	_M2  SetPos _destination
+	_M2 SetPos [(_destination Select 0)+((sin _direction)*0.5),(_destination Select 1)+((cos _direction)*.5),(_destination Select 2)]
+
+	[_side,_M2,M2StationType] Exec "Main\UpdateStationaryGun.sqs"
+
+	? (_side == east):goto "AddM2StationToEast"
+
+#AddM2StationToWest
+
+	;Add it to the list of factories & increment the total count.
+	westM2Station = westM2Station + [_M2]
+	westM2StationDamage = westM2StationDamage + [500]
+
+	;Send the new building to other players.
+	westBuildingBuiltMP = _M2;PublicVariable "westBuildingBuiltMP"
+	westBuildingBuiltTypeMP = M2StationType;PublicVariable "westBuildingBuiltTypeMP"
+
+	totalWestStationaryM2s = totalWestStationaryM2s + 1;PublicVariable "totalWestStationaryM2s"
+
+	goto "AddObjects"
+	Exit
+
+#AddM2StationToEast
+
+	;Add it to the list of factories & increment the total count.
+	eastM2Station = eastM2Station + [_M2]
+	eastM2StationDamage = eastM2StationDamage + [500]
+
+	;Send the new building to other players.
+	eastBuildingBuiltMP = _M2;PublicVariable "eastBuildingBuiltMP"
+	eastBuildingBuiltTypeMP = M2StationType;PublicVariable "eastBuildingBuiltTypeMP"
+
+	totalEastStationaryM2s = totalEastStationaryM2s + 1;PublicVariable "totalEastStationaryM2s"
+
+#AddObjects
+
+	;Create props for the station.
+	_sandbags1 = "FenceWood" CreateVehicle _destination
+	_sandbags1a = "FenceWood" CreateVehicle _destination
+	_sandbags2 = "FenceWood" CreateVehicle _destination
+	_sandbags2a = "FenceWood" CreateVehicle _destination
+	_sandbags3 = "FenceWood" CreateVehicle _destination
+	_sandbags3a = "FenceWood" CreateVehicle _destination
+
+	_direction = GetDir _M2
+	_position = GetPos _M2
+
+	_sandbags1 SetDir _direction
+	_sandbags1a SetDir _direction
+	_sandbags2 SetDir _direction
+	_sandbags2a SetDir _direction
+	_sandbags3 SetDir _direction
+	_sandbags3a SetDir _direction
+
+
+	_sandbags1 SetPos _position
+	_sandbags1a SetPos _position
+	_sandbags2 SetPos _position
+	_sandbags2a SetPos _position
+	_sandbags3 SetPos _position
+	_sandbags3a SetPos _position
+	_sandbags1 SetDir (_direction + 90) % 360
+	_sandbags1a SetDir (_direction + 90) % 360
+
+	_sandbags1 SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)]
+	_sandbags1a SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)+.3]
+
+	_direction = (_direction + 90) % 360
+	_sandbags2 SetDir _direction
+	_sandbags2 SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)]
+	_sandbags2 SetDir (_direction + 90) % 360
+	_sandbags2a SetDir _direction
+	_sandbags2a SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)+.3]
+	_sandbags2a SetDir (_direction + 90) % 360
+
+	_direction = (_direction - 180) % 360
+	_sandbags3 SetDir _direction
+	_sandbags3 SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)]
+	_sandbags3 SetDir (_direction + 90) % 360
+	_sandbags3a SetDir _direction
+	_sandbags3a SetPos [(_position Select 0)+((sin _direction)*2.15),(_position Select 1)+((cos _direction)*2.15),(_position Select 2)+.3]
+	_sandbags3a SetDir (_direction + 90) % 360
+
+	[_M2,[_sandbags1,_sandbags1a,_sandbags2,_sandbags2a,_sandbags3,_sandbags3a]] Exec "Main\StationaryGunCleanUp.sqs"

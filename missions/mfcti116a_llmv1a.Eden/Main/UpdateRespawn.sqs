@@ -1,0 +1,60 @@
+;Last modified 2/19/4
+;Script Usage: [] Exec "UpdateRespawn.sqs"
+respawnLocation = 0
+
+_side = Side player
+
+? (_side == west):_respawnMarker = "Respawn_west";_mobileHQ = WestMobileHQ
+? (_side == east):_respawnMarker = "Respawn_east";_mobileHQ = EastMobileHQ
+
+#Update
+~5
+
+	? (respawnLocation == 0):goto "SetRespawnMHQ"
+	? (respawnLocation == infantryFactoryRespawn):_buildingList = infantryFactory;goto "SetRespawn"
+	? (respawnLocation == lightFactoryRespawn):_buildingList = lightFactory;goto "SetRespawn"
+	? (respawnLocation == heavyFactoryRespawn):_buildingList = heavyFactory;goto "SetRespawn"
+	? (respawnLocation == airFactoryRespawn):_buildingList = airFactory;goto "SetRespawn"
+	? (respawnLocation == fieldHospitalRespawn):_buildingList = fieldHospital;goto "SetRespawn"
+
+	goto "Update"
+
+#SetRespawn
+
+	_count = 0
+	_totalBuildings = Count _buildingList
+
+	? (_totalBuildings < 1):goto "SetRespawnMHQ"
+
+	_nearestDistance = 100000
+	_nearestBuilding = ObjNull
+
+	#CheckBuilding
+
+		_building = _buildingList Select _count
+		_distance = player Distance _building 
+		_count = _count + 1
+
+		? (_distance < _nearestDistance) && (GetDammage _building < 1):_nearestDistance = _distance;_nearestBuilding = _building
+		? (_count < _totalBuildings):goto "CheckBuilding"
+
+		? (IsNull _nearestBuilding):goto "SetRespawnMHQ"
+		
+		_direction = (GetDir _nearestBuilding + 180) % 360
+		_position = GetPos _nearestBuilding
+		_distance = 14
+
+		? (respawnLocation == airFactoryRespawn):_distance = 25
+		? (respawnLocation == infantryFactoryRespawn):_direction = (GetDir _nearestBuilding + 90) % 360
+
+		_destination = [(_position Select 0)+((sin _direction)*_distance),(_position Select 1)+((cos _direction)*_distance),0]
+		_respawnMarker SetMarkerPos _destination
+		goto "Update"
+
+#SetRespawnMHQ
+
+		_direction = (GetDir _mobileHQ + 180) % 360
+		_position = GetPos _mobileHQ
+		_destination = [(_position Select 0)+(sin _direction)*7,(_position Select 1)+(cos _direction)*7,0]
+		_respawnMarker SetMarkerPos _destination
+		goto "Update"

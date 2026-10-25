@@ -1,0 +1,42 @@
+;Last modified 9/4/3
+
+_unit = _this Select 0
+_side = Side _unit
+
+_deathLocation = GetPos _unit
+[_unit] Exec "Main\RespawnableUnitCleanUp.sqs"
+
+@ (_unit == player)
+@ (Alive player)
+
+[player,_deathLocation] Exec "Main\RespawnUnit.sqs"
+
+#RemoveActions
+
+	_count = 0
+
+	#Remove
+
+		player RemoveAction _count
+		_count = _count + 1
+
+		? (_count < 20):goto "Remove"
+
+	player AddAction [Localize "STRSCORE","Main\Score.sqs"]
+	? (debugMP):player AddAction [Localize "STRDEBUGPROMPT","GUI\UpdateGUIDebugPrompt.sqs"]
+
+	;Add commander only menus.
+	? (player == Leader WestCommanderTeam || player == Leader EastCommanderTeam):[player] Exec "GUI\UpdateGUIBuildMenu.sqs";[player] Exec "GUI\UpdateGUIControlCenterMenu.sqs";[player] Exec "GUI\UpdateGUICommandMenu.sqs";[player] Exec "GUI\UpdateGUITeamMenu.sqs"
+
+	;Re-add building menus.
+	[player] Exec "GUI\UpdateGUIResourceMenu.sqs"
+	[player] Exec "GUI\UpdateGUIOptionsMenu.sqs"
+	[player] Exec "GUI\UpdateGUIFactoryMenu.sqs"
+	[player] Exec "GUI\UpdateGUIRepairTruckMenu.sqs"
+	[player] Exec "GUI\UpdateGUIAmmoTruckMenu.sqs"
+	[player] Exec "DBSArsenal\AddAction.sqs"
+
+	;Add a small bounty for non-commanders.  Commanders have a different bounty.
+	? (player != Leader WestCommanderTeam) && (player != Leader EastCommanderTeam):[player,50] Exec "Main\UnitCleanUp.sqs"
+
+	Exit

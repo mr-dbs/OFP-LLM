@@ -1,0 +1,205 @@
+;Last modified 9/4/3
+;Script usage:  [Group,true/false,Barracks,Resources] Exec "AIBuyLight.sqs"
+;Use to make AI randomly purchase a soldier.
+
+_side = _this Select 0
+_group = _this Select 1
+_teamPurchase = _this Select 2
+_barracks = _this Select 3
+_resources = _this Select 4
+_infantryType = _this Select 5
+
+? (_infantryType == blackOpsRole):goto "BuyBlackOps"
+? (_infantryType == infantryCQBRole):goto "BuyCQB"
+? (_infantryType == infantryATRole):goto "BuyAT"
+? (_infantryType == infantryAARole):goto "BuyAA"
+
+? (_side == east):goto "BuyEast"
+
+#BuyWest
+
+	_soldierType = soldierType
+
+	? !(westUpgradedInfantry):goto "CheckBlackOps"
+
+	_type = Random 100
+
+	? (_type < 90) && (_resources >= sniperCost):_soldierType = sniperType
+	? (_type < 80) && (_resources >= soldierLAWCost):_soldierType = soldierLAWType
+	? (_type < 70) && (_resources >= soldierATCost):_soldierType = soldierATType
+	? (_type < 60) && (_resources >= soldierAACost):_soldierType = soldierAAType
+	? (_type < 50) && (_resources >= soldierMGCost):_soldierType = soldierMGType
+	? (_type < 40) && (_resources >= soldierGrenadierCost):_soldierType = soldierGrenadierType
+	? (_type < 30) && (_resources >= soldierHeavyGrenadierCost):_soldierType = soldierHeavyGrenadierType
+	? (_type < 20) && (_resources >= soldierMedicCost):_soldierType = soldierMedicType
+	? (_type < 10) && (_resources >= soldierSteyrCost):_soldierType = soldierSteyrType
+
+	#CheckBlackOps
+
+	? (westUpgradedBlackOps) && (Random 100 < 10) && (_resources >= blackOpsCost):_soldierType = blackOpsType
+
+	[_side,_barracks,_soldierType,noScript,_group,_teamPurchase] Exec "Main\BuyUnit.sqs"
+	Exit
+
+#BuyEast
+
+	_soldierType = soldierEastType
+
+	? !(eastUpgradedInfantry):goto "CheckSpetzNatz"
+
+	_type = Random 100
+
+	? (_type < 90) && (_resources >= sniperEastCost):_soldierType = sniperEastType
+	? (_type < 80) && (_resources >= soldierLAWEastCost):_soldierType = soldierLAWEastType
+	? (_type < 70) && (_resources >= soldierATEastCost):_soldierType = soldierATEastType
+	? (_type < 60) && (_resources >= soldierAAEastCost):_soldierType = soldierAAEastType
+	? (_type < 50) && (_resources >= soldierMGEastCost):_soldierType = soldierMGEastType
+	? (_type < 40) && (_resources >= soldierGrenadierEastCost):_soldierType = soldierGrenadierEastType
+	? (_type < 30) && (_resources >= soldierHeavyGrenadierEastCost):_soldierType = soldierHeavyGrenadierEastType
+	? (_type < 20) && (_resources >= soldierMedicEastCost):_soldierType = soldierMedicEastType
+	? (_type < 10) && (_resources >= soldierAK101EastCost):_soldierType = soldierAK101EastType
+
+	#CheckSpetzNatz
+
+	? (eastUpgradedBlackOps) && (Random 100 < 10) && (_resources >= blackOpsEastCost):_soldierType = blackOpsEastType
+
+	[_side,_barracks,_soldierType,noScript,_group,_teamPurchase] Exec "Main\BuyUnit.sqs"
+	Exit
+
+#BuyBlackOps
+
+	? (_side == east):goto "BuyEastBlackOps"
+
+#BuyWestBlackOps
+
+	? !(westUpgradedInfantry):Exit
+
+	_soldierType = sniperType
+	? (westUpgradedBlackOps) && (Random 100 < 70) && (_resources >= blackOpsCost):_soldierType = blackOpsType
+	[_side,_barracks,_soldierType,noScript,_group,_teamPurchase] Exec "Main\BuyUnit.sqs"
+	Exit
+
+#BuyEastBlackOps
+
+	? !(eastUpgradedInfantry):Exit
+
+	_soldierType = sniperEastType
+	? (eastUpgradedBlackOps) && (Random 100 < 70) && (_resources >= blackOpsEastCost):_soldierType = blackOpsEastType
+	[_side,_barracks,_soldierType,noScript,_group,_teamPurchase] Exec "Main\BuyUnit.sqs"
+	Exit
+
+#BuyCQB
+
+	? (_side == east):goto "BuyEastCQB"
+
+#BuyWestCQB
+
+	_soldierType = soldierType
+	_type = Random 100
+
+	? !(westUpgradedInfantry):goto "BuyWestCQBUnit"
+	? (_type < 90) && (_resources >= soldierMGCost):_soldierType = soldierMGType
+	? (_type < 70) && (_resources >= soldierGrenadierCost):_soldierType = soldierGrenadierType
+	? (_type < 50) && (_resources >= soldierHeavyGrenadierCost):_soldierType = soldierHeavyGrenadierType
+	? (_type < 30) && (_resources >= soldierMedicCost):_soldierType = soldierMedicType
+	? (_type < 10) && (_resources >= soldierLAWCost):_soldierType = soldierLAWType
+	? (_type < 5) && (_resources >= soldierATCost):_soldierType = soldierATType
+	? (_type < 2.5) && (_resources >= soldierAACost):_soldierType = soldierAAType
+
+	#BuyWestCQBUnit
+
+		[_side,_barracks,_soldierType,noScript,_group,_teamPurchase] Exec "Main\BuyUnit.sqs"
+	
+	Exit
+
+#BuyEastCQB
+
+	_soldierType = soldierEastType
+	_type = Random 100
+
+	? !(eastUpgradedInfantry):goto "BuyEastCQBUnit"
+	? (_type < 90) && (_resources >= soldierMGEastCost):_soldierType = soldierMGEastType
+	? (_type < 70) && (_resources >= soldierGrenadierEastCost):_soldierType = soldierGrenadierEastType
+	? (_type < 50) && (_resources >= soldierHeavyGrenadierEastCost):_soldierType = soldierHeavyGrenadierEastType
+	? (_type < 30) && (_resources >= soldierMedicEastCost):_soldierType = soldierMedicEastType
+	? (_type < 10) && (_resources >= soldierLAWEastCost):_soldierType = soldierLAWEastType
+	? (_type < 5) && (_resources >= soldierATEastCost):_soldierType = soldierATEastType
+	? (_type < 2.5) && (_resources >= soldierAAEastCost):_soldierType = soldierAAEastType
+
+	#BuyEastCQBUnit
+
+		[_side,_barracks,_soldierType,noScript,_group,_teamPurchase] Exec "Main\BuyUnit.sqs"
+	
+	Exit
+
+#BuyAT
+
+	? (_side == east):goto "BuyEastAT"
+
+#BuyWestAT
+
+	_soldierType = soldierType
+	_type = Random 100
+
+	? !(westUpgradedInfantry):goto "BuyWestATUnit"
+	? (_type < 95) && (_resources >= soldierATCost):_soldierType = soldierATType
+	? (_type < 40) && (_resources >= soldierLAWCost):_soldierType = soldierLAWType
+	? (_type < 20) && (_resources >= soldierMedicCost):_soldierType = soldierMedicType
+
+	#BuyWestATUnit
+
+		[_side,_barracks,_soldierType,noScript,_group,_teamPurchase] Exec "Main\BuyUnit.sqs"
+	
+	Exit
+
+#BuyEastAT
+
+	_soldierType = soldierEastType
+	_type = Random 100
+
+	? !(eastUpgradedInfantry):goto "BuyEastATUnit"
+	? (_type < 95) && (_resources >= soldierATEastCost):_soldierType = soldierATEastType
+	? (_type < 40) && (_resources >= soldierLAWEastCost):_soldierType = soldierLAWEastType
+	? (_type < 20) && (_resources >= soldierMedicEastCost):_soldierType = soldierMedicEastType
+
+	#BuyEastATUnit
+
+		[_side,_barracks,_soldierType,noScript,_group,_teamPurchase] Exec "Main\BuyUnit.sqs"
+	
+	Exit
+
+#BuyAA
+
+	? (_side == east):goto "BuyEastAA"
+
+#BuyWestAA
+
+	_soldierType = soldierType
+	_type = Random 100
+
+	? !(westUpgradedInfantry):goto "BuyWestAAUnit"
+	? (_type < 95) && (_resources >= soldierAACost):_soldierType = soldierAAType
+	? (_type < 30) && (_resources >= soldierMedicCost):_soldierType = soldierMedicType
+	? (_type < 10) && (_resources >= soldierLAWCost):_soldierType = soldierLAWType
+
+	#BuyWestAAUnit
+
+		[_side,_barracks,_soldierType,noScript,_group,_teamPurchase] Exec "Main\BuyUnit.sqs"
+	
+	Exit
+
+#BuyEastAA
+
+	_soldierType = soldierEastType
+	_type = Random 100
+
+	? !(eastUpgradedInfantry):goto "BuyEastAAUnit"
+	? (_type < 95) && (_resources >= soldierAAEastCost):_soldierType = soldierAAEastType
+	? (_type < 30) && (_resources >= soldierMedicEastCost):_soldierType = soldierMedicEastType
+	? (_type < 10) && (_resources >= soldierLAWEastCost):_soldierType = soldierLAWEastType
+
+	#BuyEastATUnit
+
+		[_side,_barracks,_soldierType,noScript,_group,_teamPurchase] Exec "Main\BuyUnit.sqs"
+	
+	Exit

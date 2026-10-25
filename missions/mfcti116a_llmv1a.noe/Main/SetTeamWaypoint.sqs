@@ -1,0 +1,38 @@
+;Last modified 9/17/2
+
+;_unit = _this Select 0
+_unit = player
+_side = Side _unit
+
+? (_unit != player):Exit
+? (_side == east):Goto "SetEast"
+
+#SetWest
+
+	_position = GetPos _unit
+
+	;Wait for server to process any other waypoint requests.
+	@ (!westSetPlayerWaypoint)
+
+	? (debug):WestCommander SideChat ("Setting west command waypoint.")
+
+	westPlayerWaypointPlayer = _unit;PublicVariable "westPlayerWaypointPlayer"
+	westPlayerWaypointX = _position Select 0;PublicVariable "westPlayerWaypointX"
+	westPlayerWaypointY = _position Select 1;PublicVariable "westPlayerWaypointY"
+	westSetPlayerWaypoint = true;PublicVariable "westSetPlayerWaypoint"
+
+	Exit
+
+#SetEast
+
+	_position = GetPos _unit
+
+	;Wait for server to process any other waypoint requests.
+	@ (!eastSetPlayerWaypoint)
+
+	? (debug):EastCommander SideChat ("Setting east command waypoint.")
+
+	eastPlayerWaypointPlayer = _unit;PublicVariable "eastPlayerWaypointPlayer"
+	eastPlayerWaypointX = _position Select 0;PublicVariable "eastPlayerWaypointX"
+	eastPlayerWaypointY = _position Select 1;PublicVariable "eastPlayerWaypointY"
+	eastSetPlayerWaypoint = true;PublicVariable "eastSetPlayerWaypoint"

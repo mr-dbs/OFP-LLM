@@ -1,0 +1,14 @@
+;Last modified 1/26/3
+;Script usage:  [] Exec "SetTownSideMarker.sqs"
+
+_town = setTownAreaMP
+_index = setTownAreaIndexMP
+_side = setTownAreaSideMP
+_set = setTownAreaSetMP
+_marker = Format["Town Area %1",_index]
+
+;Set marker visibility.
+? (_side == 0) && (_set) && (Side player == west):_marker SetMarkerType "flag";[_town,_marker] Exec "Main\MoveMarker.sqs"
+? (_side == 0) && (!_set) && (Side player == west):_marker SetMarkerType "empty";[HiddenMarkers,_marker] Exec "Main\MoveMarker.sqs"
+? (_side == 1) && (_set) && (Side player == east):_marker SetMarkerType "flag";[_town,_marker] Exec "Main\MoveMarker.sqs"
+? (_side == 1) && (!_set) && (Side player == east):_marker SetMarkerType "empty";[HiddenMarkers,_marker] Exec "Main\MoveMarker.sqs"

@@ -1,0 +1,34 @@
+;Last modified 4/2/3
+
+_side = _this Select 0
+_building = _this Select 1
+_unitType = _this Select 2
+_scriptType = _this Select 3
+_group = _this Select 4
+_teamPurchase = _this Select 5
+
+? (_side == east):goto "AddEast"
+
+;Wait until server is done creating any units.
+@ (addWestUnit == 0)
+
+addWestUnit = _unitType;PublicVariable "addWestUnit"
+addWestUnitScript = _scriptType;PublicVariable "addWestUnitScript"
+addWestUnitTeamPurchase = _teamPurchase;PublicVariable "addWestUnitTeamPurchase"
+addWestUnitGroup = _group;PublicVariable "addWestUnitGroup"
+addWestUnitBuilding = _building;PublicVariable "addWestUnitBuilding"
+
+Exit
+
+#AddEast
+
+;Wait until server is done creating any units.
+@ (addEastUnit == 0)
+
+addEastUnit = _unitType;PublicVariable "addEastUnit"
+addEastUnitScript = _scriptType;PublicVariable "addEastUnitScript"
+addEastUnitTeamPurchase = _teamPurchase;PublicVariable "addEastUnitTeamPurchase"
+addEastUnitGroup = _group;PublicVariable "addEastUnitGroup"
+addEastUnitBuilding = _building;PublicVariable "addEastUnitBuilding"
+
+Exit

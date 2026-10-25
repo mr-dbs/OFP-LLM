@@ -1,0 +1,30 @@
+;Last modified 8/28/3
+_bounty = 0
+_unit = _this Select 0
+_bounty = _this Select 1
+_side = Side _unit
+_group = Group _unit
+
+? (_side == civilian):_unit AddEventHandler ["killed",{[_this,civilian] Exec "Main\UnitKilled.sqs"}]
+
+#Update
+~30
+
+? (IsNull _unit):Exit
+? (GetDammage _unit == 1) || !(Alive _unit):goto "CleanUp"
+
+goto "Update"
+
+#CleanUp
+
+? (_side == west):[east,_bounty] Exec "Main\AddEqualResources.sqs";totalWestCasualties = totalWestCasualties + 1;PublicVariable "totalWestCasualties"
+? (_side == east):[west,_bounty] Exec "Main\AddEqualResources.sqs";totalEastCasualties = totalEastCasualties + 1;PublicVariable "totalEastCasualties"
+? (Local player) && (_group == Group player):totalTeamCasualties = totalTeamCasualties + 1
+? (_side == resistance):totalResistanceCasualties = totalResistanceCasualties + 1;PublicVariable "totalResistanceCasualties"
+? (_side == civilian):totalCivilianCasualties = totalCivilianCasualties + 1;PublicVariable "totalCivilianCasualties"
+
+~300
+
+	? (debug):player SideChat("Cleaned up a unit.")
+	DeleteVehicle _unit
+	Exit

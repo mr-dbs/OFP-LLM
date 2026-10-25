@@ -1,0 +1,65 @@
+;Last modified 2/19/4
+_mortar = _this Select 0
+_unit = _this Select 1
+_group = Group _unit
+_side = Side _group
+
+? (publicServer):Exit
+? !(Local LocalServerObject):Exit
+
+? (_side == west):buyWestMortarShells = ObjNull;PublicVariable "buyWestMortarShells";buyWestMortarShellsUnit = ObjNull;PublicVariable "buyWestMortarShellsUnit"
+? (_side == east):buyEastMortarShells = ObjNull;PublicVariable "buyEastMortarShells";buyEastMortarShellsUnit = ObjNull;PublicVariable "buyEastMortarShellsUnit"
+
+_notify = false
+? (_group In westPlayerGroups) || (_group In eastPlayerGroups):_notify = true
+
+goto "GetResources"
+
+#CheckResources
+
+;	? (_resources < mortarRearmCost) && (_notify):[] Exec "Main\SendPlayerMessage"
+	? (_resources < mortarRearmCost):Exit
+
+	[_group,mortarRearmCost] Exec "Main\SubtractTeamResources.sqs"
+
+	_mortar AddMagazine "MFCTI116MortarHeatMagazine"
+	~2
+	_mortar AddMagazine "MFCTI116MortarHeFragMagazine"
+	~2
+	_mortar AddMagazine "MFCTI116MortarHeFragMagazine"
+	~2
+	Exit
+
+#GetResources
+
+	_resources = 0
+
+	? (_side == east):goto "GetEastResources"
+
+#GetWestResources
+
+	? (_group == WestCommanderTeam):_resources = westResources;goto "CheckResources"
+	? (_group == WestAlphaTeam):_resources = westAlphaResources;goto "CheckResources"
+	? (_group == WestBravoTeam):_resources = westBravoResources;goto "CheckResources"
+	? (_group == WestCharlieTeam):_resources = westCharlieResources;goto "CheckResources"
+	? (_group == WestDeltaTeam):_resources = westDeltaResources;goto "CheckResources"
+	? (_group == WestEchoTeam):_resources = westEchoResources;goto "CheckResources"
+	? (_group == WestFoxtrotTeam):_resources = westFoxtrotResources;goto "CheckResources"
+	? (_group == WestGolfTeam):_resources = westGolfResources;goto "CheckResources"
+	? (_group == WestHotelTeam):_resources = westHotelResources;goto "CheckResources"
+
+	Exit
+
+#GetEastResources
+
+	? (_group == EastCommanderTeam):_resources = eastResources;goto "CheckResources"
+	? (_group == EastAlphaTeam):_resources = eastAlphaResources;goto "CheckResources"
+	? (_group == EastBravoTeam):_resources = eastBravoResources;goto "CheckResources"
+	? (_group == EastCharlieTeam):_resources = eastCharlieResources;goto "CheckResources"
+	? (_group == EastDeltaTeam):_resources = eastDeltaResources;goto "CheckResources"
+	? (_group == EastEchoTeam):_resources = eastEchoResources;goto "CheckResources"
+	? (_group == EastFoxtrotTeam):_resources = eastFoxtrotResources;goto "CheckResources"
+	? (_group == EastGolfTeam):_resources = eastGolfResources;goto "CheckResources"
+	? (_group == EastHotelTeam):_resources = eastHotelResources;goto "CheckResources"
+
+	Exit

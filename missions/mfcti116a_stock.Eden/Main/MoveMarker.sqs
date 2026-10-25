@@ -1,0 +1,8 @@
+;Move marker script.
+;Use to move a map marker to a different location on the map.
+;Script usage:  [Destination,Marker] exec "MoveMarker.sqs"
+
+_destination = _this select 0
+_marker = _this select 1
+
+_marker setmarkerpos (Getpos _destination)

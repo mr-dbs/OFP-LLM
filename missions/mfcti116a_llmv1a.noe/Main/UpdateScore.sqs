@@ -1,0 +1,14 @@
+;Last modified 4/1/3
+
+timeLastDeath = 0
+_lastPoints = 0
+
+#Update
+~10
+
+
+	timeLastDeath = timeLastDeath + 10
+
+	? (timeLastDeath >= stayAliveTime):timeLastDeath = 0;[player,pointsPerStayAlive] Exec "Main\AddPlayerPoints.sqs"
+
+	goto "Update"

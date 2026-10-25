@@ -1,0 +1,188 @@
+;Last modified 2/13/4
+? !(Local LocalServerObject):Exit
+
+@ (serverStarted)
+@ (startedLocationsInit)
+@ (Count startingLocations >= 48)
+
+_totalLocations = Count startingLocations
+
+;LLM link (added): matched test games. LLM\TestStart.sqf may set llmTestStart to [[west x, west y],[east x, east y]].
+;Each side then starts at the starting location nearest its point, with that location's first base template.
+;An empty list, which is what the file holds outside trials, leaves the stock random placement below as it was.
+llmTestStart = []
+Call loadFile "LLM\TestStart.sqf"
+? (Count llmTestStart < 2):goto "WestStart"
+
+_testWest = llmTestStart Select 0
+_testEast = llmTestStart Select 1
+_westIndex = 0
+_eastIndex = 0
+_westBest = 100000 * 100000
+_eastBest = 100000 * 100000
+_count = 0
+
+#FindTestStart
+
+	_position = GetPos (startingLocations Select _count)
+	_distance = (((_position Select 0) - (_testWest Select 0)) ^ 2) + (((_position Select 1) - (_testWest Select 1)) ^ 2)
+	? (_distance < _westBest):_westBest = _distance;_westIndex = _count
+	_distance = (((_position Select 0) - (_testEast Select 0)) ^ 2) + (((_position Select 1) - (_testEast Select 1)) ^ 2)
+	? (_distance < _eastBest):_eastBest = _distance;_eastIndex = _count
+	_count = _count + 1
+	? (_count < _totalLocations):goto "FindTestStart"
+
+? (_westIndex == _eastIndex):goto "WestStart"
+
+westStartingLocation = startingLocations Select _westIndex
+westBaseTemplate = firstTemplates Select _westIndex
+eastStartingLocation = startingLocations Select _eastIndex
+eastBaseTemplate = firstTemplates Select _eastIndex
+goto "PlaceSides"
+
+#WestStart
+
+_start = Random (_totalLocations - 1)
+westStartingLocation = startingLocations Select _start
+westBaseTemplate = (firstTemplates Select _start) + (Random ((lastTemplates Select _start) - (firstTemplates Select _start)))
+
+#EastStart
+
+	#CheckPosition
+
+		_start = Random (_totalLocations - 1)
+		eastStartingLocation = startingLocations Select _start
+		eastBaseTemplate = (firstTemplates Select _start) + (Random ((lastTemplates Select _start) - (firstTemplates Select _start)))
+
+		? (eastStartingLocation == westStartingLocation):goto "WestStart"
+
+		_distance = eastStartingLocation Distance westStartingLocation 
+		? (defendTheBase) && ((_distance > 1000) && (_distance < 3000)):goto "PlaceSides"
+		? !(defendTheBase) && (_distance > 3500):goto "PlaceSides"
+		goto "WestStart"
+
+#PlaceSides
+
+	PublicVariable "westStartingLocation"
+	PublicVariable "eastStartingLocation"
+	PublicVariable "westBaseTemplate"
+	PublicVariable "eastBaseTemplate"
+
+	_destination = GetPos westStartingLocation
+	WestDestination SetPos _destination
+	WestMobileHQ SetPos [(_destination Select 0) + 10,_destination Select 1,_destination Select 2]
+
+	_destination = GetPos eastStartingLocation
+	EastDestination SetPos _destination
+	EastMobileHQ SetPos [(_destination Select 0) + 10,_destination Select 1,_destination Select 2]
+
+	_count = 0
+	_totalTeams = Count westGroups
+
+	#PlaceTeam
+
+		_westUnit = Leader (westGroups Select _count)
+		_eastUnit = Leader (eastGroups Select _count)
+		_count = _count + 1
+
+		? (Local _westUnit):[_westUnit] Exec "Main\PlaceTeam.sqs"
+		? (Local _eastUnit):[_eastUnit] Exec "Main\PlaceTeam.sqs"
+		? (_count < _totalTeams):goto "PlaceTeam"
+
+@ (serverStarted)
+
+_truck = ObjNull
+_ural = ObjNull
+_jeep1 = ObjNull
+_jeep2 = ObjNull
+_UAZ1 = ObjNull
+_UAZ2 = ObjNull
+
+;Create some jeeps to provide transport for faster games.
+#PlaceWest
+
+	? (westPlayers < 1) && !(WestCommanderTeam In westPlayerGroups):goto "PlaceEast"
+
+	_destination = GetPos WestMobileHQ
+
+	_truck = "Truck5T" CreateVehicle [(_destination Select 0) + 4,(_destination Select 1) - 9,_destination Select 2]
+	@ !(IsNull _truck)
+
+	_truck SetDir 0
+	_truck SetPos [(_destination Select 0) + 4,(_destination Select 1) - 9,_destination Select 2]
+	[west,"Truck5t",_truck] Exec "Main\AddVehicleToServerList.sqs"
+	[_truck,west,ObjNull] Exec "Main\VehicleCleanUp.sqs"
+
+	? !(fastGame):goto "PlaceEast"
+
+	_jeep1 = "Jeep" CreateVehicle [(_destination Select 0) + 8,(_destination Select 1) - 5,_destination Select 2]
+	@ !(IsNull _jeep1)
+
+	_jeep1 SetDir 0
+	_jeep1 SetPos [(_destination Select 0) + 8,(_destination Select 1) - 5,_destination Select 2]
+	[west,"Jeep",_jeep1] Exec "Main\AddVehicleToServerList.sqs"
+	[_jeep1,west,ObjNull] Exec "Main\VehicleCleanUp.sqs"
+
+	_jeep2 = "Jeep" CreateVehicle [(_destination Select 0) + 12,(_destination Select 1) - 5,_destination Select 2]
+	@ !(IsNull _jeep2)
+
+	_jeep2 SetDir 0
+	_jeep2 SetPos [(_destination Select 0) + 12,(_destination Select 1) - 5,_destination Select 2]
+	[west,"Jeep",_jeep2] Exec "Main\AddVehicleToServerList.sqs"
+	[_jeep2,west,ObjNull] Exec "Main\VehicleCleanUp.sqs"
+
+#PlaceEast
+
+	? (eastPlayers < 1) && !(EastCommanderTeam In eastPlayerGroups):goto "FastGameAddToPlayerMarkers"
+
+	_destination = GetPos EastMobileHQ
+
+	_ural = "Ural" CreateVehicle [(_destination Select 0) + 4,(_destination Select 1) - 9,_destination Select 2]
+	@ !(IsNull _ural)
+
+	_ural SetDir 0
+	_ural SetPos [(_destination Select 0) + 4,(_destination Select 1) - 9,_destination Select 2]
+	[east,"Ural",_ural] Exec "Main\AddVehicleToServerList.sqs"
+	[_ural,east,ObjNull] Exec "Main\VehicleCleanUp.sqs"
+
+	? !(fastGame):goto "AddToPlayerMarkers"
+
+	_UAZ1 = "UAZ" CreateVehicle [(_destination Select 0) + 8,(_destination Select 1) - 6.5,_destination Select 2]
+	@ !(IsNull _UAZ1)
+
+	_UAZ1 SetDir 0
+	_UAZ1 SetPos [(_destination Select 0) + 8,(_destination Select 1) - 6.5,_destination Select 2]
+	[east,"UAZ",_UAZ1] Exec "Main\AddVehicleToServerList.sqs"
+	[_UAZ1,east,ObjNull] Exec "Main\VehicleCleanUp.sqs"
+
+	_UAZ2 = "UAZ" CreateVehicle [(_destination Select 0) + 12,(_destination Select 1) - 6.5,_destination Select 2]
+	@ !(IsNull _UAZ2)
+
+	_UAZ2 SetDir 0
+	_UAZ2 SetPos [(_destination Select 0) + 12,(_destination Select 1) - 6.5,_destination Select 2]
+	[east,"UAZ",_UAZ2] Exec "Main\AddVehicleToServerList.sqs"
+	[_UAZ2,east,ObjNull] Exec "Main\VehicleCleanUp.sqs"
+
+#FastGameAddToPlayerMarkers
+
+	? !(IsNull _jeep1):westUnitBuiltMP = _jeep1;PublicVariable "westUnitBuiltMP"
+	~2
+	? !(IsNull _jeep2):westUnitBuiltMP = _jeep2;PublicVariable "westUnitBuiltMP"
+	~2
+	? !(IsNull _UAZ1):eastUnitBuiltMP = _UAZ1;PublicVariable "eastUnitBuiltMP"
+	~2
+	? !(IsNull _UAZ2):eastUnitBuiltMP = _UAZ2;PublicVariable "eastUnitBuiltMP"
+	~2
+
+#AddToPlayerMarkers
+
+	? !(IsNull _truck):westUnitBuiltMP = _truck;PublicVariable "westUnitBuiltMP"
+	~2
+	? !(IsNull _ural):eastUnitBuiltMP = _ural;PublicVariable "eastUnitBuiltMP"
+	~2
+
+	;Redundant transmission in case some players were lagged.
+	PublicVariable "westStartingLocation"
+	PublicVariable "eastStartingLocation"
+	PublicVariable "westBaseTemplate"
+	PublicVariable "eastBaseTemplate"

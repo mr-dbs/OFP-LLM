@@ -1,0 +1,53 @@
+;Last modified 11/18/3
+;Put in request to server to add a vehicle to the server lists.
+;The lists are used for various purposes such as AI routines.
+
+_side = _this Select 0
+_vehicleName = _this Select 1
+_vehicle = _this Select 2
+
+? (_side == east):goto "AddEast"
+
+@ (IsNull addWestLight && IsNull addWestHeavy && IsNull addWestAir && IsNull addWestTransport)
+
+? (_vehicleName In westMiscNames):addWestMisc = _vehicle;PublicVariable "addWestMisc"
+? (_vehicleName In westTransportNames):addWestTransport = _vehicle;PublicVariable "addWestTransport"
+
+? (limitedRadar):goto "AddWestLimitedRadar"
+
+? (_vehicleName In westLightNames):addWestLight = _vehicle;PublicVariable "addWestLight"
+? (_vehicleName In westHeavyNames):addWestHeavy = _vehicle;PublicVariable "addWestHeavy"
+? (_vehicleName In westAirNames):addWestAir = _vehicle;PublicVariable "addWestAir"
+
+Exit
+
+;Limited radar vehicles.
+#AddWestLimitedRadar
+
+? (_vehicleName In westLRLightNames):addWestLight = _vehicle;PublicVariable "addWestLight"
+? (_vehicleName In westLRHeavyNames):addWestHeavy = _vehicle;PublicVariable "addWestHeavy"
+? (_vehicleName In westLRAirNames):addWestAir = _vehicle;PublicVariable "addWestAir"
+
+Exit
+
+#AddEast
+
+@ (IsNull addEastLight && IsNull addEastHeavy && IsNull addEastAir && IsNull addEastTransport)
+
+? (_vehicleName In eastMiscNames):addEastMisc = _vehicle;PublicVariable "addEastMisc"
+? (_vehicleName In eastTransportNames):addEastTransport = _vehicle;PublicVariable "addEastTransport"
+
+? (limitedRadar):goto "AddEastLimitedRadar"
+
+? (_vehicleName In eastLightNames):addEastLight = _vehicle;PublicVariable "addEastLight"
+? (_vehicleName In eastHeavyNames):addEastHeavy = _vehicle;PublicVariable "addEastHeavy"
+? (_vehicleName In eastAirNames):addEastAir = _vehicle;PublicVariable "addEastAir"
+
+Exit
+
+;Limited radar vehicles.
+#AddEastLimitedRadar
+
+? (_vehicleName In eastLRLightNames):addEastLight = _vehicle;PublicVariable "addEastLight"
+? (_vehicleName In eastLRHeavyNames):addEastHeavy = _vehicle;PublicVariable "addEastHeavy"
+? (_vehicleName In eastLRAirNames):addEastAir = _vehicle;PublicVariable "addEastAir"

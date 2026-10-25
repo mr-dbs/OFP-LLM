@@ -1,0 +1,3780 @@
+//Last modified 2/22/4
+//Coop version.
+#include "mfcti1.16\MortarMenu.h"
+
+respawn = 3;
+respawndelay = 30;
+onLoadMission = $STRMODNAME;
+
+//Various game properties.
+/*
+West Coop							- West player side works againt the east AI side.
+East Coop							- East player side works againt the west AI side.
+More income							- Income received for towns is increased.  This is applied to both sides.
+No AC Rockets						- Aircraft have no FFARs.
+
+Opposition							- Default is Light.  Higher values increase amount of resistance spawned and starting AI side's resources.
+Defend the Base						- The AI side will make an all out assault on the player's base.  They start closer and know the base's location.
+
+If you wish to pass parameters in from a .cfg simply add the values for combined choices.
+Example: west coop & more income - 1 + 4 = 5 (param1 = 5).
+Example: east coop, defend the base, heavy opposition - 2, 2 (param1 = 1, param2 = 2).
+*/
+
+#define WESTCOOP				1
+#define EASTCOOP				2
+#define LESSUNITS				4
+#define NIGHT					8
+
+#define LIGHTOP					1
+#define AVERAGEOP				2
+#define HEAVYOP					4
+#define INSANEOP				8
+#define DTB						16
+
+titleParam1 = $STRPARAM1LABEL;
+valuesParam1[] = {WESTCOOP,EASTCOOP,WESTCOOP+LESSUNITS,EASTCOOP+LESSUNITS,NIGHT+WESTCOOP,NIGHT+EASTCOOP,NIGHT+LESSUNITS+WESTCOOP,NIGHT+LESSUNITS+EASTCOOP};
+defValueParam1 = WESTCOOP;
+textsParam1[] = {$STRPARAMCOOP1A,$STRPARAMCOOP1B,$STRPARAMCOOP1C,$STRPARAMCOOP1D,$STRPARAMCOOP1E,$STRPARAMCOOP1F,$STRPARAMCOOP1G,$STRPARAMCOOP1H};
+
+titleParam2 = $STRPARAMCOOP2LABEL;
+valuesParam2[] = {LIGHTOP,AVERAGEOP,HEAVYOP,INSANEOP,DTB,AVERAGEOP+DTB,HEAVYOP+DTB,INSANEOP+DTB};
+defValueParam2 = INSANEOP;
+textsParam2[] = {$STRPARAMCOOP2A,$STRPARAMCOOP2B,$STRPARAMCOOP2C,$STRPARAMCOOP2D,$STRPARAMCOOP2E,$STRPARAMCOOP2F,$STRPARAMCOOP2G,$STRPARAMCOOP2H};
+
+//Gui related
+#define DEFAULTFONT						"CourierNewB64"
+#define SMALLFONT						"Garamond64"
+#define VERYSMALLFONT					"SteelfishB64"
+#define BOLDFONT						"TahomaB48"
+
+#define GUIUNDEFINED					-1
+#define GUILEFT							0
+#define GUIRIGHT						1
+#define GUICENTER						2
+#define GUITILEBAR						32
+#define GUIFRAME						64
+#define GUIDEFAULTTILEBAR				GUITILEBAR + GUICENTER
+
+#define GUITEXT							0
+#define GUIBUTTON						1
+#define GUIEDITABLETEXT					2
+#define GUICOMBO						4
+#define GUILIST							5
+#define GUICHECKBOX						7
+#define GUICLICKABLETEXT				11
+
+#define GUISTYLEHUD						128
+
+#define IDCUNDEFINED									-1
+#define IDCMENUINFO										500
+#define IDCMENUTEAMLIST									501
+#define IDCMENULIST										502
+#define IDCMENULIST1									503
+#define IDCMENULIST2									504
+#define IDCMENUTITLE									510
+#define IDCMENUSTATUSLABEL								511
+#define IDCMENUBUTTON									512
+#define IDCMENUBUTTON1									513
+#define IDCMENUBUTTON2									514
+#define IDCMENUIMAGE									515
+
+#define IDCCOMMANDMENUTEAMSELECT						100
+#define IDCCOMMANDMENUSETMANUALWAYPOINTCOLUMN			101
+#define IDCCOMMANDMENUSETMANUALWAYPOINTROW				102
+#define IDCCOMMANDMENUSETPRECISEMANUALWAYPOINTCOLUMN1	103
+#define IDCCOMMANDMENUSETPRECISEMANUALWAYPOINTCOLUMN2	104
+#define IDCCOMMANDMENUSETPRECISEMANUALWAYPOINTROW1		105
+#define IDCCOMMANDMENUSETPRECISEMANUALWAYPOINTROW2		106
+#define IDCCOMMANDMENUSETWPTOCURRENT					107
+#define IDCCOMMANDMENUMOVETOWP							108
+#define IDCCOMMANDMENUTAKETOWNS							109
+#define IDCCOMMANDMENUDEFENDTOWNS						110
+#define IDCCOMMANDMENUSEARCH							111
+#define IDCCOMMANDMENUCOMMAND							112
+#define IDCCOMMANDMENUDISEMBARK							113
+#define IDCCOMMANDMENUEMBARKTRANSPORT					114
+#define IDCCOMMANDMENUDISEMBARKTRANSPORT				115
+#define IDCCOMMANDMENUFIREMISSION						116
+
+#define IDCCONTROLMENUINFO								131
+#define IDCCONTROLMENUUPGRADELIST						132
+#define IDCCONTROLMENUTEAMLIST							133
+#define IDCCONTROLMENUUNITLIST							134
+#define IDCCONTROLMENULIGHTLIST							135
+#define IDCCONTROLMENUHEAVYLIST							146
+#define IDCCONTROLMENUAIRLIST							147
+
+#define IDCTEAM											1000
+#define IDCTEAMSIZE										1100
+#define IDCTEAMRESOURCES								1200
+#define IDCTEAMINDEPENDENT								1300
+#define IDCTEAMROLE										1400
+#define IDCTEAMGIVEAMOUNT								1500
+
+#define IDCTEAMLABEL									2000
+#define IDCCOMMANDERRESOURCES							2001
+
+#define IDCVOTEOPTION									3000
+#define IDCVOTETOGGLE									3100
+#define IDCVOTEON										3200
+#define IDCVOTEOFF										3300
+
+#define IDCTEAMLABEL									2000
+#define IDCCOMMANDERRESOURCES							2001
+
+#define IDCWESTRESOURCES								4000
+#define IDCWESTTOWNSHELD								4001
+#define IDCWESTPOINTS									4002
+#define IDCWESTINCOME									4003
+
+#define IDCEASTRESOURCES								4005
+#define IDCEASTTOWNSHELD								4006
+#define IDCEASTPOINTS									4007
+#define IDCEASTINCOME									4008
+
+#define IDCLOADOUTRESOURCES		200
+#define IDCLOADOUTSPACE			201
+#define IDCLOADOUTTRADEIN		202
+#define IDCLOADOUTCOST			203
+#define IDCLOADOUTREFUND		204
+#define IDCLOADOUTTEMPLATELIST	205
+#define IDCLOADOUTPRIMARY		206
+#define IDCLOADOUTPRIMARYAMMO	207
+#define IDCLOADOUTPRIMARYLIST	208
+#define IDCLOADOUTSECONDARY		209
+#define IDCLOADOUTSECONDARYAMMO	210
+#define IDCLOADOUTSECONDARYLIST	211
+#define IDCLOADOUTSIDEARM		212
+#define IDCLOADOUTSIDEARMLIST	213
+#define IDCLOADOUTMISC			214
+#define IDCLOADOUTMISCAMMO		215
+#define IDCLOADOUTMISCLIST		216
+#define IDCLOADOUTBUY			217
+
+class GuiText
+{
+	type = GUITEXT;
+	idc = IDCUNDEFINED;
+	style = GUILEFT;
+	colorText[] = {0.75,0.75,0.75,1};
+	colorBackground[] = {0,0,0,0};
+	font = DEFAULTFONT;
+	sizeEx = 0.025;
+
+	//Default button dimensions.	
+	w = 0.275;
+	h = 0.04;
+};
+
+class GuiLargeText:GuiText
+{
+	font = DEFAULTFONT;
+	sizeEx = 0.029;
+
+	//Default button dimensions.	
+	w = 0.275;
+	h = 0.1;
+};
+
+class GuiButton
+{
+	type = GUIBUTTON;
+	idc = IDCUNDEFINED;
+	style = GUICENTER;
+	colorText[] = {0.75,0.75,0.75,1};
+	font = DEFAULTFONT;
+	sizeEx = 0.025;
+	soundClick[] = {"ui\ui_ok",0.2,1};
+	soundEscape[] = {"ui\ui_cc",0.2,1};
+	soundPush[] = {,0.2,1};
+	default = false;
+
+	//Default button dimensions.	
+	w = 0.275;
+	h = 0.04;
+};
+
+class GuiClickableText
+{
+	type = GUICLICKABLETEXT;
+	idc = IDCUNDEFINED;
+	style = GUILEFT;
+	color[] = {0.75,0.75,0.75,1};
+	colorActive[] = {1,1,1,1};
+	font = DEFAULTFONT;
+	sizeEx = 0.025;
+	soundClick[] = {"ui\ui_ok",0.2,1};
+	soundEnter[] = {"ui\ui_over",0.2,1};
+	soundEscape[] = {"ui\ui_cc",0.2,1};
+	soundPush[] = {, 0.2, 1};
+	default = false;
+
+	//Default text dimensions.	
+	w = 0.275;
+	h = 0.04;
+};
+
+class GuiEditableText
+{
+	type = GUIEDITABLETEXT;
+	idc = IDCUNDEFINED;
+	style = GUILEFT;
+	font = DEFAULTFONT;
+	autocomplete = false;
+	sizeEx = 0.02;
+	colorSelection[] = {0.3,0.3,0.3,1};
+	colorText[] = {0.75,0.75,0.75,1};
+	text = ;
+
+	//Default button dimensions.	
+	w = 0.275;
+	h = 0.1;
+};
+
+class GuiList
+{
+	style = GUILEFT;
+	idc = IDCUNDEFINED;
+	colorBackground[] = {0.35,0.35,0.35,1};
+	colorSelect[] = {0.4,0.4,0.4,1};
+	colorSelectBackground[] = {0.2,0.2,0.2,1};
+	colorText[] = {0.75,0.75,0.75,1};
+	font = DEFAULTFONT;
+	sizeEx = 0.025;
+	rowHeight = 0.04;
+
+	//Default list dimensions.	
+	w = 0.275;
+	h = 0.04;
+};
+
+class GuiListBox:GuiList
+{
+	type = GUILIST;
+	rowHeight = 0.03;
+};
+
+class GuiTransparentListBox:GuiListBox
+{
+	colorBackground[] = {0,0,0,0};
+	colorSelect[] = {0,0,0,0};
+	colorSelectBackground[] = {0,0,0,0};
+	colorText[] = {0,0,0,0};
+};
+
+class GuiCameraList:GuiList
+{
+	type = GUILIST;
+	colorText[] = {0.5,0.5,0.5,1};
+	colorBackground[] = {0.5,0.5,0.5,1};
+};
+
+class GuiComboBox:GuiList
+{
+	type = GUICOMBO;
+	wholeHeight = 0.3;
+};
+      
+class DefaultMenu
+{
+	idd = IDCUNDEFINED;
+	movingEnable = true;
+	controlsBackground[] = {BackgroundWindow};
+	objects[] = {};
+
+	class BackgroundWindow:GuiText
+	{
+		style = GUISTYLEHUD;
+		colorBackground[] = {0.1,0.1,0.1,1.0};
+
+		text = "";
+		x = 0.325;
+		y = 0.075;
+		w = 0.4;
+		h = 0.85;
+	};
+
+	class BackgroundWindowLight:BackgroundWindow
+	{
+		colorBackground[] = {0.4,0.4,0.4,1.0};
+	};
+};
+
+class OptionsMenu:DefaultMenu
+{
+	controlsBackground[] = {OptionsBackgroundWindow};
+	controls[] = {MenuTitle,InfoBox,VoteButton,HelpButton,GUISkinButton,SongsButton,ResourceButton,FireMissionButton,SetWaypointButton,SetManualWaypoint,
+	SetManualWaypointColumn,SetManualWaypointRow,SetPreciseManualWaypoint,SetPreciseManualWaypointColumn1,SetPreciseManualWaypointColumn2,
+	SetPreciseManualWaypointRow1,SetPreciseManualWaypointRow2,SetRepawn,RespawnSelection,QueueTitle,DeleteButton,DeleteAllButton,Queue,ExitMenu};
+
+	class OptionsBackgroundWindow:BackgroundWindow
+	{
+		x = 0.325;
+		y = 0.005;
+		w = 0.35;
+		h = 0.975;
+	};
+
+	class MenuTitle:GuiLargeText
+	{
+		style = GUICENTER;
+		idc = IDCMENUTITLE;
+		x = 0.325;
+		y = 0.01;
+		w = 0.35;
+		h = 0.04;
+		text = $STROPTIONSMENU;
+	};
+
+	class InfoBox:GuiList
+	{
+		idc = IDCMENUINFO;
+		type = GUILIST;
+		x = 0.3375;
+		y = 0.06;
+		w = 0.325;
+		h = 0.14;
+		sizeEx = 0.0275;
+		rowHeight = 0.035;
+	};
+
+	class SetRepawn:GuiText
+	{
+		x = 0.3375;
+		y = 0.21;
+		w = 0.18;
+		h = 0.04;
+		text = $STROPTIONSRESPAWN;
+	};
+
+	//Drop down list for waypoint column.
+	class RespawnSelection:GuiComboBox
+	{
+		idc = IDCMENULIST1;
+		x = 0.5125;
+		y = 0.21;
+		w = 0.15;
+		h = 0.04;
+	};
+
+	class VoteButton:GuiButton
+	{
+		x = 0.3375;
+		y = 0.26;
+		w = 0.325;
+		text = $STRVOTEMENU;
+		action = "closeDialog 0;optionsMenuInUse = false;[] Exec ""GUI\UpdateGUIVoteMenu.sqs""";
+	};
+
+	class HelpButton:GuiButton
+	{
+		x = 0.3375;
+		y = 0.305;
+		w = 0.325;
+		text = $STROPTIONSHELP;
+		action = "closeDialog 0;optionsMenuInUse = false;[0] Exec ""GUI\OpenHelpMenu.sqs""";
+	};
+
+	class GUISkinButton:GuiButton
+	{
+		idc = IDCMENUBUTTON1;
+		x = 0.3375;
+		y = 0.35;
+		w = 0.325;
+		text = "";
+		action = "toggleGUISkin = !toggleGUISkin;";
+	};
+
+	class SongsButton:GuiButton
+	{
+		idc = IDCMENUBUTTON;
+		x = 0.3375;
+		y = 0.395;
+		w = 0.325;
+		text = "";
+		action = "playSongs = !playSongs";
+	};
+
+	//Go to Resource Management menu.
+	class ResourceButton:GuiButton
+	{
+		x = 0.3375;
+		y = 0.44;
+		w = 0.325;
+		text = $STRTRANSFERRESOURCES;
+		action = "closeDialog 0;optionsMenuInUse = false;openResourceMenu = true";
+	};
+
+	class FireMissionButton:GuiButton
+	{
+		x = 0.3375;
+		y = 0.485;
+		w = 0.325;
+		text = $STRREQUESTFIREMISSION;
+		action = "[player] Exec ""Main\RequestFireMission.sqs""";
+	};
+
+	class SetWaypointButton:GuiButton
+	{
+		x = 0.3375;
+		y = 0.53;
+		w = 0.325;
+		text = $STRSETWPTOCURRENT;
+		action = "[] Exec ""Main\SetTeamWaypoint.sqs""";
+	};
+
+	class SetManualWaypoint:GuiButton
+	{
+		x = 0.3375;
+		y = 0.575;
+		w = 0.2;
+		h = 0.04;
+		text = $STRSETWPTO;
+		action = "[] Exec ""Command\CommandMenuCloseManualWaypoint.sqs""";
+	};
+
+	//Drop down list for waypoint column.
+	class SetManualWaypointColumn:GuiComboBox
+	{
+		idc = IDCCOMMANDMENUSETMANUALWAYPOINTCOLUMN;
+		x = 0.61;
+		y = 0.575;
+		w = 0.02;
+		h = 0.04;
+	};
+
+	//Drop down list for waypoint row.
+	class SetManualWaypointRow:GuiComboBox
+	{
+		idc = IDCCOMMANDMENUSETMANUALWAYPOINTROW;
+		x = 0.64;
+		y = 0.575;
+		w = 0.02;
+		h = 0.04;
+	};
+
+	class SetPreciseManualWaypoint:GuiButton
+	{
+		x = 0.3375;
+		y = 0.62;
+		w = 0.2;
+		h = 0.04;
+		text = $STRSETWPTO;
+		action = "[] Exec ""Command\CommandMenuSetPreciseManualWaypoint.sqs""";
+	};
+
+	//Drop down list for waypoint column.
+	class SetPreciseManualWaypointColumn1:GuiComboBox
+	{
+		idc = IDCCOMMANDMENUSETPRECISEMANUALWAYPOINTCOLUMN1;
+		x = 0.55;
+		y = 0.62;
+		w = 0.02;
+		h = 0.04;
+	};
+
+	//Drop down list for waypoint column.
+	class SetPreciseManualWaypointColumn2:GuiComboBox
+	{
+		idc = IDCCOMMANDMENUSETPRECISEMANUALWAYPOINTCOLUMN2;
+		x = 0.58;
+		y = 0.62;
+		w = 0.02;
+		h = 0.04;
+	};
+
+	//Drop down list for waypoint row.
+	class SetPreciseManualWaypointRow1:GuiComboBox
+	{
+		idc = IDCCOMMANDMENUSETPRECISEMANUALWAYPOINTROW1;
+		x = 0.61;
+		y = 0.62;
+		w = 0.02;
+		h = 0.04;
+	};
+
+	//Drop down list for waypoint row.
+	class SetPreciseManualWaypointRow2:GuiComboBox
+	{
+		idc = IDCCOMMANDMENUSETPRECISEMANUALWAYPOINTROW2;
+		x = 0.64;
+		y = 0.62;
+		w = 0.02;
+		h = 0.04;
+	};
+
+	class QueueTitle:GuiLargeText
+	{
+		style = GUICENTER;
+		x = 0.3375;
+		y = 0.6675;
+		w = 0.325;
+		h = 0.04;
+		text = $STROPTIONSQUEUE;
+	};
+
+	class DeleteButton:GuiButton
+	{
+		style = GUICENTER;
+		x = 0.3375;
+		y = 0.715;
+		w = 0.155;
+		text = $STROPTIONSDELETE;
+		action = "menuDelete = true";
+	};
+	
+	class DeleteAllButton:GuiButton
+	{
+		style = GUICENTER;
+		x = 0.51;
+		y = 0.715;
+		w = 0.155;
+		text = $STROPTIONSDELETEALL;
+		action = "menuDeleteAll = true";
+	};
+	
+	class Queue:GuiComboBox
+	{
+		idc = IDCMENULIST;
+		type = GUILIST;
+		x = 0.3375;
+		y = 0.76;
+		w = 0.325;
+		h = 0.16;
+	};
+
+	class ExitMenu:GuiButton
+	{
+		x = 0.3375;
+		y = 0.93;
+		w = 0.325;
+		text = $STREXIT;
+		action = "closeDialog 0";
+	};
+};
+
+class OptionsMenuLight:OptionsMenu
+{
+	controlsBackground[] = {OptionsBackgroundWindow,OptionsBackgroundWindow1};
+	class OptionsBackgroundWindow1:BackgroundWindowLight
+	{
+		x = 0.325;
+		y = 0.005;
+		w = 0.35;
+		h = 0.975;
+	};
+};
+
+class HelpMenu:DefaultMenu
+{
+	controlsBackground[] = {HelpBackgroundWindow};
+	controls[] = {MenuTitle,GoalsButton,TeamButton,CommanderButton,TipsButton,ExitMenu};
+
+	class HelpBackgroundWindow:BackgroundWindow
+	{
+		x = 0.35;
+		y = 0.2;
+		w = 0.3;
+		h = 0.35;
+	};
+
+	class MenuTitle:GuiLargeText
+	{
+		style = GUICENTER;
+		x = 0.3625;
+		y = 0.185;
+		w = 0.25;
+		h = 0.09;
+		text = $STRHELPMENU;
+	};
+
+	class GoalsButton:GuiButton
+	{
+		x = 0.3625;
+		y = 0.285;
+		text = $STRHELPGOALS;
+		action = "closeDialog 0;[1] Exec ""GUI\OpenHelpMenu.sqs""";
+	};
+
+	//Describes role & options for a team leader.
+	class TeamButton:GuiButton
+	{
+		x = 0.3625;
+		y = 0.335;
+		text = $STRHELPTEAM;
+		action = "closeDialog 0;[2] Exec ""GUI\OpenHelpMenu.sqs""";
+	};
+
+	//Describes role & options for the commander.
+	class CommanderButton:GuiButton
+	{
+		x = 0.3625;
+		y = 0.385;
+		text = $STRHELPCOMMANDER;
+		action = "closeDialog 0;[3] Exec ""GUI\OpenHelpMenu.sqs""";
+	};
+
+	class TipsButton:GuiButton
+	{
+		x = 0.3625;
+		y = 0.435;
+		text = $STRHELPTIPS;
+		action = "closeDialog 0;[4] Exec ""GUI\OpenHelpMenu.sqs""";
+	};
+
+	class ExitMenu:GuiButton
+	{
+		x = 0.3625;
+		y = 0.485;
+		text = $STREXIT;
+		action = "closeDialog 0";
+	};
+};
+
+class HelpMenuLight:HelpMenu
+{
+	controlsBackground[] = {HelpBackgroundWindow,HelpBackgroundWindow1};
+	class HelpBackgroundWindow1:BackgroundWindowLight
+	{
+		x = 0.35;
+		y = 0.2;
+		w = 0.3;
+		h = 0.35;
+	};
+};
+
+class DefaultHelpMenu:DefaultMenu
+{
+	class DefaultHelpBackgroundWindow:BackgroundWindow
+	{
+		x = 0.05;
+		y = 0.2;
+		w = 0.9;
+		h = 0.6;
+	};
+
+	class DefaultHelpBackgroundWindowLight:BackgroundWindowLight
+	{
+		x = 0.05;
+		y = 0.2;
+		w = 0.9;
+		h = 0.6;
+	};
+	class DefaultHelpMenuTitle:GuiLargeText
+	{
+		style = GUICENTER;
+		x = 0.3625;
+		y = 0.185;
+		w = 0.25;
+		h = 0.09;
+		text = "";
+	};
+
+	class HelpLine:GuiText
+	{
+		style = GUILEFT;
+		x = 0.075;
+		y = 0.285;
+		w = 0.9;
+		h = 0.05;
+		text = "";
+	};
+
+	class CenterHelpLine:HelpLine
+	{
+		style = GUICENTER;
+		x = 0.05;
+	};
+
+	class BackButton:GuiButton
+	{
+		x = 0.15;
+		y = 0.735;
+		text = $STRBACK;
+		action = "closeDialog 0;[0] Exec ""GUI\OpenHelpMenu.sqs""";
+	};
+
+	class ExitMenu:GuiButton
+	{
+		x = 0.575;
+		y = 0.735;
+		text = $STREXIT;
+		action = "closeDialog 0";
+	};
+};
+
+class GoalsHelpMenu:DefaultHelpMenu
+{
+	controlsBackground[] = {DefaultHelpBackgroundWindow};
+	controls[] = {MenuTitle,Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,BackButton,ExitMenu};
+
+	class MenuTitle:DefaultHelpMenuTitle {text = $STRHELPGOALS;};
+
+	class Line1:HelpLine {text = $STRHELPGOALS1;y = 0.285;};
+	class Line2:HelpLine {text = $STRHELPGOALS2;y = 0.315;};
+	class Line3:HelpLine {text = $STRHELPGOALS3;y = 0.345;};
+
+	class Line4:CenterHelpLine {text = $STRHELPGOALS4;y = 0.435;colorText[] = {.15,1,.15,1};};
+	class Line5:CenterHelpLine {text = $STRHELPGOALS5;y = 0.485;colorText[] = {.15,.8,.15,1};};
+	class Line6:CenterHelpLine {text = $STRHELPGOALS6;y = 0.535;colorText[] = {.1,.65,.1,1};};
+	class Line7:CenterHelpLine {text = $STRHELPGOALS7;y = 0.585;colorText[] = {.075,.55,.075,1};};
+	class Line8:CenterHelpLine {text = $STRHELPGOALS8;y = 0.635;colorText[] = {0,.5,0,1};};
+};
+
+class GoalsHelpMenuLight:GoalsHelpMenu
+{
+	controlsBackground[] = {DefaultHelpBackgroundWindow,DefaultHelpBackgroundWindowLight};
+};
+
+class TeamHelpMenu:DefaultHelpMenu
+{
+	controlsBackground[] = {DefaultHelpBackgroundWindow};
+	controls[] = {MenuTitle,Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,Line9,BackButton,ExitMenu};
+
+	class MenuTitle:DefaultHelpMenuTitle {text = $STRHELPTEAMMENU;};
+
+	class Line1:HelpLine {text = $STRHELPTEAM1;y = 0.285;};
+	class Line2:HelpLine {text = $STRHELPTEAM2;y = 0.315;};
+	class Line3:HelpLine {text = $STRHELPTEAM3;y = 0.345;};
+	class Line4:HelpLine {text = $STRHELPTEAM4;y = 0.375;};
+	class Line5:HelpLine {text = $STRHELPTEAM5;y = 0.405;};
+	class Line6:HelpLine {text = $STRHELPTEAM6;y = 0.435;};
+
+	class Line7:CenterHelpLine {text = $STRHELPTEAM7;y = 0.525;colorText[] = {.15,1,.15,1};};
+	class Line8:CenterHelpLine {text = $STRHELPTEAM8;y = 0.575;colorText[] = {.15,.8,.15,1};};
+	class Line9:CenterHelpLine {text = $STRHELPTEAM9;y = 0.625;colorText[] = {.1,.65,.1,1};};
+};
+
+class TeamHelpMenuLight:TeamHelpMenu
+{
+	controlsBackground[] = {DefaultHelpBackgroundWindow,DefaultHelpBackgroundWindowLight};
+};
+
+class CommanderHelpMenu:DefaultHelpMenu
+{
+	controlsBackground[] = {DefaultHelpBackgroundWindow};
+	controls[] = {MenuTitle,Line1,Line2,Line3,Line4,Line5,Line6,Line7,Line8,BackButton,ExitMenu};
+
+	class MenuTitle:DefaultHelpMenuTitle {text = $STRHELPCOMMANDERMENU;};
+
+	class Line1:HelpLine {text = $STRHELPCOMMANDER1;y = 0.285;};
+	class Line2:HelpLine {text = $STRHELPCOMMANDER2;y = 0.315;};
+	class Line3:HelpLine {text = $STRHELPCOMMANDER3;y = 0.345;};
+	class Line4:HelpLine {text = $STRHELPCOMMANDER4;y = 0.375;};
+
+	class Line5:CenterHelpLine {text = $STRHELPCOMMANDER5;y = 0.495;colorText[] = {.15,1,.15,1};};
+	class Line6:CenterHelpLine {text = $STRHELPCOMMANDER6;y = 0.545;colorText[] = {.15,.8,.15,1};};
+	class Line7:CenterHelpLine {text = $STRHELPCOMMANDER7;y = 0.595;colorText[] = {.1,.65,.1,1};};
+	class Line8:CenterHelpLine {text = $STRHELPCOMMANDER8;y = 0.645;colorText[] = {.1,.65,.1,1};};
+};
+
+class CommanderHelpMenuLight:CommanderHelpMenu
+{
+	controlsBackground[] = {DefaultHelpBackgroundWindow,DefaultHelpBackgroundWindowLight};
+};
+
+class TipsHelpMenu:DefaultHelpMenu
+{
+	controlsBackground[] = {DefaultHelpBackgroundWindow};
+	controls[] = {MenuTitle,Line1,Line2,Line3,BackButton,ExitMenu};
+
+	class MenuTitle:DefaultHelpMenuTitle {text = $STRHELPTIPS;};
+
+	class Line1:CenterHelpLine {text = $STRHELPTIPS1;y = 0.285;colorText[] = {.15,1,.15,1};};
+	class Line2:CenterHelpLine {text = $STRHELPTIPS2;y = 0.3355;colorText[] = {.15,1,.15,1};};
+	class Line3:CenterHelpLine {text = $STRHELPTIPS3;y = 0.385;colorText[] = {.15,1,.15,1};};
+};
+
+class TipsHelpMenuLight:TipsHelpMenu
+{
+	controlsBackground[] = {DefaultHelpBackgroundWindow,DefaultHelpBackgroundWindowLight};
+};
+
+class CommandMenu:DefaultMenu
+{
+	controlsBackground[] = {CommandBackgroundWindow};
+	controls[] = {MenuTitle,TeamSelectedTitle,TeamSelectList,SetManualWaypoint,SetManualWaypointColumn,SetManualWaypointRow,SetPreciseManualWaypoint,
+	SetPreciseManualWaypointColumn1,SetPreciseManualWaypointColumn2,SetPreciseManualWaypointRow1,SetPreciseManualWaypointRow2,
+	SetWaypointToCurrentPosition,BombardWaypoint,ToggleFireMission,ResourceManagement,SetAITeams,ToWaypoint,TakeTowns,DefendTowns,SearchAndDestroy,CommandVehicles,DisembarkVehicles,EmbarkTransports,DisembarkTransports,ExitMenu};
+
+	class CommandBackgroundWindow:BackgroundWindow
+	{
+		x = 0.325;
+		y = 0.025;
+		h = 0.9;
+		w = 0.35;
+	};
+
+	class MenuTitle:GuiLargeText
+	{
+		style = GUICENTER;
+		x = 0.3375;
+		y = 0.02;
+		w = 0.35;
+		h = 0.05;
+		text = $STRCOMMANDMENU;
+	};
+
+	class TeamSelectedTitle:GuiText
+	{
+		x = 0.3375;
+		y = 0.07;
+		w = 0.175;
+		text = $STRTEAM;
+	};
+
+	//Drop down list of teams.  
+	class TeamSelectList:GuiComboBox
+	{
+		idc = IDCCOMMANDMENUTEAMSELECT;
+		x = 0.435;
+		y = 0.07;
+		w = 0.225;
+		h = 0.04;
+	};
+  
+	class SetManualWaypoint:GuiButton
+	{
+		x = 0.3375;
+		y = 0.12;
+		w = 0.2;
+		h = 0.04;
+		text = $STRSETWPTO;
+		action = "[] Exec ""Command\CommandMenuCloseManualWaypoint.sqs""";
+	};
+
+	//Drop down list for waypoint column.
+	class SetManualWaypointColumn:GuiComboBox
+	{
+		idc = IDCCOMMANDMENUSETMANUALWAYPOINTCOLUMN;
+		x = 0.61;
+		y = 0.12;
+		w = 0.02;
+		h = 0.04;
+	};
+
+	//Drop down list for waypoint row.
+	class SetManualWaypointRow:GuiComboBox
+	{
+		idc = IDCCOMMANDMENUSETMANUALWAYPOINTROW;
+		x = 0.64;
+		y = 0.12;
+		w = 0.02;
+		h = 0.04;
+	};
+
+	class SetPreciseManualWaypoint:GuiButton
+	{
+		x = 0.3375;
+		y = 0.17;
+		w = 0.2;
+		h = 0.04;
+		text = $STRSETWPTO;
+		action = "[] Exec ""Command\CommandMenuSetPreciseManualWaypoint.sqs""";
+	};
+
+	//Drop down list for waypoint column.
+	class SetPreciseManualWaypointColumn1:GuiComboBox
+	{
+		idc = IDCCOMMANDMENUSETPRECISEMANUALWAYPOINTCOLUMN1;
+		x = 0.55;
+		y = 0.17;
+		w = 0.02;
+		h = 0.04;
+	};
+
+	//Drop down list for waypoint column.
+	class SetPreciseManualWaypointColumn2:GuiComboBox
+	{
+		idc = IDCCOMMANDMENUSETPRECISEMANUALWAYPOINTCOLUMN2;
+		x = 0.58;
+		y = 0.17;
+		w = 0.02;
+		h = 0.04;
+	};
+
+	//Drop down list for waypoint row.
+	class SetPreciseManualWaypointRow1:GuiComboBox
+	{
+		idc = IDCCOMMANDMENUSETPRECISEMANUALWAYPOINTROW1;
+		x = 0.61;
+		y = 0.17;
+		w = 0.02;
+		h = 0.04;
+	};
+
+	//Drop down list for waypoint row.
+	class SetPreciseManualWaypointRow2:GuiComboBox
+	{
+		idc = IDCCOMMANDMENUSETPRECISEMANUALWAYPOINTROW2;
+		x = 0.64;
+		y = 0.17;
+		w = 0.02;
+		h = 0.04;
+	};
+
+	//Set waypoint to current position.
+	class SetWaypointToCurrentPosition:GuiButton
+	{
+		idc = IDCCOMMANDMENUSETWPTOCURRENT;
+		x = 0.3375;
+		y = 0.22;
+		w = 0.325;
+		text = $STRSETWPTOCURRENT;
+		action = "[] Exec ""Main\SetTeamWaypoint.sqs""";
+	};
+
+	//Order mortars to bombard current waypoint.
+	class BombardWaypoint:GuiButton
+	{
+		x = 0.3375;
+		y = 0.27;
+		w = 0.325;
+		text = $STRBOMBARDWAYPOINT;
+		action = "[player] Exec ""Main\BombardWaypoint.sqs""";
+	};
+
+	//Accept team fire mission request or stop current fire mission.
+	class ToggleFireMission:GuiButton
+	{
+		idc = IDCCOMMANDMENUFIREMISSION;
+		x = 0.3375;
+		y = 0.32;
+		w = 0.325;
+		text = $STRACCEPTFIREMISSION;
+		action = "toggleFireMission = true";
+	};
+
+	//Go to Resource Management menu.
+	class ResourceManagement:GuiButton
+	{
+		x = 0.3375;
+		y = 0.37;
+		w = 0.325;
+		text = $STRTRANSFERRESOURCES;
+		action = "closeDialog 0;commandMenuInUse = false;openResourceMenu = true";
+	};
+  
+	//Go to AI Management menu.
+	class SetAITeams:GuiButton
+	{
+		x = 0.3375;
+		y = 0.42;
+		w = 0.325;
+		text = $STRTEAMSMENU;
+		action = "closeDialog 0;commandMenuInUse = false;openTeamMenu = true";
+	};
+
+	//Order team to Command Waypoint button.  
+	class ToWaypoint:GuiButton
+	{
+		idc = IDCCOMMANDMENUMOVETOWP;
+		x = 0.3375;
+		y = 0.47;
+		w = 0.325;
+		text = $STRCOMMANDMOVETO;
+		action = "[] Exec ""Command\CommandMenuMoveToCommanderWP.sqs""";
+	};
+  
+   	//Order team to take towns button.  
+	class TakeTowns:GuiButton
+	{
+		idc = IDCCOMMANDMENUTAKETOWNS;
+		x = 0.3375;
+		y = 0.52;
+		w = 0.325;
+		text = $STRCOMMANDTAKETOWNS;
+		action = "[] Exec ""Command\CommandMenuTakeTowns.sqs""";
+//		action = "[player,1] Exec ""Command\CommandMenuOrder.sqs""";
+	};
+  
+	//Order team to defend towns button.  
+	class DefendTowns:GuiButton
+	{
+		idc = IDCCOMMANDMENUDEFENDTOWNS;
+		x = 0.3375;
+		y = 0.57;
+		w = 0.325;
+		text = $STRCOMMANDDEFEND;
+		action = "[] Exec ""Command\CommandMenuDefendTowns.sqs""";
+	};
+
+	//Order team to search & destroy.
+	class SearchAndDestroy:GuiButton
+	{
+		idc = IDCCOMMANDMENUSEARCH;
+		x = 0.3375;
+		y = 0.62;
+		w = 0.325;
+		text = $STRCOMMANDSEARCH;
+		action = "[] Exec ""Command\CommandMenuSearchAndDestroy.sqs""";
+	};
+
+	//Order team to take command of nearby vehicles.
+	class CommandVehicles:GuiButton
+	{
+		idc = IDCCOMMANDMENUCOMMAND;
+		x = 0.3375;
+		y = 0.67;
+		w = 0.325;
+		text = $STRCOMMANDVEHICLES;
+		action = "[] Exec ""Command\CommandMenuCommandVehicles.sqs""";
+	};
+
+	//Order team to all vehicles.
+	class DisembarkVehicles:GuiButton
+	{
+		idc = IDCCOMMANDMENUDISEMBARK;
+		x = 0.3375;
+		y = 0.72;
+		w = 0.325;
+		text = $STRCOMMANDDISEMBARKVEHICLES;
+		action = "[] Exec ""Command\CommandMenuDisembarkVehicles.sqs""";
+	};
+
+	//Order team to board transport.
+	class EmbarkTransports:GuiButton
+	{
+		idc = IDCCOMMANDMENUEMBARKTRANSPORT;
+		x = 0.3375;
+		y = 0.77;
+		w = 0.325;
+		text = $STRCOMMANDBOARD;
+		action = "[] Exec ""Command\CommandMenuEmbarkTransports.sqs""";
+	};
+
+	//Order team to disembark transport.
+	class DisembarkTransports:GuiButton
+	{
+		idc = IDCCOMMANDMENUDISEMBARKTRANSPORT;
+		x = 0.3375;
+		y = 0.82;
+		w = 0.325;
+		text = $STRCOMMANDDISEMBARKTRANSPORTS;
+		action = "[] Exec ""Command\CommandMenuDisembarkTransports.sqs""";
+	};
+
+	//Exit Command Menu button.
+	class ExitMenu:GuiButton
+	{
+		x = 0.3375;
+		y = 0.87;
+		w = 0.325;
+		text = $STREXIT;
+		action = "closeDialog 0;commandMenuInUse = false";
+	};
+};
+
+class CommandMenuLight:CommandMenu
+{
+	controlsBackground[] = {CommandBackgroundWindow,CommandBackgroundWindow1};
+	class CommandBackgroundWindow1:BackgroundWindowLight
+	{
+		x = 0.325;
+		y = 0.025;
+		h = 0.9;
+		w = 0.35;
+	};
+}
+
+class MapCommandMenu:DefaultMenu
+{
+	controlsBackground[] = {CommandBackgroundWindowTop,CommandBackgroundWindowBottom};
+	controls[] = {TeamSelectList,ToWaypoint,TakeTowns,DefendTowns,SearchAndDestroy,CommandVehicles,DisembarkVehicles,EmbarkTransports,DisembarkTransports,ExitMenu};
+
+	class CommandBackgroundWindowTop:BackgroundWindow
+	{
+		x = 0.01;
+		y = 0.0;
+		h = 0.06;
+		w = 0.98;
+	};
+
+	class CommandBackgroundWindowBottom:CommandBackgroundWindowTop
+	{
+		y = 0.94;
+	};
+
+	//Drop down list of teams.  
+	class TeamSelectList:GuiComboBox
+	{
+		idc = IDCCOMMANDMENUTEAMSELECT;
+		x = 0.02;
+		y = 0.01;
+		w = 0.2;
+		h = 0.04;
+	};
+
+	//Order team to Command Waypoint button.  
+	class ToWaypoint:GuiButton
+	{
+		idc = IDCCOMMANDMENUMOVETOWP;
+		x = 0.23;
+		y = 0.01;
+		w = 0.15;
+		text = $STRCOMMANDMOVETO;
+		action = "[] Exec ""Command\CommandMenuMoveToCommanderWP.sqs""";
+	};
+
+  	//Order team to take towns button.  
+	class TakeTowns:GuiButton
+	{
+  		idc = IDCCOMMANDMENUTAKETOWNS;
+		x = 0.39;
+		y = 0.01;
+		w = 0.15;
+		text = $STRSHORTTAKETOWNS;
+		action = "[] Exec ""Command\CommandMenuTakeTowns.sqs""";
+	};
+  
+	//Order team to defend towns button.  
+	class DefendTowns:GuiButton
+	{
+		idc = IDCCOMMANDMENUDEFENDTOWNS;
+		x = 0.55;
+		y = 0.01;
+		w = 0.25;
+		text = $STRSHORTDEFEND;
+		action = "[] Exec ""Command\CommandMenuDefendTowns.sqs""";
+	};
+  
+	//Order team to search & destroy.
+	class SearchAndDestroy:GuiButton
+	{
+		idc = IDCCOMMANDMENUSEARCH;
+		x = 0.81;
+		y = 0.01;
+		w = 0.17;
+		text = $STRSHORTSEARCH;
+		action = "[] Exec ""Command\CommandMenuSearchAndDestroy.sqs""";
+	};
+
+	//Order team to take command of nearby vehicles.
+	class CommandVehicles:GuiButton
+	{
+		idc = IDCCOMMANDMENUCOMMAND;
+		x = 0.02;
+		y = 0.95;
+		w = 0.24;
+		text = $STRSHORTCOMMANDVEHICLES;
+		action = "[] Exec ""Command\CommandMenuCommandVehicles.sqs""";
+	};
+
+	//Order team to all vehicles.
+	class DisembarkVehicles:GuiButton
+	{
+		idc = IDCCOMMANDMENUDISEMBARK;
+		x = 0.27;
+		y = 0.95;
+		w = 0.19;
+		text = $STRSHORTDISEMBARKVEHICLES;
+		action = "[] Exec ""Command\CommandMenuDisembarkVehicles.sqs""";
+	};
+
+	//Order team to board transport.
+	class EmbarkTransports:GuiButton
+	{
+		idc = IDCCOMMANDMENUEMBARKTRANSPORT;
+		x = 0.47;
+		y = 0.95;
+		w = 0.18;
+		text = $STRSHORTBOARD;
+		action = "[] Exec ""Command\CommandMenuEmbarkTransports.sqs""";
+	};
+
+	//Order team to disembark transport.
+	class DisembarkTransports:GuiButton
+	{
+		idc = IDCCOMMANDMENUDISEMBARKTRANSPORT;
+		x = 0.66;
+		y = 0.95;
+		w = 0.21;
+		text = $STRSHORTDISEMBARKTRANSPORTs;
+		action = "[] Exec ""Command\CommandMenuDisembarkTransports.sqs""";
+	};
+
+	//Exit Command Menu button.
+	class ExitMenu:GuiButton
+	{
+		x = 0.88;
+		y = 0.95;
+		w = 0.1;
+		text = $STREXIT;
+		action = "closeDialog 0;commandMenuInUse = false;ForceMap false";
+	};
+};
+
+class MapCommandMenuLight:MapCommandMenu
+{
+	controlsBackground[] = {CommandBackgroundWindowTop,CommandBackgroundWindowTop1,CommandBackgroundWindowBottom,CommandBackgroundWindowBottom1};
+	class CommandBackgroundWindowTop1:BackgroundWindowLight
+	{
+		x = 0.01;
+		y = 0.0;
+		h = 0.06;
+		w = 0.98;
+	};
+
+	class CommandBackgroundWindowBottom1:CommandBackgroundWindowTop1
+	{
+		y = 0.94;
+	};
+}
+
+class ResourceMenu:DefaultMenu
+{
+	controlsBackground[] = {ResourceBackgroundWindow};
+	controls[] = {MenuTitle,InfoBox,PlayerLabel,PlayerList,GivePlayer,GivePlayerList,ExitMenu};
+
+	class ResourceBackgroundWindow:BackgroundWindow
+	{
+		x = 0.3;
+		y = 0.125;
+		h = 0.3125;
+	};
+
+	class MenuTitle:GuiLargeText
+	{
+		style = GUICENTER;
+		x = 0.35;
+		y = 0.12;
+		w = 0.305;
+		h = 0.05;
+		text = $STRRESOURCEMENU;
+	};
+
+	class InfoBox:GuiList
+	{
+		idc = IDCMENUINFO;
+		type = GUILIST;
+		x = 0.35;
+		y = 0.17;
+		w = 0.305;
+		h = 0.08;
+	};
+
+	class PlayerLabel:GuiText
+	{
+		x = 0.35;
+		y = 0.27;
+		w = 0.15;
+		text = $STRRESOURCEPLAYER;
+	};
+
+	//Drop down list of teams.  
+	class PlayerList:GuiComboBox
+	{
+		idc = IDCMENUTEAMLIST;
+		x = 0.43;
+		y = 0.27;
+		w = 0.225;
+		h = 0.04;
+	};
+ 
+	class GivePlayer:GuiButton
+	{
+		x = 0.35;
+		y = 0.32;
+		w = 0.16;
+		h = 0.04;
+		text = $STRRESOURCEGIVE;
+		action = "resourceMenuGivePlayer = true";
+	};
+
+	//Drop down list for waypoint row.
+	class GivePlayerList:GuiComboBox
+	{
+		idc = IDCMENULIST1;
+		x = 0.585;
+		y = 0.32;
+		w = 0.07;
+		h = 0.04;
+	};
+
+	//Exit Resource Menu button.
+	class ExitMenu:GuiButton
+	{
+		x = 0.35;
+		y = 0.37;
+		w = 0.305;
+		text = $STREXIT;
+		action = "closeDialog 0;resourceMenuInUse = false";
+	};
+};
+
+class ResourceMenuLight:ResourceMenu
+{
+	controlsBackground[] = {ResourceBackgroundWindow,ResourceBackgroundWindow1};
+
+	class ResourceBackgroundWindow1:BackgroundWindowLight
+	{
+		x = 0.3;
+		y = 0.125;
+		h = 0.3125;
+	};
+};
+
+class CommanderResourceMenu:ResourceMenu
+{
+	controlsBackground[] = {CommanderBackgroundWindow};
+	controls[] = {MenuTitle,InfoBox,PlayerLabel,PlayerList,PercentageLabel,PercentageList,AwardLabel,AwardList,CommanderGivePlayer,CommanderGivePlayerList,CommanderExitMenu};
+
+	class CommanderBackgroundWindow:ResourceBackgroundWindow
+	{
+		x = 0.3;
+		y = 0.125;
+		h = 0.4125;
+	};
+
+	class PercentageLabel:GuiText
+	{
+		x = 0.35;
+		y = 0.37;
+		w = 0.20;
+		h = 0.04;
+		text = $STRRESOURCEPLAYERPERCENT;
+	};
+
+	//Drop down list for waypoint column.
+	class PercentageList:GuiComboBox
+	{
+		idc = IDCMENULIST;
+		x = 0.585;
+		y = 0.37;
+		w = 0.07;
+		h = 0.04;
+	};
+
+	class AwardLabel:GuiText
+	{
+		x = 0.35;
+		y = 0.42;
+		w = 0.20;
+		h = 0.04;
+		text = $STRAWARDPLAYERPERCENT;
+	};
+
+
+	//Drop down list for waypoint column.
+	class AwardList:GuiComboBox
+	{
+		idc = IDCMENULIST2;
+		x = 0.585;
+		y = 0.42;
+		w = 0.07;
+		h = 0.04;
+	};
+
+	class CommanderGivePlayer:GivePlayer {y = 0.32;};
+	class CommanderGivePlayerList:GivePlayerList {y = 0.32;};
+	class CommanderExitMenu:ExitMenu {y = 0.47;};
+};
+
+class CommanderResourceMenuLight:CommanderResourceMenu
+{
+	controlsBackground[] = {CommanderBackgroundWindow,CommanderBackgroundWindow1};
+
+	class CommanderBackgroundWindow1:BackgroundWindowLight
+	{
+		x = 0.3;
+		y = 0.125;
+		h = 0.4125;
+	};
+};
+
+class TeamMenu:DefaultMenu
+{
+	controlsBackground[] = {TeamBackgroundWindow};
+	controls[] = {MenuTitle,CommanderResources,TeamLabel,SizeLabel,ResourcesLabel,IndependentLabel,RoleLabel,AlphaLabel,AlphaSize,AlphaResources,AlphaToggle,AlphaRole,AlphaGive,AlphaGiveAmount,
+				  BravoLabel,BravoSize,BravoResources,BravoToggle,BravoRole,BravoGive,BravoGiveAmount,CharlieLabel,CharlieSize,CharlieResources,CharlieToggle,CharlieRole,CharlieGive,CharlieGiveAmount,
+				  DeltaLabel,DeltaSize,DeltaResources,DeltaToggle,DeltaRole,DeltaGive,DeltaGiveAmount,EchoLabel,EchoSize,EchoResources,EchoToggle,EchoRole,EchoGive,EchoGiveAmount,
+				  FoxtrotLabel,FoxtrotSize,FoxtrotResources,FoxtrotToggle,FoxtrotRole,FoxtrotGive,FoxtrotGiveAmount,GolfLabel,GolfSize,GolfResources,GolfToggle,GolfRole,GolfGive,GolfGiveAmount,
+				  HotelLabel,HotelSize,HotelResources,HotelToggle,HotelRole,HotelGive,HotelGiveAmount,AllIndependent,NoIndependent,AllMechanized,AllArmoured,AllAir,ExitMenu};
+
+	class TeamBackgroundWindow:BackgroundWindow
+	{
+		x = 0.04;
+		y = 0.025;
+		h = 0.7;
+		w = 0.92;
+	};
+
+	class MenuTitle:GuiLargeText
+	{
+		style = GUICENTER;
+		x = 0.3625;
+		y = 0.02;
+		w = 0.25;
+		h = 0.05;
+		text = $STRTEAMSMENU;
+	};
+
+	class CommanderResources:GuiText
+	{
+		style = GUICENTER;
+		idc = IDCCOMMANDERRESOURCES;
+		x = 0.4;
+		y = 0.07;
+		w = 0.2;
+		text = "";
+	};
+
+	class TeamBase:GuiText
+	{
+		x = 0.05;
+		w = 0.225;
+		text = "";
+	};
+
+	class SizeBase:GuiText
+	{
+		style = GUIRIGHT;
+		x = 0.28;
+		w = 0.08;
+		text = "";
+	};
+
+	class ResourcesBase:GuiText
+	{
+		style = GUIRIGHT;
+		x = 0.36;
+		w = 0.1;
+		text = "";
+	};
+
+	class ToggleBase:GuiButton
+	{
+		x = 0.485;
+		w = 0.105;
+		text = "";
+	};
+
+	class RoleBase:GuiComboBox
+	{
+		x = 0.605;
+		w = 0.12;
+	};
+
+	class GiveBase:GuiButton
+	{
+		x = 0.74;
+		w = 0.11;
+	};
+
+	class GiveAmountBase:GuiComboBox
+	{
+		x = 0.865;
+		w = 0.08;
+	};
+
+	class TeamLabel:TeamBase
+	{
+		idc = IDCTEAMLABEL;
+		y = 0.12;
+		text = $STRTEAM;
+	};
+
+	class SizeLabel:SizeBase
+	{
+		y = 0.12;
+		text = $STRSIZE;
+	};
+
+	class ResourcesLabel:ResourcesBase
+	{
+		y = 0.12;
+		text = $STRRESOURCES;
+	};
+
+	class IndependentLabel:GuiText
+	{
+		x = 0.48;
+		y = 0.12;
+		w = 0.11;
+		text = $STRINDEPENDENT;
+	};
+
+	class RoleLabel:GuiText
+	{
+		x = 0.60;
+		y = 0.12;
+		w = 0.12;
+		text = $STRROLE;
+	};
+
+	class AlphaLabel:TeamBase
+	{
+		idc = IDCTEAM + 1;
+		y = 0.17;
+	};
+
+	class AlphaSize:SizeBase
+	{
+		idc = IDCTEAMSIZE + 1;
+		y = 0.17;
+	};
+
+	class AlphaResources:ResourcesBase
+	{
+		idc = IDCTEAMRESOURCES + 1;
+		y = 0.17;
+	};
+
+	class AlphaToggle:ToggleBase
+	{
+		idc = IDCTEAMINDEPENDENT + 1;
+		y = 0.17;
+		action = "toggleTeam = 1";
+	};
+
+	class AlphaRole:RoleBase
+	{
+		idc = IDCTEAMROLE + 1;
+		y = 0.17;
+	};
+
+	class AlphaGive:GiveBase
+	{
+		y = 0.17;
+		text = $STRGIVE;
+		action = "giveTeam = 1";
+	};
+
+	class AlphaGiveAmount:GiveAmountBase
+	{
+		idc = IDCTEAMGIVEAMOUNT + 1;
+		y = 0.17;
+	};
+
+	class BravoLabel:TeamBase
+	{
+		idc = IDCTEAM + 2;
+		y = 0.22;
+	};
+
+	class BravoSize:SizeBase
+	{
+		idc = IDCTEAMSIZE + 2;
+		y = 0.22;
+	};
+
+	class BravoResources:ResourcesBase
+	{
+		idc = IDCTEAMRESOURCES + 2;
+		y = 0.22;
+	};
+
+	class BravoToggle:ToggleBase
+	{
+		idc = IDCTEAMINDEPENDENT + 2;
+		y = 0.22;
+		action = "toggleTeam = 2";
+	};
+
+	class BravoRole:RoleBase
+	{
+		idc = IDCTEAMROLE + 2;
+		y = 0.22;
+	};
+
+	class BravoGive:GiveBase
+	{
+		y = 0.22;
+		text = $STRGIVE;
+		action = "giveTeam = 2";
+	};
+
+	class BravoGiveAmount:GiveAmountBase
+	{
+		idc = IDCTEAMGIVEAMOUNT + 2;
+		y = 0.22;
+	};
+
+	class CharlieLabel:TeamBase
+	{
+		idc = IDCTEAM + 3;
+		y = 0.27;
+	};
+
+	class CharlieSize:SizeBase
+	{
+		idc = IDCTEAMSIZE + 3;
+		y = 0.27;
+	};
+
+	class CharlieResources:ResourcesBase
+	{
+		idc = IDCTEAMRESOURCES + 3;
+		y = 0.27;
+	};
+
+	class CharlieToggle:ToggleBase
+	{
+		idc = IDCTEAMINDEPENDENT + 3;
+		y = 0.27;
+		action = "toggleTeam = 3";
+	};
+
+	class CharlieRole:RoleBase
+	{
+		idc = IDCTEAMROLE + 3;
+		y = 0.27;
+	};
+
+	class CharlieGive:GiveBase
+	{
+		y = 0.27;
+		text = $STRGIVE;
+		action = "giveTeam = 3";
+	};
+
+	class CharlieGiveAmount:GiveAmountBase
+	{
+		idc = IDCTEAMGIVEAMOUNT + 3;
+		y = 0.27;
+	};
+
+	class DeltaLabel:TeamBase
+	{
+		idc = IDCTEAM + 4;
+		y = 0.32;
+	};
+
+	class DeltaSize:SizeBase
+	{
+		idc = IDCTEAMSIZE + 4;
+		y = 0.32;
+	};
+
+	class DeltaResources:ResourcesBase
+	{
+		idc = IDCTEAMRESOURCES + 4;
+		y = 0.32;
+	};
+
+	class DeltaToggle:ToggleBase
+	{
+		idc = IDCTEAMINDEPENDENT + 4;
+		y = 0.32;
+		action = "toggleTeam = 4";
+	};
+
+	class DeltaRole:RoleBase
+	{
+		idc = IDCTEAMROLE + 4;
+		y = 0.32;
+	};
+
+	class DeltaGive:GiveBase
+	{
+		y = 0.32;
+		text = $STRGIVE;
+		action = "giveTeam = 4";
+	};
+
+	class DeltaGiveAmount:GiveAmountBase
+	{
+		idc = IDCTEAMGIVEAMOUNT + 4;
+		y = 0.32;
+	};
+
+	class EchoLabel:TeamBase
+	{
+		idc = IDCTEAM + 5;
+		y = 0.37;
+	};
+
+	class EchoSize:SizeBase
+	{
+		idc = IDCTEAMSIZE + 5;
+		y = 0.37;
+	};
+
+	class EchoResources:ResourcesBase
+	{
+		idc = IDCTEAMRESOURCES + 5;
+		y = 0.37;
+	};
+
+	class EchoToggle:ToggleBase
+	{
+		idc = IDCTEAMINDEPENDENT + 5;
+		y = 0.37;
+		action = "toggleTeam = 5";
+	};
+
+	class EchoRole:RoleBase
+	{
+		idc = IDCTEAMROLE + 5;
+		y = 0.37;
+	};
+
+	class EchoGive:GiveBase
+	{
+		y = 0.37;
+		text = $STRGIVE;
+		action = "giveTeam = 5";
+	};
+
+	class EchoGiveAmount:GiveAmountBase
+	{
+		idc = IDCTEAMGIVEAMOUNT + 5;
+		y = 0.37;
+	};
+
+	class FoxtrotLabel:TeamBase
+	{
+		idc = IDCTEAM + 6;
+		y = 0.42;
+	};
+
+	class FoxtrotSize:SizeBase
+	{
+		idc = IDCTEAMSIZE + 6;
+		y = 0.42;
+	};
+
+	class FoxtrotResources:ResourcesBase
+	{
+		idc = IDCTEAMRESOURCES + 6;
+		y = 0.42;
+	};
+
+	class FoxtrotToggle:ToggleBase
+	{
+		idc = IDCTEAMINDEPENDENT + 6;
+		y = 0.42;
+		action = "toggleTeam = 6";
+	};
+
+	class FoxtrotRole:RoleBase
+	{
+		idc = IDCTEAMROLE + 6;
+		y = 0.42;
+	};
+
+	class FoxtrotGive:GiveBase
+	{
+		y = 0.42;
+		text = $STRGIVE;
+		action = "giveTeam = 6";
+	};
+
+	class FoxtrotGiveAmount:GiveAmountBase
+	{
+		idc = IDCTEAMGIVEAMOUNT + 6;
+		y = 0.42;
+	};
+
+	class GolfLabel:TeamBase
+	{
+		idc = IDCTEAM + 7;
+		y = 0.47;
+	};
+
+	class GolfSize:SizeBase
+	{
+		idc = IDCTEAMSIZE + 7;
+		y = 0.47;
+	};
+
+	class GolfResources:ResourcesBase
+	{
+		idc = IDCTEAMRESOURCES + 7;
+		y = 0.47;
+	};
+
+	class GolfToggle:ToggleBase
+	{
+		idc = IDCTEAMINDEPENDENT + 7;
+		y = 0.47;
+		action = "toggleTeam = 7";
+	};
+
+	class GolfRole:RoleBase
+	{
+		idc = IDCTEAMROLE + 7;
+		y = 0.47;
+	};
+
+	class GolfGive:GiveBase
+	{
+		y = 0.47;
+		text = $STRGIVE;
+		action = "giveTeam = 7";
+	};
+
+	class GolfGiveAmount:GiveAmountBase
+	{
+		idc = IDCTEAMGIVEAMOUNT + 7;
+		y = 0.47;
+	};
+
+	class HotelLabel:TeamBase
+	{
+		idc = IDCTEAM + 8;
+		y = 0.52;
+	};
+
+	class HotelSize:SizeBase
+	{
+		idc = IDCTEAMSIZE + 8;
+		y = 0.52;
+	};
+
+	class HotelResources:ResourcesBase
+	{
+		idc = IDCTEAMRESOURCES + 8;
+		y = 0.52;
+	};
+
+	class HotelToggle:ToggleBase
+	{
+		idc = IDCTEAMINDEPENDENT + 8;
+		y = 0.52;
+		action = "toggleTeam = 8";
+	};
+
+	class HotelRole:RoleBase
+	{
+		idc = IDCTEAMROLE + 8;
+		y = 0.52;
+	};
+
+	class HotelGive:GiveBase
+	{
+		y = 0.52;
+		text = $STRGIVE;
+		action = "giveTeam = 8";
+	};
+
+	class HotelGiveAmount:GiveAmountBase
+	{
+		idc = IDCTEAMGIVEAMOUNT + 8;
+		y = 0.52;
+	};
+
+	class AllIndependent:GuiButton
+	{
+		x = 0.055;
+		y = 0.59;
+		w = 0.205;
+		text = $STRALLINDEPENDENT;
+		action = "allIndependent = true";
+	};
+
+	class NoIndependent:GuiButton
+	{
+		x = 0.265;
+		y = 0.59;
+		w = 0.2;
+		text = $STRNOINDEPENDENT;
+		action = "noIndependent = true";
+	};
+
+	class AllMechanized:GuiButton
+	{
+		x = 0.47;
+		y = 0.59;
+		w = 0.185;
+		text = $STRALLMECHANIZED;
+		action = "allMechanized = true";
+	};
+
+	class AllArmoured:GuiButton
+	{
+		x = 0.66;
+		y = 0.59;
+		w = 0.135;
+		text = $STRALLARMOURED;
+		action = "allArmoured = true";
+	};
+
+	class AllAir:GuiButton
+	{
+		x = 0.80;
+		y = 0.59;
+		w = 0.145;
+		text = $STRALLAIR;
+		action = "allAir = true";
+	};
+
+	//Exit Command Menu button.
+	class ExitMenu:GuiButton
+	{
+		x = 0.4;
+		y = 0.66;
+		w = 0.2;
+		text = $STREXIT;
+		action = "closeDialog 0;teamMenuInUse = false";
+	};
+};
+
+class TeamMenuLight:TeamMenu
+{
+	controlsBackground[] = {TeamBackgroundWindow,TeamBackgroundWindow1};
+
+	class TeamBackgroundWindow1:BackgroundWindowLight
+	{
+		x = 0.04;
+		y = 0.025;
+		h = 0.7;
+		w = 0.92;
+	};
+};
+
+class CameraMenu
+{
+	idd = IDCUNDEFINED;
+	movingEnable = false;
+	objects[] = {};
+	controlsBackground[] = {};
+	controls[] = {InfoBox,Next,Previous,ZoomIn,ZoomOut,ToggleCamera,Exit};
+
+	class InfoBox:GuiCameraList
+	{
+		idc = IDCMENUINFO;
+		x = 0.75;
+		y = 0.12;
+		h = 0.08;
+		w = 0.24;
+	};
+
+	class Next:GuiButton
+	{
+		x = 0.75;
+		y = 0.22;
+		w = 0.24;
+		text = $STRNEXT;
+		action = "cameraMenuNext = true";
+	};
+
+	class Previous:GuiButton
+	{
+		x = 0.75;
+		y = 0.27;
+		w = 0.24;
+		text = $STRPREVIOUS;
+		action = "cameraMenuPrevious = true";
+	};
+  
+	class ZoomIn:GuiButton
+	{
+		x = 0.75;
+		y = 0.32;
+		w = 0.24;
+		text = $STRZOOMIN;
+		action = "cameraMenuZoomIn = true";
+	};
+
+	class ZoomOut:GuiButton
+	{
+		x = 0.75;
+		y = 0.37;
+		w = 0.24;
+		text = $STRZOOMOUT;
+		action = "cameraMenuZoomOut = true";
+	};
+
+	class ToggleCamera:GuiButton
+	{
+		idc = IDCMENUBUTTON;
+		x = 0.75;
+		y = 0.42;
+		w = 0.24;
+		text = "";
+		action = "cameraSatelliteMode = !cameraSatelliteMode";
+	};
+
+	//Exit Resource Menu button.
+	class Exit:GuiButton
+	{
+		x = 0.75;
+		y = 0.47;
+		w = 0.24;
+		text = $STREXIT;
+		action = "closeDialog 0;cameraMenuExit = true";
+	};
+};
+
+class CommanderCameraMenu:CameraMenu
+{
+	idd = IDCUNDEFINED;
+	movingEnable = false;
+	objects[] = {};
+	controlsBackground[] = {};
+	controls[] = {InfoBox,Next,Previous,ZoomIn,ZoomOut,ToggleCamera,TakeTowns,DefendTowns,SearchAndDestroy,CommandVehicles,DisembarkVehicles,
+				  EmbarkTransports,DisembarkTransports,Exit};
+
+  	//Order team to take towns button.  
+	class TakeTowns:GuiButton
+	{
+  		idc = IDCCOMMANDMENUTAKETOWNS;
+		x = 0.01;
+		y = 0.12;
+		w = 0.24;
+		text = $STRCOMMANDTAKETOWNS;
+		action = "[] Exec ""Command\CommandMenuTakeTowns.sqs""";
+	};
+  
+	//Order team to defend towns button.  
+	class DefendTowns:GuiButton
+	{
+		idc = IDCCOMMANDMENUDEFENDTOWNS;
+		x = 0.01;
+		y = 0.17;
+		w = 0.24;
+		text = $STRSHORTDEFEND;
+		action = "[] Exec ""Command\CommandMenuDefendTowns.sqs""";
+	};
+  
+	//Order team to search & destroy.
+	class SearchAndDestroy:GuiButton
+	{
+		idc = IDCCOMMANDMENUSEARCH;
+		x = 0.01;
+		y = 0.22;
+		w = 0.24;
+		text = $STRCOMMANDSEARCH;
+		action = "[] Exec ""Command\CommandMenuSearchAndDestroy.sqs""";
+	};
+
+	//Order team to take command of nearby vehicles.
+	class CommandVehicles:GuiButton
+	{
+		idc = IDCCOMMANDMENUCOMMAND;
+		x = 0.01;
+		y = 0.27;
+		w = 0.24;
+		text = $STRSHORTCOMMANDVEHICLES;
+		action = "[] Exec ""Command\CommandMenuCommandVehicles.sqs""";
+	};
+
+	//Order team to all vehicles.
+	class DisembarkVehicles:GuiButton
+	{
+		idc = IDCCOMMANDMENUDISEMBARK;
+		x = 0.01;
+		y = 0.32;
+		w = 0.24;
+		text = $STRCOMMANDDISEMBARKVEHICLES;
+		action = "[] Exec ""Command\CommandMenuDisembarkVehicles.sqs""";
+	};
+
+	//Order team to board transport.
+	class EmbarkTransports:GuiButton
+	{
+		idc = IDCCOMMANDMENUEMBARKTRANSPORT;
+		x = 0.01;
+		y = 0.37;
+		w = 0.24;
+		text = $STRCOMMANDBOARD;
+		action = "[] Exec ""Command\CommandMenuEmbarkTransports.sqs""";
+	};
+
+	//Order team to disembark transport.
+	class DisembarkTransports:GuiButton
+	{
+		idc = IDCCOMMANDMENUDISEMBARKTRANSPORT;
+		x = 0.01;
+		y = 0.42;
+		w = 0.24;
+		text = $STRCOMMANDDISEMBARKTRANSPORTS;
+		action = "[] Exec ""Command\CommandMenuDisembarkTransports.sqs""";
+	};
+};
+
+class ConstructionMenu:DefaultMenu
+{
+	controls[] = {MenuTitle,InfoBox,UndoButton,AutoAlignButton,BuildingListButton,BuildingList,DefenseListButton,DefenseList,WorkerButton,ExitButton};
+	controlsBackground[] = {ConstructionBackgroundWindow};
+
+	class ConstructionBackgroundWindow:BackgroundWindow
+	{
+		text = "";
+		x = 0.21;
+		y = 0.075;
+		w = 0.615;
+		h = 0.65;
+	};
+
+	class MenuTitle:GuiLargeText
+	{
+		style = GUICENTER;
+		x = 0.375;
+		y = 0.06;
+		w = 0.3;
+		h = 0.08;
+		text = $STRCONSTRUCTIONMENU;
+	};
+
+	class InfoBox:GuiList
+	{
+		idc = IDCMENUINFO;
+		type = GUILIST;
+		x = 0.3875;
+		y = 0.13;
+		h = 0.08;
+	};
+
+	class UndoButton:GuiButton
+	{
+		x = 0.225;
+		y = 0.2275;
+		action = "[] Exec ""Main\UndoLastStructure.sqs""";
+		text = $STRUNDO;
+	};
+
+	class AutoAlignButton:GuiButton
+	{
+		idc = IDCMENUBUTTON;
+		x = 0.535;
+		y = 0.2275;
+		action = "buildMenuAlign = true";
+		text = "";
+	};
+
+	class BuildingListButton:GuiButton
+	{
+		style = GUICENTER;
+		x = 0.225;
+		y = 0.28;
+		text = $STRCONSTRUCTIONSTRUCTURE;
+		action = "buildMenuBuild = true";
+	};
+
+	//Drop down list of base structures.  
+	class BuildingList:GuiListBox
+	{
+		idc = IDCMENULIST;
+		x = 0.225;
+		y = 0.335;
+		h = 0.32;
+	};
+
+	class DefenseListButton:GuiButton
+	{
+		style = GUICENTER;
+		x = 0.535;
+		y = 0.28;
+		text = $STRCONSTRUCTIONDEFENSE;
+		action = "buildMenuBuildDefense = true";
+	};
+
+	//Drop down list of base structures.  
+	class DefenseList:GuiListBox
+	{
+		idc = IDCMENULIST1;
+		x = 0.535;
+		y = 0.335;
+		h = 0.32;
+	};
+
+	//Add worker button.
+	class WorkerButton:GuiButton
+	{
+		x = 0.225;
+		y = 0.67;
+		text = $STRADDWORKER;
+		action = "buildMenuAddWorker = true";
+	};
+
+	//Exit Command Menu button.
+	class ExitButton:GuiButton
+	{
+		idc = IDCCONSTRUCTIONMENUEXIT;
+		x = 0.535;
+		y = 0.67;
+		text = $STREXIT;
+		action = "buildMenuInUse = false;closeDialog 0";
+	};
+};
+
+class ConstructionMenuLight:ConstructionMenu
+{
+	controlsBackground[] = {ConstructionBackgroundWindow,ConstructionBackgroundWindow1};
+
+	class ConstructionBackgroundWindow1:BackgroundWindowLight
+	{
+		text = "";
+		x = 0.21;
+		y = 0.075;
+		w = 0.615;
+		h = 0.65;
+	};
+};
+
+class RepairConstructionMenu:ConstructionMenu
+{
+	controls[] = {RepairMenuTitle,RepairInfoBox,RepairAutoAlignButton,RepairBuildingListButton,RepairBuildingList,RepairExitButton};
+	controlsBackground[] = {RepairConstructionBackgroundWindow};
+
+	class RepairConstructionBackgroundWindow:ConstructionBackgroundWindow
+	{
+		x = 0.35;
+		w = 0.3;
+	};
+
+	class RepairMenuTitle:MenuTitle
+	{
+		x = 0.3625;
+		w = 0.27;
+		text = $STRREPAIRMENU;
+	};
+
+	class RepairInfoBox:InfoBox
+	{
+		x = 0.3625;
+	};
+
+	class RepairAutoAlignButton:AutoAlignButton
+	{
+		x = 0.3625;
+	};
+
+	class RepairBuildingListButton:BuildingListButton
+	{
+		style = GUICENTER;
+		x = 0.3625;
+		text = $STRCONSTRUCTIONDEFENSE;
+		action = "buildMenuBuild = true";
+	};
+
+	//Drop down list of defense structures.  
+	class RepairBuildingList:BuildingList
+	{
+		idc = IDCMENULIST;
+		x = 0.3625;
+	};
+
+	//Exit menu button.
+	class RepairExitButton:ExitButton
+	{
+		x = 0.3625;
+		action = "repairBuildMenuInUse = false;closeDialog 0";
+	};
+};
+
+class RepairConstructionMenuLight:RepairConstructionMenu
+{
+	controlsBackground[] = {RepairConstructionBackgroundWindow,RepairConstructionBackgroundWindow1};
+
+	class RepairConstructionBackgroundWindow1:BackgroundWindowLight
+	{
+		text = "";
+		x = 0.35;
+		y = 0.075;
+		w = 0.3;
+		h = 0.65;
+	};
+};
+
+class AmmoConstructionMenu:RepairConstructionMenu
+{
+	controls[] = {AmmoMenuTitle,RepairInfoBox,AmmoBuildingListButton,AmmoBuildingList,AmmoExitButton};
+
+	class AmmoMenuTitle:MenuTitle
+	{
+		x = 0.3625;
+		w = 0.27;
+		text = $STRAMMOTRUCK;
+	};
+
+	class AmmoBuildingListButton:BuildingListButton
+	{
+		style = GUICENTER;
+		x = 0.3625;
+		text = $STRBUYCRATE;
+		action = "buildMenuBuild = true";
+	};
+
+	//Drop down list of defense structures.  
+	class AmmoBuildingList:BuildingList
+	{
+		idc = IDCMENULIST;
+		x = 0.3625;
+	};
+
+	//Exit menu button.
+	class AmmoExitButton:ExitButton
+	{
+		x = 0.3625;
+		action = "ammoBuildMenuInUse = false;closeDialog 0";
+	};
+};
+
+class AmmoConstructionMenuLight:AmmoConstructionMenu
+{
+	controlsBackground[] = {AmmoConstructionBackgroundWindow,AmmoConstructionBackgroundWindow1};
+
+	class AmmoConstructionBackgroundWindow:ConstructionBackgroundWindow
+	{
+		x = 0.35;
+		w = 0.3;
+	};
+
+	class AmmoConstructionBackgroundWindow1:BackgroundWindowLight
+	{
+		text = "";
+		x = 0.35;
+		y = 0.075;
+		w = 0.3;
+		h = 0.65;
+	};
+};
+
+class ControlMenu:DefaultMenu
+{
+	controls[] = {MenuTitle,InfoBox,UpgradeStatusLabel,TeamLabel,TeamList,UpgradeLabel,UpgradeList,UnitLabel,UnitList,LightLabel,LightList,HeavyLabel,HeavyList,AirLabel,AirList,ExitButton};
+	controlsBackground[] = {ControlBackgroundWindow};
+
+	class ControlBackgroundWindow:BackgroundWindow
+	{
+		x = 0.05625;
+		y = 0.075;
+		w = 0.8925;
+		h = 0.7;
+	};
+
+	class MenuTitle:GuiLargeText
+	{
+		style = GUICENTER;
+		idc = IDCMENUTITLE;
+		x = 0.3;
+		y = 0.05;
+		w = 0.4;
+		h = 0.08;
+		text = $STRCONTROLCENTER;
+	};
+
+	class InfoBox:GuiList
+	{
+		idc = IDCCONTROLMENUINFO;
+		type = GUILIST;
+		x = 0.065;
+		y = 0.125;
+		w = 0.215;
+		h = .08;
+	};
+
+	class UpgradeStatusLabel:GuiText
+	{
+		style = GUICENTER;
+		idc = IDCMENUSTATUSLABEL;
+		x = 0.25;
+		y = 0.125;
+		w = 0.435;
+		text = "";
+	};
+
+	class TeamLabel:GuiText
+	{
+		style = GUIRIGHT;
+		x = 0.63;
+		y = 0.125;
+		w = 0.09;
+		text = $STRTEAM;
+	};
+
+	//Drop down list of teams.  
+	class TeamList:GuiComboBox
+	{
+		idc = IDCCONTROLMENUTEAMLIST;
+		x = 0.725;
+		y = 0.125;
+		w = 0.215;
+		h = 0.04;
+	};
+
+	class UpgradeLabel:GuiButton
+	{
+		x = 0.63;
+		y = 0.175;
+		w = 0.09;
+		text = $STRUPGRADE;
+		action = "controlCenterMenuUpgrade = true";
+	};
+
+	//Drop down list of upgrades.
+	class UpgradeList:GuiComboBox
+	{
+		idc = IDCCONTROLMENUUPGRADELIST;
+		x = 0.725;
+		y = 0.175;
+		w = 0.215;
+	};
+
+	class UnitLabel:GuiButton
+	{
+		x = 0.065;
+		y = 0.225;
+		w = 0.215;
+		text = $STRADDTOTEAM;
+		action = "controlCenterMenuUnit = true";
+	};
+
+	//Drop down list of soldiers.
+	class UnitList:GuiListBox
+	{
+		idc = IDCCONTROLMENUUNITLIST;
+		x = 0.065;
+		y = 0.275;
+		w = 0.215;
+		h = 0.4375;
+	};
+
+	class LightLabel:GuiButton
+	{
+		x = 0.285;
+		y = 0.225;
+		w = 0.215;
+		text = $STRADDTOTEAM;
+		action = "controlCenterMenuLight = true";
+	};
+
+	//Drop down list of light vehicles.
+	class LightList:GuiListBox
+	{
+		idc = IDCCONTROLMENULIGHTLIST;
+		x = 0.285;
+		y = 0.275;
+		w = 0.215;
+		h = 0.4375;
+	};
+
+	class HeavyLabel:GuiButton
+	{
+		x = 0.505;
+		y = 0.225;
+		w = 0.215;
+		text = $STRADDTOTEAM;
+		action = "controlCenterMenuHeavy = true";
+	};
+
+	//Drop down list of heavy vehicles.
+	class HeavyList:GuiListBox
+	{
+		idc = IDCCONTROLMENUHEAVYLIST;
+		x = 0.505;
+		y = 0.275;
+		w = 0.215;
+		h = 0.4375;
+	};
+
+	class AirLabel:GuiButton
+	{
+		x = 0.725;
+		y = 0.225;
+		w = 0.215;
+		text = $STRADDTOTEAM;
+		action = "controlCenterMenuAir = true";
+	};
+
+	//Drop down list of aircraft.
+	class AirList:GuiListBox
+	{
+		idc = IDCCONTROLMENUAIRLIST;
+		x = 0.725;
+		y = 0.275;
+		w = 0.215;
+		h = 0.4375;
+	};
+
+	//Exit Control Menu button.
+	class ExitButton:GuiButton
+	{
+		x = 0.3625;
+		y = 0.725;
+		text = $STREXIT;
+		action = "closeDialog 0";
+	};
+};
+
+class ControlMenuLight:ControlMenu
+{
+	controlsBackground[] = {ControlBackgroundWindow,ControlBackgroundWindow1};
+
+	class ControlBackgroundWindow1:BackgroundWindowLight
+	{
+		x = 0.05625;
+		y = 0.075;
+		w = 0.8925;
+		h = 0.7;
+	};
+};
+
+class LoadoutMenu:DefaultMenu
+{
+	controls[] = {MenuTitle,ResourcesLabel,SpaceLabel,TradeInLabel,CostLabel,LoadTemplate,BuyTemplate,SaveTemplate,TemplateList,PrimaryImage,PrimaryAmmo,
+				  PrimaryAdd,PrimarySubtract,PrimaryList,SecondaryImage,SecondaryAmmo,SecondaryAdd,SecondarySubtract,SecondaryList,SidearmImage,
+				  SidearmList,MiscImage,MiscAmmo,MiscAdd,MiscSubtract,MiscList,Reset,Clear,Cancel,Buy};
+
+	controlsBackground[] = {LoadoutBackgroundWindow};
+
+	class LoadoutBackgroundWindow:BackgroundWindow
+	{
+		x = 0.025;
+		y = 0.1;
+		w = 0.95;
+		h = 0.8;
+	};
+
+	class MenuTitle:GuiLargeText
+	{
+		style = GUICENTER;
+		x = 0.3625;
+		y = 0.1;
+		w = 0.285;
+		h = 0.05;
+		text = $STRLOADOUTS;
+	};
+
+	class ResourcesLabel:GuiLargeText
+	{
+		idc = IDCLOADOUTRESOURCES;
+		x = 0.05;
+		y = 0.12;
+		w = 0.25;
+		text = "";
+	};
+
+	class SpaceLabel:GuiLargeText
+	{
+		idc = IDCLOADOUTSPACE;
+		x = 0.4;
+		y = 0.12;
+		w = 0.15;
+		text = "";
+	};
+
+	class TradeInLabel:GuiLargeText
+	{
+		idc = IDCLOADOUTTRADEIN;
+		x = 0.6;
+		y = 0.12;
+		w = 0.2;
+		text = "";
+	};
+
+	class CostLabel:GuiLargeText
+	{
+		idc = IDCLOADOUTCOST;
+		x = 0.8;
+		y = 0.12;
+		w = 0.15;
+		text = "";
+	};
+
+	class LoadTemplate:GuiButton
+	{
+		x = 0.05;
+		y = 0.2;
+		w = 0.22;
+		text = $STRLOADTEMPLATE;
+		action = "loadoutLoadTemplate = true";
+	};
+
+	class BuyTemplate:GuiButton
+	{
+		x = 0.05;
+		y = 0.25;
+		w = 0.22;
+		text = $STRBUYTEMPLATE;
+		action = "loadoutBuyTemplate = true";
+	};
+
+	class SaveTemplate:GuiButton
+	{
+		x = 0.05;
+		y = 0.3;
+		w = 0.22;
+		text = $STRSAVECUSTOM;
+		action = "loadoutSaveTemplate = true";
+	};
+
+	//List of weapon loadout templates.
+	class TemplateList:GuiListBox
+	{
+		idc = IDCLOADOUTTEMPLATELIST;
+		x = 0.05;
+		y = 0.35;
+		w = 0.22;
+		h = 0.45;
+	};
+
+	class PrimaryImage:GuiTransparentListBox
+	{
+		idc = IDCLOADOUTPRIMARY;
+		x = 0.3;
+		y = 0.2;
+		rowHeight = 0.1;
+		w = 0.16;
+		h = 0.1;
+	};
+
+	class PrimaryAmmo:GuiText
+	{
+		idc = IDCLOADOUTPRIMARYAMMO;
+		x = 0.3;
+		y = 0.305;
+		w = 0.09;
+		text = "";
+	};
+
+	class PrimaryAdd:GuiButton
+	{
+		x = 0.395;
+		y = 0.305;
+		w = 0.03;
+		text = "+";
+		action = "loadoutPrimaryAdd = true";
+	};
+
+	class PrimarySubtract:GuiButton
+	{
+		x = 0.43;
+		y = 0.305;
+		w = 0.03;
+		text = "-";
+		action = "loadoutPrimarySubtract = true";
+	};
+
+	class PrimaryList:GuiListBox
+	{
+		idc = IDCLOADOUTPRIMARYLIST;
+		x = .3;
+		y = 0.35;
+		rowHeight = 0.03;
+		w = 0.158;
+		h = 0.45;
+	};
+
+	class SecondaryImage:GuiTransparentListBox
+	{
+		idc = IDCLOADOUTSECONDARY;
+		x = 0.49;
+		y = 0.2;
+		rowHeight = 0.1;
+		w = 0.16;
+		h = 0.1;
+	};
+
+	class SecondaryAmmo:GuiText
+	{
+		idc = IDCLOADOUTSECONDARYAMMO;
+		x = 0.49;
+		y = 0.305;
+		w = 0.09;
+		text = "";
+	};
+
+	class SecondaryAdd:GuiButton
+	{
+		x = 0.585;
+		y = 0.305;
+		w = 0.03;
+		text = "+";
+		action = "loadoutSecondaryAdd = true";
+	};
+
+	class SecondarySubtract:GuiButton
+	{
+		x = 0.62;
+		y = 0.305;
+		w = 0.03;
+		text = "-";
+		action = "loadoutSecondarySubtract = true";
+	};
+
+	class SecondaryList:GuiListBox
+	{
+		idc = IDCLOADOUTSECONDARYLIST;
+		x = 0.49;
+		y = 0.35;
+		w = 0.158;
+		h = 0.16;
+	};
+
+	class SidearmImage:GuiTransparentListBox
+	{
+		idc = IDCLOADOUTSIDEARM;
+		x = 0.49;
+		y = 0.54;
+		rowHeight = 0.1;
+		w = 0.16;
+		h = 0.1;
+	};
+
+	class SidearmList:GuiListBox
+	{
+		idc = IDCLOADOUTSIDEARMLIST;
+		x = 0.49;
+		y = 0.65;
+		w = 0.16;
+		h = 0.15;
+	};
+
+	class MiscImage:GuiTransparentListBox
+	{
+		idc = IDCLOADOUTMISC;
+		x = .68;
+		y = 0.2;
+		rowHeight = 0.1;
+		w = 0.16;
+		h = 0.1;
+	};
+	class MiscAmmo:GuiText
+	{
+		idc = IDCLOADOUTMISCAMMO;
+		x = 0.68;
+		y = 0.305;
+		w = 0.09;
+		text = "";
+	};
+
+	class MiscAdd:GuiButton
+	{
+		x = 0.772;
+		y = 0.305;
+		w = 0.03;
+		text = "+";
+		action = "loadoutMiscAdd = true";
+	};
+
+	class MiscSubtract:GuiButton
+	{
+		x = 0.807;
+		y = 0.305;
+		w = 0.03;
+		text = "-";
+		action = "loadoutMiscSubtract = true";
+	};
+
+	class MiscList:GuiListBox
+	{
+		idc = IDCLOADOUTMISCLIST;
+		x = 0.68;
+		y = 0.35;
+		rowHeight = 0.03;
+		w = 0.27;
+		h = 0.45;
+	};
+
+	class Reset:GuiButton
+	{
+		x = 0.1;
+		y = 0.825;
+		w = 0.18;
+		text = $STRRESET;
+		action = "loadoutReset = true";
+	};
+
+	class Clear:GuiButton
+	{
+		x = 0.3065;
+		y = 0.825;
+		w = 0.18;
+		text = $STRCLEAR;
+		action = "loadoutClear = true";
+	};
+
+	class Cancel:GuiButton
+	{
+		x = 0.513;
+		y = 0.825;
+		w = 0.18;
+		text = $STRCANCEL;
+		action = "loadoutCancel = true";
+	};
+
+	class Buy:GuiButton
+	{
+		idc = IDCLOADOUTBUY;
+		x = 0.7+.02;
+		y = 0.825;
+		w = 0.18;
+		text = $STRBUY;
+		action = "loadoutBuy = true";
+	};
+};
+
+class LoadoutMenuLight:LoadoutMenu
+{
+	controlsBackground[] = {LoadoutBackgroundWindow,LoadoutBackgroundWindow1};
+
+	class LoadoutBackgroundWindow1:BackgroundWindowLight
+	{
+		x = 0.025;
+		y = 0.1;
+		w = 0.95;
+		h = 0.8;
+	};
+};
+
+//Base menu from which all vehicle menus are derived.
+class UnitMenu:DefaultMenu
+{
+	controls[] = {MenuTitle,StatusLabel,InfoBox,ImageBox,AddEmptyButton,AddToPlayerButton,AddList,ExitButton};
+	controlsBackground[] = {UnitBackgroundWindow};
+
+	class UnitBackgroundWindow:BackgroundWindow
+	{
+		x = 0.325;
+		y = 0.02;
+		w = 0.35;
+		h = 0.7;
+	};
+
+	class MenuTitle:GuiLargeText
+	{
+		idc = IDCMENUTITLE;
+		style = GUICENTER;
+		font = "TahomaB48"
+		sizeEx = 0.025;
+		x = 0.325;
+		y = 0.00125;
+		w = 0.35;
+		h = 0.08;
+		text = "";
+	};
+
+	class StatusLabel:GuiText
+	{
+		idc = IDCMENUSTATUSLABEL;
+		style = GUICENTER;
+		x = 0.3375;
+		y = 0.06;
+		w = 0.325;
+		h = 0.04;
+		text = "";
+	};
+
+	class InfoBox:GuiList
+	{
+		idc = IDCMENUINFO;
+		type = GUILIST;
+		x = 0.3375;
+		y = 0.11;
+		w = 0.17;
+		h = 0.08;
+	};
+
+	class ImageBox:GuiList
+	{
+		idc = IDCMENUIMAGE;
+		type = GUILIST;
+		rowHeight = 0.08;
+		x = 0.53;
+		y = 0.11;
+		w = 0.13;
+		h = 0.08;
+	};
+
+	//Add vehicle to selected team.
+	class AddToTeamButton:GuiButton
+	{
+		style = GUICENTER;
+		x = 0.3375;
+		y = 0.21;
+		w = 0.17;
+
+		action = "menuAddToTeam = true";
+		text = $STRADDTO;
+	};
+
+	//Add vehicle to selected team.
+	class AddToTeamList:GuiComboBox
+	{
+		idc = IDCMENUTEAMLIST;
+		x = 0.53;
+		y = 0.21;
+		w = 0.13;
+	};
+
+	//Add empty vehicle.
+	class AddEmptyButton:GuiButton
+	{
+		idc = IDCMENUBUTTON;
+		style = GUICENTER;
+		x = 0.3375;
+		y = 0.26;
+		w = 0.325;
+
+		action = "menuAddEmpty = true";
+		text = $STRADDEMPTY;
+	};
+
+	//Add vehicle to player team.
+	class AddToPlayerButton:GuiButton
+	{
+		idc = IDCMENUBUTTON1;
+		style = GUICENTER;
+		x = 0.3375;
+		y = 0.31;
+		w = 0.325;
+
+		action = "menuAddToPlayer = true";
+		text = $STRADDMANNED;
+	};
+
+	//Drop down list of units.  
+	class AddList:GuiListBox
+	{
+		idc = IDCMENULIST;
+		x = 0.3375;
+		y = 0.36;
+		w = 0.325;
+		h = 0.3;
+	};
+
+	//Exit light vehicle button.
+	class ExitButton:GuiButton
+	{
+		x = 0.3375;
+		y = 0.67;
+		w = 0.325;
+
+		action = "openMenuType = 0;CloseDialog 0";
+		text = $STREXIT;
+	};
+};
+
+class UnitMenuLight:UnitMenu
+{
+	controlsBackground[] = {UnitBackgroundWindow,UnitBackgroundWindow1};
+
+	class UnitBackgroundWindow1:BackgroundWindowLight
+	{
+		x = 0.325;
+		y = 0.02;
+		w = 0.35;
+		h = 0.7;
+	};
+};
+
+class CommanderUnitMenu:UnitMenu
+{
+	controls[] = {MenuTitle,StatusLabel,InfoBox,ImageBox,AddToTeamButton,AddToTeamList,AddEmptyButton,AddToPlayerButton,AddList,ExitButton};
+};
+
+class CommanderUnitMenuLight:UnitMenuLight
+{
+	controls[] = {MenuTitle,StatusLabel,InfoBox,ImageBox,AddToTeamButton,AddToTeamList,AddEmptyButton,AddToPlayerButton,AddList,ExitButton};
+};
+
+class CommanderRepairMenu:CommanderUnitMenu
+{
+	controls[] = {MenuTitle,StatusLabel,InfoBox,ImageBox,AddToTeamButton,AddToTeamList,AddEmptyButton,AddToPlayerButton,CommanderRepairAddList,AddIndependentSalvagerButton,ExitButton};
+	controlsBackground[] = {CommanderRepairBackgroundWindow};
+
+	class CommanderRepairBackgroundWindow:BackgroundWindow
+	{
+		x = 0.325;
+		y = 0.01;
+		w = 0.35;
+		h = 0.71;
+	};
+
+	//Drop down list of units.  
+	class CommanderRepairAddList:AddList
+	{
+		h = 0.24;
+	};
+
+	//Add independent salvage truck.
+	class AddIndependentSalvagerButton:GuiButton
+	{
+		style = GUICENTER;
+		x = 0.3375;
+		y = 0.62;
+		w = 0.325;
+		text = $STRBUYSALVAGER;
+		action = "repairDepotMenuIndependentSalvager = true";
+	};
+};
+
+class CommanderRepairMenuLight:CommanderRepairMenu
+{
+	controlsBackground[] = {CommanderRepairBackgroundWindow,CommanderRepairBackgroundWindow1};
+
+	class CommanderRepairBackgroundWindow1:BackgroundWindowLight
+	{
+		y = 0.01;
+		w = 0.35;
+		h = 0.71;
+	};
+
+};
+
+class RespawnMenu:DefaultMenu
+{
+	controls[] = {MenuTitle,RespawnLocationLabel,RespawnAtLabel,TeamButton,MHQButton,BarracksButton,LightButton,HeavyButton,AirButton,HospitalButton};
+	controlsBackground[] = {RespawnBackgroundWindow};
+
+	class RespawnBackgroundWindow:BackgroundWindow
+	{
+		x = 0.0625;
+		y = 0.09;
+		h = 0.36;
+		w = 0.875;
+	};
+
+	class MenuTitle:GuiLargeText
+	{
+		idc = IDCMENUTITLE;
+		style = GUICENTER;
+		font = "TahomaB48"
+		sizeEx = 0.025;
+		x = 0.3375;
+		y = 0.075;
+		w = 0.325;
+		text = "";
+	};
+
+	class RespawnLocationLabel:GuiText
+	{
+		idc = IDCMENUSTATUSLABEL;
+		style = GUICENTER;
+		x = 0.3375;
+		y = 0.175;
+		w = 0.325;
+		h = 0.04;
+		text = "";
+	};
+
+	class RespawnAtLabel:GuiText
+	{
+		style = GUICENTER;
+		x = 0.3375;
+		y = 0.225;
+		w = 0.325;
+		h = 0.04;
+		text = $STRCHANGERESPAWNTO;
+	};
+
+	class RespawnButton:GuiButton
+	{
+		y = 0.325;
+		w = 0.25;
+		text = "";
+	};
+
+	class TeamButton:RespawnButton
+	{
+		idc = IDCMENUBUTTON + 6;
+		y = 0.275;
+		x = 0.375;
+		action = "teamRespawn = !teamRespawn";
+	};
+
+	class MHQButton:RespawnButton
+	{
+		idc = IDCMENUBUTTON;
+		x = 0.1;
+		action = "respawnLocation = 0";
+	};
+
+	class BarracksButton:RespawnButton
+	{
+		idc = IDCMENUBUTTON + 1;
+		x = 0.375;
+		action = "respawnLocation = 1";
+	};
+
+	class LightButton:RespawnButton
+	{
+		idc = IDCMENUBUTTON + 2;
+		x = 0.65;
+		action = "respawnLocation = 2";
+	};
+
+	class HeavyButton:RespawnButton
+	{
+		idc = IDCMENUBUTTON + 3;
+		x = 0.1;
+		y = 0.375;
+		action = "respawnLocation = 3";
+	};
+
+	class AirButton:RespawnButton
+	{
+		idc = IDCMENUBUTTON + 4;
+		x = 0.375;
+		y = 0.375;
+		action = "respawnLocation = 4";
+	};
+
+	class HospitalButton:RespawnButton
+	{
+		idc = IDCMENUBUTTON + 5;
+		x = 0.65;
+		y = 0.375;
+		action = "respawnLocation = 5";
+	};
+};
+
+class RespawnMenuLight:RespawnMenu
+{
+	controlsBackground[] = {RespawnBackgroundWindow,RespawnBackgroundWindow1};
+
+	class RespawnBackgroundWindow1:BackgroundWindowLight
+	{
+		x = 0.0625;
+		y = 0.09;
+		h = 0.36;
+		w = 0.875;
+	};
+};
+
+class VoteMenu:DefaultMenu
+{
+	controlsBackground[] = {VoteBackgroundWindow};
+	controls[] = {MenuTitle,OptionsLabel,VotesOnLabel,VotesOffLabel,ToggleLabel,Option1,VotesOn1,VotesOff1,Toggle1,
+				  Option2,VotesOn2,VotesOff2,Toggle2,Option3,VotesOn3,VotesOff3,Toggle3,
+				  Option4,VotesOn4,VotesOff4,Toggle4,Option5,VotesOn5,VotesOff5,Toggle5,
+				  Option6,VotesOn6,VotesOff6,Toggle6,Option7,VotesOn7,VotesOff7,Toggle7,
+				  Option8,VotesOn8,VotesOff8,Toggle8,Option9,VotesOn9,VotesOff9,Toggle9,
+				  Option10,VotesOn10,VotesOff10,Toggle10,Option11,VotesOn11,VotesOff11,Toggle11,ExitMenu};
+
+	class VoteBackgroundWindow:BackgroundWindow
+	{
+		x = 0.17;
+		y = 0.075;
+		h = 0.61;
+		w = 0.66;
+	};
+
+	class MenuTitle:GuiLargeText
+	{
+		idc = IDCMENUTITLE;
+		style = GUICENTER;
+		x = 0.3625;
+		y = 0.07;
+		w = 0.25;
+		h = 0.05;
+		text = $STRVOTEMENU;
+	};
+
+	class OptionBase:GuiText
+	{
+		x = 0.18;
+		h = 0.04;
+		w = 0.3;
+		sizeEx = 0.022;
+		text = "";
+	};
+
+	class VotesOnBase:GuiText
+	{
+		style = GUIRIGHT;
+		x = 0.445;
+		h = 0.04;
+		w = 0.125;
+		text = "";
+	};
+
+	class VotesOffBase:GuiText
+	{
+		style = GUIRIGHT;
+		x = 0.56;
+		h = 0.04;
+		w = 0.125;
+		text = "";
+	};
+
+	class ToggleBase:GuiButton
+	{
+		x = 0.715;
+		h = 0.035;
+		w = 0.1;
+		text = "";
+	};
+
+	class OptionsLabel:OptionBase
+	{
+		y = 0.12;
+		sizeEx = 0.025;
+		text = $STROPTIONS;
+	};
+
+	class VotesOnLabel:VotesOnBase
+	{
+		y = 0.12;
+		x = 0.435;
+		h = 0.04;
+		w = 0.135;
+		text = $STRVOTESON;
+	};
+
+	class VotesOffLabel:VotesOffBase
+	{
+		y = 0.12;
+		text = $STRVOTESOFF;
+	};
+
+	class ToggleLabel:GuiText
+	{
+		x = 0.715;
+		y = 0.12;
+		h = 0.04;
+		w = 0.1;
+		text = $STRYOURVOTE;
+	};
+
+	class Option1:OptionBase
+	{
+		idc = IDCVOTEOPTION;
+		y = 0.16;
+	};
+
+	class VotesOn1:VotesOnBase
+	{
+		idc = IDCVOTEON;
+		y = 0.16;
+	};
+
+	class VotesOff1:VotesOffBase
+	{
+		idc = IDCVOTEOFF;
+		y = 0.16;
+	};
+
+	class Toggle1:ToggleBase
+	{
+		idc = IDCVOTETOGGLE;
+		y = 0.1625;
+		action = "toggleVote = 0";
+	};
+
+	class Option2:OptionBase
+	{
+		idc = IDCVOTEOPTION + 1;
+		y = 0.2;
+	};
+
+	class VotesOn2:VotesOnBase
+	{
+		idc = IDCVOTEON + 1;
+		y = 0.2;
+	};
+
+	class VotesOff2:VotesOffBase
+	{
+		idc = IDCVOTEOFF + 1;
+		y = 0.2;
+	};
+
+	class Toggle2:ToggleBase
+	{
+		idc = IDCVOTETOGGLE + 1;
+		y = 0.2025;
+		action = "toggleVote = 1";
+	};
+
+	class Option3:OptionBase
+	{
+		idc = IDCVOTEOPTION + 2;
+		y = 0.24;
+	};
+
+	class VotesOn3:VotesOnBase
+	{
+		idc = IDCVOTEON + 2;
+		y = 0.24;
+	};
+
+	class VotesOff3:VotesOffBase
+	{
+		idc = IDCVOTEOFF + 2;
+		y = 0.24;
+	};
+
+	class Toggle3:ToggleBase
+	{
+		idc = IDCVOTETOGGLE + 2;
+		y = 0.2425;
+		action = "toggleVote = 2";
+	};
+
+	class Option4:OptionBase
+	{
+		idc = IDCVOTEOPTION + 3;
+		y = 0.28;
+	};
+
+	class VotesOn4:VotesOnBase
+	{
+		idc = IDCVOTEON + 3;
+		y = 0.28;
+	};
+
+	class VotesOff4:VotesOffBase
+	{
+		idc = IDCVOTEOFF + 3;
+		y = 0.28;
+	};
+
+	class Toggle4:ToggleBase
+	{
+		idc = IDCVOTETOGGLE + 3;
+		y = 0.2825;
+		action = "toggleVote = 3";
+	};
+
+	class Option5:OptionBase
+	{
+		idc = IDCVOTEOPTION + 4;
+		y = 0.32;
+	};
+
+	class VotesOn5:VotesOnBase
+	{
+		idc = IDCVOTEON + 4;
+		y = 0.32;
+	};
+
+	class VotesOff5:VotesOffBase
+	{
+		idc = IDCVOTEOFF + 4;
+		y = 0.32;
+	};
+
+	class Toggle5:ToggleBase
+	{
+		idc = IDCVOTETOGGLE + 4;
+		y = 0.3225;
+		action = "toggleVote = 4";
+	};
+
+	class Option6:OptionBase
+	{
+		idc = IDCVOTEOPTION + 5;
+		y = 0.36;
+	};
+
+	class VotesOn6:VotesOnBase
+	{
+		idc = IDCVOTEON + 5;
+		y = 0.36;
+	};
+
+	class VotesOff6:VotesOffBase
+	{
+		idc = IDCVOTEOFF + 5;
+		y = 0.36;
+	};
+
+	class Toggle6:ToggleBase
+	{
+		idc = IDCVOTETOGGLE + 5;
+		y = 0.3625;
+		action = "toggleVote = 5";
+	};
+
+	class Option7:OptionBase
+	{
+		idc = IDCVOTEOPTION + 6;
+		y = 0.4;
+	};
+
+	class VotesOn7:VotesOnBase
+	{
+		idc = IDCVOTEON + 6;
+		y = 0.4;
+	};
+
+	class VotesOff7:VotesOffBase
+	{
+		idc = IDCVOTEOFF + 6;
+		y = 0.4;
+	};
+
+	class Toggle7:ToggleBase
+	{
+		idc = IDCVOTETOGGLE + 6;
+		y = 0.4025;
+		action = "toggleVote = 6";
+	};
+
+	class Option8:OptionBase
+	{
+		idc = IDCVOTEOPTION + 7;
+		y = 0.44;
+	};
+
+	class VotesOn8:VotesOnBase
+	{
+		idc = IDCVOTEON + 7;
+		y = 0.44;
+	};
+
+	class VotesOff8:VotesOffBase
+	{
+		idc = IDCVOTEOFF + 7;
+		y = 0.44;
+	};
+
+	class Toggle8:ToggleBase
+	{
+		idc = IDCVOTETOGGLE + 7;
+		y = 0.4425;
+		action = "toggleVote = 7";
+	};
+
+	class Option9:OptionBase
+	{
+		idc = IDCVOTEOPTION + 8;
+		y = 0.48;
+	};
+
+	class VotesOn9:VotesOnBase
+	{
+		idc = IDCVOTEON + 8;
+		y = 0.48;
+	};
+
+	class VotesOff9:VotesOffBase
+	{
+		idc = IDCVOTEOFF + 8;
+		y = 0.48;
+	};
+
+	class Toggle9:ToggleBase
+	{
+		idc = IDCVOTETOGGLE + 8;
+		y = 0.4825;
+		action = "toggleVote = 8";
+	};
+
+	class Option10:OptionBase
+	{
+		idc = IDCVOTEOPTION + 9;
+		y = 0.52;
+	};
+
+	class VotesOn10:VotesOnBase
+	{
+		idc = IDCVOTEON + 9;
+		y = 0.52;
+	};
+
+	class VotesOff10:VotesOffBase
+	{
+		idc = IDCVOTEOFF + 9;
+		y = 0.52;
+	};
+
+	class Toggle10:ToggleBase
+	{
+		idc = IDCVOTETOGGLE + 9;
+		y = 0.5225;
+		action = "toggleVote = 9";
+	};
+
+	class Option11:OptionBase
+	{
+		idc = IDCVOTEOPTION + 10;
+		y = 0.56;
+	};
+
+	class VotesOn11:VotesOnBase
+	{
+		idc = IDCVOTEON + 10;
+		y = 0.56;
+	};
+
+	class VotesOff11:VotesOffBase
+	{
+		idc = IDCVOTEOFF + 10;
+		y = 0.56;
+	};
+
+	class Toggle11:ToggleBase
+	{
+		idc = IDCVOTETOGGLE + 10;
+		y = 0.5625;
+		action = "toggleVote = 10";
+	};
+
+	//Exit menu button.
+	class ExitMenu:GuiButton
+	{
+		x = 0.4;
+		y = 0.62;
+		h = 0.04;
+		w = 0.2;
+		text = $STREXIT;
+		action = "closeDialog 0";
+	};
+};
+
+class VoteMenuLight:VoteMenu
+{
+	controlsBackground[] = {VoteBackgroundWindow,VoteBackgroundWindow1};
+
+	class VoteBackgroundWindow1:BackgroundWindowLight
+	{
+		x = 0.17;
+		y = 0.075;
+		h = 0.61;
+		w = 0.66;
+	};
+};
+
+class DebugPrompt:DefaultMenu
+{
+	controls[] = {VariableLabel,Prompt,ShowButton,VariableValue};
+	controlsBackground[] = {DebugBackground};
+
+	class DebugBackground:BackgroundWindow
+	{
+		x = 0.01;
+		y = 0.95;
+		h = 0.04;
+		w = 0.98;
+	};
+
+	class VariableLabel:GuiText
+	{
+		idc = IDCMENUTITLE;
+		x = 0.01;
+		y = 0.95;
+		w = 0.1;
+		text = $STRVARIABLE;
+	};
+
+	class Prompt:GuiEditableText
+	{
+		idc = IDCMENULIST;
+		x = 0.12;
+		y = 0.955;
+		w = 0.5;
+		h = 0.03;
+	};
+
+	class ShowButton:GuiButton
+	{
+		x = 0.63;
+		y = 0.955;
+		w = 0.05;
+		h = 0.03;
+		action = "debugPromptShow = true";
+		text = $STRSHOW;
+	};
+	
+	class VariableValue:GuiText
+	{
+		idc = IDCMENUINFO;
+		x = 0.685;
+		y = 0.95;
+		w = 0.295;
+		text = "";
+	};
+};
+
+class DebugPromptLight:DebugPrompt
+{
+	controlsBackground[] = {DebugBackground,DebugBackground1};
+
+	class DebugBackground1:BackgroundWindowLight
+	{
+		x = 0.01;
+		y = 0.95;
+		h = 0.04;
+		w = 0.98;
+	};
+};
+
+class EndOfGame:DefaultMenu
+{
+	controlsBackground[] = {};
+	controls[] = {MenuTitle,CasualtiesLabel,VehiclesLostLabel,WestLabel,WestCasualties,WestVehiclesLost,EastLabel,EastCasualties,
+					EastVehiclesLost,ResistanceLabel,ResistanceCasualties,ResistanceVehiclesLost,CivilianLabel,CivilianCasualties,CivilianVehiclesLost,
+					WestResources,WestIncome,WestPoints,WestTowns,EastResources,EastIncome,EastPoints,EastTowns};
+
+	class MenuTitle:GuiLargeText
+	{
+		idc = IDCMENUINFO;
+		style = GUICENTER;
+		sizeEx = 0.04;
+		x = 0.375;
+		y = 0.12;
+		w = 0.25;
+		h = 0.05;
+		text = "";
+	};
+
+	class SideBase:GuiText
+	{
+		x = 0.25;
+		text = "";
+	};
+
+	class CasualtiesLabel:GuiText
+	{
+		style = GUIRIGHT;
+		x = 0.425;
+		y = 0.25;
+		w = 0.15;
+		text = $STRCASUALTIES;
+	};
+
+	class VehiclesLostLabel:GuiText
+	{
+		style = GUIRIGHT;
+		x = 0.625;
+		y = 0.25;
+		w = 0.15;
+		text = $STRVEHICLESLOST;
+	};
+
+	class WestLabel:SideBase
+	{
+		y = 0.3;
+		text = $STRWEST;
+	};
+
+	class WestCasualties:CasualtiesLabel
+	{
+		idc = IDCMENULIST;
+		style = GUIRIGHT;
+		y = 0.3;
+		text = "";
+	};
+
+	class WestVehiclesLost:VehiclesLostLabel
+	{
+		idc = IDCMENULIST + 1;
+		style = GUIRIGHT;
+		y = 0.3;
+		text = "";
+	};
+
+	class EastLabel:SideBase
+	{
+		y = 0.35;
+		text = $STREAST;
+	};
+
+	class EastCasualties:CasualtiesLabel
+	{
+		idc = IDCMENULIST + 2;
+		style = GUIRIGHT;
+		y = 0.35;
+	};
+
+	class EastVehiclesLost:VehiclesLostLabel
+	{
+		idc = IDCMENULIST + 3;
+		style = GUIRIGHT;
+		y = 0.35;
+	};
+
+	class ResistanceLabel:SideBase
+	{
+		y = 0.4;
+		text = $STRRESISTANCE;
+	};
+
+	class ResistanceCasualties:CasualtiesLabel
+	{
+		idc = IDCMENULIST + 4;
+		style = GUIRIGHT;
+		y = 0.4;
+	};
+
+	class ResistanceVehiclesLost:VehiclesLostLabel
+	{
+		idc = IDCMENULIST + 5;
+		style = GUIRIGHT;
+		y = 0.4;
+	};
+
+	class CivilianLabel:SideBase
+	{
+		y = 0.45;
+		text = $STRCIVILIAN;
+	};
+
+	class CivilianCasualties:CasualtiesLabel
+	{
+		idc = IDCMENULIST + 6;
+		style = GUIRIGHT;
+		y = 0.45;
+	};
+
+	class CivilianVehiclesLost:VehiclesLostLabel
+	{
+		idc = IDCMENULIST + 7;
+		style = GUIRIGHT;
+		y = 0.45;
+	};
+
+	class WestResources:GuiText
+	{
+		idc = IDCWESTRESOURCES;
+		x = 0.25;
+		y = 0.6;
+		text = "";
+	};
+
+	class WestIncome:GuiText
+	{
+		idc = IDCWESTINCOME;
+		x = 0.25;
+		y = 0.65;
+		text = "";
+	};
+
+	class WestPoints:GuiText
+	{
+		idc = IDCWESTPOINTS;
+		x = 0.59;
+		y = 0.6;
+		text = "";
+	};
+
+	class WestTowns:GuiText
+	{
+		idc = IDCWESTTOWNSHELD;
+		x = 0.59;
+		y = 0.65;
+		text = "";
+	};
+
+	class EastResources:GuiText
+	{
+		idc = IDCEASTRESOURCES;
+		x = 0.25;
+		y = 0.75;
+		text = "";
+	};
+
+	class EastIncome:GuiText
+	{
+		idc = IDCEASTINCOME;
+		x = 0.25;
+		y = 0.8;
+		text = "";
+	};
+
+	class EastPoints:GuiText
+	{
+		idc = IDCEASTPOINTS;
+		x = 0.59;
+		y = 0.75;
+		text = "";
+	};
+
+	class EastTowns:GuiText
+	{
+		idc = IDCEASTTOWNSHELD;
+		x = 0.59;
+		y = 0.8;
+		text = "";
+	};
+};
+
+//DBS Arsenal dialog.
+#include "DBSArsenal\Dialog.hpp"

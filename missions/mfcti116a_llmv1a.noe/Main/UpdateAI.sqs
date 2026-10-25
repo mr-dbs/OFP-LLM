@@ -1,0 +1,1015 @@
+;Last modified 2/18/4
+;Use on a group to give it AI control.
+;Script usage: [Unit,Side] Exec "UpdateAI.sqs"
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_unit = _this select 0
+_side = Side _unit
+_closestTarget = ObjNull
+
+? (_side != west) && (_side != east):_side = _this Select 1
+
+;Get group
+_group = Group _unit
+_group SetCombatMode "RED"
+_group SetBehaviour "AWARE"
+
+~15
+
+;If the unit is a player then don't run the AI routines.
+? (player == Leader _group):Exit
+? !(Local Leader _group):Exit
+
+_scriptType = 0
+_lastScriptType = -1
+_newOrder = true
+_timeElapsed = 0
+_reportMission = true
+_killed = false
+
+_totalTowns = Count towns
+
+#Update
+~1
+	? (_killed) && (Alive Leader _group):_killed = false;_newOrder = true
+	? !(_killed) && !(Alive Leader _group):_killed = true;goto "WaitForRespawn"
+
+	_lastScriptType = _scriptType
+	_timeElapsed = _timeElapsed + 1
+
+	;Get team's current script.
+	? (_group == WestAlphaTeam):_scriptType = westAlphaTeamScript;_independent = westAlphaIndependent;_groupValue = groupAlpha
+	? (_group == WestBravoTeam):_scriptType = westBravoTeamScript;_independent = westBravoIndependent;_groupValue = groupBravo
+	? (_group == WestCharlieTeam):_scriptType = westCharlieTeamScript;_independent = westCharlieIndependent;_groupValue = groupCharlie
+	? (_group == WestDeltaTeam):_scriptType = westDeltaTeamScript;_independent = westDeltaIndependent;_groupValue = groupDelta
+	? (_group == WestEchoTeam):_scriptType = westEchoTeamScript;_independent = westEchoIndependent;_groupValue = groupEcho
+	? (_group == WestFoxtrotTeam):_scriptType = westFoxtrotTeamScript;_independent = westFoxtrotIndependent;_groupValue = groupFoxtrot
+	? (_group == WestGolfTeam):_scriptType = westGolfTeamScript;_independent = westGolfIndependent;_groupValue = groupGolf
+	? (_group == WestHotelTeam):_scriptType = westHotelTeamScript;_independent = westHotelIndependent;_groupValue = groupHotel
+
+	? (_group == EastAlphaTeam):_scriptType = eastAlphaTeamScript;_independent = eastAlphaIndependent;_groupValue = groupAlpha
+	? (_group == EastBravoTeam):_scriptType = eastBravoTeamScript;_independent = eastBravoIndependent;_groupValue = groupBravo
+	? (_group == EastCharlieTeam):_scriptType = eastCharlieTeamScript;_independent = eastCharlieIndependent;_groupValue = groupCharlie
+	? (_group == EastDeltaTeam):_scriptType = eastDeltaTeamScript;_independent = eastDeltaIndependent;_groupValue = groupDelta
+	? (_group == EastEchoTeam):_scriptType = eastEchoTeamScript;_independent = eastEchoIndependent;_groupValue = groupEcho
+	? (_group == EastFoxtrotTeam):_scriptType = eastFoxtrotTeamScript;_independent = eastFoxtrotIndependent;_groupValue = groupFoxtrot
+	? (_group == EastGolfTeam):_scriptType = eastGolfTeamScript;_independent = eastGolfIndependent;_groupValue = groupGolf
+	? (_group == EastHotelTeam):_scriptType = eastHotelTeamScript;_independent = eastHotelIndependent;_groupValue = groupHotel
+
+	? (_independent):_timeElapsed = 0;goto "Update"
+
+	;If a new order to move to a waypoint has been issued, flag it for next actual waypoint order.
+	;Note that a waypoint is triggered first by newWaypointOrderScript & then moveToWaypointScript.
+	;This prevents the unit from continually following the commander's waypoint without further orders to do so.
+	? (_scriptType == newOrderScript):_newOrder = true
+
+	;Execute script every time udateAIDelay of time passes.
+	? (_timeElapsed >= updateAIDelay):goto "Start"
+;	? (_scriptType == newWaypointOrderScript) || (_lastScriptType == _scriptType):goto "Update"
+	? (_scriptType == newOrderScript) || (_lastScriptType == _scriptType):goto "Update"
+
+	;If the script type has changed then reset mission reporting.
+	_reportMission = true
+	_defendingTarget = false
+	_closestTarget = ObjNull
+
+	#Start
+
+		_saboteurTargetFound = false
+		_timeElapsed = 0
+
+		? !(Alive Leader _group):goto "Update"
+
+		;Execute current AI setting of group.
+;		? (_scriptType == assaultScript):goto "TakeTowns"
+		? (_scriptType == assaultScript) || (_scriptType == takeTownsAndBasesScript):goto "TakeTownsAndBases"
+		? (_scriptType == defenseScript):goto "DefendTowns"
+		? (_scriptType == defendTownsAndBasesScript):goto "DefendTowns"
+
+		;Line below kept for compatibility with the 1.46 version of this mod.
+		? (_scriptType == defendBaseScript):goto "DefendTowns"
+
+		? (_scriptType == searchAndDestroyScript):goto "SearchAndDestroy"
+		? (_scriptType == moveToWaypointScript && _newOrder):goto "MoveToWaypoint"
+
+		? (_scriptType == commandVehiclesScript && _newOrder):goto "CommandVehicles"
+		? (_scriptType == disembarkVehiclesScript && _newOrder):goto "DisembarkVehicles"
+
+		? (_scriptType == embarkTransportScript && _newOrder):goto "EmbarkInTransports"
+		? (_scriptType == disembarkTransportScript && _newOrder):goto "DisembarkTransports"
+
+		goto "Update"
+
+;AI routines for defending towns.
+#DefendTowns
+
+	? !(Alive Leader _group):goto "Update"
+	? (_reportMission) && (_side == west):westMessage = messageOrderDefend;PublicVariable "westMessage";westPlayerMessageGroupFrom = _groupValue;PublicVariable "westPlayerMessageGroupFrom";_reportMission = false;_closestTarget = ObjNull
+	? (_reportMission) && (_side == east):eastMessage = messageOrderDefend;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = _groupValue;PublicVariable "eastPlayerMessageGroupFrom";_reportMission = false;_closestTarget = ObjNull
+
+	;If a town was previously chosen and in range then do a patrol.
+	? (!IsNull _closestTarget):goto "MoveToClosestTarget"
+
+	#CreateDefendTargetList
+
+	_closestDistance = 10000
+	_tempTargets = []
+	_tempTargetDistances = []
+	_closestTarget = ObjNull
+
+	;BUILD A LIST OF TAKEN TOWNS
+	_count = 0
+	_maxTargets = Count towns
+
+	? (_maxTargets < 1):goto "Update"
+
+	;Add any friendly towns to the defend target list.
+	#CheckTowns
+
+	;If a town is taken then add it to the list.
+	? (_side == west):_tempSide = "west"
+	? (_side == east):_tempSide = "east"
+
+	? (townSides Select _count == _tempSide):_tempTargets = _tempTargets + [towns Select _count];_tempTargetDistances = _tempTargetDistances + [Leader _group Distance (towns Select _count)]
+
+	_count = _count + 1
+
+	? (_count < _maxTargets):goto "CheckTowns"
+
+	;DETERMINE WHICH TOWN IS CLOSEST
+	_count = 0
+	_maxTargets = Count _tempTargets
+
+	;If no friendly towns have been found then check for any targets.
+	? (_maxTargets < 1):goto "FindClosestBase"
+
+	;Check for a closer target.
+	#CheckClosestTowns
+
+		? (_tempTargetDistances Select _count < _closestDistance):_closestDistance = _tempTargetDistances Select _count;_closestTarget = _tempTargets Select _count
+
+		_count =_count + 1
+
+		? (_count < _maxTargets):goto "CheckClosestTowns"
+
+	? (_side == west):_totalBases = Count westControlCenter
+	? (_side == east):_totalBases = Count eastControlCenter
+
+	;If no bases exist then skip closest base check.
+	? (_totalBases < 1):goto "MoveToClosestTarget"
+
+	_count = 0
+
+	;Find base closest to group leader.
+	#FindClosestBase
+
+		? (_side == west):_base = westControlCenter Select _count
+		? (_side == east):_base = eastControlCenter Select _count
+
+		_count =_count + 1
+		_distance = Leader _group Distance _base
+
+		? (_distance < _closestDistance):_closestDistance = _distance;_closestTarget = _base
+		? (_count < _totalBases):goto "FindClosestBase"
+
+	#MoveToClosestTarget
+
+		? (IsNull _closestTarget) && (_side == west):westMessage = messageOrderDefendDenied;PublicVariable "westMessage";westPlayerMessageGroupFrom = _groupValue;PublicVariable "westPlayerMessageGroupFrom"
+		? (IsNull _closestTarget) && (_side == east):eastMessage = messageOrderDefendDenied;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = _groupValue;PublicVariable "eastPlayerMessageGroupFrom"
+
+		? (_defendingTarget)||(Leader _group Distance _closestTarget < targetDefendRange):goto "DefendTarget"
+	
+		;Leader _group DoMove GetPos _closestTarget
+		[_group,GetPos _closestTarget] Exec "Main\ActionMoveGroup.sqs"
+
+		goto "Update"
+
+#DefendTarget
+
+	? (debug):player SideChat("Defending base/town.")
+	_defendingTarget = true
+
+	_unmannedGuns = []
+
+	#FindUnmannedMortar
+
+		? (_side == west):_gunList = westMortar
+		? (_side == east):_gunList = eastMortar
+
+		_return = "FindUnmannedAAStations";goto "FindUnmannedGuns"
+
+	#FindUnmannedAAStations
+
+		? (_side == west):_gunList = westAAStation
+		? (_side == east):_gunList = eastAAStation
+
+		_return = "FindUnmannedAAGuns";goto "FindUnmannedGuns"
+
+	#FindUnmannedAAGuns
+
+		? (_side == west):_gunList = westAAGun
+		? (_side == east):_gunList = eastAAGun
+
+		_return = "FindUnmannedHEFortifications";goto "FindUnmannedGuns"
+
+	#FindUnmannedHEFortifications
+
+		? (_side == west):_gunList = westHEFortification
+		? (_side == east):_gunList = eastHEFortification
+
+		_return = "FindUnmannedHEStations";goto "FindUnmannedGuns"
+
+	#FindUnmannedHEStations
+
+		? (_side == west):_gunList = westHEStation
+		? (_side == east):_gunList = eastHEStation
+
+		_return = "FindUnmannedHEGuns";goto "FindUnmannedGuns"
+
+	#FindUnmannedHEGuns
+
+		? (_side == west):_gunList = westHEGun
+		? (_side == east):_gunList = eastHEGun
+
+		_return = "FindUnmannedM2Fortifications";goto "FindUnmannedGuns"
+
+	#FindUnmannedM2Fortifications
+
+		? (_side == west):_gunList = westM2Fortification
+		? (_side == east):_gunList = eastM2Fortification
+
+		_return = "FindUnmannedM2Stations";goto "FindUnmannedGuns"
+
+	#FindUnmannedM2Stations
+
+		? (_side == west):_gunList = westM2Station
+		? (_side == east):_gunList = eastM2Station
+
+		_return = "FindUnmannedM2Guns";goto "FindUnmannedGuns"
+
+	#FindUnmannedM2Guns
+
+		? (_side == west):_gunList = westM2Gun
+		? (_side == east):_gunList = eastM2Gun
+
+		_return = "AssignToGuns";goto "FindUnmannedGuns"
+
+	#AssignToGuns
+
+		? (Count _unmannedGuns < 1):_units = Units _group;goto "StartDefendTargetPatrol"
+		? (debug):player SideChat("Assigning defense to any guns.")
+
+		_units = Units _group
+
+		#AssignToGun
+
+			? (Count _unmannedGuns < 1) && (Count _units > 0):goto "StartDefendTargetPatrol"
+			? (Count _units < 1):goto "Update"
+
+			_gunner = _units Select 0
+			_gun = _unmannedGuns Select 0
+			_units = _units - [_gunner]
+
+			;If potential gunner is not in a vehicle then assign to current gun.
+			? (Vehicle _gunner == _gunner):_gunner AssignAsGunner _gun;[_gunner] OrderGetIn true;_unmannedGuns = _unmannedGuns - [_gun]
+
+			goto "AssignToGun"
+
+		#StartDefendTargetPatrol
+
+			_count = 0
+			_totalUnits = Count _units
+
+		;Patrol the target if not manning a stationary gun.
+		#DefendTargetPatrol
+
+			_unit = _units Select _count
+			_count = _count + 1
+
+			? !(CanMove Vehicle _unit) || (GetDammage _unit >= 1):goto "DefendTargetPatrolNext"
+
+			;Change direction.
+			_direction = Random 359
+			_position = GetPos _closestTarget
+			_distance = (targetDefendRange / 3) + Random (targetDefendRange - (targetDefendRange / 3))
+			_destination = [(_position Select 0)+((Sin _direction)*_distance),(_position Select 1)+((Cos _direction)*_distance),_position Select 2]
+
+			;Occasionally return to target.
+			? (Random 100 < 25):_destination = _position
+
+			_unit CommandMove _destination
+
+			#DefendTargetPatrolNext
+
+				? (_count < _totalUnits):goto "DefendTargetPatrol"
+
+		goto "Update"
+
+#FindUnmannedGuns
+
+	_count = 0
+	_totalGuns = Count _gunList
+
+	? (_totalGuns < 1):goto _return
+
+	#CheckForUnmannedGun
+
+		_gun = _gunList Select _count
+		? (IsNull _gun):goto "CheckNextUnmannedGun"
+
+		_distance = Leader _group Distance _gun
+		_count =_count + 1
+
+		? ((IsNull Gunner _gun)||(!Alive Gunner _gun))&&(_distance < targetDefendRange):_unmannedGuns = _unmannedGuns + [_gun]
+
+		#CheckNextUnmannedGun
+
+			? (_count < _totalGuns):goto "CheckForUnmannedGun"
+
+		goto _return
+
+#TakeTownsAndBases
+
+	? !(Alive Leader _group):goto "Update"
+	? (_reportMission) && (_side == west):westMessage = messageOrderTakeTowns;PublicVariable "westMessage";westPlayerMessageGroupFrom = _groupValue;PublicVariable "westPlayerMessageGroupFrom";_reportMission = false
+	? (_reportMission) && (_side == east):eastMessage = messageOrderTakeTowns;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = _groupValue;PublicVariable "eastPlayerMessageGroupFrom";_reportMission = false
+
+	_tempTargets = []
+	_tempTargetDistances = []
+
+	;BUILD A LIST OF UNTAKEN TOWNS
+	_count = 0
+	_maxTargets = Count towns
+
+	;If no town targets then check for base targets.
+	? (_maxTargets < 1):goto "CheckBaseTargets"
+	? (defendTheBase) && (_scriptType == takeTownsAndBasesScript):goto "CheckBaseTargets"
+
+	#CheckTownTarget
+
+		;If a town is untaken then add it to the list.
+		? (_side == west):_tempSide = "west"
+		? (_side == east):_tempSide = "east"
+
+		? (townSides Select _count != _tempSide):_tempTargets = _tempTargets + [towns Select _count];_tempTargetDistances = _tempTargetDistances + [Leader _group Distance (towns Select _count)]
+
+		_count = _count + 1
+
+		? (_count < _maxTargets):goto "CheckTownTarget"
+
+	;If this is not an AI controlled side or a public server then don't target the base.
+	? (_scriptType != takeTownsAndBasesScript) || (publicServer):goto "FindClosestTownsBases"
+
+	;BUILD A LIST OF UNDESTROYED ENEMY STRUCTURES
+	#CheckBaseTargets
+
+	? (_side == west):_structureList = eastControlCenter + eastInfantryFactory + eastLightFactory + eastHeavyFactory + eastAirFactory + [EastMobileHQ]
+	? (_side == east):_structureList = westControlCenter + westInfantryFactory + westLightFactory + westHeavyFactory + westAirFactory + [WestMobileHQ]
+
+	_count = 0
+	_maxStructureTargets = Count _structureList
+
+	;If no base or towns were found then return.
+	? (_maxTargets < 1) && (_maxStructureTargets < 1):goto "Update"
+	? (_maxStructureTargets < 1):goto "FindClosestTownsBases"
+
+	#CheckBaseTarget
+
+		_structure = _structureList Select _count
+		_count = _count + 1
+
+		? (GetDammage _structure < 1):_tempTargets = _tempTargets + [_structure];_tempTargetDistances = _tempTargetDistances + [Leader _group Distance _structure]
+		? (_count < _maxStructureTargets):goto "CheckBaseTarget"
+
+	;DETERMINE WHICH TARGET IS CLOSEST
+	#FindClosestTownsBases
+
+	_count = 0
+	_closestDistance = 10000
+	_closestTarget = ObjNull
+	_maxTargets = Count _tempTargets
+
+	? (_maxTargets < 1):goto "Update"
+
+	;Check for a closer target.
+	#FindClosestTownBase
+
+		_attackUnits = Units _group
+		_attackUnits = _attackUnits - [Leader _group]
+		_tempTarget = _tempTargets Select _count
+
+		;Attack the MHQ even if it is empty.
+		? (_tempTarget == EastMobileHQ) && (_tempTargetDistances Select _count < 60):Leader _group DoTarget _tempTarget;Leader _group DoFire _tempTarget;[_attackUnits] CommandTarget _tempTarget;[_attackUnits] CommandFire _tempTarget;_closestTarget = _tempTarget;goto "ForceMHQAttack"
+		? (_tempTarget == WestMobileHQ) && (_tempTargetDistances Select _count < 60):Leader _group DoTarget _tempTarget;Leader _group DoFire _tempTarget;[_attackUnits] CommandTarget _tempTarget;[_attackUnits] CommandFire _tempTarget;_closestTarget = _tempTarget;goto "ForceMHQAttack"
+
+		;If within range of the enemy base move to the next target.
+		? (_scriptType == takeTownsAndBasesScripts) && ((_tempTargets Select _count) In _structureList) && (_tempTargetDistances Select _count < _closestDistance)&&(_tempTargetDistances Select _count < 75):goto "FindNextClosestTownBase"
+		? (_tempTargetDistances Select _count < _closestDistance)&&(_tempTargetDistances Select _count > 10):_closestDistance = _tempTargetDistances Select _count;_closestTarget = _tempTargets Select _count
+
+		#FindNextClosestTownBase
+
+		_count = _count + 1
+
+		? (_count < _maxTargets):goto "FindClosestTownBase"
+
+	? (IsNull _closestTarget):goto "Update"
+
+	_direction = Random 360
+	_position = GetPos _closestTarget
+	[_group,[(_position Select 0)+((sin _direction)*15),(_position Select 1)+((cos _direction)*15),_position Select 2]] Exec "Main\ActionMoveGroup.sqs"
+	goto "Update"
+
+#MoveToWaypoint
+
+	? (_side == west):_waypointMarker = "WestCommanderWP";_destination = westCommanderWPDestination
+	? (_side == east):_waypointMarker = "EastCommanderWP";_destination = eastCommanderWPDestination
+
+	? (_reportMission) && (_side == west):westMessage = messageOrderMoveToWaypoint;PublicVariable "westMessage";westPlayerMessageGroupFrom = _groupValue;PublicVariable "westPlayerMessageGroupFrom";_reportMission = false
+	? (_reportMission) && (_side == east):eastMessage = messageOrderMoveToWaypoint;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = _groupValue;PublicVariable "eastPlayerMessageGroupFrom";_reportMission = false
+
+	[_group,GetPos _destination] Exec "Main\ActionMoveGroup.sqs"
+
+	;Do not execute this routine again until a new order to move occurs.
+	_newOrder = false
+
+	goto "Update"
+
+#SearchAndDestroy
+
+	? (_reportMission) && (_side == west):westMessage = messageOrderSearchAndDestroy;PublicVariable "westMessage";westPlayerMessageGroupFrom = _groupValue;PublicVariable "westPlayerMessageGroupFrom";_reportMission = false
+	? (_reportMission) && (_side == east):eastMessage = messageOrderSearchAndDestroy;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = _groupValue;PublicVariable "eastPlayerMessageGroupFrom";_reportMission = false
+
+	_town = towns Select (Random (_totalTowns - 1))
+	_position = GetPos _town
+
+	? (_side == west) && !(IsNull westBaseFound) && (GetDammage westBaseFound < 1):_position = GetPos westBaseFound
+	? (_side == east) && !(IsNull eastBaseFound) && (GetDammage eastBaseFound < 1):_position = GetPos eastBaseFound
+
+	? (_baseFound):_x = (_position Select 0) + (Random 200) - 100;_y = (_position Select 1) + (Random 200) - 100;goto "MoveToSearchAndDestroyTarget"
+
+	_leaderPosition = GetPos Leader _group
+	_x = (_position Select 0) + (((_leaderPosition Select 0) - (_position Select 0)) / 2) * (Random 1)
+	_y = (_position Select 1) + (((_leaderPosition Select 1) - (_position Select 1)) / 2) * (Random 1)
+
+#MoveToSearchAndDestroyTarget
+
+	_group Move [_x,_y]
+
+	_count = 0
+	_units = Units _group
+	_totalUnits = Count _units
+	_saboteurs = []
+
+	? (_totalUnits < 1):goto "Update"
+
+	#CountSaboteur
+
+		_saboteur = _units Select _count
+		_count = _count + 1
+
+		? (Alive _saboteur) && (_saboteur Ammo "Timebomb" > 0) && (Vehicle _saboteur == _saboteur):_saboteurs = _saboteurs + [_saboteur]
+		? (_count < _totalUnits):goto "CountSaboteur"
+
+	? (Count _saboteurs > 0):goto "SaboteurCheck"
+	goto "Update"
+
+;Check to see if current saboteur knows the location of the enemy mobile HQ.
+#SaboteurCheck
+
+	? (_side == west):_targets = [EastMobileHQ] + eastControlCenter + eastInfantryFactory + eastLightFactory + eastHeavyFactory + eastAirFactory;_spottedTargets = westSpottedUnits - [EastMobileHQ]
+	? (_side == east):_targets = [WestMobileHQ] + westControlCenter + westInfantryFactory + westLightFactory + westHeavyFactory + westAirFactory;_spottedTargets = eastSpottedUnits - [WestMobileHQ]
+
+	_saboteurCount = 0
+	_totalSaboteurs = Count _saboteurs
+	_totalTargets = Count _targets
+
+	#UpdateSaboteur
+
+		_count = 0
+		_checkedTargets = []
+		_count = Random (_totalTargets - 1)
+		_saboteur = _saboteurs Select _saboteurCount
+
+	#FindSaboteurTarget
+
+		_target = _targets Select _count
+		? (Count _saboteurTargets > _saboteurCount):_target = _saboteurTargets Select _saboteurCount
+
+		_distance = _target Distance _saboteur
+		_checkedTargets  = _checkedTargets + [_count]
+
+		? (_distance < 300) && (GetDammage _target < 1) && ((_saboteur KnowsAbout _target >= 1) || (_target In _spottedTargets)):goto "SabotageTarget"
+		_saboteurTargets = _saboteurTargets - [_target]
+
+		#GetRandomTarget
+
+			_count = Random (_totalTargets - 1)
+			? (_count In _checkedTargets):goto "GetRandomTarget"
+
+		? (Count _checkedTargets < _totalTargets):goto "FindSaboteurTarget"
+
+	#UpdateNextSaboteur
+
+		_saboteurCount = _saboteurCount + 1
+		? (_saboteurCount < _totalSaboteurs):goto "UpdateSaboteur"
+
+	goto "Update"
+
+#SabotageTarget
+
+	? !(_target In _saboteurTargets):_saboteurTargets = _saboteurTargets + [_target]
+	_saboteur CommandMove GetPos _target
+
+	#SaboteurCheckDistance
+
+		? (_distance < 15):goto "SaboteurDropBomb"
+
+	goto "UpdateNextSaboteur"
+
+;Make the saboteur drop a satchel by the enemy's structure.
+#SaboteurDropBomb
+
+	_saboteur Fire ["throw","Timebomb","Timebomb"]
+	~2
+
+	;Pick a random direction and run like hell from the bomb.
+	_direction = Random 359
+	_position = GetPos _saboteur
+	_saboteur CommandMove [(_position Select 0)+((sin _direction)*50),(_position Select 1)+((cos _direction)*50),_position Select 2]
+	goto "UpdateNextSaboteur"
+
+;Disembark from cargo only.
+#DisembarkTransports
+
+	_count = 0
+	_vehicles = []
+	_units = Units _group
+	_totalUnits = Count _units
+
+	? (_totalUnits < 1):goto "Update"
+
+	? (_reportMission) && (_side == west):westMessage = messageOrderDisembarkTransports;PublicVariable "westMessage";westPlayerMessageGroupFrom = _groupValue;PublicVariable "westPlayerMessageGroupFrom";_reportMission = false
+	? (_reportMission) && (_side == east):eastMessage = messageOrderDisembarkTransports;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = _groupValue;PublicVariable "eastPlayerMessageGroupFrom";_reportMission = false
+
+	;Do not execute this routine again until a new order to move occurs.
+	_newOrder = false
+
+	;Get each vehicle in the group & order everyone out.
+	;If the driver is not on the team then it is a transport so eject.
+	#DisembarkTransport
+
+		_unitToDisembark = _units Select _count
+		_vehicle = Vehicle _unitToDisembark
+		_count = _count + 1
+
+		;If _vehicle is actually a vehicle & it has not already been disembarked then order the group out.
+		? (_unitToDisembark != _vehicle)&&!((Driver _vehicle) In _units):_unitToDisembark Action ["EJECT",_vehicle]
+		? (_unitToDisembark != _vehicle)&&(Driver _vehicle != _unitToDisembark)&&(Gunner _vehicle != _unitToDisembark)&&(Commander _vehicle != _unitToDisembark):_vehicles = _vehicles + [_vehicle];UnassignVehicle _unitToDisembark
+
+		? (_count < _totalUnits):goto "DisembarkTransport"
+
+		goto "Update"
+
+#DisembarkVehicles
+
+	_count = 0
+	_vehicles = []
+	_units = Units _group
+	_totalUnits = Count _units
+
+	? (_totalUnits < 1):goto "Update"
+	? (_reportMission) && (_side == west):westMessage = messageOrderDisembarkVehicles;PublicVariable "westMessage";westPlayerMessageGroupFrom = _groupValue;PublicVariable "westPlayerMessageGroupFrom";_reportMission = false
+	? (_reportMission) && (_side == east):eastMessage = messageOrderDisembarkVehicles;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = _groupValue;PublicVariable "eastPlayerMessageGroupFrom";_reportMission = false
+
+	;Do not execute this routine again until a new order to move occurs.
+	_newOrder = false
+
+	;Get each vehicle in the group & order everyone out.
+	#DisembarkVehicle
+
+		_unitToDisembark = _units Select _count
+		_vehicle = Vehicle _unitToDisembark
+		_count = _count + 1
+
+		;If _vehicle is actually a vehicle & it has not already been disembarked then order the group out.
+		? (_unitToDisembark != _vehicle):UnassignVehicle _unitToDisembark
+		? (_count < _totalUnits):goto "DisembarkVehicle"
+
+		goto "Update"
+
+#EmbarkInTransports
+
+	? (_side == west):_vehicles = westTransports
+	? (_side == east):_vehicles = eastTransports
+
+	_totalVehicles = Count _vehicles
+	_units = Units _group
+	_totalUnits = Count _units
+	_embarkCount = 0
+
+	? (debug):player SideChat("Embark in transport.")
+
+	;Do not execute this routine again until a new order to move occurs.
+	_newOrder = false
+
+	? (_totalVehicles < 1) || (_totalUnits < 1):goto "Update"
+	? !(_reportMission):goto "Update"
+
+	_findCount = 0
+
+	#FindTransport
+
+		_transport = _vehicles Select _findCount
+		_findCount = _findCount + 1
+
+		? (GetDammage _transport != 1)&&(Leader _group Distance _transport < 100):goto "EmbarkInTransport"
+		? (_findCount < _totalVehicles):goto "FindTransport"
+
+		goto "Update"
+
+	#EmbarkInTransport
+
+		? (_reportMission) && (_side == west):westMessage = messageOrderEmbarkTransports;PublicVariable "westMessage";westPlayerMessageGroupFrom = _groupValue;PublicVariable "westPlayerMessageGroupFrom";_reportMission = false
+		? (_reportMission) && (_side == east):eastMessage = messageOrderEmbarkTransports;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = _groupValue;PublicVariable "eastPlayerMessageGroupFrom";_reportMission = false
+
+		_count = 0
+		_transportPositionReturn = "EmbarkUnitInTransport";goto "GetAvailableTransportPositions"
+
+		#EmbarkUnitInTransport
+
+			_unitToEmbark = _units Select _embarkCount
+			_embarkCount = _embarkCount + 1
+			_count = _count + 1
+
+			;If unit is a stationary vehicle (gun) leave it now.
+			? (IsNull (Driver Vehicle _unitToEmbark))||(!CanMove Vehicle _unitToEmbark):_unitToEmbark LeaveVehicle (Vehicle _unitToEmbark)
+
+			;If current unit is not already in a vehicle.
+			? (Vehicle _unitToEmbark == _unitToEmbark):_unitToEmbark AssignAsCargo _transport;[_unitToEmbark] OrderGetIn true
+
+			? (_embarkCount < _totalUnits) && (_count < _availableTransportPositions):goto "EmbarkUnitInTransport"
+			? (_embarkCount < _totalUnits):goto "FindTransport"
+
+			goto "Update"
+
+;Get free positions on transport.
+#GetAvailableTransportPositions
+
+	_totalTransportPositions = 0;_transportReturn = "CountTransportPositions";goto "GetTotalTransportPositions"
+
+	#CountTransportPositions
+
+		_transportCrew = Crew _transport
+		_transportCrew = _transportCrew - [Driver _transport];_transportCrew = _transportCrew - [Commander _transport];_transportCrew = _transportCrew - [Gunner _transport]
+
+		_transportCrewBoarded = Count _transportCrew
+		_availableTransportPositions = _totalTransportPositions - _transportCrewBoarded
+
+		? (debug):_text = Format["Transport found (%1).  %2 available positions of %3.",_transport,_availableTransportPositions,_totalTransportPositions];player SideChat(_text)
+
+		goto _transportPositionReturn
+
+;Get max positions available for a given transport
+#GetTotalTransportPositions
+
+	_transportPositionsCount = 0
+	_transportNames = westTransportNames + eastTransportNames
+	_transportPositions = westTransportPositions + eastTransportPositions
+	_totalTransports = Count _transportNames
+
+	#FindMatchingTransport
+
+		;CountType doesn't seem to return Vulcans or sometimes BMPs.
+		;BMPs are returned when BMP2s are counted.
+		_transportName = _transportNames Select _transportPositionsCount
+		_transportsFound = (_transportName CountType [_transport])
+		_BMP2Found = 0
+		_M2A2Found = 0
+
+		;Some vehicles such as BMP2s will return from a CountType as a BMP.  Do a special check for these.
+		? (_transportName == "BMP"):_BMP2Found = ("BMP2" CountType [_transport])
+		? (_transportName == "M113"):_M2A2Found = ("bradley" CountType [_transport])
+
+		? (_BMP2Found > 0):_totalTransportPositions = _transportPositions Select (_transportPositionsCount + 1);goto _transportReturn
+		? (_M2A2Found > 0):_totalTransportPositions = _transportPositions Select (_transportPositionsCount + 2);goto _transportReturn
+		? (_transportsFound > 0):_totalTransportPositions = _transportPositions Select _transportPositionsCount;goto _transportReturn
+
+		_transportPositionsCount = _transportPositionsCount + 1
+
+		? (_transportPositionsCount < _totalTransports):goto "FindMatchingTransport"
+
+	goto _transportReturn
+
+;Create list of units and remove ones already in mobile vehicles.
+#GetAvailableUnits
+
+	_countedUnits = Units _group
+	_units = Units _group
+	_totalUnits = Count _countedUnits
+	_unitCount = 0
+
+	#CountAvailableUnit
+
+		_unit = _countedUnits Select _unitCount
+		_unitCount = _unitCount + 1
+
+		;If in a mobile vehicle don't include in list.
+		? (Vehicle _unit != _unit)&&!(IsNull (Driver Vehicle _unit))&&(CanMove Vehicle _unit):_units = _units - [_unit]
+
+		;If in an immobile vehicle then leave it now.
+		? (Vehicle _unit != _unit)&&((IsNull (Driver Vehicle _unit))||!(CanMove Vehicle _unit)):_unit LeaveVehicle (Vehicle _unit)
+		? (_unitCount < _totalUnits):goto "CountAvailableUnit"
+
+		? (debug):_text = Format["%1 available units to command vehicles.",Count _units];player SideChat(_text)
+
+		_totalAvailableUnits = Count _units
+		goto _availableUnitsReturn
+
+#CommandVehicles
+
+	? (_reportMission) && (_side == west):westMessage = messageOrderCommandVehicles;PublicVariable "westMessage";westPlayerMessageGroupFrom = _groupValue;PublicVariable "westPlayerMessageGroupFrom";_reportMission = false
+	? (_reportMission) && (_side == east):eastMessage = messageOrderCommandVehicles;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = _groupValue;PublicVariable "eastPlayerMessageGroupFrom";_reportMission = false
+
+	;Do not execute this routine again until a new order to move occurs.
+	_newOrder = false
+
+	_vehicles = westAirVehicles + eastAirVehicles + westHeavyVehicles + eastHeavyVehicles + westLightVehicles + eastLightVehicles
+	_totalVehicles = Count _vehicles
+
+	_availableUnitsReturn = "CommandVehiclesStart";goto "GetAvailableUnits"
+
+	#CommandVehiclesStart
+
+		_totalUnits = Count _units
+
+		? (_totalAvailableUnits < 1):goto "Update"
+
+		_unitCount = 0
+		_findCommandableReturn = "CommandVehicle";goto "FindCommandableVehicles"
+
+	#CommandVehicle
+
+		? (IsNull _vehicle):goto "Update"
+
+		_boardReturn = "CheckCommandVehicle";goto "BoardCommandableVehicle"
+
+		#CheckCommandVehicle
+
+			? (Count _units > 0):_findCommandableReturn = "CommandVehicle";goto "FindCommandableVehicle"
+
+			goto "Update"
+
+#FindCommandableVehicles
+
+	? (debug):player SideChat("Commandeer vehicle.")
+	? (_totalVehicles < 1) || (_totalUnits < 1):goto "Update"
+
+	_vehicleCount = 0
+
+	#FindCommandableVehicle
+
+		? (_vehicleCount >= _totalVehicles):_vehicle = ObjNull;goto _findCommandableReturn
+
+		_vehicle = _vehicles Select _vehicleCount
+		_vehicleCount = _vehicleCount + 1
+
+		? (GetDammage _vehicle != 1) && ((_units Select 0) Distance _vehicle < embarkVehicleRange):goto _findCommandableReturn
+		? (_vehicleCount < _totalVehicles):goto "FindCommandableVehicle"
+
+		? (GetDammage _vehicle == 1) || ((_units Select 0) Distance _vehicle > embarkVehicleRange):_vehicle = ObjNull
+
+		goto _findCommandableReturn
+
+#FindNextAvailableUnit
+
+	_nextUnitCount = 0
+	_totalUnits = Count _units
+
+	#FindNextAvailableUnitInRange
+
+		_unit = _units Select _nextUnitCount
+		_nextUnitCount = _nextUnitCount + 1
+
+		? (_unit Distance _vehicle < embarkVehicleRange):goto _findNextReturn
+		? (_nextUnitCount < _totalUnits):goto "FindNextAvailableUnitInRange"
+		? (_unit Distance _vehicle > embarkVehicleRange):_unit = ObjNull
+
+		goto _findNextReturn
+
+#BoardCommandableVehicle
+
+	_unit = _units Select 0
+
+	_driver = Driver _vehicle
+	_gunner = Gunner _vehicle
+	_commander = Commander _vehicle
+
+
+	;If vehicle is full then return.
+	? ((_vehicle In westHeavyVehicles)||(_vehicle In eastHeavyVehicles))&&(!IsNull _driver) && (!IsNull _gunner) && (!IsNull _commander):goto _boardReturn
+	? ((_vehicle In westLightVehicles)||(_vehicle In eastLightVehicles))&&(!IsNull _driver) && (!IsNull _gunner):goto _boardReturn
+	? ((_vehicle In westAirVehicles)||(_vehicle In eastAirVehicles))&&(!IsNull _driver) && (!IsNull _gunner):goto _boardReturn
+	? ((_vehicle In westUnarmedVehicles)||(_vehicle In eastUnarmedVehicles))&&(!IsNull _driver):goto _boardReturn
+	? ((_vehicle In westOneManAirVehicles)||(_vehicle In eastOneManAirVehicles))&&(!IsNull _driver):goto _boardReturn
+
+	;If a member of the vehicle is from a different team then return.
+	? (!IsNull _driver) && !(_driver In _units):goto _boardReturn
+	? (!IsNull _gunner) && !(_gunner In _units):goto _boardReturn
+	? (!IsNull _commander) && !(_commander In _units):goto _boardReturn
+
+	? (IsNull _driver):_units = _units - [_unit];_unit AssignAsDriver _vehicle;[_unit] OrderGetIn true
+	? (Count _units < 1):goto _boardReturn
+	? (_vehicle In westUnarmedVehicles) || (_vehicle In eastUnarmed) || (_vehicle In westOneManAir) || (_vehicle In eastOneManAir):goto _boardReturn
+
+	? (debug):_text = format["Vehicle: %1, Unit: %2",_vehicle,_unit];player sidechat(_text)
+
+	_findNextReturn = "BoardCommandableVehicleGunner";goto "FindNextAvailableUnit"
+
+	#BoardCommandableVehicleGunner
+
+	? (IsNull _unit):goto _boardReturn
+	? (IsNull _gunner):_units = _units - [_unit];_unit AssignAsGunner _vehicle;[_unit] OrderGetIn true
+	? (Count _units < 1):goto _boardReturn
+
+	_findNextReturn = "BoardCommandableVehicleCommander";goto "FindNextAvailableUnit"
+
+	#BoardCommandableVehicleCommander
+
+	? (IsNull _unit):goto _boardReturn
+	? (IsNull _commander):_units = _units - [_unit];_unit AssignAsCommander _vehicle;[_unit] OrderGetIn true
+
+	goto _boardReturn
+
+	? (IsNull _driver)&&(_unit Distance _vehicle < embarkVehicleRange):_unit = _units Select 0;_units = _units - [_unit];_unit AssignAsDriver;[_unit] OrderGetIn true
+	? (Count _units < 1):goto _boardReturn
+
+	? (_vehicle In westUnarmedVehicles) || (_vehicle In eastUnarmed) || (_vehicle In westOneManAir) || (_vehicle In eastOneManAir):goto _boardReturn
+	? (IsNull _gunner)&&(_unit Distance _vehicle < embarkVehicleRange):_unit = _units Select 0;_units = _units - [_unit];_unit AssignAsGunner;[_unit] OrderGetIn true
+	? (Count _units < 1):goto _boardReturn
+
+	? (_vehicle In westLight) || (_vehicle In eastLight) || (_vehicle In westAir) || (_vehicle In eastAir):goto _boardReturn
+	? (IsNull _commander)&&(_unit Distance _vehicle < embarkVehicleRange):_unit = _units Select 0;_units = _units - [_unit];_unit AssignAsGunner;[_unit] OrderGetIn true
+	? (Count _units < 1):goto _boardReturn
+
+	goto _boardReturn
+
+#EmbarkInVehicles
+
+	_vehicles = westAir + eastAir + westHeavy + eastHeavy + westLight + eastLight
+	_totalVehicles = Count _vehicles
+	_units = Units _group
+	_totalUnits = Count _units
+
+	? (debug):player SideChat("Commandeer vehicle.")
+
+	? (_totalVehicles < 1) || (_totalUnits < 1):goto "Update"
+
+	_count = 0
+
+	#FindVehicle
+
+		_currentVehicle = _vehicles Select _count
+		_count = _count + 1
+
+		? (GetDammage _currentVehicle != 1)&&(Leader _group Distance _currentVehicle < 100):goto "CommandVehicle"
+		? (_count < _totalVehicles):goto "FindVehicle"
+
+		goto "Update"
+
+	#EmbarkInVehicle
+
+		_count = 0
+
+		#FindFreeVehicle
+
+			_groupSize = 2
+
+			_currentVehicle = _vehicles Select _count
+			_count = _count + 1
+
+			? (GetDammage _currentVehicle != 1)&&(Leader _group Distance _currentVehicle < 100):goto "CommandVehicle"
+			? (_count < _totalVehicles):goto "FindVehicle"
+
+			goto "Update"
+
+			? ((!IsNull Driver _currentVehicle)||(Alive Driver _currentVehicle))&&!(Driver _currentVehicle In _units):goto "FindNextFreeVehicle"
+			? (_currentVehicle In westHeavy) || (_currentVehicle In eastHeavy):_groupSize = 3
+			? (_currentVehicle In westUnarmed) || (_currentVehicle In eastUnarmed):_groupSize = 1
+
+			_driver = _units Select 0;_units = _units - [_driver]
+
+			;If unit is a stationary vehicle (gun) leave it now.
+			? (IsNull (Driver Vehicle _driver))||(!CanMove Vehicle _driver):_driver LeaveVehicle (Vehicle _driver);_driver AssignAsDriver _currentVehicle;[_driver] OrderGetIn true
+
+			? (Count _units < 1):goto "Update"
+
+			_gunner = _units Select 0;_units = _units - [_gunner]
+
+			;If unit is a stationary vehicle (gun) leave it now.
+			? (IsNull (Driver Vehicle _gunner))||(!CanMove Vehicle _gunner):_gunner LeaveVehicle (Vehicle _gunner);_gunner AssignAsDriver _gunner;[_gunner] OrderGetIn true
+
+			? (Count _units < 1):goto "Update"
+
+			_commander = _units Select 0;_units = _units - [_commander]
+
+			;If unit is a stationary vehicle (gun) leave it now.
+			? (IsNull (Driver Vehicle _commander))||(!CanMove Vehicle _commander):_commander LeaveVehicle (Vehicle _commander);_commander AssignAsDriver _commander;[_commander] OrderGetIn true
+
+			? (Count _units < 1):goto "Update"
+
+			#FindNextFreeVehicle
+
+				_count = _count + 1
+
+				? (_count < _totalVehicles):goto "FindFreeVehicle"
+
+#CheckForEnemyStructures
+
+	_structureCount = 0
+	_structureList = westControlCenter
+	_totalStructures = Count _structureList
+	_units = Units _group
+
+	#CheckEnemyStructure
+
+		_structure = _structureList Select _structureCount
+		_structureCount = _structureCount + 1
+
+		? (GetDammage _structure != 1):goto "AttackEnemyStructure"
+		? (_structureCount < totalStructures):goto "CheckEnemyStructure"
+
+	goto "Update"
+
+#AttackEnemyStructure
+
+	(Gunner Vehicle _unit) CommandTarget _structure
+	(Gunner Vehicle _unit) CommandFire _structure
+
+	goto "Update"
+
+#ForceMHQAttack
+
+	_count = 0
+	_units = Units _group
+	_teamSize = Count _units
+	_vehicles = []
+
+	#GetVehicleInRange
+
+		_vehicle = Vehicle (_units Select _count)
+
+		? (_vehicle In _vehicles) || (_vehicle Distance _closestTarget > 50) || (_vehicle In westAirVehicles) || (_vehicle In eastAirVehicles):goto "GetNextVehicleInRange"
+
+		_vehicles = _vehicles + [_vehicle]
+		_vehicle DoWatch _closestTarget
+
+		#GetNextVehicleInRange
+
+			_count = _count  + 1
+			? (_count < _teamSize):goto "GetVehicleInRange"
+
+	_totalVehicles = Count _vehicles
+	? (_totalVehicles < 1):goto "Update"
+
+	~2
+	_count = 0
+
+	;Determine weapon type of each vehicle and fire a shell at the MHQ.
+	#FireVehicle
+
+		_vehicle = _vehicles Select _count
+		_weapons = Weapons _vehicle
+
+		_totalWeapons = Count _weapons
+		? (_totalWeapons < 1):goto "FireNextVehicle"
+
+		_weaponCount = 0
+
+		#CheckWeapon
+
+			_weapon = _weapons Select _weaponCount
+			? (_weapon In AIMainWeapons):_vehicle Fire _weapon;goto "FireNextVehicle"
+
+			_weaponCount = _weaponCount + 1
+			? (_weaponCount < _totalWeapons):goto "CheckWeapon"
+
+		#FireNextVehicle
+
+			_count = _count + 1
+			? (_count < _totalVehicles):goto "FireVehicle"
+
+		goto "Update"
+
+#WaitForRespawn
+
+	_deadUnit = Leader _group
+	_deathLocation = GetPos Leader _group
+
+	@ (Alive Leader _group)
+
+	[_deadUnit] Exec "Main\RespawnableUnitCleanUp.sqs"
+	[Leader _group,_deathLocation] Exec "Main\RespawnUnit.sqs"
+
+	goto "Update"

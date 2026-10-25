@@ -1,0 +1,48 @@
+;Last modified 1/10/4
+;Updates building damage.
+;ScriptUsage:  [Side,Building] Exec "UpdateRepairDepot.sqs"
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_depot = _this Select 1
+
+#Update
+~30
+
+	? (IsNull _depot):Exit
+	? !(publicServer) && (GetDammage _depot >= 1):Exit
+	? (GetDammage _depot >= 1):goto "Update"
+
+	_count = 0
+
+	? (Count vehicles < 1):goto "Update"
+
+		#CheckVehicle
+
+			_vehicle = vehicles Select _count
+			_damage = GetDammage _vehicle
+			_driver = Driver _vehicle
+			_gunner = Gunner _vehicle
+
+			? (_damage > 0) && (_damage < 1):goto "RepairVehicle"
+
+			#CheckNextVehicle
+	
+				_count = _count + 1
+				? (_count < Count vehicles):goto "CheckVehicle"
+
+				goto "Update"
+
+#RepairVehicle
+
+	? (Side _driver != _side):goto "CheckNextVehicle"
+	? (IsNull _driver) || (_vehicle Distance _depot > repairDepotRepairRange):goto "CheckNextVehicle"
+
+	_vehicle SetDammage 0
+
+	? (Group _driver In westPlayerGroups) || (Group _driver In eastPlayerGroups):[Leader Group _driver,groupCommander,messageRepairingVehicle,0,0] Exec "Main\SendPlayerMessage.sqs"
+	? (Group _gunner != Group _driver) && ((Group _gunner In westPlayerGroups) || (Group _gunner In eastPlayerGroups)):[Leader Group _gunner,groupCommander,messageRepairingVehicle,0,0] Exec "Main\SendPlayerMessage.sqs"
+
+	goto "CheckNextVehicle"

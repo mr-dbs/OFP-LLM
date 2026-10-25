@@ -1,0 +1,38 @@
+;Last modified 4/13/3
+_side = _this Select 0
+_idc = _this Select 1
+
+? (_side == east):goto "GetEastSelectedTeamSize"
+
+#GetWestSelectedTeamSize
+
+	? (westSelectedGroup == groupAlpha):_selectedTeamSize = westAlphaSize
+	? (westSelectedGroup == groupBravo):_selectedTeamSize = westBravoSize
+	? (westSelectedGroup == groupCharlie):_selectedTeamSize = westCharlieSize
+	? (westSelectedGroup == groupDelta):_selectedTeamSize = westDeltaSize
+	? (westSelectedGroup == groupEcho):_selectedTeamSize = westEchoSize
+	? (westSelectedGroup == groupFoxtrot):_selectedTeamSize = westFoxtrotSize
+	? (westSelectedGroup == groupGolf):_selectedTeamSize = westGolfSize
+	? (westSelectedGroup == groupHotel):_selectedTeamSize = westHotelSize
+
+	_text = Format["%1 %2: %3",teamDesignations Select westSelectedGroup,Localize "STRSIZE",_selectedteamSize]
+
+	goto "UpdateInfoBox"
+
+#GetEastSelectedTeamSize
+
+	? (eastSelectedGroup == groupAlpha):_selectedTeamSize = eastAlphaSize
+	? (eastSelectedGroup == groupBravo):_selectedTeamSize = eastBravoSize
+	? (eastSelectedGroup == groupCharlie):_selectedTeamSize = eastCharlieSize
+	? (eastSelectedGroup == groupDelta):_selectedTeamSize = eastDeltaSize
+	? (eastSelectedGroup == groupEcho):_selectedTeamSize = eastEchoSize
+	? (eastSelectedGroup == groupFoxtrot):_selectedTeamSize = eastFoxtrotSize
+	? (eastSelectedGroup == groupGolf):_selectedTeamSize = eastGolfSize
+	? (eastSelectedGroup == groupHotel):_selectedTeamSize = eastHotelSize
+
+	_text = Format["%1 %2: %3",teamDesignations Select eastSelectedGroup,Localize "STRSIZE",_selectedteamSize]
+
+#UpdateInfoBox
+
+	;Show size of selected group.
+	lbAdd[_idc,_text]

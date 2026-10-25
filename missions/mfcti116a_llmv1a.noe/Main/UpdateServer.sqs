@@ -1,0 +1,350 @@
+;Last modified 2/19/4
+;Add this to script caller.
+;Script usage:  "UpdateServer.sqs"
+
+[] Exec "Main\UpdateGameProperties.sqs"
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+;[] Exec "\mfcti1.16\Scripts\UpdateMortars.sqs"
+
+@ (gameStarted)
+
+[] Exec "Main\InitServer.sqs"
+[] Exec "Main\UpdateGamePropertiesServer.sqs"
+
+@ (serverStarted)
+
+[] Exec "Main\UpdateBuilding.sqs"
+[] Exec "Main\UpdateSalvageTrucks.sqs"
+[] Exec "Main\UpdateRepairTrucks.sqs"
+[] Exec "Main\UpdateResources.sqs"
+[] Exec "Main\UpdateGameOver.sqs"
+[] Exec "Main\UpdateAIObservation.sqs"
+[] Exec "Main\UpdateVotes.sqs"
+
+[west] Exec "Main\UpdateCommanderAI.sqs"
+[east] Exec "Main\UpdateCommanderAI.sqs"
+
+;LLM link (added). See LLM\Init.sqs
+[] Exec "LLM\Init.sqs"
+[] Exec "Main\UpdateDisconnectedPlayerServer.sqs"
+[] Exec "Main\UpdateCivilians.sqs"
+
+_lastWestMessage = 0
+_lastWestPlayerMessage = 0
+_lastWestBuildingBuilt = ObjNull
+_lastWestUnitBuilt = ObjNull
+_lastWestBuildingInUse = ObjNull
+_lastWestBuildingInUseState = false
+_timeWestBuildingInUseRequested = 0
+_lastWestPlayerWaypoint = ObjNull
+
+_lastEastMessage = 0
+_lastEastPlayerMessage = 0
+_lastEastBuildingBuilt = ObjNull
+_lastEastUnitBuilt = ObjNull
+_lastEastBuildingInUse = ObjNull
+_lastEastBuildingInUseState = false
+_timeEastBuildingInUseRequested = 0
+_lastEastPlayerWaypoint = ObjNull
+
+_timeTeamsLastCounted = 0
+_timeWestMessageLastSent = 0
+_timeWestPlayerMessageLastSent = 0
+_timeEastMessageLastSent = 0
+_timeEastPlayerMessageLastSent = 0
+_serverUpdateDelay = 0.25
+
+_timeQueuedUnitRequested = 0
+
+_westMobileHQDestroyed = false
+_eastMobileHQDestroyed = false
+
+? !(Group WestCommander In westPlayerGroups):unlockWestMHQ = false;PublicVariable "unlockWestMHQ";WestMobileHQ Lock true
+? !(Group EastCommander In eastPlayerGroups):unlockEastMHQ = false;PublicVariable "unlockEastMHQ";EastMobileHQ Lock true
+
+_lastWestUnlock = unlockWestMHQ
+_lastEastUnlock = unlockEastMHQ
+
+_gameOver = false
+
+#Update
+~_serverUpdateDelay
+
+	? !(_gameOver) && (westWinsGame || eastWinsGame):[] Exec "Main\GameOver.sqs";_gameOver = true
+
+	;Set town side.
+	? (setTown):[] Exec "Main\SetTownSideServer.sqs"
+	? (setTownArea):[] Exec "Main\SetTownAreaSideServer.sqs"
+
+	;Lock/unlock MHQ.
+	? (_lastWestUnlock && !unlockWestMHQ):WestMobileHQ Lock true;_lastWestUnlock = unlockWestMHQ
+	? (!_lastWestUnlock && unlockWestMHQ):WestMobileHQ Lock false;_lastWestUnlock = unlockWestMHQ
+
+	? (_lastEastUnlock && !unlockEastMHQ):EastMobileHQ Lock true;_lastEastUnlock = unlockEastMHQ
+	? (!_lastEastUnlock && unlockEastMHQ):EastMobileHQ Lock false;_lastEastUnlock = unlockEastMHQ
+
+	? !(Local player):"Respawn_west" SetMarkerPos GetPos WestMobileHQ;"Respawn_east" SetMarkerPos GetPos EastMobileHQ;goto "GetCommander"
+	
+	#UpdateLocalPlayer
+
+		? (Side player == west):"Respawn_east" SetMarkerPos GetPos EastMobileHQ
+		? (Side player == east):"Respawn_west" SetMarkerPos GetPos WestMobileHQ
+
+	#GetCommander
+
+		_westCommander = Leader WestCommanderTeam
+		_eastCommander = Leader EastCommanderTeam
+
+	_timeTeamsLastCounted = _timeTeamsLastCounted + _serverUpdateDelay
+
+	;Debug variable.  Use _timeTeamsLastCounted for team count to prevent lag.
+	? (_timeTeamsLastCounted >= 1) && (debugMP):totalVehicles = Count vehicles;PublicVariable "totalVehicles"
+
+	;Don't count & transmit team counts to players EVERY server update as this would lag things.
+	? (_timeTeamsLastCounted >= 1):_timeTeamsLastCounted = 0;[] Exec "Main\CountTeams.sqs"
+
+	;Update position of GameLogic object that is used to determine distance to Commander Waypoint.
+	westCommanderWPDestination SetPos GetMarkerPos "WestCommanderWP"
+	eastCommanderWPDestination SetPos GetMarkerPos "EastCommanderWP"
+
+	;Assign a bonus to opposing team if a commander dies for ANY reason.
+	? (!westCommanderDead && !eastWinsGame) && !(Alive _westCommander):westCommanderDead = true;[east,commanderDeadBonus] Exec "Main\AddResources.sqs";eastMessage = messageEnemyCommanderKilled;PublicVariable "eastMessage"
+	? (!eastCommanderDead && !westWinsGame) && !(Alive _eastCommander):eastCommanderDead = true;[west,commanderDeadBonus] Exec "Main\AddResources.sqs";westMessage = messageEnemyCommanderKilled;PublicVariable "westMessage"
+
+	;Reset dead commander flag now that s/he is a alive again.
+	? (westCommanderDead) && (Alive _westCommander):westCommanderDead = false
+	? (eastCommanderDead) && (Alive _eastCommander):eastCommanderDead = false
+
+	;If a Mobile HQ is destroyed post the message to everyone.
+	? (!_westMobileHQDestroyed && !eastWinsGame) && (GetDammage WestMobileHQ == 1):_westMobileHQDestroyed = true;westMessage = messageMHQDestroyed;PublicVariable "westMessage";eastMessage = messageEnemyMHQDestroyed;PublicVariable "eastMessage";westPlayerMessageGroupFrom = groupCommander;PublicVariable "westPlayerMessageGroupFrom";eastPlayerMessageGroupFrom = groupCommander;PublicVariable "eastPlayerMessageGroupFrom"
+	? (!_eastMobileHQDestroyed && !westWinsGame) && (GetDammage EastMobileHQ == 1):_eastMobileHQDestroyed = true;eastMessage = messageMHQDestroyed;PublicVariable "eastMessage";westMessage = messageEnemyMHQDestroyed;PublicVariable "westMessage";westPlayerMessageGroupFrom = groupCommander;PublicVariable "westPlayerMessageGroupFrom";eastPlayerMessageGroupFrom = groupCommander;PublicVariable "eastPlayerMessageGroupFrom"
+
+	;If a new message then start the count.  If the count is already going then continue it.
+	;Resetting the message allows players to see duplicate message if they occur again & prevents message spamming.
+	? (_timeWestMessageLastSent > 0):_timeWestMessageLastSent = _timeWestMessageLastSent + _serverUpdateDelay
+	? (_timeEastMessageLastSent > 0):_timeEastMessageLastSent = _timeEastMessageLastSent + _serverUpdateDelay
+
+	? (_lastWestMessage != westMessage):_timeWestMessageLastSent = 0.1;_lastWestMessage = westMessage
+	? (_lastEastMessage != eastMessage):_timeEastMessageLastSent = 0.1;_lastEastMessage = eastMessage
+
+	;Clear the message after a while.
+	? (_timeWestMessageLastSent >= 1):_timeWestMessageLastSent = 0;westMessage = 0;PublicVariable "westMessage"
+	? (_timeEastMessageLastSent >= 1):_timeEastMessageLastSent = 0;eastMessage = 0;PublicVariable "eastMessage"
+
+
+	;If a new player message then start the count.  If the count is already going then continue it.
+	? (_timeWestPlayerMessageLastSent > 0):_timeWestPlayerMessageLastSent = _timeWestPlayerMessageLastSent + _serverUpdateDelay
+	? (_timeEastPlayerMessageLastSent > 0):_timeEastPlayerMessageLastSent = _timeEastPlayerMessageLastSent + _serverUpdateDelay
+
+	? (_lastWestPlayerMessage != westPlayerMessage):_timeWestPlayerMessageLastSent = 0.1;_lastWestPlayerMessage = westPlayerMessage
+	? (_lastEastPlayerMessage != eastPlayerMessage):_timeEastPlayerMessageLastSent = 0.1;_lastEastPlayerMessage = eastPlayerMessage
+
+	;Clear the message after a while.
+	? (_timeWestPlayerMessageLastSent >= 1):_timeWestPlayerMessageLastSent = 0;westPlayerMessage = 0;PublicVariable "westPlayerMessage"
+	? (_timeEastPlayerMessageLastSent >= 1):_timeEastPlayerMessageLastSent = 0;eastPlayerMessage = 0;PublicVariable "eastPlayerMessage"
+
+	;There should be a small delay before a new building can be requested to be in use.  Allows clients to all receive last request.
+
+	;If a the building in use timer has started then incremement it.
+	? (_timeWestBuildingInUseRequested > 0):_timeWestBuildingInUseRequested = _timeWestBuildingInUseRequested + _serverUpdateDelay
+	? (_timeEastBuildingInUseRequested > 0):_timeEastBuildingInUseRequested = _timeEastBuildingInUseRequested + _serverUpdateDelay
+
+	;Start the timer.
+	? (westRequestBuildingInUseMP) && (_timeWestBuildingInUseRequested == 0):_timeWestBuildingInUseRequested = 0.1
+	? (eastRequestBuildingInUseMP) && (_timeEastBuildingInUseRequested == 0):_timeEastBuildingInUseRequested = 0.1
+
+	;If the time delay has been reached reset it.
+	? (_timeWestBuildingInUseRequested >= 0.5):_timeWestBuildingInUseRequested = 0;westRequestBuildingInUseMP = false;PublicVariable "westRequestBuildingInUseMP"
+	? (_timeEastBuildingInUseRequested >= 0.5):_timeEastBuildingInUseRequested = 0;eastRequestBuildingInUseMP = false;PublicVariable "eastRequestBuildingInUseMP"
+
+	;There should be a small delay before a new request from a player queue can be issued.
+
+	;If a the building in use timer has started then incremement it.
+	? (_timeQueuedUnitRequested > 0):_timeQueuedUnitRequested = _timeQueuedUnitRequested + _serverUpdateDelay
+
+	;Start the queued unit request timer.
+	? (queuedUnitRequestedMP) && (_timeQueuedUnitRequested == 0):_timeQueuedUnitRequested = 0.1
+
+	;If the time delay has been reached reset it.
+	? (_timeQueuedUnitRequested >= 1):_timeQueuedUnitRequested = 0;queuedUnitRequestedMP = false;PublicVariable "queuedUnitRequestedMP"
+
+	? (requestScore):[] Exec "Main\ScoreServer.sqs"
+	? (undoLastStructure):[] Exec "Main\UndoLastStructureServer.sqs"
+
+
+	;WEST UPDATES
+	#UpdateWest
+
+	? !(IsNull westBuildingInUseMP) && (_lastWestBuildingInUse != westBuildingInUseMP):goto "CheckWestBuildingsInUse"
+	? (_lastWestBuildingInUseState && !westBuildingInUseStateMP):goto "CheckWestBuildingsInUse"
+	? (!_lastWestBuildingInUseState && westBuildingInUseStateMP):goto "CheckWestBuildingsInUse"
+
+	;Check for unit construction/deployment.
+	? (addWestUnit > 0):[west] Exec "Main\ReinforceGroupServer.sqs"
+
+	? !(IsNull buyWestMortarShells):[buyWestMortarShells,buyWestMortarShellsUnit] Exec "Main\BuyMortarShellsServer.sqs"
+
+	? (addWestResources > 0):[west] Exec "Main\AddResourcesServer.sqs"
+	? (addWestAwardResources > 0):[west] Exec "Main\AddAwardResourcesServer.sqs"
+	? (addWestEqualResources > 0):[west] Exec "Main\AddEqualResourcesServer.sqs"
+	? (subtractWestResources > 0):westResources = westResources - subtractWestResources;PublicVariable "westResources";subtractWestResources = 0;PublicVariable "subtractWestResources"
+	? (addWestResourcesToTeam != -1):[west] Exec "Main\AddResourcesToTeamServer.sqs"
+	? (westResources < 0):westResources = 0;PublicVariable "westResources"
+
+	? (addWestMannedVehicle > 0):[west] Exec "Main\AddMannedVehicle.sqs"
+
+	? (deployWestWorker):goto "DeployWestWorker"
+	? (addWestStructure):[west] Exec "Build\BuildStructureServer.sqs"
+	? (westRequestUpgrade > 0):[west,westRequestUpgrade] Exec "Main\UpdateUpgrade.sqs"
+
+	;Check for player waypoints
+
+	? (westSetPlayerWaypoint):[west] Exec "Main\SetTeamWaypointServer.sqs"
+	;Check for west commander orders.
+
+	;Add vehicle to server lists.
+	_addVehicle = ObjNull
+
+	? !(IsNull addWestLight):_lastWestUnitBuilt = addWestLight;westLightVehicles = westLightVehicles + [addWestLight];_addVehicle = addWestLight;addWestLight = ObjNull;PublicVariable "addWestLight"
+	? !(IsNull addWestMisc):_lastWestUnitBuilt = addWestMisc;westMiscVehicles = westMiscVehicles + [addWestMisc];_addVehicle = addWestMisc;addWestMisc = ObjNull;PublicVariable "addWestMisc"
+	? !(IsNull addWestHeavy):_lastWestUnitBuilt = addWestHeavy;westHeavyVehicles = westHeavyVehicles + [addWestHeavy];_addVehicle = addWestHeavy;addWestHeavy = ObjNull;PublicVariable "addWestHeavy"
+	? !(IsNull addWestAir):_lastWestUnitBuilt = addWestAir;westAirVehicles = westAirVehicles + [addWestAir];_addVehicle = addWestAir;addWestAir = ObjNull;PublicVariable "addWestAir"
+	? !(IsNull _addVehicle):vehicles = vehicles + [_addVehicle];westVehicles = westVehicles + [_addVehicle]
+
+	;Since certain transports are the same vehicle as a salvager remove a salvager from the transport list.
+	? !(IsNull westAmmoTruck):westAmmoTrucks = westAmmoTrucks + [westAmmoTruck];westAmmoTruck = ObjNull;PublicVariable "westAmmoTruck"
+	? !(IsNull westRepairTruck):westRepairTrucks = westRepairTrucks + [westRepairTruck];westRepairTruck = ObjNull;PublicVariable "westRepairTruck"
+	? !(IsNull addWestTransport):westTransports = westTransports + [addWestTransport];addWestTransport = ObjNull;PublicVariable "addWestTransport"
+
+	;Since certain transports are the same vehicle as a salvager remove a salvager from the transport list.
+	? !(IsNull westSalvageTruck) && (westSalvageTruck In westTransports):westTransports = westTransports - [westSalvageTruck]
+	? !(IsNull westSalvageTruck):westSalvageTrucks = westSalvageTrucks + [westSalvageTruck];westSalvageTruck = ObjNull;PublicVariable "westSalvageTruck"
+
+	? (countWestVehicles):[west] Exec "Main\CountTotalWorkingVehicles.sqs"
+
+	;EAST UPDATES
+	? !(IsNull eastBuildingInUseMP) && (_lastEastBuildingInUse != eastBuildingInUseMP):goto "CheckEastBuildingsInUse"
+	? (_lastEastBuildingInUseState && !eastBuildingInUseStateMP):goto "CheckEastBuildingsInUse"
+	? (!_lastEastBuildingInUseState && eastBuildingInUseStateMP):goto "CheckEastBuildingsInUse"
+
+	;Check for unit construction/deployment.
+	? (addEastUnit > 0):[east] Exec "Main\ReinforceGroupServer.sqs"
+
+	? !(IsNull buyEastMortarShells):[buyEastMortarShells,buyEastMortarShellsUnit] Exec "Main\BuyMortarShellsServer.sqs"
+
+	? (addEastResources > 0):[east] Exec "Main\AddResourcesServer.sqs"
+	? (addEastAwardResources > 0):[east] Exec "Main\AddAwardResourcesServer.sqs"
+	? (addEastEqualResources > 0):[east] Exec "Main\AddEqualResourcesServer.sqs"
+	? (addEastResourcesToTeam != -1):[east] Exec "Main\AddResourcesToTeamServer.sqs"
+	? (subtractEastResources > 0):eastResources = eastResources - subtractEastResources;PublicVariable "eastResources";subtractEastResources = 0;PublicVariable "subtractEastResources"
+	? (eastResources < 0):eastResources = 0;PublicVariable "eastResources"
+
+	? (addEastMannedVehicle > 0):[east] Exec "Main\AddMannedVehicle.sqs"
+
+	? (deployEastWorker):goto "DeployEastWorker"
+	? (addEastStructure):[east] Exec "Build\BuildStructureServer.sqs"
+	? (eastRequestUpgrade > 0):[east,eastRequestUpgrade] Exec "Main\UpdateUpgrade.sqs"
+	? (eastSetPlayerWaypoint):[east] Exec "Main\SetTeamWaypointServer.sqs"
+
+	;Add vehicle to server lists.
+	_addVehicle = ObjNull
+
+	? !(IsNull addEastLight):_lastEastUnitBuilt = addEastLight;eastLightVehicles = eastLightVehicles + [addEastLight];_addVehicle = addEastLight;addEastLight = ObjNull;PublicVariable "addEastLight"
+	? !(IsNull addEastMisc):_lastEastUnitBuilt = addEastMisc;eastMiscVehicles = eastMiscVehicles + [addEastMisc];_addVehicle = addEastMisc;addEastMisc = ObjNull;PublicVariable "addEastMisc"
+	? !(IsNull addEastHeavy):_lastEastUnitBuilt = addEastHeavy;eastHeavyVehicles = eastHeavyVehicles + [addEastHeavy];_addVehicle = addEastHeavy;addEastHeavy = ObjNull;PublicVariable "addEastHeavy"
+	? !(IsNull addEastAir):_lastEastUnitBuilt = addEastAir;eastAirVehicles = eastAirVehicles + [addEastAir];_addVehicle = addEastAir;addEastAir = ObjNull;PublicVariable "addEastAir"
+	? !(IsNull _addVehicle):vehicles = vehicles + [_addVehicle];eastVehicles = eastVehicles + [_addVehicle]
+
+	? !(IsNull eastAmmoTruck):eastAmmoTrucks = eastAmmoTrucks + [eastAmmoTruck];eastAmmoTruck = ObjNull;PublicVariable "eastAmmoTruck"
+	? !(IsNull eastRepairTruck):eastRepairTrucks = eastRepairTrucks + [eastRepairTruck];eastRepairTruck = ObjNull;PublicVariable "eastRepairTruck"
+	? !(IsNull addEastTransport):eastTransports = eastTransports + [addEastTransport];addEastTransport = ObjNull;PublicVariable "addEastTransport"
+
+	;Since certain transports are the same vehicle as a salvager remove a salvager from the transport list.
+	? !(IsNull eastSalvageTruck) && (eastSalvageTruck In eastTransports):eastTransports = eastTransports - [eastSalvageTruck]
+	? !(IsNull eastSalvageTruck):eastSalvageTrucks = eastSalvageTrucks + [eastSalvageTruck];eastSalvageTruck = ObjNull;PublicVariable "eastSalvageTruck"
+
+	? (countEastVehicles):[east] Exec "Main\CountTotalWorkingVehicles.sqs"
+
+	goto "Update"
+
+;Check to see if a building needs to be added to the server list for buildings in use.
+#CheckWestBuildingsInUse
+
+	_lastWestBuildingInUse = westBuildingInUseMP;
+	_lastWestBuildingInUseState = westBuildingInUseStateMP;
+
+	;If state is false then remove the building in use from the list & return to main loop.
+	? !(westBuildingInUseStateMP):buildingsInUseServer = buildingsInUseServer - [westBuildingInUseMP];Goto "Update"
+
+	;If the building is already in use then go back to the main loop.
+	? (westBuildingInUseMP In buildingsInUseServer):goto "Update"
+
+	;If state is true then add building in use to the list.
+	? (westBuildingInUseStateMP):buildingsInUseServer = buildingsInUseServer + [westBuildingInUseMP]
+
+	goto "Update"
+
+#DeployWestWorker
+
+	deployWestWorker = false;PublicVariable "deployWestWorker"
+	_mobileHQ = WestMobileHQ
+
+	;Create unit into temp group & subtract resource cost.
+	_group = WestTempGroup;westResources = westResources - workerCost;PublicVariable "westResources"
+
+	goto "DeployWorker"
+
+;Check to see if a building needs to be added to the server list for buildings in use.
+#CheckEastBuildingsInUse
+
+	_lastEastBuildingInUse = eastBuildingInUseMP;
+	_lastEastBuildingInUseState = eastBuildingInUseStateMP;
+
+	;If state is false then remove the building in use from the list & return to main loop.
+	? !(eastBuildingInUseStateMP):buildingsInUseServer = buildingsInUseServer - [eastBuildingInUseMP];Goto "Update"
+
+	;If the building is already in use then go back to the main loop.
+	? (eastBuildingInUseMP In buildingsInUseServer):goto "Update"
+
+	;If state is true then add building in use to the list.
+	? (eastBuildingInUseStateMP):buildingsInUseServer = buildingsInUseServer + [eastBuildingInUseMP]
+
+	goto "Update"
+
+#DeployEastWorker
+
+	deployEastWorker = false;PublicVariable "deployEastWorker"
+	_mobileHQ = EastMobileHQ
+
+	;Create unit into temp group & subtract resource cost.
+	_group = EastTempGroup;eastResources = eastResources - workerCost;PublicVariable "eastResources"
+
+	goto "DeployWorker"
+
+	Goto "Update"
+
+#DeployWorker
+
+	? (GetDammage _mobileHQ == 1):goto "Update"
+
+	"Civilian" CreateUnit [GetPos _mobileHQ,_group,"",1,"PRIVATE"]
+
+	@ (Count (Units _group) > 1)
+
+	;Select last unit in temp group.
+	_newUnit = (Units _group) Select (Count Units _group - 1)
+
+	;Remove the unit from the Temp Group.
+	[_newUnit] Join GrpNull
+
+	;Execute worker's AI script.
+	[_newUnit] Exec "Main\UpdateWorkerAI.sqs"
+	[_newUnit,(workerCost * 2) * bountyPercentage] Exec "Main\UnitCleanUp.sqs"
+
+	? (debug):_message = Format["%1 deployed at MHQ (Group: %2).",_newUnit,_group]
+	? (debug):player GlobalChat (_message)
+
+	goto "Update"

@@ -1,0 +1,199 @@
+;Last modified 11/14/3
+;Worker AI script.
+;Use on a unit to make it an AI controlled worker.
+;Script usage: [Unit] exec "UpdateWorkerAI.sqs"
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_unit = _this select 0
+_side = Side _unit
+_returnPosition = GetPos _unit
+_wanderCount = 0
+
+;If the unit is a player then don't run the AI routines.
+? (_unit == player):Exit
+
+_unit SetBehaviour "CARELESS"
+
+#Start
+
+? (_side == west):totalWestWorkers = totalWestWorkers + 1;PublicVariable "totalWestWorkers";goto "WestUpdate"
+? (_side == east):totalEastWorkers = totalEastWorkers + 1;PublicVariable "totalEastWorkers";goto "EastUpdate"
+
+Exit
+
+#WestUpdate
+~updateWorkerAIDelay
+
+	;See if anything needs to be repaired or built.
+	#CheckWestBuildings
+
+		;If unit dies end the script.
+		? !(Alive _unit):goto "DeadWorker"
+
+		;Highest priority is to buildings that were just constructed.
+		_tempList = westTempBuildingList
+
+		_buildingLists = [westControlCenter,westInfantryFactory,westLightFactory,westHeavyFactory,westAirFactory,westRepairDepot,westAmmoDepot,westObservationTower,westFieldHospital,westMortar,westAAStation,westAAGun,westHEFortification,westHEStation,westHEGun,westM2Fortification,westM2Station,westM2Gun]
+		_damageLists = [westControlCenterDamage,westInfantryFactoryDamage,westLightFactoryDamage,westHeavyFactoryDamage,westAirFactoryDamage,westRepairDepotDamage,westAmmoDepotDamage,westObservationTowerDamage,westFieldHospitalDamage,westMortarDamage,westAAStationDamage,westAAGunDamage,westHEFortificationDamage,westHEStationDamage,westHEGunDamage,westM2FortificationDamage,westM2StationDamage,westM2GunDamage]
+		_totalLists = Count _buildingLists
+
+		_return = "WestUpdate"
+		goto "CheckTempList"
+
+#EastUpdate
+~updateWorkerAIDelay
+
+	;See if anything needs to be repaired or built.
+	#CheckEastBuildings
+
+		;If unit dies end the script.
+		? !(Alive _unit):goto "DeadWorker"
+	
+		;Highest priority is to buildings that were just constructed.
+		_tempList = eastTempBuildingList
+
+		_buildingLists = [eastControlCenter,eastInfantryFactory,eastLightFactory,eastHeavyFactory,eastAirFactory,eastRepairDepot,eastAmmoDepot,eastObservationTower,eastFieldHospital,eastMortar,eastAAStation,eastAAGun,eastHEFortification,eastHEStation,eastHEGun,eastM2Fortification,eastM2Station,eastM2Gun]
+		_damageLists = [eastControlCenterDamage,eastInfantryFactoryDamage,eastLightFactoryDamage,eastHeavyFactoryDamage,eastAirFactoryDamage,eastRepairDepotDamage,eastAmmoDepotDamage,eastObservationTowerDamage,eastFieldHospitalDamage,eastMortarDamage,eastAAStationDamage,eastAAGunDamage,eastHEFortificationDamage,eastHEStationDamage,eastHEGunDamage,eastM2FortificationDamage,eastM2StationDamage,eastM2GunDamage]
+		_totalLists = Count _buildingLists
+
+		_return = "EastUpdate"
+		goto "CheckTempList"
+
+	#CheckTempList
+
+		? (_totalLists < 1):goto _return
+		? (Count _tempList < 1):goto "CheckBuildings"
+
+		_tempBuilding = _tempList Select 0
+		_listCount = 0
+
+		#FindList
+
+			_buildinglist = _buildingLists Select _listCount
+			_damageList = _damageLists Select _listCount
+			_listCount = _listCount + 1
+
+			_buildingCount = 0
+			_totalbuildings = Count _buildinglist
+
+			#FindTempBuilding
+
+				_building = _buildinglist Select _buildingCount
+				_damage = _damageList Select _buildingCount
+
+				? (IsNull _building):goto "FindNextTempBuilding"
+				? (_building == _tempBuilding) && (_building Distance _unit < workerRange) && (_damage != 500):goto "Repair"
+
+				#FindNextTempBuilding
+
+					_buildingCount = _buildingCount + 1
+					? (_buildingCount < _totalbuildings):goto "FindTempBuilding"
+
+			? (_listCount < _totalLists):goto "FindList"
+
+	#CheckBuildings
+
+		_listCount = 0
+
+		#CheckList
+
+			_buildinglist = _buildingLists Select _listCount
+			_damageList = _damageLists Select _listCount
+			_listCount = _listCount + 1
+
+			_buildingCount = 0
+			_totalbuildings = Count _buildinglist
+
+			? (_totalbuildings < 1):goto "CheckNextList"
+
+			#CheckBuilding
+
+				_building = _buildinglist Select _buildingCount
+				_damage = _damageList Select _buildingCount
+
+				? (IsNull _building):goto "CheckNextBuilding"
+
+				;If building is damaged & within range then repair it.
+				? (_building Distance _unit < workerRange) && (_damage != 500):goto "Repair"
+
+				#CheckNextBuilding
+
+					_buildingCount = _buildingCount + 1
+					? (_buildingCount < _totalbuildings):goto "CheckBuilding"
+
+			#CheckNextList
+
+				? (_listCount < _totalLists):goto "CheckList"
+
+			;If no building need to be repaired wander so all workers are not standing in same area.
+			#Wander
+
+				_wanderCount = _wanderCount + 1
+
+				? (_wanderCount < 5):goto _return
+
+				_wanderCount = 0
+				_direction = Random 359
+				_position = GetPos _unit
+				_distance = (targetDefendRange / 4) + Random (targetDefendRange / 4)
+				_destination = [(_position Select 0)+((Sin _direction)*_distance),(_position Select 1)+((Cos _direction)*_distance),_position Select 2]
+
+				;Occasionally return to starting point.
+				? (Random 100 < 25):_destination = _returnPosition
+
+				_unit SetSpeedMode "LIMITED"
+				_unit CommandMove _destination
+				goto _return
+
+	#Repair
+
+		;Set worker attributes for max movement speed.
+		_unit SetSpeedMode "FULL"
+
+		? (_unit Distance _building > 12.5):_unit DoMove GetPos _building
+
+		_moveCount = 0
+
+		#MoveToBuilding
+		~0.25
+
+			_moveCount = _moveCount + 1
+
+			;If unit is taking a long time recheck for buildings.  Helps prevent unit from getting stuck on buildings.
+			? (_moveCount >= 100):goto _return
+
+			;If unit dies end the script.
+			? !(Alive _unit):goto "DeadWorker"
+			? ((_unit Distance _building > 12.5)):goto "MoveToBuilding"
+
+			DoStop _unit
+			_lastDamage = 0
+
+		#RepairBuilding
+
+			? !(_lastDamage != 0) && (_lastDamage == _damage):goto _return
+
+			;If unit dies end the script.
+			? !(Alive _unit):goto "DeadWorker"
+
+			;If the building is repaired go back to the main loop.
+			? (_damage < 0) || (_damage == 500) || (GetDammage _building < 1):goto _return
+
+			_damageList Set [_buildingCount,_damage - workerRepairRate]
+			_lastBuilding = _building
+
+			? (Random 100 < 40):_unit PlayMove "CombatToMedic";goto _return
+			? (Random 100 < 30):_unit PlayMove "HandGunStandToHandGunTakeFlag";goto _return
+			? (Random 100 < 30):_unit PlayMove "StandToBinocStand";goto _return
+			_unit PlayMove "CrouchToBinocCrouch"
+			goto _return
+
+#DeadWorker
+
+	? (_side == west):totalWestWorkers = totalWestWorkers - 1;PublicVariable "totalWestWorkers"
+	? (_side == east):totalEastWorkers = totalEastWorkers - 1;PublicVariable "totalEastWorkers"
+	[_side,groupCommander,messageWorkerKilled,0,0] Exec "Main\SendSideMessage.sqs"
+
+	Exit

@@ -1,0 +1,6446 @@
+version=11;
+class Mission
+{
+	addOns[]=
+	{
+		"6G30",
+		"AH64",
+		"bis_resistance",
+		"BIS_WeaponPack",
+		"Bizon",
+		"bmp2",
+		"bradley",
+		"Brdm",
+		"Ch47D",
+		"G36a",
+		"HMMWV",
+		"LaserGuided",
+		"Mini",
+		"Mm1",
+		"oh58",
+		"Steyr",
+		"Su25",
+		"Vulcan",
+		"xms",
+		"MFCTI116"
+	};
+	addOnsAuto[]=
+	{
+		"Mini",
+		"bis_resistance",
+		"BIS_WeaponPack",
+		"MFCTI116"
+	};
+	randomSeed=42499;
+	class Intel
+	{
+		briefingName="MFCTI 1.16a Coop LLM (stock commander)";
+		resistanceWest=0.000000;
+		startWeather=0.000000;
+		forecastWeather=0.000000;
+		month=8;
+		day=25;
+		hour=10;
+		minute=0;
+	};
+	class Groups
+	{
+		items=92;
+		class Item0
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4641.013184,0.528175,1064.081909};
+					special="NONE";
+					id=0;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.200000;
+					text="InitGame";
+					init="gameOver = false;gamePropertiesStarted = false;gameStarted = false;serverStarted = false;startedTownInit = false;startedLocationsInit = false;startedCivilianInit = false;startedCivilianDestinationInit = false;eastWinsGame = false;westWinsGame = false;[] Exec ""Main\InitPlayer.sqs"";[] Exec ""Main\UpdateServer.sqs"";[] Exec ""Main\PlaceSides.sqs""";
+				};
+			};
+		};
+		class Item1
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={0.000000,0.000000,0.000000};
+					special="NONE";
+					id=2;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.200000;
+					text="HiddenMarkers";
+				};
+			};
+		};
+		class Item2
+		{
+			side="WEST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={893.638672,18.741657,12092.004883};
+					id=7;
+					side="WEST";
+					vehicle="SoldierWB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					text="WestAlphaLeader";
+					init="WestAlphaTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item3
+		{
+			side="WEST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={898.130371,19.107527,12091.915039};
+					id=8;
+					side="WEST";
+					vehicle="SoldierWB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					text="WestBravoLeader";
+					init="WestBravoTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item4
+		{
+			side="WEST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={902.006836,19.395729,12091.760742};
+					id=9;
+					side="WEST";
+					vehicle="SoldierWB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					text="WestCharlieLeader";
+					init="WestCharlieTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item5
+		{
+			side="WEST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={906.049805,19.578651,12091.887695};
+					id=11;
+					side="WEST";
+					vehicle="SoldierWB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					text="WestDeltaLeader";
+					init="WestDeltaTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item6
+		{
+			side="WEST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={910.133301,19.835114,12092.379883};
+					id=13;
+					side="WEST";
+					vehicle="SoldierWB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					text="WestEchoLeader";
+					init="WestEchoTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item7
+		{
+			side="WEST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={914.175293,19.895271,12091.909180};
+					special="NONE";
+					id=14;
+					side="WEST";
+					vehicle="SoldierWB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					text="WestFoxtrotLeader";
+					init="WestFoxtrotTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item8
+		{
+			side="WEST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={917.883301,20.002987,12091.993164};
+					id=88;
+					side="WEST";
+					vehicle="SoldierWB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					text="WestGolfLeader";
+					init="WestGolfTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item9
+		{
+			side="WEST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={921.925293,20.167294,12091.909180};
+					special="NONE";
+					id=89;
+					side="WEST";
+					vehicle="SoldierWB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					text="WestHotelLeader";
+					init="WestHotelTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item10
+		{
+			side="WEST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={928.835938,20.407616,12091.917969};
+					special="NONE";
+					id=15;
+					side="WEST";
+					vehicle="SoldierWSaboteurPipe";
+					player="PLAYER COMMANDER";
+					leader=1;
+					rank="COLONEL";
+					skill=1.000000;
+					text="WestCommander";
+					init="WestCommanderTeam = group this;[this] Exec ""Main\InitCommander.sqs"";[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item11
+		{
+			side="WEST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10461.032227,14.985000,12626.443359};
+					id=16;
+					side="WEST";
+					vehicle="SoldierWB";
+					leader=1;
+					skill=0.600000;
+					fuel=0.900000;
+					text="WestTempGroupLeader";
+					init="WestTempGroup = group this;[] Exec ""Main\UpdateTempGroup.sqs""";
+				};
+			};
+		};
+		class Item12
+		{
+			side="EAST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10875.683594,32.738941,11643.833984};
+					special="NONE";
+					id=18;
+					side="EAST";
+					vehicle="SoldierEB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					text="EastAlphaLeader";
+					init="EastAlphaTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item13
+		{
+			side="EAST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10878.731445,32.691761,11643.790039};
+					special="NONE";
+					id=19;
+					side="EAST";
+					vehicle="SoldierEB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					text="EastBravoLeader";
+					init="EastBravoTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item14
+		{
+			side="EAST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10882.619141,32.632698,11643.723633};
+					special="NONE";
+					id=20;
+					side="EAST";
+					vehicle="SoldierEB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					text="EastCharlieLeader";
+					init="EastCharlieTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item15
+		{
+			side="EAST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10885.830078,32.573788,11643.759766};
+					special="NONE";
+					id=21;
+					side="EAST";
+					vehicle="SoldierEB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					text="EastDeltaLeader";
+					init="EastDeltaTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item16
+		{
+			side="EAST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10889.283203,32.516014,11643.748047};
+					special="NONE";
+					id=22;
+					side="EAST";
+					vehicle="SoldierEB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					health=0.900000;
+					text="EastEchoLeader";
+					init="EastEchoTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item17
+		{
+			side="EAST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10892.355469,32.473099,11643.662109};
+					special="NONE";
+					id=23;
+					side="EAST";
+					vehicle="SoldierEB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					text="EastFoxtrotLeader";
+					init="EastFoxtrotTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item18
+		{
+			side="EAST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10894.876953,32.420357,11643.748047};
+					special="NONE";
+					id=90;
+					side="EAST";
+					vehicle="SoldierEB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					health=0.900000;
+					text="EastGolfLeader";
+					init="EastGolfTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item19
+		{
+			side="EAST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10897.949219,32.377445,11643.662109};
+					special="NONE";
+					id=91;
+					side="EAST";
+					vehicle="SoldierEB";
+					player="PLAY CDG";
+					leader=1;
+					rank="CAPTAIN";
+					skill=1.000000;
+					text="EastHotelLeader";
+					init="EastHotelTeam = group this;[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item20
+		{
+			side="EAST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10901.522461,32.328770,11643.672852};
+					special="NONE";
+					id=2;
+					side="EAST";
+					vehicle="OfficerE";
+					player="PLAY CDG";
+					leader=1;
+					rank="COLONEL";
+					skill=1.000000;
+					text="EastCommander";
+					init="EastCommanderTeam = group this;[EastCommander] Exec ""Main\InitCommander.sqs"";[this] Exec ""Main\UpdatePlayer.sqs""";
+				};
+			};
+		};
+		class Item21
+		{
+			side="EAST";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={8767.446289,24.432640,12675.053711};
+					azimut=180.000000;
+					special="NONE";
+					id=24;
+					side="EAST";
+					vehicle="SoldierEB";
+					leader=1;
+					skill=0.200000;
+					text="EastTempGroupLeader";
+					init="EastTempGroup = group this";
+				};
+			};
+		};
+		class Item22
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={2489.812744,104.466820,7455.215332};
+					id=38;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start1";
+					init="[this,0,0] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item23
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={3619.421387,100.654015,6850.667480};
+					id=39;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start2";
+					init="[this,0,0] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item24
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={2552.583008,21.882788,6047.788086};
+					id=40;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start3";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item25
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={11663.877930,82.056625,4271.740234};
+					id=41;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start4";
+					init="[this,2,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item26
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={3281.112305,126.483063,10103.942383};
+					id=42;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start5";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item27
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={5760.001465,25.699081,6448.299316};
+					id=43;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start6";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item28
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4104.708984,29.792648,4392.800293};
+					id=44;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start7";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item29
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10124.128906,111.727371,5366.292969};
+					id=45;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start8";
+					init="[this,0,0] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item30
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={11098.071289,122.219810,3903.070068};
+					id=46;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start9";
+					init="[this,0,0] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item31
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={9852.256836,107.512283,4526.418457};
+					id=47;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start10";
+					init="[this,2,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item32
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={9806.595703,119.913422,4194.012695};
+					id=48;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start11";
+					init="[this,1,1] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item33
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={1419.705200,23.570251,4511.522461};
+					id=49;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start12";
+					init="[this,4,4] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item34
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={2666.890137,53.377483,6692.684570};
+					id=50;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start13";
+					init="[this,0,0] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item35
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4925.232422,24.073555,6252.959473};
+					id=51;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start14";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item36
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={6463.333008,79.673828,3571.922363};
+					id=52;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start15";
+					init="[this,2,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item37
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10692.766602,140.983948,3583.953125};
+					id=53;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start16";
+					init="[this,1,1] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item38
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={6992.921387,120.500259,6115.093262};
+					id=54;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start17";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item39
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={3706.858154,127.284348,8659.361328};
+					id=55;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start18";
+					init="[this,0,0] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item40
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={3792.749756,25.947475,5610.228027};
+					id=56;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start19";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item41
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={2830.293213,26.510786,3835.069092};
+					id=57;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start20";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item42
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={1702.643066,22.821283,5836.294434};
+					id=58;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start21";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item43
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={2780.320312,25.944036,6252.499512};
+					id=59;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start22";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item44
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4921.616699,26.443251,3494.804932};
+					id=60;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start23";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item45
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4668.218262,30.951670,4533.357422};
+					id=61;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start24";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item46
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={3835.436768,115.605728,8279.711914};
+					id=62;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start25";
+					init="[this,0,0] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item47
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10008.875977,129.698410,4008.578125};
+					id=63;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start26";
+					init="[this,0,0] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item48
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={7660.765137,120.403816,7084.945312};
+					id=64;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start27";
+					init="[this,0,0] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item49
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={3207.115234,34.642620,4197.381348};
+					id=65;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start28";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item50
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={6072.491211,109.883881,4260.701660};
+					id=66;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start29";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item51
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={3113.300293,103.455017,7318.189941};
+					id=67;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start30";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item52
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={6809.727051,119.470062,5146.138184};
+					id=68;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start31";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item53
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4674.788574,344.996521,10142.291992};
+					id=69;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start32";
+					init="[this,0,0] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item54
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={2431.159180,151.534500,10156.780273};
+					id=70;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start33";
+					init="[this,0,0] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item55
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4649.401367,120.886452,7397.257324};
+					id=71;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start34";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item56
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={6148.400391,85.454140,3578.306396};
+					id=72;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start35";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item57
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10039.894531,120.437233,4848.065918};
+					id=73;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start36";
+					init="[this,1,1] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item58
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={2998.156982,115.670059,7544.893555};
+					id=74;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start37";
+					init="[this,0,0] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item59
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={5103.311523,31.664587,6407.595703};
+					id=75;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start38";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item60
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10830.788086,139.981369,4579.686523};
+					id=76;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start39";
+					init="[this,0,0] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item61
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10834.833984,136.238235,4415.760742};
+					id=77;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start40";
+					init="[this,1,1] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item62
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10718.023438,141.289627,4692.304688};
+					id=78;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start41";
+					init="[this,2,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item63
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4108.838867,103.503838,6503.441406};
+					id=79;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start42";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item64
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10384.078125,249.917694,8494.114258};
+					id=80;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start43";
+					init="[this,0,0] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item65
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10185.248047,298.793518,7852.605957};
+					id=81;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start44";
+					init="[this,0,0] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item66
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10547.694336,123.799454,5202.381836};
+					id=82;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start45";
+					init="[this,2,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item67
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={3077.281982,43.346470,5291.507812};
+					id=83;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start46";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item68
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4360.168457,113.006729,7884.643555};
+					id=84;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start47";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item69
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10607.820312,115.638153,5674.848145};
+					id=85;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="Start48";
+					init="[this,0,2] Exec ""Main\InitStartingLocation.sqs""";
+				};
+			};
+		};
+		class Item70
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4691.181152,0.528175,694.870850};
+					id=86;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="WestCommanderWPDestination";
+				};
+			};
+		};
+		class Item71
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4947.942871,0.528175,699.614990};
+					id=87;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="EastCommanderWPDestination";
+				};
+			};
+		};
+		class Item72
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4582.671387,0.528175,1064.406128};
+					id=37;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.600000;
+					text="LocalServerObject";
+				};
+			};
+		};
+		class Item73
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={1671.198242,37.825649,9558.365234};
+					special="NONE";
+					id=92;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.200000;
+					text="CivilianDestination0";
+					init="[this] Exec ""Main\InitCivilianDestination.sqs""";
+				};
+			};
+		};
+		class Item74
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={5877.248535,105.216194,9225.635742};
+					special="NONE";
+					id=93;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.200000;
+					text="CivilianDestination1";
+					init="[this] Exec ""Main\InitCivilianDestination.sqs""";
+				};
+			};
+		};
+		class Item75
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={11188.068359,144.989990,7640.580078};
+					special="NONE";
+					id=94;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.200000;
+					text="CivilianDestination2";
+					init="[this] Exec ""Main\InitCivilianDestination.sqs""";
+				};
+			};
+		};
+		class Item76
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4138.773926,23.490000,4973.625000};
+					special="NONE";
+					id=95;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.200000;
+					text="CivilianDestination3";
+					init="[this] Exec ""Main\InitCivilianDestination.sqs""";
+				};
+			};
+		};
+		class Item77
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4148.864258,20.777525,3627.045410};
+					special="NONE";
+					id=96;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.200000;
+					text="CivilianDestination4";
+					init="[this] Exec ""Main\InitCivilianDestination.sqs""";
+				};
+			};
+		};
+		class Item78
+		{
+			side="CIV";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4186.532227,22.287411,3706.511963};
+					azimut=300.000000;
+					special="NONE";
+					id=97;
+					side="CIV";
+					vehicle="Rapid";
+					leader=1;
+					skill=0.200000;
+					init="[this] Exec ""Main\InitCivilian.sqs""";
+				};
+			};
+		};
+		class Item79
+		{
+			side="CIV";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={2057.473633,56.980118,9217.242188};
+					azimut=145.000000;
+					special="NONE";
+					id=98;
+					side="CIV";
+					vehicle="Skoda";
+					leader=1;
+					skill=0.200000;
+					init="[this] Exec ""Main\InitCivilian.sqs""";
+				};
+			};
+		};
+		class Item80
+		{
+			side="CIV";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10725.154297,127.979996,3193.447998};
+					special="NONE";
+					id=99;
+					side="CIV";
+					vehicle="SkodaBlue";
+					leader=1;
+					skill=0.200000;
+					init="[this] Exec ""Main\InitCivilian.sqs""";
+				};
+			};
+		};
+		class Item81
+		{
+			side="CIV";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={6584.567871,109.979996,4159.435059};
+					azimut=265.000000;
+					special="NONE";
+					id=100;
+					side="CIV";
+					vehicle="SkodaGreen";
+					leader=1;
+					skill=0.200000;
+					init="[this] Exec ""Main\InitCivilian.sqs""";
+				};
+			};
+		};
+		class Item82
+		{
+			side="CIV";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={11115.858398,116.734360,5343.211914};
+					azimut=210.000000;
+					special="NONE";
+					id=101;
+					side="CIV";
+					vehicle="SkodaRed";
+					leader=1;
+					skill=0.200000;
+					init="[this] Exec ""Main\InitCivilian.sqs""";
+				};
+			};
+		};
+		class Item83
+		{
+			side="CIV";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={4240.521973,23.490000,4987.474121};
+					special="NONE";
+					id=102;
+					side="CIV";
+					vehicle="Mini";
+					leader=1;
+					skill=0.200000;
+					init="[this] Exec ""Main\InitCivilian.sqs""";
+				};
+			};
+		};
+		class Item84
+		{
+			side="CIV";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10507.202148,123.974998,4115.529785};
+					azimut=265.000000;
+					special="NONE";
+					id=103;
+					side="CIV";
+					vehicle="RapidY";
+					leader=1;
+					skill=0.200000;
+					init="[this] Exec ""Main\InitCivilian.sqs""";
+				};
+			};
+		};
+		class Item85
+		{
+			side="CIV";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={8959.758789,122.150108,5407.833984};
+					azimut=275.000000;
+					special="NONE";
+					id=104;
+					side="CIV";
+					vehicle="Jawa";
+					leader=1;
+					skill=0.200000;
+					init="[this] Exec ""Main\InitCivilian.sqs""";
+				};
+			};
+		};
+		class Item86
+		{
+			side="CIV";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={1663.158203,37.682358,9556.930664};
+					azimut=75.000000;
+					special="NONE";
+					id=105;
+					side="CIV";
+					vehicle="Bus";
+					leader=1;
+					skill=0.200000;
+					init="[this] Exec ""Main\InitCivilian.sqs""";
+				};
+			};
+		};
+		class Item87
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={6554.276855,109.979996,4154.149414};
+					special="NONE";
+					id=106;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.200000;
+					text="CivilianDestination5";
+					init="[this] Exec ""Main\InitCivilianDestination.sqs""";
+				};
+			};
+		};
+		class Item88
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={10442.457031,123.974998,4102.991211};
+					special="NONE";
+					id=107;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.200000;
+					text="CivilianDestination6";
+					init="[this] Exec ""Main\InitCivilianDestination.sqs""";
+				};
+			};
+		};
+		class Item89
+		{
+			side="LOGIC";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={3893.363525,106.964996,7056.604492};
+					special="NONE";
+					id=108;
+					side="LOGIC";
+					vehicle="Logic";
+					leader=1;
+					skill=0.200000;
+					text="CivilianDestination7";
+					init="[this] Exec ""Main\InitCivilianDestination.sqs""";
+				};
+			};
+		};
+		class Item90
+		{
+			side="GUER";
+			class Vehicles
+			{
+				items=1;
+				class Item0
+				{
+					position[]={9585.061523,21.744785,12507.498047};
+					special="NONE";
+					id=109;
+					side="GUER";
+					vehicle="SoldierGB";
+					leader=1;
+					skill=0.200000;
+					text="ResistanceTempGroupLeader";
+					init="ResistanceTempGroup = group this";
+				};
+			};
+			class Waypoints
+			{
+				items=1;
+				class Item0
+				{
+					position[]={9585.061523,21.744785,12507.498047};
+					id=109;
+					type="HOLD";
+					combatMode="BLUE";
+					combat="CARELESS";
+					class Effects
+					{
+					};
+					showWP="NEVER";
+				};
+			};
+		};
+		class Item91
+		{
+			side="GUER";
+			class Vehicles
+			{
+				items=9;
+				class Item0
+				{
+					position[]={9714.469727,14.858938,12414.582031};
+					id=114;
+					side="GUER";
+					vehicle="OfficerG";
+					leader=1;
+					rank="LIEUTNANT";
+					skill=0.600000;
+				};
+				class Item1
+				{
+					position[]={9709.654297,14.764086,12414.594727};
+					id=115;
+					side="GUER";
+					vehicle="SoldierGAA";
+					rank="LIEUTNANT";
+					skill=0.600000;
+				};
+				class Item2
+				{
+					position[]={9720.350586,14.975875,12414.594727};
+					id=116;
+					side="GUER";
+					vehicle="SoldierGAT";
+					rank="LIEUTNANT";
+					skill=0.600000;
+				};
+				class Item3
+				{
+					position[]={9725.553711,15.078884,12414.594727};
+					id=117;
+					side="GUER";
+					vehicle="SoldierGG";
+					rank="LIEUTNANT";
+					skill=0.600000;
+				};
+				class Item4
+				{
+					position[]={9702.717773,14.626740,12414.594727};
+					id=118;
+					side="GUER";
+					vehicle="SoldierGLAW";
+					rank="LIEUTNANT";
+					skill=0.600000;
+				};
+				class Item5
+				{
+					position[]={9697.802734,15.276937,12414.594727};
+					id=119;
+					side="GUER";
+					vehicle="SoldierGMG";
+					rank="LIEUTNANT";
+					skill=0.600000;
+				};
+				class Item6
+				{
+					position[]={9731.333984,15.193405,12414.595703};
+					id=120;
+					side="GUER";
+					vehicle="SoldierGMedic";
+					rank="LIEUTNANT";
+					skill=0.600000;
+				};
+				class Item7
+				{
+					position[]={9737.981445,15.324965,12414.594727};
+					id=121;
+					side="GUER";
+					vehicle="SoldierGSniper";
+					rank="LIEUTNANT";
+					skill=0.600000;
+				};
+				class Item8
+				{
+					position[]={9692.887695,16.851961,12414.595703};
+					id=122;
+					side="GUER";
+					vehicle="SoldierGB";
+					rank="LIEUTNANT";
+					skill=0.600000;
+				};
+			};
+			class Waypoints
+			{
+				items=1;
+				class Item0
+				{
+					position[]={9714.784180,14.972159,12417.284180};
+					type="HOLD";
+					combatMode="BLUE";
+					combat="CARELESS";
+					class Effects
+					{
+					};
+					showWP="NEVER";
+				};
+			};
+		};
+	};
+	class Vehicles
+	{
+		items=55;
+		class Item0
+		{
+			position[]={1691.566040,36.989998,9545.772461};
+			special="NONE";
+			id=1;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town1";
+			init="[Town1,""Modrava"",""N/A"",250] exec ""Main\InitTown.sqs""";
+		};
+		class Item1
+		{
+			position[]={5506.635742,145.206665,9443.189453};
+			special="NONE";
+			id=3;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town2";
+			init="[Town2,""Mokropsy"",""N/A"",175] exec ""Main\InitTown.sqs""";
+		};
+		class Item2
+		{
+			position[]={7992.172852,508.680542,9449.770508};
+			special="NONE";
+			id=4;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town3";
+			init="[Town3,""Trosky"",""N/A"",150] exec ""Main\InitTown.sqs""";
+		};
+		class Item3
+		{
+			position[]={8890.427734,193.994995,7889.387207};
+			special="NONE";
+			id=5;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town4";
+			init="[Town4,""Varta"",""N/A"",100] exec ""Main\InitTown.sqs""";
+		};
+		class Item4
+		{
+			position[]={11121.068359,144.989990,7672.240723};
+			special="NONE";
+			id=6;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town5";
+			init="[Town5,""Loukov"",""N/A"",200] exec ""Main\InitTown.sqs""";
+		};
+		class Item5
+		{
+			position[]={936.513184,20.517609,12092.514648};
+			id=10;
+			side="EMPTY";
+			vehicle="MFCTI116WestMobileHQ";
+			leader=1;
+			skill=0.600000;
+			text="WestMobileHQ";
+			init="this AddAction [Localize ""STRLOGONTOCAMERA"",""GUI\UpdateSatelliteCamera.sqs""];this AddAction [Localize ""STRUNFLIPMHQ"",""Main\UnflipVehicle.sqs""];this AddEventHandler [""killed"",{[_this,west] Exec ""Main\UnitKilled.sqs""}];this AddEventHandler [""killed"",{[_this,west] Exec ""Main\MHQDestroyed.sqs""}]";
+		};
+		class Item6
+		{
+			position[]={10910.780273,32.540993,11643.881836};
+			id=12;
+			side="EMPTY";
+			vehicle="MFCTI116EastMobileHQ";
+			leader=1;
+			skill=0.600000;
+			text="EastMobileHQ";
+			init="this AddAction [Localize ""STRLOGONTOCAMERA"",""GUI\UpdateSatelliteCamera.sqs""];this AddAction [Localize ""STRUNFLIPMHQ"",""Main\UnflipVehicle.sqs""];this AddEventHandler [""killed"",{[_this,east] Exec ""Main\UnitKilled.sqs""}];this AddEventHandler [""killed"",{[_this,east] Exec ""Main\MHQDestroyed.sqs""}]";
+		};
+		class Item7
+		{
+			position[]={1656.558350,39.959999,11320.455078};
+			special="NONE";
+			id=17;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town0";
+			init="[Town0,""Mokra Vrata"",""N/A"",100] exec ""Main\InitTown.sqs""";
+		};
+		class Item8
+		{
+			position[]={9804.397461,275.207275,6960.792480};
+			special="NONE";
+			id=25;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town6";
+			init="[Town6,""Blata"",""N/A"",100] exec ""Main\InitTown.sqs""";
+		};
+		class Item9
+		{
+			position[]={11204.371094,117.151215,5363.694824};
+			special="NONE";
+			id=26;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town7";
+			init="[Town7,""Bitov"",""N/A"",100] exec ""Main\InitTown.sqs""";
+		};
+		class Item10
+		{
+			position[]={9017.247070,121.994995,5442.781738};
+			special="NONE";
+			id=27;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town8";
+			init="[Town8,""Velka Ves"",""N/A"",150] exec ""Main\InitTown.sqs""";
+		};
+		class Item11
+		{
+			position[]={9198.689453,154.485001,4978.178223};
+			special="NONE";
+			id=28;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town9";
+			init="[Town9,""Mala Ves"",""N/A"",100] exec ""Main\InitTown.sqs""";
+		};
+		class Item12
+		{
+			position[]={10475.567383,123.974998,4070.096436};
+			special="NONE";
+			id=29;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town10";
+			init="[Town10,""Lany"",""N/A"",200] exec ""Main\InitTown.sqs""";
+		};
+		class Item13
+		{
+			position[]={10803.792969,127.979996,3123.898926};
+			special="NONE";
+			id=30;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town11";
+			init="[Town11,""Lipany"",""N/A"",500] exec ""Main\InitTown.sqs""";
+		};
+		class Item14
+		{
+			position[]={11507.183594,72.000000,2228.058105};
+			special="NONE";
+			id=31;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town12";
+			init="[Town12,""Okrouhlo"",""N/A"",100] exec ""Main\InitTown.sqs""";
+		};
+		class Item15
+		{
+			position[]={10701.175781,48.658123,1776.690918};
+			special="NONE";
+			id=32;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town13";
+			init="[Town13,""St Sedlo"",""N/A"",75] exec ""Main\InitTown.sqs""";
+		};
+		class Item16
+		{
+			position[]={9402.500000,63.989998,2746.484619};
+			special="NONE";
+			id=33;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town14";
+			init="[Town14,""Bor"",""N/A"",75] exec ""Main\InitTown.sqs""";
+		};
+		class Item17
+		{
+			position[]={7689.189941,24.547764,4427.003906};
+			special="NONE";
+			id=34;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town15";
+			init="[Town15,""Davle"",""N/A"",150] exec ""Main\InitTown.sqs""";
+		};
+		class Item18
+		{
+			position[]={6549.060059,109.979996,4127.527344};
+			special="NONE";
+			id=35;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town16";
+			init="[Town16,""Neveklov"",""N/A"",200] exec ""Main\InitTown.sqs""";
+		};
+		class Item19
+		{
+			position[]={5829.853516,28.295008,5143.056641};
+			special="NONE";
+			id=36;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town17";
+			init="[Town17,""Kost"",""N/A"",100] exec ""Main\InitTown.sqs""";
+		};
+		class Item20
+		{
+			position[]={2206.425537,17.914782,174.286285};
+			id=110;
+			side="EMPTY";
+			vehicle="BMPRes";
+			skill=0.600000;
+		};
+		class Item21
+		{
+			position[]={2217.791748,17.004343,174.286285};
+			id=111;
+			side="EMPTY";
+			vehicle="T55G";
+			skill=0.600000;
+		};
+		class Item22
+		{
+			position[]={2229.553467,16.315790,174.468903};
+			id=112;
+			side="EMPTY";
+			vehicle="T72Res";
+			skill=0.600000;
+		};
+		class Item23
+		{
+			position[]={2240.354248,16.102055,174.469879};
+			id=113;
+			side="EMPTY";
+			vehicle="T80Res";
+			skill=0.600000;
+		};
+		class Item24
+		{
+			position[]={5224.042480,10.769594,5058.351074};
+			special="NONE";
+			id=123;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town18";
+			init="[Town18,""Slapy"",""N/A"",150] exec ""Main\InitTown.sqs""";
+		};
+		class Item25
+		{
+			position[]={5268.061035,7.383109,5525.864746};
+			special="NONE";
+			id=124;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town19";
+			init="[Town19,""Frymburk"",""N/A"",100] exec ""Main\InitTown.sqs""";
+		};
+		class Item26
+		{
+			position[]={6843.061035,112.491524,5583.750488};
+			special="NONE";
+			id=125;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town20";
+			init="[Town20,""Skalice"",""N/A"",100] exec ""Main\InitTown.sqs""";
+		};
+		class Item27
+		{
+			position[]={6702.449707,114.974998,6200.896484};
+			special="NONE";
+			id=126;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town21";
+			init="[Town21,""Paseky"",""N/A"",125] exec ""Main\InitTown.sqs""";
+		};
+		class Item28
+		{
+			position[]={6767.441406,129.959991,6832.812500};
+			special="NONE";
+			id=127;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town22";
+			init="[Town22,""Opatov"",""N/A"",100] exec ""Main\InitTown.sqs""";
+		};
+		class Item29
+		{
+			position[]={6212.159668,116.946960,7380.440430};
+			special="NONE";
+			id=128;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town23";
+			init="[Town23,""Joudov"",""N/A"",100] exec ""Main\InitTown.sqs""";
+		};
+		class Item30
+		{
+			position[]={5920.441895,81.621651,8464.412109};
+			special="NONE";
+			id=129;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town24";
+			init="[Town24,""Dolina"",""N/A"",150] exec ""Main\InitTown.sqs""";
+		};
+		class Item31
+		{
+			position[]={4125.349609,23.490000,5026.149414};
+			special="NONE";
+			id=130;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town25";
+			init="[Town25,""Petrovice"",""N/A"",400] exec ""Main\InitTown.sqs""";
+		};
+		class Item32
+		{
+			position[]={4167.600098,7.965000,3437.231201};
+			special="NONE";
+			id=131;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town26";
+			init="[Town26,""Vidlakov"",""N/A"",250] exec ""Main\InitTown.sqs""";
+		};
+		class Item33
+		{
+			position[]={3918.307129,107.411079,7169.063477};
+			special="NONE";
+			id=132;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town27";
+			init="[Town27,""Mirov"",""N/A"",200] exec ""Main\InitTown.sqs""";
+		};
+		class Item34
+		{
+			position[]={2424.332520,129.749435,9757.149414};
+			special="NONE";
+			id=133;
+			side="EMPTY";
+			vehicle="FlagCarrier";
+			skill=0.200000;
+			text="Town28";
+			init="[Town28,""Bludov"",""N/A"",150] exec ""Main\InitTown.sqs""";
+		};
+		class Item35
+		{
+			presence=0.250759;
+			position[]={3020.768311,21.959999,6065.825684};
+			azimut=270.000000;
+			id=134;
+			side="EMPTY";
+			vehicle="TruckV3SG";
+			skill=0.600000;
+			init="[this,civilian] Exec ""Main\EmptyVehicleCleanUp.sqs""";
+		};
+		class Item36
+		{
+			presence=0.250759;
+			position[]={10778.717773,127.979996,3052.634033};
+			azimut=90.000000;
+			id=135;
+			side="EMPTY";
+			vehicle="JeepPolice";
+			skill=0.600000;
+			init="[this,civilian] Exec ""Main\EmptyVehicleCleanUp.sqs""";
+		};
+		class Item37
+		{
+			presence=0.250759;
+			position[]={4145.838867,23.490000,5025.154297};
+			azimut=180.000000;
+			id=136;
+			side="EMPTY";
+			vehicle="JeepPolice";
+			skill=0.600000;
+			init="[this,civilian] Exec ""Main\EmptyVehicleCleanUp.sqs""";
+		};
+		class Item38
+		{
+			position[]={3522.305420,43.251179,5173.183594};
+			id=137;
+			side="EMPTY";
+			vehicle="Grave";
+			leader=1;
+			skill=0.600000;
+			text="kt1";
+		};
+		class Item39
+		{
+			position[]={2347.340088,42.058037,5637.772949};
+			id=138;
+			side="EMPTY";
+			vehicle="Grave";
+			leader=1;
+			skill=0.600000;
+			text="kt2";
+		};
+		class Item40
+		{
+			position[]={5381.304688,108.518524,4073.452881};
+			id=139;
+			side="EMPTY";
+			vehicle="Grave";
+			leader=1;
+			skill=0.600000;
+			text="kt3";
+		};
+		class Item41
+		{
+			position[]={7553.383301,61.578609,5909.725098};
+			id=140;
+			side="EMPTY";
+			vehicle="Grave";
+			leader=1;
+			skill=0.600000;
+			text="kt4";
+		};
+		class Item42
+		{
+			position[]={4886.186523,357.518219,10066.640625};
+			id=141;
+			side="EMPTY";
+			vehicle="Grave";
+			leader=1;
+			skill=0.600000;
+			text="kt5";
+		};
+		class Item43
+		{
+			position[]={8725.884766,99.891846,4196.724609};
+			id=142;
+			side="EMPTY";
+			vehicle="Grave";
+			leader=1;
+			skill=0.600000;
+			text="kt6";
+		};
+		class Item44
+		{
+			position[]={8516.575195,188.999985,7459.804199};
+			id=143;
+			side="EMPTY";
+			vehicle="Grave";
+			leader=1;
+			skill=0.600000;
+			text="kt7";
+		};
+		class Item45
+		{
+			position[]={6670.604980,323.280334,8901.759766};
+			id=144;
+			side="EMPTY";
+			vehicle="Grave";
+			leader=1;
+			skill=0.600000;
+			text="kt8";
+		};
+		class Item46
+		{
+			position[]={4810.065918,28.221428,4498.936523};
+			id=145;
+			side="EMPTY";
+			vehicle="HeliHEmpty";
+			leader=1;
+			skill=0.600000;
+			text="hlz1";
+		};
+		class Item47
+		{
+			position[]={3306.931885,161.077316,7820.393066};
+			id=146;
+			side="EMPTY";
+			vehicle="HeliHEmpty";
+			leader=1;
+			skill=0.600000;
+			text="hlz2";
+		};
+		class Item48
+		{
+			position[]={2875.011963,127.442673,8738.207031};
+			id=147;
+			side="EMPTY";
+			vehicle="HeliHEmpty";
+			leader=1;
+			skill=0.600000;
+			text="hlz3";
+		};
+		class Item49
+		{
+			position[]={5109.233398,152.226471,7469.788086};
+			id=148;
+			side="EMPTY";
+			vehicle="HeliHEmpty";
+			leader=1;
+			skill=0.600000;
+			text="hlz4";
+		};
+		class Item50
+		{
+			position[]={6609.117188,115.656807,4896.471191};
+			id=149;
+			side="EMPTY";
+			vehicle="HeliHEmpty";
+			leader=1;
+			skill=0.600000;
+			text="hlz5";
+		};
+		class Item51
+		{
+			position[]={10546.769531,130.983475,4930.157715};
+			id=150;
+			side="EMPTY";
+			vehicle="HeliHEmpty";
+			leader=1;
+			skill=0.600000;
+			text="hlz6";
+		};
+		class Item52
+		{
+			position[]={9929.443359,194.794037,3573.494141};
+			id=151;
+			side="EMPTY";
+			vehicle="HeliHEmpty";
+			leader=1;
+			skill=0.600000;
+			text="hlz7";
+		};
+		class Item53
+		{
+			position[]={10356.455078,76.737404,744.553589};
+			id=152;
+			side="EMPTY";
+			vehicle="HeliHEmpty";
+			leader=1;
+			skill=0.600000;
+			text="hlz8";
+		};
+		class Item54
+		{
+			position[]={9829.637695,254.071838,8425.477539};
+			id=153;
+			side="EMPTY";
+			vehicle="HeliHEmpty";
+			leader=1;
+			skill=0.600000;
+			text="hlz9";
+		};
+	};
+	class Markers
+	{
+		items=269;
+		class Item0
+		{
+			position[]={5002.312012,0.528175,444.031982};
+			name="Respawn_west";
+			text="@STRRESPAWN";
+			type="Start";
+			colorName="ColorGreen";
+		};
+		class Item1
+		{
+			position[]={4946.323730,0.528175,446.706787};
+			name="Respawn_east";
+			text="@STRRESPAWN";
+			type="Start";
+			colorName="ColorGreen";
+		};
+		class Item2
+		{
+			position[]={4682.030762,0.528175,1081.175659};
+			name="West Town 0";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item3
+		{
+			position[]={4682.290527,0.528175,1074.831909};
+			name="West Town 1";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item4
+		{
+			position[]={4682.106934,0.528175,1062.501831};
+			name="West Town 2";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item5
+		{
+			position[]={4682.591309,0.528175,1051.122925};
+			name="West Town 3";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item6
+		{
+			position[]={4683.128418,0.528175,1037.937378};
+			name="West Town 4";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item7
+		{
+			position[]={4946.270996,0.528175,1087.949097};
+			name="East Town 0";
+			text="@STREAST";
+			type="Flag1";
+		};
+		class Item8
+		{
+			position[]={4946.065918,0.528175,1076.105347};
+			name="East Town 1";
+			text="@STREAST";
+			type="Flag1";
+		};
+		class Item9
+		{
+			position[]={4946.161621,0.528175,1064.429565};
+			name="East Town 2";
+			text="East";
+			type="Flag1";
+		};
+		class Item10
+		{
+			position[]={4946.118652,0.528175,1051.656128};
+			name="East Town 3";
+			text="@STREAST";
+			type="Flag1";
+		};
+		class Item11
+		{
+			position[]={4946.399902,0.528175,1039.400269};
+			name="East Town 4";
+			text="@STREAST";
+			type="Flag1";
+		};
+		class Item12
+		{
+			position[]={4688.261230,0.528175,854.239990};
+			name="West Alpha Marker";
+			text="@STRALPHA";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item13
+		{
+			position[]={4948.976074,0.528175,852.001709};
+			name="East Alpha Marker";
+			text="@STRALPHA";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item14
+		{
+			position[]={4689.681152,0.528175,788.407959};
+			name="West Foxtrot Marker";
+			text="@STRFOXTROT";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item15
+		{
+			position[]={4688.550293,0.528175,801.728271};
+			name="West Echo Marker";
+			text="@STRECHO";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item16
+		{
+			position[]={4688.458496,0.528175,826.568115};
+			name="West Charlie Marker";
+			text="@STRCHARLIE";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item17
+		{
+			position[]={4688.511230,0.528175,840.298584};
+			name="West Bravo Marker";
+			text="@STRBRAVO";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item18
+		{
+			position[]={4949.651855,0.528175,839.995850};
+			name="East Bravo Marker";
+			text="@STRBRAVO";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item19
+		{
+			position[]={4688.384277,0.528175,867.638428};
+			name="West Commander Marker";
+			text="@STRCOMMANDER";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item20
+		{
+			position[]={4948.020996,0.528175,865.872803};
+			name="East Commander Marker";
+			text="@STRCOMMANDER";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item21
+		{
+			position[]={4682.022949,0.528175,1026.929565};
+			name="West Town 5";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item22
+		{
+			position[]={4946.958496,0.528175,1027.454956};
+			name="East Town 5";
+			text="@STREAST";
+			type="Flag1";
+		};
+		class Item23
+		{
+			position[]={4691.872559,0.528175,618.372803};
+			name="WestEchoWP";
+			text="@STRECHOWP";
+			type="Flag";
+			colorName="ColorRed";
+		};
+		class Item24
+		{
+			position[]={4694.765137,0.528175,676.687256};
+			name="WestCommanderWP";
+			text="@STRCOMMANDERWP";
+			type="Destroy";
+		};
+		class Item25
+		{
+			position[]={4694.726074,0.528175,664.224365};
+			name="WestAlphaWP";
+			text="@STRALPHAWP";
+			type="Flag";
+		};
+		class Item26
+		{
+			position[]={4692.380371,0.528175,650.712646};
+			name="WestBravoWP";
+			text="@STRBRAVOWP";
+			type="Flag";
+		};
+		class Item27
+		{
+			position[]={4693.319824,0.528175,639.204834};
+			name="WestCharlieWP";
+			text="@STRCHARLIEWP";
+			type="Flag";
+		};
+		class Item28
+		{
+			position[]={4692.382324,0.528175,630.197021};
+			name="WestDeltaWP";
+			text="@STRDELTAWP";
+			type="Flag";
+		};
+		class Item29
+		{
+			position[]={4689.280762,0.528175,813.349365};
+			name="West Delta Marker";
+			text="@STRDELTA";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item30
+		{
+			position[]={4953.005371,0.528175,672.036865};
+			name="EastAlphaWP";
+			text="@STRALPHAWP";
+			type="Flag";
+		};
+		class Item31
+		{
+			position[]={4952.966309,0.528175,659.573975};
+			name="EastBravoWP";
+			text="@STRBRAVOWP";
+			type="Flag";
+		};
+		class Item32
+		{
+			position[]={4952.593262,0.528175,646.064209};
+			name="EastCharlieWP";
+			text="@STRCHARLIEWP";
+			type="Flag";
+		};
+		class Item33
+		{
+			position[]={4953.530762,0.528175,633.503662};
+			name="EastDeltaWP";
+			text="@STRDELTAWP";
+			type="Flag";
+		};
+		class Item34
+		{
+			position[]={4953.579590,0.528175,621.341553};
+			name="EastEchoWP";
+			text="@STRECHOWP";
+			type="Flag";
+		};
+		class Item35
+		{
+			position[]={4948.687012,0.528175,803.263428};
+			name="East Echo Marker";
+			text="@STRECHO";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item36
+		{
+			position[]={4949.565918,0.528175,828.583740};
+			name="East Charlie Marker";
+			text="@STRCHARLIE";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item37
+		{
+			position[]={4949.206543,0.528175,816.323975};
+			name="East Delta Marker";
+			text="@STRDELTA";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item38
+		{
+			position[]={4948.685059,0.528175,791.628662};
+			name="East Foxtrot Marker";
+			text="@STRFOXTROT";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item39
+		{
+			position[]={4953.224121,0.528175,683.343506};
+			name="EastCommanderWP";
+			text="@STRCOMMANDERWP";
+			type="Destroy";
+			colorName="ColorRed";
+		};
+		class Item40
+		{
+			position[]={4682.179199,0.528175,1015.231323};
+			name="West Town 6";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item41
+		{
+			position[]={4681.421387,0.528175,1003.911011};
+			name="West Town 7";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item42
+		{
+			position[]={4681.421387,0.528175,992.586792};
+			name="West Town 8";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item43
+		{
+			position[]={4681.421387,0.528175,980.457825};
+			name="West Town 9";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item44
+		{
+			position[]={4681.421387,0.528175,967.518372};
+			name="West Town 10";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item45
+		{
+			position[]={4945.792480,0.528175,1014.366089};
+			name="East Town 6";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item46
+		{
+			position[]={4944.938965,0.528175,1002.547729};
+			name="East Town 7";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item47
+		{
+			position[]={4945.034668,0.528175,990.520386};
+			name="East Town 8";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item48
+		{
+			position[]={4944.276855,0.528175,977.789856};
+			name="East Town 9";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item49
+		{
+			position[]={4943.519043,0.528175,964.848450};
+			name="East Town 10";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item50
+		{
+			position[]={4679.905762,0.528175,955.248779};
+			name="West Town 11";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item51
+		{
+			position[]={4942.554199,0.528175,952.180420};
+			name="East Town 11";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item52
+		{
+			position[]={4940.491699,0.528175,940.442139};
+			name="East Town 12";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item53
+		{
+			position[]={4939.804199,0.528175,932.370850};
+			name="East Town 13";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item54
+		{
+			position[]={4939.804199,0.528175,924.300537};
+			name="East Town 14";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item55
+		{
+			position[]={4939.804199,0.528175,914.031006};
+			name="East Town 15";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item56
+		{
+			position[]={4939.114746,0.528175,905.960693};
+			name="East Town 16";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item57
+		{
+			position[]={4678.530762,0.528175,946.444092};
+			name="West Town 12";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item58
+		{
+			position[]={4677.153809,0.528175,937.641357};
+			name="West Town 13";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item59
+		{
+			position[]={4677.841309,0.528175,930.302490};
+			name="West Town 14";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item60
+		{
+			position[]={4678.530762,0.528175,922.232178};
+			name="West Town 15";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item61
+		{
+			position[]={4678.530762,0.528175,914.896240};
+			name="West Town 16";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item62
+		{
+			position[]={4678.956543,0.528175,908.085693};
+			name="West Town 17";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item63
+		{
+			position[]={4937.862793,0.528175,893.929443};
+			name="East Town 17";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item64
+		{
+			position[]={4748.688965,0.528175,466.881592};
+			name="West Vehicle 0";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item65
+		{
+			position[]={4748.683105,0.528175,466.171631};
+			name="West Vehicle 1";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item66
+		{
+			position[]={4748.683105,0.528175,465.489990};
+			name="West Vehicle 2";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item67
+		{
+			position[]={4748.675293,0.528175,464.814209};
+			name="West Vehicle 3";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item68
+		{
+			position[]={4748.675293,0.528175,464.131592};
+			name="West Vehicle 4";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item69
+		{
+			position[]={4748.675293,0.528175,463.449951};
+			name="West Vehicle 5";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item70
+		{
+			position[]={4748.675293,0.528175,462.766357};
+			name="West Vehicle 6";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item71
+		{
+			position[]={4748.675293,0.528175,462.082764};
+			name="West Vehicle 7";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item72
+		{
+			position[]={4748.673340,0.528175,461.399170};
+			name="West Vehicle 8";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item73
+		{
+			position[]={4748.675293,0.528175,460.718506};
+			name="West Vehicle 9";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item74
+		{
+			position[]={4748.673340,0.528175,459.999756};
+			name="West Vehicle 10";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item75
+		{
+			position[]={4750.331543,0.528175,466.881592};
+			name="East Vehicle 0";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item76
+		{
+			position[]={4750.325684,0.528175,466.171631};
+			name="East Vehicle 1";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item77
+		{
+			position[]={4750.325684,0.528175,465.489990};
+			name="East Vehicle 2";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item78
+		{
+			position[]={4750.317871,0.528175,464.814209};
+			name="East Vehicle 3";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item79
+		{
+			position[]={4750.317871,0.528175,464.131592};
+			name="East Vehicle 4";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item80
+		{
+			position[]={4750.317871,0.528175,463.449951};
+			name="East Vehicle 5";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item81
+		{
+			position[]={4750.317871,0.528175,462.766357};
+			name="East Vehicle 6";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item82
+		{
+			position[]={4750.317871,0.528175,462.082764};
+			name="East Vehicle 7";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item83
+		{
+			position[]={4750.317871,0.528175,461.399170};
+			name="East Vehicle 8";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item84
+		{
+			position[]={4750.317871,0.528175,460.718506};
+			name="East Vehicle 9";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item85
+		{
+			position[]={4750.317871,0.528175,459.999756};
+			name="East Vehicle 10";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item86
+		{
+			position[]={4691.874512,0.528175,609.673584};
+			name="WestFoxtrotWP";
+			text="@STRFOXTROTWP";
+			type="Flag";
+			colorName="ColorRed";
+		};
+		class Item87
+		{
+			position[]={4953.581543,0.528175,607.671631};
+			name="EastFoxtrotWP";
+			text="@STRFOXTROTWP";
+			type="Flag";
+		};
+		class Item88
+		{
+			position[]={4748.671387,0.528175,459.317139};
+			name="West Vehicle 11";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item89
+		{
+			position[]={4748.673340,0.528175,458.600342};
+			name="West Vehicle 12";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item90
+		{
+			position[]={4748.673340,0.528175,457.882568};
+			name="West Vehicle 13";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item91
+		{
+			position[]={4748.673340,0.528175,457.199951};
+			name="West Vehicle 14";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item92
+		{
+			position[]={4748.673340,0.528175,456.516357};
+			name="West Vehicle 15";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item93
+		{
+			position[]={4750.317871,0.528175,459.282959};
+			name="East Vehicle 11";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item94
+		{
+			position[]={4750.317871,0.528175,458.567139};
+			name="East Vehicle 12";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item95
+		{
+			position[]={4750.315918,0.528175,457.883545};
+			name="East Vehicle 13";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item96
+		{
+			position[]={4750.317871,0.528175,457.202881};
+			name="East Vehicle 14";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item97
+		{
+			position[]={4750.315918,0.528175,456.519287};
+			name="East Vehicle 15";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item98
+		{
+			position[]={4748.671387,0.528175,455.602295};
+			name="West Vehicle 16";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item99
+		{
+			position[]={4748.671387,0.528175,454.885498};
+			name="West Vehicle 17";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item100
+		{
+			position[]={4748.671387,0.528175,454.167725};
+			name="West Vehicle 18";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item101
+		{
+			position[]={4748.671387,0.528175,453.485107};
+			name="West Vehicle 19";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item102
+		{
+			position[]={4748.673340,0.528175,452.801514};
+			name="West Vehicle 20";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item103
+		{
+			position[]={4750.317871,0.528175,455.614990};
+			name="East Vehicle 16";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item104
+		{
+			position[]={4750.317871,0.528175,454.899170};
+			name="East Vehicle 17";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item105
+		{
+			position[]={4750.317871,0.528175,454.215576};
+			name="East Vehicle 18";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item106
+		{
+			position[]={4750.317871,0.528175,453.534912};
+			name="East Vehicle 19";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item107
+		{
+			position[]={4750.317871,0.528175,452.851318};
+			name="East Vehicle 20";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item108
+		{
+			position[]={4748.677246,0.528175,452.089600};
+			name="West Vehicle 21";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item109
+		{
+			position[]={4748.671387,0.528175,451.379639};
+			name="West Vehicle 22";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item110
+		{
+			position[]={4748.671387,0.528175,450.697998};
+			name="West Vehicle 23";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item111
+		{
+			position[]={4748.663574,0.528175,450.022217};
+			name="West Vehicle 24";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item112
+		{
+			position[]={4748.663574,0.528175,449.339600};
+			name="West Vehicle 25";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item113
+		{
+			position[]={4748.663574,0.528175,448.657959};
+			name="West Vehicle 26";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item114
+		{
+			position[]={4748.663574,0.528175,447.974365};
+			name="West Vehicle 27";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item115
+		{
+			position[]={4748.663574,0.528175,447.290771};
+			name="West Vehicle 28";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item116
+		{
+			position[]={4748.663574,0.528175,446.607178};
+			name="West Vehicle 29";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item117
+		{
+			position[]={4748.663574,0.528175,445.926514};
+			name="West Vehicle 30";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item118
+		{
+			position[]={4748.661621,0.528175,445.207764};
+			name="West Vehicle 31";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item119
+		{
+			position[]={4750.319824,0.528175,452.089600};
+			name="East Vehicle 21";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item120
+		{
+			position[]={4750.315918,0.528175,451.379639};
+			name="East Vehicle 22";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item121
+		{
+			position[]={4750.315918,0.528175,450.697998};
+			name="East Vehicle 23";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item122
+		{
+			position[]={4750.308105,0.528175,450.022217};
+			name="East Vehicle 24";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item123
+		{
+			position[]={4750.308105,0.528175,449.339600};
+			name="East Vehicle 25";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item124
+		{
+			position[]={4750.308105,0.528175,448.657959};
+			name="East Vehicle 26";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item125
+		{
+			position[]={4750.308105,0.528175,447.974365};
+			name="East Vehicle 27";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item126
+		{
+			position[]={4750.308105,0.528175,447.290771};
+			name="East Vehicle 28";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item127
+		{
+			position[]={4750.306152,0.528175,446.607178};
+			name="East Vehicle 29";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item128
+		{
+			position[]={4750.308105,0.528175,445.926514};
+			name="East Vehicle 30";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item129
+		{
+			position[]={4750.306152,0.528175,445.207764};
+			name="East Vehicle 31";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item130
+		{
+			position[]={4748.661621,0.528175,444.525146};
+			name="West Vehicle 32";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item131
+		{
+			position[]={4748.661621,0.528175,443.808350};
+			name="West Vehicle 33";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item132
+		{
+			position[]={4748.661621,0.528175,443.090576};
+			name="West Vehicle 34";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item133
+		{
+			position[]={4748.661621,0.528175,442.407959};
+			name="West Vehicle 35";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item134
+		{
+			position[]={4748.663574,0.528175,441.724365};
+			name="West Vehicle 36";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item135
+		{
+			position[]={4750.306152,0.528175,444.490967};
+			name="East Vehicle 32";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item136
+		{
+			position[]={4750.306152,0.528175,443.775146};
+			name="East Vehicle 33";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item137
+		{
+			position[]={4750.306152,0.528175,443.091553};
+			name="East Vehicle 34";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item138
+		{
+			position[]={4750.306152,0.528175,442.410889};
+			name="East Vehicle 35";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item139
+		{
+			position[]={4750.306152,0.528175,441.727295};
+			name="East Vehicle 36";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item140
+		{
+			position[]={4748.659668,0.528175,440.810303};
+			name="West Vehicle 37";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item141
+		{
+			position[]={4748.661621,0.528175,440.093506};
+			name="West Vehicle 38";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item142
+		{
+			position[]={4748.661621,0.528175,439.375732};
+			name="West Vehicle 39";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item143
+		{
+			position[]={4748.661621,0.528175,438.693115};
+			name="West Vehicle 40";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item144
+		{
+			position[]={4750.308105,0.528175,440.822998};
+			name="East Vehicle 37";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item145
+		{
+			position[]={4750.308105,0.528175,440.107178};
+			name="East Vehicle 38";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item146
+		{
+			position[]={4750.306152,0.528175,439.423584};
+			name="East Vehicle 39";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item147
+		{
+			position[]={4750.308105,0.528175,438.742920};
+			name="East Vehicle 40";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item148
+		{
+			position[]={4715.029785,0.528175,1361.263306};
+			name="Town Area 0";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item149
+		{
+			position[]={4716.824707,0.528175,1347.130493};
+			name="Town Area 1";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item150
+		{
+			position[]={4716.188965,0.528175,1319.023071};
+			name="Town Area 2";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item151
+		{
+			position[]={4716.187012,0.528175,1308.825806};
+			name="Town Area 3";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item152
+		{
+			position[]={4717.778809,0.528175,1308.825806};
+			name="Town Area 4";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item153
+		{
+			position[]={4717.778809,0.528175,1296.931519};
+			name="Town Area 5";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item154
+		{
+			position[]={4717.780762,0.528175,1288.433472};
+			name="Town Area 6";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item155
+		{
+			position[]={4719.372559,0.528175,1279.935425};
+			name="Town Area 7";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item156
+		{
+			position[]={4717.776855,0.528175,1271.441284};
+			name="Town Area 8";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item157
+		{
+			position[]={4717.778809,0.528175,1262.941284};
+			name="Town Area 9";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item158
+		{
+			position[]={4716.792480,0.528175,1255.312378};
+			name="Town Area 10";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item159
+		{
+			position[]={4719.776855,0.528175,1243.204956};
+			name="Town Area 11";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item160
+		{
+			position[]={4717.333496,0.528175,1232.652222};
+			name="Town Area 12";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item161
+		{
+			position[]={4720.157715,0.528175,1225.119019};
+			name="Town Area 13";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item162
+		{
+			position[]={4718.743652,0.528175,1223.611206};
+			name="Town Area 14";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item163
+		{
+			position[]={4720.157715,0.528175,1214.566284};
+			name="Town Area 15";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item164
+		{
+			position[]={4717.632324,0.528175,1207.773315};
+			name="Town Area 16";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item165
+		{
+			position[]={4722.886230,0.528175,1199.603394};
+			name="Town Area 17";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item166
+		{
+			position[]={4748.663574,0.528175,437.698975};
+			name="West Vehicle 41";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item167
+		{
+			position[]={4750.308105,0.528175,437.698975};
+			name="East Vehicle 41";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item168
+		{
+			position[]={4748.661621,0.528175,437.016357};
+			name="West Vehicle 42";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item169
+		{
+			position[]={4748.663574,0.528175,436.299561};
+			name="West Vehicle 43";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item170
+		{
+			position[]={4748.663574,0.528175,435.581787};
+			name="West Vehicle 44";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item171
+		{
+			position[]={4748.663574,0.528175,434.899170};
+			name="West Vehicle 45";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item172
+		{
+			position[]={4748.663574,0.528175,434.215576};
+			name="West Vehicle 46";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item173
+		{
+			position[]={4750.308105,0.528175,436.982178};
+			name="East Vehicle 42";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item174
+		{
+			position[]={4750.308105,0.528175,436.266357};
+			name="East Vehicle 43";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item175
+		{
+			position[]={4750.306152,0.528175,435.582764};
+			name="East Vehicle 44";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item176
+		{
+			position[]={4750.308105,0.528175,434.902100};
+			name="East Vehicle 45";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item177
+		{
+			position[]={4750.306152,0.528175,434.218506};
+			name="East Vehicle 46";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item178
+		{
+			position[]={4748.661621,0.528175,433.301514};
+			name="West Vehicle 47";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item179
+		{
+			position[]={4748.661621,0.528175,432.584717};
+			name="West Vehicle 48";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item180
+		{
+			position[]={4748.661621,0.528175,431.866943};
+			name="West Vehicle 49";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item181
+		{
+			position[]={4748.661621,0.528175,431.184326};
+			name="West Vehicle 50";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item182
+		{
+			position[]={4750.308105,0.528175,433.314209};
+			name="East Vehicle 47";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item183
+		{
+			position[]={4750.308105,0.528175,432.598389};
+			name="East Vehicle 48";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item184
+		{
+			position[]={4750.308105,0.528175,431.914795};
+			name="East Vehicle 49";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item185
+		{
+			position[]={4750.308105,0.528175,431.234131};
+			name="East Vehicle 50";
+			type="Flag";
+			colorName="ColorGreen";
+		};
+		class Item186
+		{
+			position[]={4689.683105,0.528175,760.335693};
+			name="West Hotel Marker";
+			text="@STRHOTEL";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item187
+		{
+			position[]={4688.550293,0.528175,773.656006};
+			name="West Golf Marker";
+			text="@STRGOLF";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item188
+		{
+			position[]={4947.433105,0.528175,780.538818};
+			name="East Golf Marker";
+			text="@STRGOLF";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item189
+		{
+			position[]={4947.431152,0.528175,768.902100};
+			name="East Hotel Marker";
+			text="@STRHOTEL";
+			type="Dot";
+			colorName="ColorBlue";
+		};
+		class Item190
+		{
+			position[]={4691.874512,0.528175,601.585693};
+			name="WestGolfWP";
+			text="@STRGOLFWP";
+			type="Flag";
+			colorName="ColorRed";
+		};
+		class Item191
+		{
+			position[]={4691.874512,0.528175,592.886475};
+			name="WestHotelWP";
+			text="@STRHOTELWP";
+			type="Flag";
+			colorName="ColorRed";
+		};
+		class Item192
+		{
+			position[]={4953.579590,0.528175,593.463623};
+			name="EastGolfWP";
+			text="@STRGOLFWP";
+			type="Flag";
+		};
+		class Item193
+		{
+			position[]={4953.581543,0.528175,579.793701};
+			name="EastHotelWP";
+			text="@STRHOTELWP";
+			type="Flag";
+		};
+		class Item194
+		{
+			position[]={4763.144043,0.528175,467.006592};
+			name="West Alpha Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item195
+		{
+			position[]={4763.138184,0.528175,465.156006};
+			name="West Bravo Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item196
+		{
+			position[]={4763.138184,0.528175,463.307373};
+			name="West Charlie Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item197
+		{
+			position[]={4763.142090,0.528175,461.455811};
+			name="West Delta Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item198
+		{
+			position[]={4763.138184,0.528175,459.606201};
+			name="West Echo Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item199
+		{
+			position[]={4763.140137,0.528175,457.756592};
+			name="West Foxtrot Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item200
+		{
+			position[]={4763.140137,0.528175,455.906006};
+			name="West Golf Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item201
+		{
+			position[]={4763.138184,0.528175,454.056396};
+			name="West Hotel Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item202
+		{
+			position[]={4765.890137,0.528175,467.006592};
+			name="East Alpha Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item203
+		{
+			position[]={4765.884277,0.528175,465.156006};
+			name="East Bravo Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item204
+		{
+			position[]={4765.884277,0.528175,463.307373};
+			name="East Charlie Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item205
+		{
+			position[]={4765.888184,0.528175,461.455811};
+			name="East Delta Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item206
+		{
+			position[]={4765.884277,0.528175,459.606201};
+			name="East Echo Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item207
+		{
+			position[]={4765.886230,0.528175,457.756592};
+			name="East Foxtrot Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item208
+		{
+			position[]={4765.886230,0.528175,455.906006};
+			name="East Golf Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item209
+		{
+			position[]={4765.884277,0.528175,454.056396};
+			name="East Hotel Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item210
+		{
+			position[]={4763.142090,0.528175,449.571045};
+			name="West Alpha Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item211
+		{
+			position[]={4763.136230,0.528175,447.720459};
+			name="West Bravo Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item212
+		{
+			position[]={4763.138184,0.528175,445.871826};
+			name="West Charlie Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item213
+		{
+			position[]={4763.140137,0.528175,444.020264};
+			name="West Delta Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item214
+		{
+			position[]={4763.138184,0.528175,442.170654};
+			name="West Echo Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item215
+		{
+			position[]={4763.138184,0.528175,440.321045};
+			name="West Foxtrot Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item216
+		{
+			position[]={4763.138184,0.528175,438.470459};
+			name="West Golf Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item217
+		{
+			position[]={4763.138184,0.528175,436.620850};
+			name="West Hotel Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item218
+		{
+			position[]={4765.888184,0.528175,449.571045};
+			name="East Alpha Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item219
+		{
+			position[]={4765.882324,0.528175,447.720459};
+			name="East Bravo Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item220
+		{
+			position[]={4765.884277,0.528175,445.871826};
+			name="East Charlie Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item221
+		{
+			position[]={4765.886230,0.528175,444.020264};
+			name="East Delta Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item222
+		{
+			position[]={4765.884277,0.528175,442.170654};
+			name="East Echo Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item223
+		{
+			position[]={4765.884277,0.528175,440.321045};
+			name="East Foxtrot Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item224
+		{
+			position[]={4765.884277,0.528175,438.470459};
+			name="East Golf Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item225
+		{
+			position[]={4765.884277,0.528175,436.620850};
+			name="East Hotel Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item226
+		{
+			position[]={4763.173340,0.528175,469.028076};
+			name="West Commander Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item227
+		{
+			position[]={4765.950684,0.528175,468.944092};
+			name="East Commander Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item228
+		{
+			position[]={4763.255371,0.528175,451.349365};
+			name="West Commander Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item229
+		{
+			position[]={4765.923340,0.528175,451.230225};
+			name="East Commander Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item230
+		{
+			position[]={4763.177246,0.528175,470.523193};
+			name="West Latest Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item231
+		{
+			position[]={4765.923340,0.528175,470.523193};
+			name="East Latest Activity";
+			type="Unknown";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item232
+		{
+			position[]={4763.194824,0.528175,452.415771};
+			name="West Latest Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item233
+		{
+			position[]={4765.940918,0.528175,452.415771};
+			name="East Latest Base";
+			type="Warning";
+			colorName="ColorRed";
+			a=0.750000;
+			b=0.750000;
+		};
+		class Item234
+		{
+			position[]={8158.172852,19.151817,4391.563477};
+			name="BridgeEastDestination";
+			type="Empty";
+		};
+		class Item235
+		{
+			position[]={7836.679688,19.517479,4390.959961};
+			name="BridgeWestDestination";
+			type="Empty";
+		};
+		class Item236
+		{
+			position[]={4796.272949,0.528175,1017.047729};
+			name="West Town 18";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item237
+		{
+			position[]={4795.606934,0.528175,1005.728394};
+			name="West Town 19";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item238
+		{
+			position[]={4796.272949,0.528175,992.985229};
+			name="West Town 20";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item239
+		{
+			position[]={4796.272949,0.528175,982.290833};
+			name="West Town 21";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item240
+		{
+			position[]={4797.526855,0.528175,971.596497};
+			name="West Town 22";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item241
+		{
+			position[]={4797.526855,0.528175,959.565247};
+			name="West Town 23";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item242
+		{
+			position[]={4797.526855,0.528175,950.207764};
+			name="West Town 24";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item243
+		{
+			position[]={4796.272949,0.528175,938.177490};
+			name="West Town 25";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item244
+		{
+			position[]={4797.526855,0.528175,927.483154};
+			name="West Town 26";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item245
+		{
+			position[]={4797.559082,0.528175,919.461670};
+			name="West Town 27";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item246
+		{
+			position[]={4798.112793,0.528175,909.989014};
+			name="West Town 28";
+			text="@STRWEST";
+			type="Flag1";
+			colorName="ColorGreen";
+		};
+		class Item247
+		{
+			position[]={5061.511230,0.528175,975.379700};
+			name="East Town 18";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item248
+		{
+			position[]={5061.512207,0.528175,968.155090};
+			name="East Town 19";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item249
+		{
+			position[]={5061.511230,0.528175,961.575012};
+			name="East Town 20";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item250
+		{
+			position[]={5061.511230,0.528175,955.069092};
+			name="East Town 21";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item251
+		{
+			position[]={5061.511230,0.528175,947.882568};
+			name="East Town 22";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item252
+		{
+			position[]={5062.286621,0.528175,941.082764};
+			name="East Town 23";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item253
+		{
+			position[]={5062.149902,0.528175,934.429443};
+			name="East Town 24";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item254
+		{
+			position[]={5062.786621,0.528175,927.776123};
+			name="East Town 25";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item255
+		{
+			position[]={5062.011230,0.528175,921.123779};
+			name="East Town 26";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item256
+		{
+			position[]={5062.148926,0.528175,913.495850};
+			name="East Town 27";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item257
+		{
+			position[]={5061.873535,0.528175,906.992920};
+			name="East Town 28";
+			text="@STREAST";
+			type="Flag1";
+			colorName="ColorRed";
+		};
+		class Item258
+		{
+			position[]={5048.077637,0.528175,1323.973267};
+			name="Town Area 18";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item259
+		{
+			position[]={5048.079590,0.528175,1313.962524};
+			name="Town Area 19";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item260
+		{
+			position[]={5048.079590,0.528175,1298.950806};
+			name="Town Area 20";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item261
+		{
+			position[]={5048.078613,0.528175,1288.942261};
+			name="Town Area 21";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item262
+		{
+			position[]={5048.079590,0.528175,1288.942261};
+			name="Town Area 22";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item263
+		{
+			position[]={5048.078613,0.528175,1278.934448};
+			name="Town Area 23";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item264
+		{
+			position[]={5048.079590,0.528175,1263.922729};
+			name="Town Area 24";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item265
+		{
+			position[]={5052.770996,0.528175,1258.916870};
+			name="Town Area 25";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item266
+		{
+			position[]={5048.079590,0.528175,1243.907104};
+			name="Town Area 26";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item267
+		{
+			position[]={5048.079590,0.528175,1223.887573};
+			name="Town Area 27";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+		class Item268
+		{
+			position[]={5051.547363,0.528175,1197.610229};
+			name="Town Area 28";
+			markerType="ELLIPSE";
+			type="Flag";
+			colorName="ColorGreenAlpha";
+			a=150.000000;
+			b=150.000000;
+		};
+	};
+	class Sensors
+	{
+		items=121;
+		class Item0
+		{
+			position[]={5506.404785,145.225266,9444.200195};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 2";
+			expActiv="[thislist,Town2] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item1
+		{
+			position[]={7991.444336,508.598419,9450.690430};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 3";
+			expActiv="[thislist,Town3] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item2
+		{
+			position[]={8890.333984,193.994995,7890.477051};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 4";
+			expActiv="[thislist,Town4] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item3
+		{
+			position[]={11120.214844,144.989990,7672.475098};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 5";
+			expActiv="[thislist,Town5] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item4
+		{
+			position[]={1656.300537,39.959999,11321.494141};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town0";
+			expActiv="[thislist,Town0] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item5
+		{
+			position[]={9804.297852,275.218079,6961.562012};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 6";
+			expActiv="[thislist,Town6] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item6
+		{
+			position[]={11203.835938,117.163429,5364.722168};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 7";
+			expActiv="[thislist,Town7] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item7
+		{
+			position[]={9017.020508,121.994995,5443.685059};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 8";
+			expActiv="[thislist,Town8] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item8
+		{
+			position[]={9197.978516,154.485001,4978.865723};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 9";
+			expActiv="[thislist,Town9] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item9
+		{
+			position[]={10474.856445,123.974998,4070.783936};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 10";
+			expActiv="[thislist,Town10] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item10
+		{
+			position[]={10803.080078,127.979996,3124.586426};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 11";
+			expActiv="[thislist,Town11] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item11
+		{
+			position[]={11506.471680,72.000000,2228.745605};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 12";
+			expActiv="[thislist,Town12] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item12
+		{
+			position[]={10700.463867,48.714863,1777.378418};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 13";
+			expActiv="[thislist,Town13] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item13
+		{
+			position[]={9401.788086,63.989998,2747.172119};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 14";
+			expActiv="[thislist,Town14] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item14
+		{
+			position[]={7688.477051,24.562916,4427.691406};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 15";
+			expActiv="[thislist,Town15] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item15
+		{
+			position[]={6548.347168,109.979996,4128.214844};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 16";
+			expActiv="[thislist,Town16] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item16
+		{
+			position[]={5829.140625,28.291960,5143.744141};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 17";
+			expActiv="[thislist,Town17] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item17
+		{
+			position[]={1656.316162,39.959999,11321.253906};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town0,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town0,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item18
+		{
+			position[]={1656.310303,39.959999,11321.039062};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town0,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town0,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item19
+		{
+			position[]={1657.609009,37.832966,9558.438477};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town1,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town1,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item20
+		{
+			position[]={1658.050171,37.801792,9558.125977};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town1,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town1,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item21
+		{
+			position[]={5506.606445,145.207291,9442.345703};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town2,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town2,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item22
+		{
+			position[]={5506.458008,145.210495,9442.894531};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town2,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town2,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item23
+		{
+			position[]={7991.717773,508.627228,9448.729492};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town3,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town3,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item24
+		{
+			position[]={7991.711914,508.620209,9448.514648};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town3,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town3,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item25
+		{
+			position[]={8981.192383,122.155815,5460.686035};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town8,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town8,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item26
+		{
+			position[]={8981.303711,122.144608,5461.140625};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town8,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town8,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item27
+		{
+			position[]={9174.200195,154.485001,4971.540527};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town9,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town9,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item28
+		{
+			position[]={9172.917969,154.485001,4970.872070};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town9,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town9,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item29
+		{
+			position[]={11529.781250,72.000000,2231.239014};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town12,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town12,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item30
+		{
+			position[]={11528.883789,72.000000,2231.023193};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town12,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town12,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item31
+		{
+			position[]={10658.163086,46.313839,1765.397949};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town13,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town13,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item32
+		{
+			position[]={10657.546875,46.231461,1764.531372};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town13,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town13,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item33
+		{
+			position[]={11181.310547,117.517723,5385.599121};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town7,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town7,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item34
+		{
+			position[]={11181.304688,117.511284,5385.384277};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town7,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town7,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item35
+		{
+			position[]={11137.624023,144.989990,7675.790039};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town5,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town5,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item36
+		{
+			position[]={11137.156250,144.989990,7676.068359};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town5,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town5,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item37
+		{
+			position[]={8890.406250,193.994995,7889.391113};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town4,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town4,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item38
+		{
+			position[]={8890.400391,193.994995,7889.174316};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town4,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town4,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item39
+		{
+			position[]={9804.510742,275.197876,6960.118652};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town6,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town6,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item40
+		{
+			position[]={9804.504883,275.194763,6959.903809};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town6,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town6,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item41
+		{
+			position[]={10808.059570,127.979996,3110.175049};
+			a=200.000000;
+			b=200.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town11,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town11,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item42
+		{
+			position[]={10808.798828,127.979996,3110.040039};
+			a=200.000000;
+			b=200.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town11,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town11,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item43
+		{
+			position[]={10453.651367,123.974998,4096.455078};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town10,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town10,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item44
+		{
+			position[]={10453.781250,123.974998,4097.197266};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town10,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town10,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item45
+		{
+			position[]={9401.658203,63.989998,2745.522705};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town14,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town14,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item46
+		{
+			position[]={9401.652344,63.989998,2745.306885};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town14,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town14,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item47
+		{
+			position[]={7704.541992,23.674612,4428.296387};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town15,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town15,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item48
+		{
+			position[]={7704.536133,23.669279,4428.437012};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town15,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town15,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item49
+		{
+			position[]={6553.871582,109.979996,4170.996094};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town16,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town16,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item50
+		{
+			position[]={6553.866211,109.979996,4171.988281};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town16,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town16,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item51
+		{
+			position[]={5830.577637,28.274786,5146.059082};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town17,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town17,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item52
+		{
+			position[]={5830.571777,28.276157,5145.843262};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town17,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town17,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item53
+		{
+			position[]={1691.273071,36.989998,9546.745117};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 1";
+			expActiv="[thislist,Town1] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item54
+		{
+			position[]={4457.541016,0.528175,1070.906128};
+			activationBy="ALPHA";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Open Command Menu";
+			expActiv="[west] Exec ""GUI\OpenMapCommandMenuGUI.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item55
+		{
+			position[]={4457.380859,0.528175,1058.550659};
+			activationBy="BRAVO";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Open Command Menu";
+			expActiv="[east] Exec ""GUI\OpenMapCommandMenuGUI.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item56
+		{
+			position[]={1655.613037,39.959999,11318.396484};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town0,125] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item57
+		{
+			position[]={1651.443237,36.989998,9548.628906};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town1,150] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item58
+		{
+			position[]={5517.808594,145.366562,9450.203125};
+			a=550.000000;
+			b=550.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town2,100] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item59
+		{
+			position[]={8006.480469,509.048462,9448.321289};
+			a=600.000000;
+			b=600.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town3,100] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item60
+		{
+			position[]={8885.255859,193.994995,7899.122070};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town4,75] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item61
+		{
+			position[]={11138.041016,144.989990,7674.041016};
+			a=600.000000;
+			b=600.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town5,100] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item62
+		{
+			position[]={9796.695312,275.015869,6946.855957};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town6,75] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item63
+		{
+			position[]={11201.044922,117.185631,5368.684082};
+			a=400.000000;
+			b=400.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town7,75] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item64
+		{
+			position[]={8977.982422,122.100319,5466.698730};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town8,75] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item65
+		{
+			position[]={9168.697266,154.485001,4968.299805};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town9,40] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item66
+		{
+			position[]={10446.375977,123.974998,4095.803711};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town10,75] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item67
+		{
+			position[]={10830.686523,127.979996,3136.080078};
+			a=600.000000;
+			b=600.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town11,150] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item68
+		{
+			position[]={11528.250977,72.000000,2226.617432};
+			a=450.000000;
+			b=450.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town12,75] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item69
+		{
+			position[]={10665.072266,45.808662,1749.659180};
+			a=450.000000;
+			b=450.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town13,125] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item70
+		{
+			position[]={9395.726562,63.962284,2756.198486};
+			a=450.000000;
+			b=450.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town14,75] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item71
+		{
+			position[]={7707.052734,23.238691,4436.793457};
+			a=550.000000;
+			b=550.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town15,75] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item72
+		{
+			position[]={6562.541992,109.979996,4172.361328};
+			a=550.000000;
+			b=550.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town16,75] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item73
+		{
+			position[]={5831.150391,28.284794,5144.307129};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town17,50] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item74
+		{
+			position[]={4716.226074,0.528175,1062.410034};
+			repeating=1;
+			type="END1";
+			age="UNKNOWN";
+			text="Detect Game Over";
+			name="DetectGameOver";
+			expCond="gameOver";
+			class Effects
+			{
+			};
+		};
+		class Item75
+		{
+			position[]={5223.329590,10.713114,5059.038574};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 18";
+			expActiv="[thislist,Town18] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item76
+		{
+			position[]={5211.772461,7.225641,5118.990234};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town18,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town18,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item77
+		{
+			position[]={5211.766602,7.233897,5118.774414};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town18,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town18,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item78
+		{
+			position[]={5212.344727,7.261805,5119.267578};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town18,100] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item79
+		{
+			position[]={5267.348145,7.395573,5526.552246};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 19";
+			expActiv="[thislist,Town19] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item80
+		{
+			position[]={5277.336426,6.614198,5501.599609};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town19,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town19,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item81
+		{
+			position[]={5277.330566,6.605529,5501.383789};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town19,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town19,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item82
+		{
+			position[]={5280.786621,7.688770,5524.282227};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town19,60] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item83
+		{
+			position[]={6842.348145,112.470398,5584.437988};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 20";
+			expActiv="[thislist,Town20] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item84
+		{
+			position[]={6841.195801,112.490936,5565.311035};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town20,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town20,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item85
+		{
+			position[]={6841.189941,112.491356,5565.095215};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town20,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town20,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item86
+		{
+			position[]={6837.961914,112.398262,5567.295410};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town20,80] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item87
+		{
+			position[]={6701.736816,114.974998,6201.583984};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 21";
+			expActiv="[thislist,Town21] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item88
+		{
+			position[]={6703.173828,114.974998,6203.898926};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town21,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town21,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item89
+		{
+			position[]={6703.167969,114.974998,6203.683105};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town21,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town21,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item90
+		{
+			position[]={6703.746582,114.974998,6202.146973};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town21,80] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item91
+		{
+			position[]={6766.728516,129.959991,6833.500000};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 22";
+			expActiv="[thislist,Town22] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item92
+		{
+			position[]={6769.450684,129.959991,6813.190918};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town22,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town22,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item93
+		{
+			position[]={6769.445312,129.959991,6812.974121};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town22,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town22,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item94
+		{
+			position[]={6774.522461,129.959991,6814.181641};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town22,80] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item95
+		{
+			position[]={6211.446777,116.935478,7381.127930};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 23";
+			expActiv="[thislist,Town23] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item96
+		{
+			position[]={6212.883789,116.948631,7383.442871};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town23,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town23,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item97
+		{
+			position[]={6212.877930,116.949135,7383.227051};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town23,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town23,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item98
+		{
+			position[]={6213.456543,116.961090,7381.690918};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town23,80] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item99
+		{
+			position[]={5919.729004,81.644936,8465.099609};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 24";
+			expActiv="[thislist,Town24] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item100
+		{
+			position[]={5921.166016,81.664612,8467.414062};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town24,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town24,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item101
+		{
+			position[]={5921.160156,81.660812,8467.198242};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town24,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town24,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item102
+		{
+			position[]={5921.738770,81.624298,8465.662109};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town24,80] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item103
+		{
+			position[]={4124.636719,23.490000,5026.836914};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 25";
+			expActiv="[thislist,Town25] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item104
+		{
+			position[]={4096.035156,23.490000,5026.571777};
+			a=250.000000;
+			b=175.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town25,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town25,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item105
+		{
+			position[]={4096.029297,23.490000,5026.355957};
+			a=250.000000;
+			b=175.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town25,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town25,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item106
+		{
+			position[]={4104.793457,23.490000,5028.084961};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town25,135] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item107
+		{
+			position[]={4166.887207,7.965000,3437.918701};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 26";
+			expActiv="[thislist,Town26] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item108
+		{
+			position[]={4168.324219,7.965000,3440.233154};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town26,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town26,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item109
+		{
+			position[]={4168.318359,7.965000,3440.017334};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town26,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town26,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item110
+		{
+			position[]={4163.034180,8.122170,3457.592773};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town26,120] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item111
+		{
+			position[]={3917.594238,107.427170,7169.750977};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 27";
+			expActiv="[thislist,Town27] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item112
+		{
+			position[]={3943.212891,106.964996,7120.162598};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town27,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town27,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item113
+		{
+			position[]={3943.207031,106.964996,7119.946777};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town27,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town27,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item114
+		{
+			position[]={3930.696777,106.964996,7116.372559};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town27,120] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item115
+		{
+			position[]={7848.350098,19.055349,4390.831543};
+			a=5.000000;
+			b=20.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			expActiv="[thisList,""BridgeEastDestination""] Exec ""Main\CrossWater.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item116
+		{
+			position[]={8146.328125,19.058247,4391.192383};
+			a=5.000000;
+			b=20.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			expActiv="[thisList,""BridgeWestDestination""] Exec ""Main\CrossWater.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item117
+		{
+			position[]={2423.715820,129.764572,9757.803711};
+			a=10.000000;
+			b=10.000000;
+			activationBy="ANY";
+			repeating=1;
+			age="UNKNOWN";
+			text="Take over Town 28";
+			expActiv="[thislist,Town28] exec ""Main\SetTownSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item118
+		{
+			position[]={2419.408447,129.022278,9736.291992};
+			a=150.000000;
+			b=150.000000;
+			activationBy="WEST";
+			repeating=1;
+			age="UNKNOWN";
+			text="West Area Trigger";
+			expActiv="[west,Town28,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[west,Town28,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item119
+		{
+			position[]={2419.402588,129.004059,9735.289062};
+			a=150.000000;
+			b=150.000000;
+			activationBy="EAST";
+			repeating=1;
+			age="UNKNOWN";
+			text="East Area Trigger";
+			expActiv="[east,Town28,true] exec ""Main\SetTownAreaSide.sqs""";
+			expDesactiv="[east,Town28,false] exec ""Main\SetTownAreaSide.sqs""";
+			class Effects
+			{
+			};
+		};
+		class Item120
+		{
+			position[]={2421.554443,128.982864,9730.883789};
+			a=500.000000;
+			b=500.000000;
+			activationBy="ANY";
+			age="UNKNOWN";
+			text="Resistance Trigger";
+			expCond="this && ((west countSide thisList > 0) || (east countSide thisList > 0))";
+			expActiv="[Town28,120] Exec ""Main\AddResistance.sqs""";
+			class Effects
+			{
+			};
+		};
+	};
+};
+class Intro
+{
+	randomSeed=8166403;
+	class Intel
+	{
+	};
+};
+class OutroWin
+{
+	randomSeed=5538307;
+	class Intel
+	{
+	};
+};
+class OutroLoose
+{
+	randomSeed=2739203;
+	class Intel
+	{
+	};
+};

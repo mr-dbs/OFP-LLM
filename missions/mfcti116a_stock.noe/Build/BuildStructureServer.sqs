@@ -1,0 +1,285 @@
+;Last modified 3/3/4
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+
+? (_side == east):goto "CreateEastStructure"
+
+#CreateWestStructure
+
+	_direction = addWestStructureDirection
+	_destination = [(addWestStructureX)+((sin _direction)*10),(addWestStructureY)+((cos _direction)*10),addWestStructureZ]
+
+	_alignOrigin = [(addWestStructureX)+((sin _direction)*7),(addWestStructureY)+((cos _direction)*7),addWestStructureZ]
+	_westStructureType = addWestStructureType
+	_westUnit = addWestStructurePlayer
+	_align = addWestStructureAlign
+
+	;Base buildings.
+	? (addWestStructureType >= infantryFactoryType && addWestStructureType <= controlCenterType):goto "CreateWestGenericStructure"
+	? (addWestStructureType == ammoDepotType):[_westUnit,_destination,_direction] Exec "Build\BuildAmmoDepotServer.sqs"
+	? (addWestStructureType == repairDepotType):goto "CreateWestGenericStructure"
+	? (addWestStructureType == observationTowerType):goto "CreateWestGenericStructure"
+	? (addWestStructureType == helicopterPadType):goto "CreateWestGenericStructure"
+	? (addWestStructureType == fieldHospitalType):goto "CreateWestGenericStructure"
+
+	;Stationary guns.
+	? (addWestStructureType == HEFortificationType):[west,_destination,_direction] Exec "Build\BuildHEFortificationServer.sqs"
+	? (addWestStructureType == HEStationType):[west,_destination,_direction] Exec "Build\BuildHEStationServer.sqs"
+	? (addWestStructureType == HEGunType):[west,_destination,_direction] Exec "Build\BuildHEGunServer.sqs"
+	? (addWestStructureType == M2FortificationType):[west,_destination,_direction] Exec "Build\BuildM2FortificationServer.sqs"
+	? (addWestStructureType == M2StationType):[west,_destination,_direction] Exec "Build\BuildM2StationServer.sqs"
+	? (addWestStructureType == M2GunType):[west,_destination,_direction] Exec "Build\BuildM2GunServer.sqs"
+	? (addWestStructureType == AAStationType):[west,_destination,_direction] Exec "Build\BuildAAStationServer.sqs"
+	? (addWestStructureType == AAGunType):[west,_destination,_direction] Exec "Build\BuildAAGunServer.sqs"
+	? (addWestStructureType == mortarType):[west,_destination,_direction] Exec "Build\BuildMortarServer.sqs"
+
+	;Crates
+	? (addWestStructureType >= weaponsCrateType) && (addWestStructureType <= heavyAmmoCrateType):_destination = [(addWestStructureX)+((sin _direction)*5),(addWestStructureY)+((cos _direction)*5),addWestStructureZ];[west,addWestStructureType,_destination,_direction] Exec "Build\BuildCrateServer.sqs"
+	? (addWestStructureType >= sandbagType):goto "CreateWestGenericStructure"
+
+#ClearWestServerVariables
+
+	;Clear server request variables.
+	addWestStructureType = 0;PublicVariable "addWestStructureType"
+	addWestStructureX = 0;PublicVariable "addWestStructureX"
+	addWestStructureY = 0;PublicVariable "addWestStructureY"
+	addWestStructureZ = 0;PublicVariable "addWestStructureZ"
+	addWestStructureDirection = 0;PublicVariable "addWestStructureDirection"
+	addWestStructure = false;PublicVariable "addWestStructure"
+	addWestStructureAlign = false;PublicVariable "addWestStructureAlign"
+
+Exit
+
+#CreateEastStructure
+
+	_direction = addEastStructureDirection
+	_destination = [(addEastStructureX)+((sin _direction)*10),(addEastStructureY)+((cos _direction)*10),addEastStructureZ]
+	_alignOrigin = [(addEastStructureX)+((sin _direction)*7),(addEastStructureY)+((cos _direction)*7),addEastStructureZ]
+	_eastStructureType = addEastStructureType
+	_eastUnit = addEastStructurePlayer
+	_align = addEastStructureAlign
+
+	;Base buildings.
+	? (addEastStructureType >= infantryFactoryType && addEastStructureType <= controlCenterType):goto "CreateEastGenericStructure"
+	? (addEastStructureType == ammoDepotType):[_eastUnit,_destination,_direction] Exec "Build\BuildAmmoDepotServer.sqs"
+	? (addEastStructureType == repairDepotType):goto "CreateEastGenericStructure"
+	? (addEastStructureType == observationTowerType):goto "CreateEastGenericStructure"
+	? (addEastStructureType == helicopterPadType):goto "CreateEastGenericStructure"
+	? (addEastStructureType == fieldHospitalType):goto "CreateEastGenericStructure"
+
+	;Stationary guns.
+	? (addEastStructureType == HEFortificationType):[east,_destination,_direction] Exec "Build\BuildHEFortificationServer.sqs"
+	? (addEastStructureType == HEStationType):[east,_destination,_direction] Exec "Build\BuildHEStationServer.sqs"
+	? (addEastStructureType == HEGunType):[east,_destination,_direction] Exec "Build\BuildHEGunServer.sqs"
+	? (addEastStructureType == M2FortificationType):[east,_destination,_direction] Exec "Build\BuildM2FortificationServer.sqs"
+	? (addEastStructureType == M2StationType):[east,_destination,_direction] Exec "Build\BuildM2StationServer.sqs"
+	? (addEastStructureType == M2GunType):[east,_destination,_direction] Exec "Build\BuildM2GunServer.sqs"
+	? (addEastStructureType == AAStationType):[east,_destination,_direction] Exec "Build\BuildAAStationServer.sqs"
+	? (addEastStructureType == AAGunType):[east,_destination,_direction] Exec "Build\BuildAAGunServer.sqs"
+	? (addEastStructureType == mortarType):[east,_destination,_direction] Exec "Build\BuildMortarServer.sqs"
+
+	;Crates
+	? (addEastStructureType >= weaponsCrateType) && (addEastStructureType <= heavyAmmoCrateType):_destination = [(addEastStructureX)+((sin _direction)*5),(addEastStructureY)+((cos _direction)*5),addEastStructureZ];[east,addEastStructureType,_destination,_direction] Exec "Build\BuildCrateServer.sqs"
+	? (addEastStructureType >= sandbagType):goto "CreateEastGenericStructure"
+
+#ClearEastServerVariables
+
+	;Clear server request variables.
+	addEastStructureType = 0;PublicVariable "addEastStructureType"
+	addEastStructureX = 0;PublicVariable "addEastStructureX"
+	addEastStructureY = 0;PublicVariable "addEastStructureY"
+	addEastStructureZ = 0;PublicVariable "addEastStructureZ"
+	addEastStructureDirection = 0;PublicVariable "addEastStructureDirection"
+	addEastStructure = false;PublicVariable "addEastStructure"
+	addEastStructureAlign = false;PublicVariable "addEastStructureAlign"
+
+Exit
+
+;Create a standard building.
+#CreateWestGenericStructure
+
+	? !(publicServer):goto "CreateWestGenericStructureAddon"
+
+	? (addWestStructureType == infantryFactoryType):_structure = "Housebudova4"
+	? (addWestStructureType == lightFactoryType):_structure = "Housebouda3"
+	? (addWestStructureType == heavyFactoryType):_structure = "Housegaraz_s_tankem"
+	? (addWestStructureType == airFactoryType):_structure = "Hangar_Hall"
+	? (addWestStructureType == controlCenterType):_structure = "Housebudova5"
+	? (addWestStructureType == repairDepotType):_structure = "Houserepair_center"
+	? (addWestStructureType == observationTowerType):_structure = "ViewTower2"
+	? (addWestStructureType == helicopterPadType):_structure = "HeliH"
+	? (addWestStructureType == fieldHospitalType):_structure = "MASH"
+	? (addWestStructureType == sandbagType):_structure = "FenceWood"
+
+	goto "CreateWestGenericStructureStart"
+
+	#CreateWestGenericStructureAddon
+
+	? (addWestStructureType == infantryFactoryType):_structure = "MFCTI116WestBarracks"
+	? (addWestStructureType == lightFactoryType):_structure = "MFCTI116WestLightFactory"
+	? (addWestStructureType == heavyFactoryType):_structure = "MFCTI116WestHeavyFactory"
+	? (addWestStructureType == airFactoryType):_structure = "MFCTI116WestAircraftFactory"
+	? (addWestStructureType == controlCenterType):_structure = "MFCTI116WestControlCenter"
+	? (addWestStructureType == repairDepotType):_structure = "MFCTI116WestRepairDepot"
+	? (addWestStructureType == observationTowerType):_structure = "ViewTower2"
+	? (addWestStructureType == helicopterPadType):_structure = "HeliH"
+	? (addWestStructureType == fieldHospitalType):_structure = "MASH"
+	? (addWestStructureType == sandbagType):_structure = "FenceWood"
+	? (addWestStructureType == largeWallType):_structure = "MFCTI116WestLargeWall"
+
+	#CreateWestGenericStructureStart
+
+	;Create structure.
+	_structureType = addWestStructureType
+	_newStructure = _structure CreateVehicle _destination
+	_newStructure SetDir _direction
+	_newStructure SetPos _destination
+	_destination = [(_destination Select 0)+((sin _direction)*0.5),(_destination Select 1)+((cos _direction)*.5),(_destination Select 2)]
+	_newStructure SetPos _destination
+
+	? (addWestStructureType == infantryFactoryType):westInfantryFactory = westInfantryFactory + [_newStructure];westInfantryFactoryDamage = westInfantryFactoryDamage + [500];totalWestInfantryFactories = totalWestInfantryFactories + 1;PublicVariable "totalWestInfantryFactories"
+	? (addWestStructureType == lightFactoryType):westLightFactory = westLightFactory + [_newStructure];westLightFactoryDamage = westLightFactoryDamage + [500];totalWestLightFactories = totalWestLightFactories + 1;PublicVariable "totalWestLightFactories"
+	? (addWestStructureType == heavyFactoryType):westHeavyFactory = westHeavyFactory + [_newStructure];westHeavyFactoryDamage = westHeavyFactoryDamage + [500];totalWestHeavyFactories = totalWestHeavyFactories + 1;PublicVariable "totalWestHeavyFactories"
+	? (addWestStructureType == airFactoryType):westAirFactory = westAirFactory + [_newStructure];westAirFactoryDamage = westAirFactoryDamage + [500];totalWestAirFactories = totalWestAirFactories + 1;PublicVariable "totalWestAirFactories"
+	? (addWestStructureType == controlCenterType):westControlCenter = westControlCenter + [_newStructure];westControlCenterDamage = westControlCenterDamage + [500];totalWestControlCenters = totalWestControlCenters + 1;PublicVariable "totalWestControlCenters"
+	? (addWestStructureType == repairDepotType):westRepairDepot = westRepairDepot + [_newStructure];westRepairDepotDamage = westRepairDepotDamage + [500];totalWestRepairDepots = totalWestRepairDepots + 1;PublicVariable "totalWestRepairDepots"
+	? (addWestStructureType == observationTowerType):westObservationTower = westObservationTower + [_newStructure];westObservationTowerDamage = westObservationTowerDamage + [500];totalWestObservationTowers = totalWestObservationTowers + 1;PublicVariable "totalWestObservationTowers";goto "CheckWestGenericPS"
+	? (addWestStructureType == fieldHospitalType):westFieldHospital = westFieldHospital + [_newStructure];westFieldHospitalDamage = westFieldHospitalDamage + [500];totalWestFieldHospitals = totalWestFieldHospitals + 1;PublicVariable "totalWestFieldHospitals"
+	? (addWestStructureType == sandbagType):westSandbag = westSandbag + [_newStructure];goto "CheckWestGenericPS"
+	? (addWestStructureType == largeWallType):westLargeWall = westLargeWall + [_newStructure];goto "CheckWestGenericPS"
+
+	westTempBuildingList = westTempBuildingList + [_newStructure]
+
+	#CheckWestGenericPS
+
+	;Send the new building to other players.
+	? (publicServer)||(_structureType == fieldHospitalType):westBuildingBuiltMP = _newStructure;PublicVariable "westBuildingBuiltMP"
+	? (publicServer)||(_structureType == fieldHospitalType):westBuildingBuiltTypeMP = addWestStructureType;PublicVariable "westBuildingBuiltTypeMP"
+
+	;Clear server request variables.
+	addWestStructureType = 0;PublicVariable "addWestStructureType"
+	addWestStructurePlayer = ObjNull;PublicVariable "addWestStructurePlayer"
+	addWestStructureX = 0;PublicVariable "addWestStructureX"
+	addWestStructureY = 0;PublicVariable "addWestStructureY"
+	addWestStructureZ = 0;PublicVariable "addWestStructureZ"
+	addWestStructureDirection = 0;PublicVariable "addWestStructureDirection"
+	addWestStructure = false;PublicVariable "addWestStructure"
+	addWestStructureAlign = false;PublicVariable "addWestStructureAlign"
+
+	goto "SetGenericStructure"
+
+;Create a standard building.
+#CreateEastGenericStructure
+
+	? !(publicServer):goto "CreateEastGenericStructureAddon"
+
+	? (addEastStructureType == infantryFactoryType):_structure = "Housebudova4"
+	? (addEastStructureType == lightFactoryType):_structure = "Housebouda3"
+	? (addEastStructureType == heavyFactoryType):_structure = "Housegaraz_s_tankem"
+	? (addEastStructureType == airFactoryType):_structure = "Hangar_Hall"
+	? (addEastStructureType == controlCenterType):_structure = "Housebudova5"
+	? (addEastStructureType == repairDepotType):_structure = "Houserepair_center"
+	? (addEastStructureType == observationTowerType):_structure = "ViewTower2"
+	? (addEastStructureType == helicopterPadType):_structure = "HeliH"
+	? (addEastStructureType == fieldHospitalType):_structure = "MASH"
+	? (addEastStructureType == sandbagType):_structure = "FenceWood"
+
+	goto "CreateEastGenericStructureStart"
+
+	#CreateEastGenericStructureAddon
+
+	? (addEastStructureType == infantryFactoryType):_structure = "MFCTI116EastBarracks"
+	? (addEastStructureType == lightFactoryType):_structure = "MFCTI116EastLightFactory"
+	? (addEastStructureType == heavyFactoryType):_structure = "MFCTI116EastHeavyFactory"
+	? (addEastStructureType == airFactoryType):_structure = "MFCTI116EastAircraftFactory"
+	? (addEastStructureType == controlCenterType):_structure = "MFCTI116EastControlCenter"
+	? (addEastStructureType == repairDepotType):_structure = "MFCTI116EastRepairDepot"
+	? (addEastStructureType == observationTowerType):_structure = "ViewTower2"
+	? (addEastStructureType == helicopterPadType):_structure = "HeliH"
+	? (addEastStructureType == fieldHospitalType):_structure = "MASH"
+	? (addEastStructureType == sandbagType):_structure = "FenceWood"
+	? (addEastStructureType == largeWallType):_structure = "MFCTI116EastLargeWall"
+
+	#CreateEastGenericStructureStart
+
+	;Create structure.
+	_structureType = addEastStructureType
+	_newStructure = _structure CreateVehicle _destination
+	_newStructure SetDir _direction
+	_newStructure SetPos _destination
+	_destination = [(_destination Select 0)+((sin _direction)*0.5),(_destination Select 1)+((cos _direction)*.5),(_destination Select 2)]
+	_newStructure SetPos _destination
+
+	? (addEastStructureType == infantryFactoryType):eastInfantryFactory = eastInfantryFactory + [_newStructure];eastInfantryFactoryDamage = eastInfantryFactoryDamage + [500];totalEastInfantryFactories = totalEastInfantryFactories + 1;PublicVariable "totalEastInfantryFactories"
+	? (addEastStructureType == lightFactoryType):eastLightFactory = eastLightFactory + [_newStructure];eastLightFactoryDamage = eastLightFactoryDamage + [500];totalEastLightFactories = totalEastLightFactories + 1;PublicVariable "totalEastLightFactories"
+	? (addEastStructureType == heavyFactoryType):eastHeavyFactory = eastHeavyFactory + [_newStructure];eastHeavyFactoryDamage = eastHeavyFactoryDamage + [500];totalEastHeavyFactories = totalEastHeavyFactories + 1;PublicVariable "totalEastHeavyFactories"
+	? (addEastStructureType == airFactoryType):eastAirFactory = eastAirFactory + [_newStructure];eastAirFactoryDamage = eastAirFactoryDamage + [500];totalEastAirFactories = totalEastAirFactories + 1;PublicVariable "totalEastAirFactories"
+	? (addEastStructureType == controlCenterType):eastControlCenter = eastControlCenter + [_newStructure];eastControlCenterDamage = eastControlCenterDamage + [500];totalEastControlCenters = totalEastControlCenters + 1;PublicVariable "totalEastControlCenters"
+	? (addEastStructureType == repairDepotType):eastRepairDepot = eastRepairDepot + [_newStructure];eastRepairDepotDamage = eastRepairDepotDamage + [500];totalEastRepairDepots = totalEastRepairDepots + 1;PublicVariable "totalEastRepairDepots"
+	? (addEastStructureType == observationTowerType):eastObservationTower = eastObservationTower + [_newStructure];eastObservationTowerDamage = eastObservationTowerDamage + [500];totalEastObservationTowers = totalEastObservationTowers + 1;PublicVariable "totalEastObservationTowers";goto "CheckEastGenericPS"
+	? (addEastStructureType == fieldHospitalType):eastFieldHospital = eastFieldHospital + [_newStructure];eastFieldHospitalDamage = eastFieldHospitalDamage + [500];totalEastFieldHospitals = totalEastFieldHospitals + 1;PublicVariable "totalEastFieldHospitals"
+	? (addEastStructureType == sandbagType):eastSandbag = eastSandbag + [_newStructure];goto "CheckEastGenericPS"
+	? (addEastStructureType == largeWallType):eastLargeWall = eastLargeWall + [_newStructure];goto "CheckEastGenericPS"
+
+	eastTempBuildingList = eastTempBuildingList + [_newStructure]
+
+	#CheckEastGenericPS
+
+	;Send the new building to other players.
+	? (publicServer)||(_structureType == fieldHospitalType):eastBuildingBuiltMP = _newStructure;PublicVariable "eastBuildingBuiltMP"
+	? (publicServer)||(_structureType == fieldHospitalType):eastBuildingBuiltTypeMP = addEastStructureType;PublicVariable "eastBuildingBuiltTypeMP"
+
+	;Clear server request variables.
+	addEastStructureType = 0;PublicVariable "addEastStructureType"
+	addEastStructurePlayer = ObjNull;PublicVariable "addEastStructurePlayer"
+	addEastStructureX = 0;PublicVariable "addEastStructureX"
+	addEastStructureY = 0;PublicVariable "addEastStructureY"
+	addEastStructureZ = 0;PublicVariable "addEastStructureZ"
+	addEastStructureDirection = 0;PublicVariable "addEastStructureDirection"
+	addEastStructure = false;PublicVariable "addEastStructure"
+	addEastStructureAlign = false;PublicVariable "addEastStructureAlign"
+
+#SetGenericStructure
+
+	? (_side == west):westLastPlayerStructure = _newStructure
+	? (_side == east):eastLastPlayerStructure = _newStructure
+
+	? (_structure == "FenceWood") || (_structure == "MFCTI116WestLargeWall") || (_structure == "MFCTI116EastLargeWall"):[_side,_newStructure,_structure,_alignOrigin,_align] Exec "Main\AlignWall.sqs";Exit
+	? (_structure != "MASH") && (_structure != "ViewTower2") && (_structure != "HeliH"):[_side,_newStructure,_structure,_structureType,false] Exec "Main\ResetBuilding.sqs"
+
+	[_newStructure,_structure,_destination,_direction] Exec "Main\AlignBuildingDirection.sqs"
+
+	? (_structure == "ViewTower2") || (_structure == "HeliH"):goto "WaitForConstruction"
+
+	;Set damage so structure can be constructed.
+	_newStructure SetDammage 1
+
+	? (_side == west):westPlayerMessage = messagePlaced + _westStructureType;PublicVariable "westPlayerMessage";westPlayerMessagePlayer = _westUnit;PublicVariable "westPlayerMessagePlayer"
+	? (_side == east):eastPlayerMessage = messagePlaced + _eastStructureType;PublicVariable "eastPlayerMessage";eastPlayerMessagePlayer = _eastUnit;PublicVariable "eastPlayerMessagePlayer"
+
+	#WaitForConstruction
+
+	@ (GetDammage _newStructure != 1)
+
+	;If structure was undone then do not display construction complete message.
+	? (IsNull _newStructure):Exit
+
+	? (_side == east):goto "EastComplete"
+
+#WestComplete
+
+	westMessage = messageConstructed + _westStructureType;PublicVariable "westMessage";westPlayerMessageGroupFrom = groupCommander;PublicVariable "westPlayerMessageGroupFrom"
+
+	? (_structure == "MASH") || (_structure == "ViewTower2") || (_structure == "HeliH"):westTempBuildingList = westTempBuildingList - [_newStructure]
+
+	Exit
+
+
+#EastComplete
+
+	eastMessage = messageConstructed + _eastStructureType;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = groupCommander;PublicVariable "eastPlayerMessageGroupFrom"
+
+	? (_structure == "MASH") || (_structure == "ViewTower2") || (_structure == "HeliH"):eastTempBuildingList = eastTempBuildingList - [_newStructure]

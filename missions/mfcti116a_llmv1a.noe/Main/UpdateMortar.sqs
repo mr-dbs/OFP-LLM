@@ -1,0 +1,47 @@
+;Last modified 2/19/4
+
+? (publicServer):Exit
+
+_mortar = _this Select 0
+
+_lastX = 0
+_lastY = 0
+_fireMissionSet = false
+
+#Update
+~11
+
+	_gunner = Gunner _mortar
+
+	? (IsNull _gunner):goto "Update"
+	? (MFCTI116NoMortars) || !(Alive _gunner) || (GetDammage _mortar >= 1):goto "Update"
+	? !(Local _gunner):goto "Update"
+
+	_side = Side _gunner
+
+	? (_side == west):_fireMission = westFireMission;_x = westFireMissionX;_y = westFireMissionY;_playerGroups = westPlayerGroups
+	? (_side == east):_fireMission = eastFireMission;_x = eastFireMissionX;_y = eastFireMissionY;_playerGroups = eastPlayerGroups
+
+	? !(_fireMission):_fireMissionSet = false
+	? !(_fireMission) || ((Group _gunner) In _playerGroups) && (_gunner == (Leader Group _gunner)):goto "Update"
+
+	? (_lastX != _x || _lastY != _y):goto "SetDestination"
+	? (_fireMission && !_fireMissionSet):goto "SetDestination"
+
+	_distance = sqrt((_x - ((GetPos _mortar) Select 0))^2 + (_y - ((GetPos _mortar) Select 1))^2)
+
+	;Get distance & fire if in range.
+	? (_distance <= MFCTI116MaxRange):_mortar Fire "MFCTI116Mortar"
+
+	goto "Update"
+
+#SetDestination
+
+	_fireMissionSet = true
+	_lastX = _x
+	_lastY = _y
+	[_mortar,[_x,_y,0]] Exec "\mfcti1.16\Scripts\SetMortar.sqs"
+
+	~50
+
+	goto "Update"

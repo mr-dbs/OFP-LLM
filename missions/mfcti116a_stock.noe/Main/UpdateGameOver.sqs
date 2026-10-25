@@ -1,0 +1,180 @@
+;Last modified 1/30/4
+
+#Update
+~15
+
+	? (westWinsGame || eastWinsGame):Exit
+	? (pointsToWin > 0):goto "CheckPointsToWin"
+	? (townsToWin != 0):goto "CheckTownsToWin"
+	? (timeToEnd > 0):goto "CheckTimeToEnd"
+
+	#CheckMHQs
+
+	? (GetDammage WestMobileHQ < 1) && (GetDammage EastMobileHQ < 1):goto "Update"
+
+	_buildingList = westInfantryFactory
+	_return = "CountWestBarracks"
+	goto "CountBuildings"
+
+	#CountWestBarracks
+
+		_westBarracks = _destroyedBuilding
+		_westBuildings = _buildingCount
+
+	_buildingList = westLightFactory
+	_return = "CountWestLightFactories"
+	goto "CountBuildings"
+
+	#CountWestLightFactories
+
+		_westLight = _destroyedBuilding
+		_westBuildings = _westBuildings + _buildingCount
+
+	_buildingList = westHeavyFactory
+	_return = "CountWestHeavyFactories"
+	goto "CountBuildings"
+
+	#CountWestHeavyFactories
+
+		_westHeavy = _destroyedBuilding
+		_westBuildings = _westBuildings + _buildingCount
+
+	_buildingList = westAirFactory
+	_return = "CountWestAirFactories"
+	goto "CountBuildings"
+
+	#CountWestAirFactories
+
+		_westAir = _destroyedBuilding
+		_westBuildings = _westBuildings + _buildingCount
+
+	_buildingList = eastInfantryFactory
+	_return = "CountEastBarracks"
+	goto "CountBuildings"
+
+	#CountEastBarracks
+
+		_eastBarracks = _destroyedBuilding
+		_eastBuildings = _buildingCount
+
+	_buildingList = eastLightFactory
+	_return = "CountEastLightFactories"
+	goto "CountBuildings"
+
+	#CountEastLightFactories
+
+		_eastLight = _destroyedBuilding
+		_eastBuildings = _eastBuildings + _buildingCount
+
+	_buildingList = eastHeavyFactory
+	_return = "CountEastHeavyFactories"
+	goto "CountBuildings"
+
+	#CountEastHeavyFactories
+
+		_eastHeavy = _destroyedBuilding
+		_eastBuildings = _eastBuildings + _buildingCount
+
+	_buildingList = eastAirFactory
+	_return = "CountEastAirFactories"
+	goto "CountBuildings"
+
+	#CountEastAirFactories
+
+		_eastAir = _destroyedBuilding
+		_eastBuildings = _eastBuildings + _buildingCount
+
+	;If the Mobile HQ destroyed and no factories are functional end the game.
+	? (GetDammage WestMobileHQ == 1) && (_westBuildings < 1):goto "EastWins"
+	? (GetDammage EastMobileHQ == 1) && (_eastBuildings < 1):goto "WestWins"
+
+	goto "Update"
+
+#CountBuildings
+
+	_count = 0
+	_buildingCount = 0
+	_totalBuildings = Count _buildingList
+	_destroyedBuilding = ObjNull
+
+	? (_totalBuildings < 1):goto _return
+
+	#CountBuilding
+
+		_building = _buildingList Select _count
+		_count = _count + 1
+
+		;If a building is destroyed keep track of it incase the side loses (camera will pan around it).
+		? (GetDammage _building == 1):_destroyedBuilding = _building
+
+		;If any structure is found that is not destroyed then don't bother continuing the count.
+		? (GetDammage _building < 1):_buildingCount = _buildingCount + 1;goto _return
+
+		? (_count < _totalBuildings):goto "CountBuilding"
+
+	goto _return
+
+
+#CheckPointsToWin
+
+	westTotalPoints = westTotalCommanderPoints+westTotalAlphaPoints+westTotalBravoPoints+westTotalCharliePoints+westTotalDeltaPoints+westTotalEchoPoints+westTotalFoxtrotPoints+westTotalGolfPoints+westTotalHotelPoints;PublicVariable "westTotalPoints"
+	eastTotalPoints = eastTotalCommanderPoints+eastTotalAlphaPoints+eastTotalBravoPoints+eastTotalCharliePoints+eastTotalDeltaPoints+eastTotalEchoPoints+eastTotalFoxtrotPoints+eastTotalGolfPoints+eastTotalHotelPoints;PublicVariable "eastTotalPoints"
+
+	? (westTotalPoints == eastTotalPoints):westTotalpoints = westTotalpoints + Random 10;eastTotalpoints = eastTotalpoints + Random 10;PublicVariable "westTotalPoints";PublicVariable "eastTotalPoints"
+	? (westTotalPoints >= pointsToWin):goto "WestWins"
+	? (eastTotalPoints >= pointsToWin):goto "EastWins"
+
+goto "CheckMHQs"
+
+#CheckTimeToEnd
+
+	? (time / 60 < timeToEnd):goto "CheckMHQs"
+
+	westTotalPoints = westTotalCommanderPoints+westTotalAlphaPoints+westTotalBravoPoints+westTotalCharliePoints+westTotalDeltaPoints+westTotalEchoPoints+westTotalFoxtrotPoints+westTotalGolfPoints+westTotalHotelPoints;PublicVariable "westTotalPoints"
+	eastTotalPoints = eastTotalCommanderPoints+eastTotalAlphaPoints+eastTotalBravoPoints+eastTotalCharliePoints+eastTotalDeltaPoints+eastTotalEchoPoints+eastTotalFoxtrotPoints+eastTotalGolfPoints+eastTotalHotelPoints;PublicVariable "eastTotalPoints"
+
+	? (westTotalPoints == eastTotalPoints):westTotalpoints = westTotalpoints + Random 10;eastTotalpoints = eastTotalpoints + Random 10;PublicVariable "westTotalPoints";PublicVariable "eastTotalPoints"
+
+	? (westTotalPoints >= eastTotalPoints):goto "WestWins"
+	goto "EastWins"
+
+#CheckTownsToWin
+
+	;Wait until server has finished any other score requests.
+	@ (!requestScore)
+
+	;Request server does a score calculation.
+	requestScore = true;PublicVariable "requestScore"
+
+	;Wait until server has finished current request.
+	@ (!requestScore)
+
+	_townsNeeded = townsToWin
+	? (townsToWin < 0):_townsNeeded = Count towns
+
+	? (westTownsHeld >= _townsNeeded):goto "WestWins"
+	? (eastTownsHeld >= _townsNeeded):goto "EastWins"
+
+goto "CheckMHQs"
+
+#WestWins
+
+	loserBarracks = _eastBarracks;PublicVariable "loserBarracks"
+	loserLight = _eastLight;PublicVariable "loserLight"
+	loserHeavy = _eastHeavy;PublicVariable "loserHeavy"
+	loserAir = _eastAir;PublicVariable "loserAir"
+
+	westWinsGame = true;PublicVariable "westWinsGame"
+
+	Exit
+
+#EastWins
+
+	loserBarracks = _westBarracks;PublicVariable "loserBarracks"
+	loserLight = _westLight;PublicVariable "loserLight"
+	loserHeavy = _westHeavy;PublicVariable "loserHeavy"
+	loserAir = _westAir;PublicVariable "loserAir"
+
+	eastWinsGame = true;PublicVariable "eastWinsGame"
+
+	Exit

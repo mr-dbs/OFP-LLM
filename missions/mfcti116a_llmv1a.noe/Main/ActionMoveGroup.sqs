@@ -1,0 +1,43 @@
+;Last modified 5/20/3
+
+;Order units is group to return to leader's position.
+;Script usage: [Group] Exec "ActionFollowLeader.sqs"
+
+_group = _this Select 0
+_destination = _this Select 1
+
+_units = Units _group
+_totalUnits = Count _units
+_units = _units - [Leader _group]
+_units CommandFollow Leader _group
+Leader _group DoMove _destination
+Driver Vehicle (Leader _group) CommandMove _destination
+
+;Leader _group DoMove _destination
+_units = _units + [Leader _group]
+
+;Determine if leader is on foot.
+_leaderOnFoot = true
+? (Vehicle Leader _group != Leader _group):_leaderOnFoot = false
+
+_count = 0
+
+#CheckVehicle
+
+	_unit = _units Select _count
+	_count = _count + 1
+
+	? (_unit == Leader _group):goto "CheckNextVehicle"
+	? (Vehicle _unit != _unit):_unit CommandMove _destination;goto "CheckNextVehicle"
+
+	;If unit is on foot determine if it must move independently or fall in formation.
+	_distance = _unit Distance Leader _group
+	_position = GetPos (Leader _group)
+	_destinationDistance = Sqrt (((_destination Select 0) - (_position Select 0))^2 + ((_destination Select 1) - (_position Select 1))^2)
+
+	? (_distance > inFormationRange) && (_distance < _destinationDistance):_unit CommandMove GetPos (Leader _group);goto "CheckNextVehicle"
+	? (_distance <= inFormationRange):[_unit] CommandFollow Leader _group
+
+	#CheckNextVehicle
+
+		? (_count < _totalUnits):goto "CheckVehicle"

@@ -1,0 +1,12 @@
+_unit = _this Select 0
+
+_unit RemoveWeapon "Pipebomb"
+_unit RemoveMagazines "Pipebomb"
+
+_unit AddWeapon "Timebomb"
+_unit AddMagazine "Timebomb"
+_unit AddMagazine "Timebomb"
+_unit AddMagazine "Timebomb"
+_unit AddMagazine "HandGrenade"
+_unit AddMagazine "HandGrenade"
+_unit AddWeapon "NVGoggles"

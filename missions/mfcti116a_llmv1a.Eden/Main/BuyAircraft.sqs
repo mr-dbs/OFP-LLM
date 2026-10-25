@@ -1,0 +1,57 @@
+;Last modified 9/19/3
+;Script usage:  [Group,true/false,Factory,Resources] Exec "BuyAircraft.sqs"
+;Use to make AI randomly purchase an aircraft.
+
+_side = _this Select 0
+_group = _this Select 1
+_teamPurchase = _this Select 2
+_factory = _this Select 3
+_resources = _this Select 4
+
+_assaultModifier = 1
+? (expensiveAssaultAC):_assaultModifier = expensiveAssaultACMultiplier
+
+? (_side == east):goto "BuyEast"
+
+#BuyWest
+
+	_vehicleType = OH58Type
+
+	? (_resources < mannedOH58Cost * _assaultModifier):Exit
+	? (noACRockets) || !(westUpgradedRockets):_vehicleType = AH1Type
+	? (_vehicleType == AH1Type) && (_resources < mannedAH1Cost * _assaultModifier):Exit
+	? !(westUpgradedAir):goto "PurchaseWest"
+
+	_type = Random 100
+
+	? (!noACRockets && westUpgradedAircraftRockets) && (_type < 80) && (_resources >= mannedUH60Cost * _assaultModifier):_vehicleType = UH60Type
+	? (_type < 40) && (_resources >= mannedAH1Cost * _assaultModifier):_vehicleType = AH1Type
+	? (_type < 20) && (_resources >= mannedAH64Cost * _assaultModifier):_vehicleType = AH64Type
+
+	;If commander is an AI and base is by an airstrip.
+	? !(WestCommander In westPlayerGroups) && ((_type < 10) || (_type < 40 && _type > 30)) && (_resources >= mannedA10Cost * _assaultModifier) && (westBaseTemplate In airBase):_vehicleType = A10Type
+
+	#PurchaseWest
+
+		[_side,_factory,_vehicleType,noScript,_group,_teamPurchase] Exec "Main\BuyVehicle.sqs"
+
+	Exit
+
+#BuyEast
+
+	? (_resources < mannedMI17Cost * _assaultModifier) || !(eastUpgradedAir):Exit
+	? (noACRockets || !eastUpgradedAircraftRockets) && (_resources < mannedMI24Cost * _assaultModifier):Exit
+
+	_type = Random 100
+	_vehicleType = MI24Type
+
+	? (!noACRockets && eastUpgradedAircraftRockets):_vehicleType = MI17Type
+	? (_type < 60) && (_resources >= mannedMI24Cost * _assaultModifier):_vehicleType = MI24Type
+	? (_type < 30) && (_resources >= mannedKA50Cost * _assaultModifier):_vehicleType = KA50Type
+
+	;If commander is an AI and base is by an airstrip.
+	? !(EastCommander In eastPlayerGroups) && ((_type < 15) || (_type < 70 && _type > 60)) && (_resources >= mannedSU25Cost * _assaultModifier) && (eastBaseTemplate In airBase):_vehicleType = SU25Type
+
+	#PurchaseEast
+
+		[_side,_factory,_vehicleType,noScript,_group,_teamPurchase] Exec "Main\BuyVehicle.sqs"

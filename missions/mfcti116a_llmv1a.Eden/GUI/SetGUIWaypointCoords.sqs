@@ -1,0 +1,40 @@
+;Last modified 11/21/2
+
+;Add rows & columns to manual selection boxes.
+_count = 0
+_totalColumns = Count coordsColumn
+
+#AddCoords
+
+	;Add the text & data for the column pull-down box.
+	_selection = lbAdd[IDCCommandMenuWPColumn,coordsColumn Select _count]
+	lbSetData [IDCCommandMenuWPColumn,_selection,coordsColumn Select _count]
+
+	;Add the text & data for the row pull-down box.
+	_selection = lbAdd[IDCCommandMenuWPRow,coordsRow Select _count]
+	lbSetData [IDCCommandMenuWPRow,_selection,coordsRow Select _count]
+
+	;Add the text & data for the precise column pull-down boxes.
+	_selection = lbAdd[IDCCommandMenuPreciseWPColumn1,coordsColumn Select _count]
+	lbSetData [IDCCommandMenuPreciseWPColumn1,_selection,coordsColumn Select _count]
+	_selection = lbAdd[IDCCommandMenuPreciseWPColumn2,coordsColumn Select _count]
+	lbSetData [IDCCommandMenuPreciseWPColumn2,_selection,coordsColumn Select _count]
+
+	;Add the text & data for the precise row pull-down boxes.
+	_selection = lbAdd[IDCCommandMenuPreciseWPRow1,coordsRow Select _count]
+	lbSetData [IDCCommandMenuPreciseWPRow1,_selection,coordsRow Select _count]
+	_selection = lbAdd[IDCCommandMenuPreciseWPRow2,coordsRow Select _count]
+	lbSetData [IDCCommandMenuPreciseWPRow2,_selection,coordsRow Select _count]
+
+	_count = _count  + 1
+
+	? (_count < _totalColumns):goto "AddCoords"
+
+	;Set current manual waypoints.
+	lbSetCurSel[IDCCommandMenuWPColumn,commandWaypointColumn]
+	lbSetCurSel[IDCCommandMenuWPRow,commandWaypointRow]
+
+	lbSetCurSel[IDCCommandMenuPreciseWPColumn1,commandPreciseWaypointColumn1]
+	lbSetCurSel[IDCCommandMenuPreciseWPColumn2,commandPreciseWaypointColumn2]
+	lbSetCurSel[IDCCommandMenuPreciseWPRow1,commandPreciseWaypointRow1]
+	lbSetCurSel[IDCCommandMenuPreciseWPRow2,commandPreciseWaypointRow2]

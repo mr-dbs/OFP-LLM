@@ -1,0 +1,55 @@
+;Last modified 10/18/3
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_gun = _this Select 0
+_objects = _this Select 1
+_timeElapsed = 0
+
+#Update
+~10
+
+	_timeElapsed = _timeElapsed + 10
+	? (GetDammage _gun < 1):_timeElapsed = 0
+
+	? (_timeElapsed >= 300):goto "DeleteGun"
+
+	goto "Update"
+
+#DeleteGun
+
+
+	? (_gun In westMortar):totalWestStationaryMortars = totalWestStationaryMortars - 1;PublicVariable "totalWestStationaryMortars"
+	? (_gun In eastMortar):totalEastStationaryMortars = totalEastStationaryMortars - 1;PublicVariable "totalEastStationaryMortars"
+
+	_westM2 = westM2Gun + westM2Station + westM2Fortification
+	_eastM2 = eastM2Gun + eastM2Station + eastM2Fortification
+
+	? (_gun In _westM2):totalWestStationaryM2s = totalWestStationaryM2s - 1;PublicVariable "totalWestStationaryM2s"
+	? (_gun In _eastM2):totalEastStationaryM2s = totalEastStationaryM2s - 1;PublicVariable "totalEastStationaryM2s"
+
+	_westHE = westHEGun + westHEStation + westHEFortification
+	_eastHE = eastHEGun + eastHEStation + eastHEFortification
+
+	? (_gun In _westHE):totalWestStationaryHEs = totalWestStationaryHEs - 1;PublicVariable "totalWestStationaryHEs"
+	? (_gun In _eastHE):totalEastStationaryHEs = totalEastStationaryHEs - 1;PublicVariable "totalEastStationaryHEs"
+
+	_westAA = westAAGun + westAAStation
+	_eastAA = eastAAGun + eastAAStation
+
+	? (_gun In _westAA):totalWestStationaryAAs = totalWestStationaryAAs - 1;PublicVariable "totalWestStationaryAAs"
+	? (_gun In _eastAA):totalEastStationaryAAs = totalEastStationaryAAs - 1;PublicVariable "totalEastStationaryAAs"
+
+	DeleteVehicle _gun
+
+	_count = 0
+	_totalObjects = Count _objects
+	? (_totalObjects < 1):Exit
+
+	#DeleteObject
+
+		_object = _objects Select _count
+		DeleteVehicle _object
+
+		_count = _count + 1
+		? (_count < _totalObjects):goto "DeleteObject"

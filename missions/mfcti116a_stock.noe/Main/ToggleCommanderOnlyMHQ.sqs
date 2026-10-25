@@ -1,0 +1,25 @@
+;Last modified 4/13/3
+
+_vehicle = _this Select 0
+_unit = _this Select 1
+_action = _this Select 2
+_side = Side _unit
+
+_vehicle RemoveAction _action
+
+? (_side == west) && (_vehicle == WestMobileHQ):goto "ToggleWest"
+? (_side == east) && (_vehicle == EastMobileHQ):goto "ToggleEast"
+
+Exit
+
+#ToggleWest
+
+	? (westCommanderOnlyMHQ):westCommanderOnlyMHQ = false;PublicVariable "westCommanderOnlyMHQ";WestMobileHQ AddAction [Localize "STRENABLECOMMANDERONLYMHQ","Main\ToggleCommanderOnlyMHQ.sqs"];Exit
+	? (!westCommanderOnlyMHQ):westCommanderOnlyMHQ = true;PublicVariable "westCommanderOnlyMHQ";;WestMobileHQ AddAction [Localize "STRDISABLECOMMANDERONLYMHQ","Main\ToggleCommanderOnlyMHQ.sqs"];Exit
+
+	Exit
+
+#ToggleEast
+	
+	? (eastCommanderOnlyMHQ):eastCommanderOnlyMHQ = false;PublicVariable "eastCommanderOnlyMHQ";EastMobileHQ AddAction [Localize "STRENABLECOMMANDERONLYMHQ","Main\ToggleCommanderOnlyMHQ.sqs"];Exit
+	? (!eastCommanderOnlyMHQ):eastCommanderOnlyMHQ = true;PublicVariable "eastCommanderOnlyMHQ";EastMobileHQ AddAction [Localize "STRDISABLECOMMANDERONLYMHQ","Main\ToggleCommanderOnlyMHQ.sqs"];Exit

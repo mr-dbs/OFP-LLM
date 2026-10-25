@@ -1,0 +1,34 @@
+;Last modified 1/29/4
+;Script Usage:  [Side,Cost,Type] Exec "Upgrade.sqs"
+
+_side = _this Select 0
+_cost = _this Select 1
+_type = _this Select 2
+
+? (_side == east):goto "UpgradeEast"
+
+#UpgradeWest
+
+	? (westUpgradeInProgress) && (player == Leader WestCommanderTeam):Hint( Localize "STRCANTUPGRADE")
+	? (westUpgradeInProgress):Exit
+
+	_error = format ["%1 (%2 %3 %4).",Localize "STRNOTENOUGHRESOURCES",Localize "STRNEED",_cost - westResources,Localize "STRMORE"]
+	? (westResources < _cost) && (player == Leader WestCommanderTeam):Hint (_error)
+	? (westResources < _cost):Exit
+
+	westRequestUpgrade = _type;PublicVariable "westRequestUpgrade"
+
+	Exit
+
+#UpgradeEast
+
+	? (eastUpgradeInProgress) && (player == Leader EastCommanderTeam):Hint( Localize "STRCANTUPGRADE")
+	? (eastUpgradeInProgress):Exit
+
+	_error = format ["%1 (%2 %3 %4).",Localize "STRNOTENOUGHRESOURCES",Localize "STRNEED",_cost - eastResources,Localize "STRMORE"]
+	? (eastResources < _cost) && (player == Leader EastCommanderTeam):Hint (_error)
+	? (eastResources < _cost):Exit
+
+	eastRequestUpgrade = _type;PublicVariable "eastRequestUpgrade"
+
+	Exit

@@ -1,0 +1,6 @@
+;Last modified 12/9/2
+
+@ !(undoLastStructure)
+
+undoLastStructure = true;PublicVariable "undoLastStructure"
+undoLastStructurePlayer = player;PublicVariable "undoLastStructurePlayer"

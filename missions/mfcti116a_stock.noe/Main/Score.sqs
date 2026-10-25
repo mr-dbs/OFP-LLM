@@ -1,0 +1,278 @@
+;Last modified 2/19/4
+
+_group = Group player
+_side = Side player
+
+_income = 0
+_townsHeld = 0
+_count = 0
+_totalTowns = Count towns
+_noPoints = false
+
+? (_side != west && _side != east):Hint Localize "STRRENEGADE";Exit
+? (_side == east):goto "CheckEastVehicleTotal"
+
+;Get total west working vehicles.
+#CheckWestVehicleTotal
+
+	;Wait until server has finished any other requests.
+	@ (!countWestVehicles)
+
+	;Request server does a vehicle count.
+	countWestVehicles = true;PublicVariable "countWestVehicles"
+
+	;Wait until server has finished request.
+	@ (!countWestVehicles)
+
+#CheckWestUpgrades
+
+	_upgradeText = ""
+	_upgradeText1 = ""
+	_upgradeType = 0
+
+	_upgradeText1 = Format ["\n%1\n",Localize "STRUPGRADED"];_upgraded = false
+
+	? (westUpgradedInfantry):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRINFANTRY"];_upgraded = true
+	? (westUpgradedBlackOps):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRBLACKOPS"];_upgraded = true
+	? (westUpgradedLight):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRLIGHTVEHICLES"];_upgraded = true
+	? (westUpgradedHeavy):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRHEAVYVEHICLES"];_upgraded = true
+	? (westUpgradedAir):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRAIRCRAFT"];_upgraded = true
+	? (westUpgradedAircraftRockets):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRACROCKETS"];_upgraded = true
+	? (westUpgradedAircraftAT):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRACAT"];_upgraded = true
+	? (westUpgradedRadar):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRRADAR"];_upgraded = true
+	? !(_upgraded):_upgradeText1 = ""
+
+	? (westUpgradeInProgressType > 0):_upgradeText = Format ["\n%1 %2\n",Localize "STRUPGRADING",upgradeNames Select westUpgradeInProgressType]
+	? (westUpgradeInProgressType == blackOpsUpgradeType):_upgradeText = Format ["\n%1 %2\n",Localize "STRUPGRADINGTO",upgradeNames Select westUpgradeInProgressType]
+	
+	_upgradeText = _upgradeText + _upgradeText1
+	_upgradeText = _upgradeText + Format["\n%1\n%2: %3\n%4: %5\n\n%6\n%7: %8\n%9: %10",Localize "STRSIDECASUALTIES",Localize "STRTROOPS",totalWestCasualties,Localize "STRVEHICLES",totalWestVehiclesLost,Localize "STRTEAMCASUALTIES",Localize "STRTROOPS",totalTeamCasualties,Localize "STRVEHICLES",totalTeamVehiclesLost]
+	goto "CountTowns"
+
+;Get total east working vehicles.
+#CheckEastVehicleTotal
+
+	;Wait until server has finished any other requests.
+	@ (!countEastVehicles)
+
+	;Request server does a vehicle count.
+	countEastVehicles = true;PublicVariable "countEastVehicles"
+
+	;Wait until server has finished request.
+	@ (!countEastVehicles)
+
+#CheckEastUpgrades
+
+	_upgradeText = ""
+	_upgradeText1 = ""
+	_upgradeType = 0
+
+	_upgradeText1 = Format ["\n%1\n",Localize "STRUPGRADED"];_upgraded = false
+
+	? (eastUpgradedInfantry):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRINFANTRY"];_upgraded = true
+	? (eastUpgradedBlackOps):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRSPETZNATZ"];_upgraded = true
+	? (eastUpgradedLight):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRLIGHTVEHICLES"];_upgraded = true
+	? (eastUpgradedHeavy):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRHEAVYVEHICLES"];_upgraded = true
+	? (eastUpgradedAir):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRAIRCRAFT"];_upgraded = true
+	? (eastUpgradedAircraftRockets):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRACROCKETS"];_upgraded = true
+	? (eastUpgradedAircraftAT):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRACAT"];_upgraded = true
+	? (eastUpgradedRadar):_upgradeText1 = _upgradeText1 + Format["%1\n",Localize "STRRADAR"];_upgraded = true
+
+	? (eastUpgradeInProgressType > 0):_upgradeText = Format ["\n%1 %2\n",Localize "STRUPGRADING",upgradeNames Select eastUpgradeInProgressType]
+	? (eastUpgradeInProgressType == blackOpsUpgradeType):_upgradeText = Format ["\n%1 %2\n",Localize "STRUPGRADINGTO",upgradeNames Select eastUpgradeInProgressType]
+
+	_upgradeText = _upgradeText + _upgradeText1
+	_upgradeText = _upgradeText + Format["\n%1\n%2: %3\n%4: %5\n\n%6\n%7: %8\n%9: %10",Localize "STRSIDECASUALTIES",Localize "STRTROOPS",totalEastCasualties,Localize "STRVEHICLES",totalEastVehiclesLost,Localize "STRTEAMCASUALTIES",Localize "STRTROOPS",totalTeamCasualties,Localize "STRVEHICLES",totalTeamVehiclesLost]
+
+#CountTowns
+
+	;Wait until server has finished any other score requests.
+	@ (!requestScore)
+
+	;Request server does a score calculation.
+	requestScore = true;PublicVariable "requestScore"
+
+	;Wait until server has finished current request.
+	@ (!requestScore)
+
+	_townsNeeded = townsToWin
+	? (townsToWin < 0):_townsNeeded = totalTowns
+
+	? (_side == east):goto "SetEastText"
+
+#SetWestText
+
+	_townsText = Format["%1: %2\n",Localize "STRTOWNSHELD",westTownsHeld]
+	? (_townsNeeded > 0):_townsText = Format["%1: %2 %3 %4\n",Localize "STRTOWNSHELD",westTownsHeld,Localize "STROF",_townsNeeded]
+
+	_stationaryText = Format["%1: %2 %3 %4\n%5: %6 %7 %8\n%9: %10 %11 %12\n",Localize "STRM2S",totalWestStationaryM2s,Localize "STROF",maxStationaryM2s,Localize "STRHES",totalWestStationaryHEs,Localize "STROF",maxStationaryHEs,Localize "STRAAS",totalWestStationaryAAs,Localize "STROF",maxStationaryAAs]
+	? (noStationaryGunLimit):_stationaryText = Format["%1: %2\n%3: %4\n%5: %6\n",Localize "STRM2S",totalWestStationaryM2s,Localize "STRHES",totalWestStationaryHEs,Localize "STRAAS",totalWestStationaryAAs]
+
+	? (publicServer):_stationaryText = Format["%1: %2 %3 %4\n%5: %6 %7 %8\n",Localize "STRM2S",totalWestStationaryM2s,Localize "STROF",maxStationaryM2s,Localize "STRHES",totalWestStationaryHEs,Localize "STROF",maxStationaryHEs]
+	? (noStationaryGunLimit && publicServer):_stationaryText = Format["%1: %2\n%3: %4\n",Localize "STRM2S",totalWestStationaryM2s,Localize "STRHES",totalWestStationaryHEs]
+
+	_mortarText = Format["%1: %2 %3 %4\n",Localize "STRMORTARS",totalWestStationaryMortars,Localize "STROF",maxStationaryMortars]
+	? (noStationaryGunLimit):_mortarText = Format["%1: %2\n",Localize "STRMORTARS",totalWestStationaryMortars]
+	? (MFCTI116NoMortars || publicServer):_mortarText = ""
+
+	goto "SetScoreText"
+
+#SetEastText
+
+	_townsText = Format["%1: %2\n",Localize "STRTOWNSHELD",eastTownsHeld]
+	? (_townsNeeded > 0):_townsText = Format["%1: %2 %3 %4\n",Localize "STRTOWNSHELD",eastTownsHeld,Localize "STROF",_townsNeeded]
+
+	_stationaryText = Format["%1: %2 %3 %4\n%5: %6 %7 %8\n%9: %10 %11 %12\n",Localize "STRM2S",totalEastStationaryM2s,Localize "STROF",maxStationaryM2s,Localize "STRHES",totalEastStationaryHEs,Localize "STROF",maxStationaryHEs,Localize "STRAAS",totalEastStationaryAAs,Localize "STROF",maxStationaryAAs]
+	? (noStationaryGunLimit):_stationaryText = Format["%1: %2\n%3: %4\n%5: %6\n",Localize "STRM2S",totalEastStationaryM2s,Localize "STRHES",totalEastStationaryHEs,Localize "STRAAS",totalEastStationaryAAs]
+
+	? (publicServer):_stationaryText = Format["%1: %2 %3 %4\n%5: %6 %7 %8\n",Localize "STRM2S",totalEastStationaryM2s,Localize "STROF",maxStationaryM2s,Localize "STRHES",totalEastStationaryHEs,Localize "STROF",maxStationaryHEs]
+	? (noStationaryGunLimit && publicServer):_stationaryText = Format["%1: %2\n%3: %4\n",Localize "STRM2S",totalEastStationaryM2s,Localize "STRHES",totalEastStationaryHEs]
+
+	_mortarText = Format["%1: %2 %3 %4\n",Localize "STRMORTARS",totalEastStationaryMortars,Localize "STROF",maxStationaryMortars]
+	? (noStationaryGunLimit):_mortarText = Format["%1: %2\n",Localize "STRMORTARS",totalEastStationaryMortars]
+	? (MFCTI116NoMortars || publicServer):_mortarText = ""
+
+#SetScoreText
+
+	_stationaryText = _stationaryText + _mortarText
+
+	? (player != WestCommander) && (player != EastCommander):goto "PlayerScore"
+
+	_return = "ShowCommanderScore"
+	? (_side == west):goto "WestPlayerScore"
+	? (_side == east):goto "EastPlayerScore"
+
+#ShowCommanderScore
+
+	? (_side == east):goto "ShowEastCommanderScore"
+
+	#ShowWestCommanderScore
+
+		? (publicServer):goto "ShowWestCommanderScorePS"
+
+		_pointsText = Format ["%1: %2\n",Localize "STRPOINTS",westCommanderPoints - (westCommanderPoints % 1)]
+		? (pointsToWin > 0):_pointsText = Format ["%1: %2 %3 %4\n%5: %6\n",Localize "STRSIDEPOINTS",westTotalPoints,Localize "STROF",pointsToWin,Localize "STRPOINTS",westCommanderPoints - (westCommanderPoints % 1)]
+
+		Hint Format ["%1%2: %3\n%4%5: %6\n\n%7%8: %9 %10 %11\n%12: %13 %14 %15\n%16: %17 %18 %19\n%20",_pointsText,Localize "STRRESOURCES",westResources,_townsText,Localize "STRINCOME",westIncome - (_totalValue + _awardValue),_stationaryText,Localize "STRWORKERS",totalWestWorkers,Localize "STROF",maxWorkers,Localize "STRSALVAGERS",totalWestSalvagers,Localize "STROF",maxSalvagers,Localize "STRVEHICLES",totalWestVehicles,Localize "STROF",maxVehicles,_upgradeText]
+		Exit
+
+		#ShowWestCommanderScorePS
+
+			Hint Format ["%1%2: %3\n%4%5: %6\n\n%7%8: %9 %10 %11\n%12: %13 %14 %15\n%16: %17 %18 %19\n%20",_pointsText,Localize "STRRESOURCES",westResources,_townsText,Localize "STRINCOME",westIncome - (_totalValue + _awardValue),_stationaryText,Localize "STRWORKERS",totalWestWorkers,Localize "STROF",maxWorkers,Localize "STRSALVAGERS",totalWestSalvagers,Localize "STROF",maxSalvagers,Localize "STRVEHICLES",totalWestVehicles,Localize "STROF",maxVehicles,_upgradeText]
+			Exit
+
+	#ShowEastCommanderScore
+
+		? (publicServer):goto "ShowEastCommanderScorePS"
+
+		_pointsText = Format ["%1: %2\n",Localize "STRPOINTS",eastCommanderPoints - (eastCommanderPoints % 1)]
+		? (pointsToWin > 0):_pointsText = Format ["%1: %2 %3 %4\n%5: %6\n",Localize "STRSIDEPOINTS",eastTotalPoints,Localize "STROF",pointsToWin,Localize "STRPOINTS",eastCommanderPoints - (eastCommanderPoints % 1)]
+
+		Hint Format ["%1%2: %3\n%4%5: %6\n\n%7%8: %9 %10 %11\n%12: %13 %14 %15\n%16: %17 %18 %19\n%20",_pointsText,Localize "STRRESOURCES",eastResources,_townsText,Localize "STRINCOME",eastIncome - (_totalValue + _awardValue),_stationaryText,Localize "STRWORKERS",totalEastWorkers,Localize "STROF",maxWorkers,Localize "STRSALVAGERS",totalEastSalvagers,Localize "STROF",maxSalvagers,Localize "STRVEHICLES",totalEastVehicles,Localize "STROF",maxVehicles,_upgradeText]
+		Exit
+
+		#ShowEastCommanderScorePS
+
+			Hint Format ["%1%2: %3\n%4%5: %6\n\n%7%8: %9 %10 %11\n%12: %13 %14 %15\n%16: %17 %18 %19\n%20",_pointsText,Localize "STRRESOURCES",eastResources,_townsText,Localize "STRINCOME",eastIncome - (_totalValue + _awardValue),_stationaryText,Localize "STRWORKERS",totalEastWorkers,Localize "STROF",maxWorkers,Localize "STRSALVAGERS",totalEastSalvagers,Localize "STROF",maxSalvagers,Localize "STRVEHICLES",totalEastVehicles,Localize "STROF",maxVehicles,_upgradeText]
+			Exit
+
+#PlayerScore
+
+	_return = "ShowPlayerScore"
+
+	? (_side == west):goto "WestPlayerScore"
+	? (_side == east):goto "EastPlayerScore"
+
+#ShowPlayerScore
+
+	? (_side == east):goto "ShowEastPlayerScore"
+
+	#ShowWestPlayerScore
+
+		_pointsText = Format ["%1: %2\n",Localize "STRPOINTS",_points]
+		? (pointsToWin > 0):_pointsText = Format ["%1: %2 %3 %4\n%5: %6\n",Localize "STRSIDEPOINTS",westTotalPoints,Localize "STROF",pointsToWin,Localize "STRPOINTS",_points]
+
+		Hint Format ["%1%2: %3\n%4%5: %6\n\n%7%8: %9 %10 %11\n%12: %13 %14 %15\n%16: %17 %18 %19\n%20",_pointsText,Localize "STRRESOURCES",_resources,_townsText,Localize "STRINCOME",_playerIncome,_stationaryText,Localize "STRWORKERS",totalWestWorkers,Localize "STROF",maxWorkers,Localize "STRSALVAGERS",totalWestSalvagers,Localize "STROF",maxSalvagers,Localize "STRVEHICLES",totalWestVehicles,Localize "STROF",maxVehicles,_upgradeText]
+		Exit
+
+	#ShowEastPlayerScore
+
+		_pointsText = Format ["%1: %2\n",Localize "STRPOINTS",_points]
+		? (pointsToWin > 0):_pointsText = Format ["%1: %2 %3 %4\n%5: %6\n",Localize "STRSIDEPOINTS",eastTotalPoints,Localize "STROF",pointsToWin,Localize "STRPOINTS",_points]
+
+		Hint Format ["%1%2: %3\n%4%5: %6\n\n%7%8: %9 %10 %11\n%12: %13 %14 %15\n%16: %17 %18 %19\n%20",_pointsText,Localize "STRRESOURCES",_resources,_townsText,Localize "STRINCOME",_playerIncome,_stationaryText,Localize "STRWORKERS",totalEastWorkers,Localize "STROF",maxWorkers,Localize "STRSALVAGERS",totalEastSalvagers,Localize "STROF",maxSalvagers,Localize "STRVEHICLES",totalEastVehicles,Localize "STROF",maxVehicles,_upgradeText]
+		Exit
+
+	#WestPlayerScore
+
+		_totalValue = 0
+		_awardValue = 0
+
+		? (westPlayers < 1):goto _return
+
+		_awardValue = westIncome * westPlayerAwardPercentage
+		_awardValue = _awardValue - (_awardValue % 1)
+		_totalValue = (westIncome - _awardValue) * westPlayerResourcePercentage
+		_totalValue = _totalValue - (_totalValue % 1)
+
+		? (_group == WestCommanderTeam):goto _return
+
+		_playerIncome = _totalValue / westPlayers
+		_playerIncome = _playerIncome - (_playerIncome % 1)
+		_totalPoints = westAlphaPoints + westBravoPoints + westCharliePoints + westDeltaPoints + westEchoPoints + westFoxtrotPoints + westGolfPoints + westHotelPoints
+		? (_totalPoints < 1):_totalPoints = westPlayers;_noPoints = true
+
+		? (_group == WestAlphaTeam):_resources = westAlphaResources;_points = westAlphaPoints
+		? (_group == WestBravoTeam):_resources = westBravoResources;_points = westBravoPoints
+		? (_group == WestCharlieTeam):_resources = westCharlieResources;_points = westCharliePoints
+		? (_group == WestDeltaTeam):_resources = westDeltaResources;_points = westDeltaPoints
+		? (_group == WestEchoTeam):_resources = westEchoResources;_points = westEchoPoints
+		? (_group == WestFoxtrotTeam):_resources = westFoxtrotResources;_points = westFoxtrotPoints
+		? (_group == WestGolfTeam):_resources = westGolfResources;_points = westGolfPoints
+		? (_group == WestHotelTeam):_resources = westHotelResources;_points = westHotelPoints
+		? (_noPoints):_points = 1
+
+		_points = _points - (_points % 1)
+		_teamValue = (_points / _totalPoints) * _awardValue
+		_teamValue = _teamValue - (_teamValue % 1)
+		_playerIncome = _playerIncome + _teamValue
+
+		? (_noPoints):_points = 0
+		goto _return
+
+	#EastPlayerScore
+
+		_totalValue = 0
+		_awardValue = 0
+
+		? (eastPlayers < 1):goto _return
+
+		_awardValue = eastIncome * eastPlayerAwardPercentage
+		_awardValue = _awardValue - (_awardValue % 1)
+		_totalValue = (eastIncome - _awardValue) * eastPlayerResourcePercentage
+		_totalValue = _totalValue - (_totalValue % 1)
+
+		? (_group == EastCommanderTeam):goto _return
+
+		_playerIncome = _totalValue / eastPlayers
+		_playerIncome = _playerIncome - (_playerIncome % 1)
+		_totalPoints = eastAlphaPoints + eastBravoPoints + eastCharliePoints + eastDeltaPoints + eastEchoPoints + eastFoxtrotPoints + eastGolfPoints + eastHotelPoints
+		? (_totalPoints < 1):_totalPoints = eastPlayers;_noPoints = true
+
+		? (_group == EastAlphaTeam):_resources = eastAlphaResources;_points = eastAlphaPoints
+		? (_group == EastBravoTeam):_resources = eastBravoResources;_points = eastBravoPoints
+		? (_group == EastCharlieTeam):_resources = eastCharlieResources;_points = eastCharliePoints
+		? (_group == EastDeltaTeam):_resources = eastDeltaResources;_points = eastDeltaPoints
+		? (_group == EastEchoTeam):_resources = eastEchoResources;_points = eastEchoPoints
+		? (_group == EastFoxtrotTeam):_resources = eastFoxtrotResources;_points = eastFoxtrotPoints
+		? (_group == EastGolfTeam):_resources = eastGolfResources;_points = eastGolfPoints
+		? (_group == EastHotelTeam):_resources = eastHotelResources;_points = eastHotelPoints
+		? (_noPoints):_points = 1
+
+		_points = _points - (_points % 1)
+		_teamValue = (_points / _totalPoints) * addEastAwardResources
+		_teamValue = _teamValue - (_teamValue % 1)
+		_playerIncome = _playerIncome + _teamValue
+
+		? (_noPoints):_points = 0
+		goto _return

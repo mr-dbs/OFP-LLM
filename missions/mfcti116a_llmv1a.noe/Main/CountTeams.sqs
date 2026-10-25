@@ -1,0 +1,25 @@
+;Last modified 11/23/2
+
+? !(Local LocalServerObject):Exit
+
+#CountWest
+
+	westAlphaSize = Count Units WestAlphaTeam;PublicVariable "westAlphaSize"
+	westBravoSize = Count Units WestBravoTeam;PublicVariable "westBravoSize"
+	westCharlieSize = Count Units WestCharlieTeam;PublicVariable "westCharlieSize"
+	westDeltaSize = Count Units WestDeltaTeam;PublicVariable "westDeltaSize"
+	westEchoSize = Count Units WestEchoTeam;PublicVariable "westEchoSize"
+	westFoxtrotSize = Count Units WestFoxtrotTeam;PublicVariable "westFoxtrotSize"
+	westGolfSize = Count Units WestGolfTeam;PublicVariable "westGolfSize"
+	westHotelSize = Count Units WestHotelTeam;PublicVariable "westHotelSize"
+
+#CountEast
+
+	eastAlphaSize = Count Units EastAlphaTeam;PublicVariable "eastAlphaSize"
+	eastBravoSize = Count Units EastBravoTeam;PublicVariable "eastBravoSize"
+	eastCharlieSize = Count Units EastCharlieTeam;PublicVariable "eastCharlieSize"
+	eastDeltaSize = Count Units EastDeltaTeam;PublicVariable "eastDeltaSize"
+	eastEchoSize = Count Units EastEchoTeam;PublicVariable "eastEchoSize"
+	eastFoxtrotSize = Count Units EastFoxtrotTeam;PublicVariable "eastFoxtrotSize"
+	eastGolfSize = Count Units EastGolfTeam;PublicVariable "eastGolfSize"
+	eastHotelSize = Count Units EastHotelTeam;PublicVariable "eastHotelSize"

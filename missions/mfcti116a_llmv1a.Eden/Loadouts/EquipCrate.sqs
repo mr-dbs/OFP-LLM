@@ -1,0 +1,123 @@
+;Last modified 3/19/4
+;Adds equipment to a crate on the client's side.
+;Script Usage:[Side,Crate,CrateType] Exec "EquipCrate.sqs"
+
+_side = _this Select 0
+_crateType = _this Select 1
+_crate = _this Select 2
+
+? !(publicServer):Exit
+
+ClearMagazineCargo _crate
+ClearWeaponCargo _crate
+
+? (_side == east):goto "EquipEastCrate"
+
+#EquipWestCrate
+
+	? (_crateType == weaponsCrateType):goto "EquipWestWeaponsCrate"
+	? (_crateType == ammoCrateType):goto "EquipWestAmmoCrate"
+	? (_crateType == heavyWeaponsCrateType):goto "EquipWestHeavyWeaponsCrate"
+	? (_crateType == heavyAmmoCrateType):goto "EquipWestHeavyAmmoCrate"
+
+	Exit
+
+#EquipEastCrate
+
+	? (_crateType == weaponsCrateType):goto "EquipEastWeaponsCrate"
+	? (_crateType == ammoCrateType):goto "EquipEastAmmoCrate"
+	? (_crateType == heavyWeaponsCrateType):goto "EquipEastHeavyWeaponsCrate"
+	? (_crateType == heavyAmmoCrateType):goto "EquipEastHeavyAmmoCrate"
+
+	Exit
+
+#EquipMiscCrate
+
+	_crate AddMagazineCargo ["Mine",10]
+	_crate AddMagazineCargo ["Pipebomb",10]
+	_crate AddMagazineCargo ["Handgrenade",10]
+	_crate AddMagazineCargo ["SmokeShell",5]
+	_crate AddMagazineCargo ["SmokeShellRed",5]
+	_crate AddMagazineCargo ["SmokeShellGreen",5]
+
+	Exit
+
+#EquipWestWeaponsCrate
+
+	_crate AddWeaponCargo ["M16",2]
+	_crate AddWeaponCargo ["M16GrenadeLauncher",2]
+	_crate AddWeaponCargo ["M60",2]
+	_crate AddWeaponCargo ["HK",2]
+	_crate AddWeaponCargo ["M21",2]
+	_crate AddWeaponCargo ["MM1",2]
+
+	Exit
+
+#EquipWestAmmoCrate
+
+	_crate AddMagazineCargo ["M16",12]
+	_crate AddMagazineCargo ["M60",6]
+	_crate AddMagazineCargo ["HK",12]
+	_crate AddMagazineCargo ["M21",12]
+	_crate AddMagazineCargo ["Steyrmag",6]
+	_crate AddMagazineCargo ["G36aMag",6]
+	_crate AddMagazineCargo ["M4",6]
+	_crate AddMagazineCargo ["MM1magazine",4]
+	_crate AddMagazineCargo ["Mortar",6]
+	_crate AddMagazineCargo ["GrenadeLauncher",6]
+
+	Exit
+
+#EquipWestHeavyWeaponsCrate
+
+	_crate AddWeaponCargo ["LAWLauncher",2]
+	_crate AddWeaponCargo ["CarlGustavLauncher",2]
+	_crate AddWeaponCargo ["AALauncher",2]
+
+	goto "EquipMiscCrate"
+
+#EquipWestHeavyAmmoCrate
+
+	_crate AddMagazineCargo ["LAWLauncher",10]
+	_crate AddMagazineCargo ["CarlGustavLauncher",10]
+	_crate AddMagazineCargo ["AALauncher",10]
+
+	Exit
+
+#EquipEastWeaponsCrate
+
+	_crate AddWeaponCargo ["AK74",2]
+	_crate AddWeaponCargo ["AK74GrenadeLauncher",2]
+	_crate AddWeaponCargo ["PK",2]
+	_crate AddWeaponCargo ["Bizon",2]
+	_crate AddWeaponCargo ["SVDDragunov",2]
+	_crate AddWeaponCargo ["6g30",2]
+
+	Exit
+
+#EquipEastAmmoCrate
+
+	_crate AddMagazineCargo ["AK74",20]
+	_crate AddMagazineCargo ["PK",6]
+	_crate AddMagazineCargo ["BizonMag",12]
+	_crate AddMagazineCargo ["SVDDragunov",20]
+	_crate AddMagazineCargo ["6g30Magazine",8]
+	_crate AddMagazineCargo ["GrenadeLauncher",6]
+
+	Exit
+
+#EquipEastHeavyWeaponsCrate
+
+	_crate AddWeaponCargo ["RPGLauncher",2]
+	_crate AddWeaponCargo ["AT4Launcher",2]
+	_crate AddWeaponCargo ["9K32Launcher",2]
+
+	goto "EquipMiscCrate"
+
+#EquipEastHeavyAmmoCrate
+
+	_crate AddMagazineCargo ["RPGLauncher",12]
+	_crate AddMagazineCargo ["AT4Launcher",6]
+	_crate AddMagazineCargo ["9K32Launcher",6]
+
+	Exit

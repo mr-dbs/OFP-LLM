@@ -1,0 +1,95 @@
+;Last modified 2/19/4
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_destination = _this Select 1
+_direction = _this Select 2
+
+_M2Name = "M2StaticMG"
+
+? !(publicServer):_M2Name = "MFCTI116M2StaticMG"
+? (_side == east):_M2Name = _M2Name + "E"
+? !(publicServer) && (limitedRadar):_M2Name = _M2Name + "LR"
+
+#CreateM2
+
+	;Create building, props, gun, & gunner.
+	_M2 = _M2Name CreateVehicle _destination
+	_M2  SetDir _direction
+	_M2  SetPos _destination
+	_M2 SetPos [(_destination Select 0)+((sin _direction)*0.5),(_destination Select 1)+((cos _direction)*.5),(_destination Select 2)]
+
+	? (_side == east):goto "AddM2FortificationToEast"
+
+#AddM2FortificationToWest
+
+	;Add it to the list of factories & increment the total count.
+	westM2Fortification = westM2Fortification + [_M2]
+	westM2FortificationDamage = westM2FortificationDamage + [500]
+
+	;Send the new building to other players.
+	westBuildingBuiltMP = _M2;PublicVariable "westBuildingBuiltMP"
+	westBuildingBuiltTypeMP = M2FortificationType;PublicVariable "westBuildingBuiltTypeMP"
+
+	totalWestStationaryM2s = totalWestStationaryM2s + 1;PublicVariable "totalWestStationaryM2s"
+
+	goto "AddObjects"
+
+#AddM2FortificationToEast
+
+	;Add it to the list of factories & increment the total count.
+	eastM2Fortification = eastM2Fortification + [_M2]
+	eastM2FortificationDamage = eastM2FortificationDamage + [500]
+
+	;Send the new building to other players.
+	eastBuildingBuiltMP = _M2;PublicVariable "eastBuildingBuiltMP"
+	eastBuildingBuiltTypeMP = M2FortificationType;PublicVariable "eastBuildingBuiltTypeMP"
+
+	totalEastStationaryM2s = totalEastStationaryM2s + 1;PublicVariable "totalEastStationaryM2s"
+
+#AddObjects
+
+	;Create bunker to put gun in.
+	_fortification = "MFCTI116Fortification" CreateVehicle _destination
+
+	;Create pallets to put under M2 at the same position as the M2.
+	_pallet1 = "Paleta1" CreateVehicle _destination
+	_pallet2 = "Paleta1" CreateVehicle _destination
+	_pallet3 = "Paleta1" CreateVehicle _destination
+
+	_direction = GetDir _M2
+	_gunnerDirection = GetDir _M2
+	_position = GetPos _M2
+
+	_fortification SetDir _direction
+	_pallet1 SetDir _direction
+	_pallet2 SetDir _direction
+	_pallet3 SetDir _direction
+
+	_M2 SetPos _position
+	_fortification SetPos _position
+	_pallet1 SetPos _position
+	_pallet2 SetPos _position
+	_pallet3 SetPos _position
+
+	_direction = (_direction + 50) % 360
+	_M2 SetDir _direction
+	_pallet1 SetDir _direction
+	_pallet2 SetDir _direction
+	_pallet3 SetDir _direction
+
+	_M2 SetPos [(_position Select 0)+((sin _direction)*2.45),(_position Select 1)+((cos _direction)*2.45),(_position Select 2)+ 2.15]
+	_pallet1 SetPos [(_position Select 0)+((sin _direction)*2.45),(_position Select 1)+((cos _direction)*2.45),(_position Select 2)+ 1.9]
+	_pallet2 SetPos [(_position Select 0)+((sin _direction)*2.45),(_position Select 1)+((cos _direction)*2.45),(_position Select 2)+1.7]
+	_pallet3 SetPos [(_position Select 0)+((sin _direction)*2.45),(_position Select 1)+((cos _direction)*2.45),(_position Select 2)+1.5]
+
+	_direction = (_direction - 50) % 360
+	_M2 SetDir _direction
+	_pallet1 SetDir _direction
+	_pallet2 SetDir _direction
+	_pallet3 SetDir _direction
+
+	[_side,_fortification,_M2,_pallet1,_pallet2,_pallet3,M2FortificationType] Exec "Main\UpdateFortification.sqs"
+	[_M2,[_fortification,_pallet1,_pallet2,_pallet3]] Exec "Main\StationaryGunCleanUp.sqs"

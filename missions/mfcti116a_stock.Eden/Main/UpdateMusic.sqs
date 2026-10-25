@@ -1,0 +1,29 @@
+;Last modified 12/21/2
+
+_lastPlaySongs = false
+_delay = 0
+
+#Update
+~1
+
+	? (playSongs) && !(_lastPlaySongs):goto "PlaySong"
+	? !(playSongs) && (_lastPlaySongs):1 FadeMusic 0;_delay = 0
+
+	_lastPlaySongs = playSongs
+
+	? (playSongs):_delay = _delay - 1
+	? (playSongs) && (_delay < 1):goto "PlaySong"
+
+goto "Update"
+
+#PlaySong
+
+	_song = songs Select Random ((Count songs) - 1)
+	_lastPlaySongs = playSongs
+
+	PlayMusic [_song,0]
+	0 FadeMusic 1
+
+	_delay = Random 400 + 400
+
+goto "Update"

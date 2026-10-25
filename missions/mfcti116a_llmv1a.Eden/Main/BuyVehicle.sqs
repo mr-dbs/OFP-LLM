@@ -1,0 +1,115 @@
+;Last modified 2/1/4
+
+_side = _this Select 0
+_building = _this Select 1
+_unitType = _this Select 2
+_scriptType = _this Select 3
+_group = _this Select 4
+_teamPurchase = _this Select 5
+_cost = unitCosts Select _unitType
+
+? (cheapTransportAC) && ((_unitType In westAircraftTransports) || (_unitType In westAircraftTransports)):_cost = _cost * cheapTransportACMultiplier
+? (expensiveAssaultAC) && ((_unitType In westAssaultAircraft) || (_unitType In westAssaultAircraft)):_cost = _cost * expensiveAssaultACMultiplier
+
+_driver = 0
+_gunner = 0
+_commander = 0
+_factory = lightFactoryType
+
+? (_side == east):goto "AddToEast"
+? (_teamPurchase):goto "CountWest"
+
+_needed = _cost - westResources
+
+;If more resources are needed then available report an error to player.
+? (_needed > 0) && (player == Leader WestCommanderTeam):Hint Format["%1 (%2 $%3 %4.)",Localize "STRNOTENOUGHRESOURCES",Localize "STRNEED",_needed,Localize "STRMORE"]
+? (_needed > 0):Exit
+
+#CountWest
+;Wait until server has finished any other requests.
+@ (!countWestVehicles)
+
+;Request server does a vehicle count.
+countWestVehicles = true;PublicVariable "countWestVehicles"
+
+;Wait until server has finished request.
+@ (!countWestVehicles)
+
+;If the the total vehicle count is too high then exit now.
+? (totalWestVehicles >= maxVehicles):westPlayerMessage = messageMaxVehiclesReached;PublicVariable "westPlayerMessage";westPlayerMessagePlayer = Leader _group;PublicVariable "westPlayerMessagePlayer";Exit
+
+@ (addWestMannedVehicle == 0)
+
+#AddToWest
+
+	? (_unitType In westUnarmed):_driver = soldierType
+	? (_unitType == ammoTruckType):_factory = ammoDepotType
+	? (_unitType == repairTruckType || _unitType == salvageTruckType):_factory = repairDepotType
+	? (_unitType In westLight):_driver = soldierType;_gunner = soldierType
+
+	;Make the driver a medic for an ambulance.
+	? (_unitType == ambulanceType):_driver = medicType
+
+	? (_unitType In westHeavy):_driver = soldierType;_gunner = soldierType;_commander = soldierType;_factory = heavyFactoryType
+	? (_unitType In westAir):_driver = soldierPilotType;_gunner = soldierPilotType;_factory = airFactoryType
+	? (_unitType In westOneManAir):_driver = soldierPilotType;_factory = airFactoryType
+
+	addWestMannedVehicle = _unitType;PublicVariable "addWestMannedVehicle"
+	addWestDriver = _driver;PublicVariable "addWestDriver"
+	addWestGunner = _gunner;PublicVariable "addWestGunner"
+	addWestCommander = _commander;PublicVariable "addWestCommander"
+	addWestMannedVehicleGroup = _group;PublicVariable "addWestMannedVehicleGroup"
+	addWestMannedVehicleBuilding = _building;PublicVariable "addWestMannedVehicleBuilding"
+	addWestMannedVehicleType = _factory;PublicVariable "addWestMannedVehicleType"
+	addWestMannedVehicleScript = _scriptType;PublicVariable "addWestMannedVehicleScript"
+	addWestMannedVehicleTeamPurchase = _teamPurchase;PublicVariable "addWestMannedVehicleTeamPurchase"
+
+Exit
+
+#AddToEast
+
+	? (_teamPurchase):goto "CountEast"
+
+	_needed = _cost - eastResources
+
+	;If more resources are needed then available report an error to player.
+	? (_needed > 0) && (player == Leader EastCommanderTeam):Hint Format["%1 (%2 $%3 %4.)",Localize "STRNOTENOUGHRESOURCES",Localize "STRNEED",_needed,Localize "STRMORE"]
+	? (_needed > 0):Exit
+
+	#CountEast
+
+	;Wait until server has finished any other requests.
+	@ (!countEastVehicles)
+
+	;Request server does a vehicle count.
+	countEastVehicles = true;PublicVariable "countEastVehicles"
+
+	;Wait until server has finished request.
+	@ (!countEastVehicles)
+
+	;If the the total vehicle count is too high then exit now.
+	? (totalEastVehicles >= maxVehicles):eastPlayerMessage = messageMaxVehiclesReached;PublicVariable "eastPlayerMessage";eastPlayerMessagePlayer = Leader _group;PublicVariable "eastPlayerMessagePlayer";Exit
+
+	@ (addEastMannedVehicle == 0)
+
+	? (_unitType In eastUnarmed):_driver = soldierEastType
+	? (_unitType == ammoTruckEastType):_factory = ammoDepotType
+	? (_unitType == repairTruckEastType || _unitType == salvageTruckEastType):_factory = repairDepotType
+	? (_unitType In eastLight):_driver = soldierEastType;_gunner = soldierEastType
+
+	;Make the driver a medic for an ambulance.
+	? (_unitType == ambulanceEastType):_driver = medicEastType
+
+	? (_unitType In eastHeavy):_driver = soldierEastType;_gunner = soldierEastType;_commander = soldierEastType;_factory = heavyFactoryType
+	? (_unitType In eastAir):_driver = soldierPilotEastType;_gunner = soldierPilotEastType;_factory = airFactoryType
+	? (_unitType In eastOneManAir):_driver = soldierPilotEastType;_factory = airFactoryType
+
+	addEastMannedVehicle = _unitType;PublicVariable "addEastMannedVehicle"
+	addEastDriver = _driver;PublicVariable "addEastDriver"
+	addEastGunner = _gunner;PublicVariable "addEastGunner"
+	addEastCommander = _commander;PublicVariable "addEastCommander"
+	addEastMannedVehicleGroup = _group;PublicVariable "addEastMannedVehicleGroup"
+	addEastMannedVehicleBuilding = _building;PublicVariable "addEastMannedVehicleBuilding"
+	addEastMannedVehicleType = _factory;PublicVariable "addEastMannedVehicleType"
+	addEastMannedVehicleScript = _scriptType;PublicVariable "addEastMannedVehicleScript"
+	addEastMannedVehicleTeamPurchase = _teamPurchase;PublicVariable "addEastMannedVehicleTeamPurchase"

@@ -1,0 +1,35 @@
+;Last modified 1/26/3
+;Script usage:  [] Exec "SetTownAreaSide.sqs"
+
+;Only run this on the server.
+? !(Local LocalServerObject):Exit
+
+_count = 0
+_totalTowns = Count towns
+
+;Find the town in list that matches setTownAreaTown.
+#FindTown
+
+	? ((towns Select _count) == setTownAreaTown):goto "SetSide"
+
+	_count = _count + 1
+
+	? (_count < _totalTowns):goto "FindTown"
+
+;	Hint ("ERROR:  Could not set town area's side.  Town was not found on list!!!")
+	goto "Clear"
+
+#SetSide
+
+	? (setTownAreaSide == 0):townAreaWestSides Set [_count,setTownAreaSet]
+	? (setTownAreaSide == 1):townAreaEastSides Set [_count,setTownAreaSet]
+
+	setTownAreaMP = setTownAreaTown;PublicVariable "setTownAreaMP"
+	setTownAreaSideMP = setTownAreaSide;PublicVariable "setTownAreaSideMP"
+	setTownAreaIndexMP = _count;PublicVariable "setTownAreaIndexMP"
+	setTownAreaSetMP = setTownAreaSet;PublicVariable "setTownAreaSetMP"
+
+#Clear
+
+	setTownAreaTown = ObjNull;PublicVariable "setTownAreaTown"
+	setTownArea = false;PublicVariable "setTownArea"

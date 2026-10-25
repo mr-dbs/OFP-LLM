@@ -1,0 +1,104 @@
+;Last modified 2/19/4
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_destination = _this Select 1
+_direction = _this Select 2
+
+_M2Name = "M2StaticMG"
+
+? !(publicServer):_M2Name = "MFCTI116HEStaticMG"
+? (_side == east):_M2Name = _M2Name + "E"
+? !(publicServer) && (limitedRadar):_M2Name = _M2Name + "LR"
+
+#CreateM2
+
+	;Create building, props, gun, & gunner.
+	_M2 = _M2Name CreateVehicle _destination
+	_M2 SetDir _direction
+	_M2 SetPos _destination
+	_M2 SetPos [(_destination Select 0)+((sin _direction)*0.5),(_destination Select 1)+((cos _direction)*.5),(_destination Select 2)]
+
+	;Load the gun with high-explosive rounds.
+	? (publicServer):_M2 RemoveMagazine "Browning";_M2 RemoveWeapon "Browning";_M2 AddWeapon "MachineGun30";_M2 AddMagazine "MachineGun30"
+	? (_side == east):goto "AddHEFortificationToEast"
+
+#AddHEFortificationToWest
+
+	;Add it to the list of factories & increment the total count.
+	westHEFortification = westHEFortification + [_M2]
+	westHEFortificationDamage = westHEFortificationDamage + [500]
+
+	;Send the new building to other players.
+	westBuildingBuiltMP = _M2;PublicVariable "westBuildingBuiltMP"
+	westBuildingBuiltTypeMP = HEFortificationType;PublicVariable "westBuildingBuiltTypeMP"
+
+	totalWestStationaryHEs = totalWestStationaryHEs + 1;PublicVariable "totalWestStationaryHEs"
+
+	goto "AddObjects"
+
+#AddHEFortificationToEast
+
+	;Add it to the list of factories & increment the total count.
+	eastHEFortification = eastHEFortification + [_M2]
+	eastHEFortificationDamage = eastHEFortificationDamage + [500]
+
+	;Send the new building to other players.
+	eastBuildingBuiltMP = _M2;PublicVariable "eastBuildingBuiltMP"
+	eastBuildingBuiltTypeMP = HEFortificationType;PublicVariable "eastBuildingBuiltTypeMP"
+
+	totalEastStationaryHEs = totalEastStationaryHEs + 1;PublicVariable "totalEastStationaryHEs"
+
+#AddObjects
+
+	;Create bunker to put gun in.
+	_fortification = "MFCTI116Fortification" CreateVehicle _destination
+
+	;Create pallets to put under the HE gun.
+	_pallet1 = "Paleta1" CreateVehicle _destination
+	_pallet2 = "Paleta1" CreateVehicle _destination
+	_pallet3 = "Paleta1" CreateVehicle _destination
+	_sign = "MFCTI116DangerSign" CreateVehicle _destination
+
+	_direction = GetDir _M2
+	_gunnerDirection = GetDir _M2
+	_position = GetPos _M2
+
+	_fortification SetDir _direction
+	_pallet1 SetDir _direction
+	_pallet2 SetDir _direction
+	_pallet3 SetDir _direction
+	_sign SetDir _direction
+
+	_M2 SetPos _position
+	_fortification SetPos _position
+	_pallet1 SetPos _position
+	_pallet2 SetPos _position
+	_pallet3 SetPos _position
+	_sign SetPos _position
+
+	_signDirection = (_direction + 180) % 360
+
+	_direction = (_direction + 50) % 360
+	_M2 SetDir _direction
+	_pallet1 SetDir _direction
+	_pallet2 SetDir _direction
+	_pallet3 SetDir _direction
+
+	_M2 SetPos [(_position Select 0)+((sin _direction)*2.45),(_position Select 1)+((cos _direction)*2.45),(_position Select 2)+ 2.15]
+	_pallet1 SetPos [(_position Select 0)+((sin _direction)*2.45),(_position Select 1)+((cos _direction)*2.45),(_position Select 2)+ 1.9]
+	_pallet2 SetPos [(_position Select 0)+((sin _direction)*2.45),(_position Select 1)+((cos _direction)*2.45),(_position Select 2)+1.7]
+	_pallet3 SetPos [(_position Select 0)+((sin _direction)*2.45),(_position Select 1)+((cos _direction)*2.45),(_position Select 2)+1.5]
+	_sign SetPos [(_position Select 0)+((sin _signDirection)*8.5),(_position Select 1)+((cos _signDirection)*8.5),(_position Select 2)]
+
+	_direction = (_direction - 50) % 360
+	_M2 SetDir _direction
+	_pallet1 SetDir _direction
+	_pallet2 SetDir _direction
+	_pallet3 SetDir _direction
+
+	[_side,_fortification,_M2,_pallet1,_pallet2,_pallet3,HEFortificationType] Exec "Main\UpdateFortification.sqs"
+
+	[_M2,[_pallet1,_pallet2,_pallet3,_sign,_fortification]] Exec "Main\StationaryGunCleanUp.sqs"

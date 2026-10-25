@@ -1,0 +1,7 @@
+;DBS Arsenal - write presets to <user dir>\Config\DBSArsenal_Presets.cfg (CWR newConfig/saveConfig).
+
+? not (dbsArsPersist):Exit
+_cfg = newConfig
+_cfg addValue ["magic","DBSARS1"]
+_cfg addValue ["presets",dbsArsPresets]
+_cfg saveConfig dbsArsPresetFile

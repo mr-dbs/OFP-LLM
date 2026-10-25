@@ -1,0 +1,68 @@
+;Last modified 10/21/3
+
+? !(Local LocalServerObject):Exit
+
+_side = Side undoLastStructurePlayer
+
+undoLastStructure = false;PublicVariable "undoLastStructure"
+undoLastStructureType = 0;PublicVariable "undoLastStructureType"
+
+@ (IsNull deleteStructure)
+
+? (_side == east):goto "UndoEast"
+
+? (IsNull westLastPlayerStructure):Exit
+
+;Sandbags and helicopter pads are deleted immediately.
+? (westLastPlayerStructure In westSandbag):westSandbag = westSandbag - [westLastPlayerStructure];_cost = sandbagCost;goto "DeleteWestStructure"
+? (westLastPlayerStructure In westLargeWall):westLargeWall = westLargeWall - [westLastPlayerStructure];_cost = largeWallCost;goto "DeleteWestStructure"
+
+? ("HeliH" CountType [westLastPlayerStructure] > 0):_cost = helicopterPadCost;goto "DeleteWestStructure"
+? ("ViewTower2" CountType [westLastPlayerStructure] > 0):_cost = observationTowerCost;goto "DeleteWestStructure"
+? (westLastPlayerStructure In westFieldHospital) && (GetDammage westLastPlayerStructure == 1):westFieldHospital = westFieldHospital - [westLastPlayerStructure];_cost = fieldHospitalCost;goto "DeleteWestStructure"
+? (westLastPlayerStructure In westFieldHospital) && (GetDammage westLastPlayerStructure != 1):Exit
+
+;Guns can't be undone.
+? (westLastPlayerStructure In westM2Gun)||(westLastPlayerStructure In westM2Station)||(westLastPlayerStructure In westM2Fortification):Exit
+? (westLastPlayerStructure In westHEGun)||(westLastPlayerStructure In westHEStation)||(westLastPlayerStructure In westHEFortification):Exit
+
+deleteStructure = westLastPlayerStructure;PublicVariable "deleteStructure";westLastPlayerStructure = ObjNull
+
+Exit
+
+#UndoEast
+
+? (IsNull eastLastPlayerStructure):Exit
+
+;Sandbags and helicopter pads are deleted immediately.
+? (eastLastPlayerStructure In eastSandbag):eastSandbag = eastSandbag - [eastLastPlayerStructure];_cost = sandbagCost;goto "DeleteEastStructure"
+? (eastLastPlayerStructure In eastLargeWall):eastLargeWall = eastLargeWall - [eastLastPlayerStructure];_cost = largeWallCost;goto "DeleteEastStructure"
+
+? ("HeliH" CountType [eastLastPlayerStructure] > 0):_cost = helicopterPadCost;goto "DeleteEastStructure"
+? ("ViewTower2" CountType [eastLastPlayerStructure] > 0):_cost = observationTowerCost;goto "DeleteEastStructure"
+? (eastLastPlayerStructure In eastFieldHospital) && (GetDammage eastLastPlayerStructure == 1):eastFieldHospital = eastFieldHospital - [eastLastPlayerStructure];_cost = fieldHospitalCost;goto "DeleteEastStructure"
+? (eastLastPlayerStructure In eastFieldHospital) && (GetDammage eastLastPlayerStructure != 1):Exit
+
+;Guns can't be undone.
+? (eastLastPlayerStructure In eastM2Gun)||(eastLastPlayerStructure In eastM2Station)||(eastLastPlayerStructure In eastM2Fortification):Exit
+? (eastLastPlayerStructure In eastHEGun)||(eastLastPlayerStructure In eastHEStation)||(eastLastPlayerStructure In eastHEFortification):Exit
+
+deleteStructure = eastLastPlayerStructure;PublicVariable "deleteStructure";eastLastPlayerStructure = ObjNull
+
+Exit
+
+#DeleteWestStructure
+
+	westTempBuildingList = westTempBuildingList - [westLastPlayerStructure]
+	DeleteVehicle westLastPlayerStructure
+	westLastPlayerStructure = ObjNull
+	westResources = westResources + _cost;PublicVariable "westResources"
+	Exit
+
+#DeleteEastStructure
+
+	eastTempBuildingList = eastTempBuildingList - [eastLastPlayerStructure]
+	DeleteVehicle eastLastPlayerStructure
+	eastLastPlayerStructure = ObjNull
+	eastResources = eastResources + _cost;PublicVariable "eastResources"
+	Exit

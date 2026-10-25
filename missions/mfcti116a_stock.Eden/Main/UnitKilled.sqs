@@ -1,0 +1,216 @@
+;Last modified 2/19/4
+;Script usage:  [[UnitKilled,Killer]] Exec "UnitKilled.sqs"
+;Script usage:  Unit AddEventHandler ["killed",{[_this,side] Exec "Main\UnitKilled.sqs"}]
+;Bug:  The game doesn't return a vehicle when this script is called by an event handler.
+;Bug:  The game doesn't return the victim's side properly.  Victim is always a civilian.
+
+_eventArray = _this Select 0
+_victim = _eventArray Select 0
+_killer = _eventArray Select 1
+_victimSide = _this Select 1
+_side = Side _killer
+
+@ (serverStarted)
+
+_names = unitNames
+? (limitedRadar):_names = unitLRNames
+
+? (_side == resistance) || (_side == civilian):Exit
+? (_killer == _victim):Exit
+
+;? (_victimSide == _side):goto "VehiclePenalize"
+? (_victimSide != civilian):_return = "AwardBounty";goto "GetUnitStats"
+
+;Penalize player for killing a civilian.
+#CivilianPenalize
+
+	[Group _killer,civilianKillingPenalty] Exec "Main\SubtractTeamResources.sqs"
+	[Leader Group _killer,groupCommander,messageCivilianKilled,civilianKillingPenalty,0] Exec "Main\SendPlayerMessage.sqs"
+	Exit
+
+;Penalize player for killing a friendly vehicle.
+#VehiclePenalize
+
+	_return = "CompensateVictim";goto "GetUnitStats"
+
+#CompensateVictim
+
+	;Do not penalize killer if victim is in a stolen vehicle.
+	? (_victimSide == west) && (_victimName In eastUnitDescriptions):Exit
+	? (_victimSide == east) && (_victimName In westUnitDescriptions):Exit
+
+	;If player is destroying his/her own vehicle do not penalize.
+	? !(Local LocalServerObject) && (Local _killer):Exit
+
+	[Group _killer,Group _victim,_actualValue] Exec "Main\TransferTeamResources.sqs"
+	[_victimSide,groupCommander,messageVehicleDestroyedByFriendly,_actualValue,Group _killer] Exec "Main\SendSideMessage.sqs"
+	Exit
+
+#AwardBounty
+
+;Get rid of fractions
+_bounty = _bounty - (_bounty % 1)
+
+;Check if unit was on the same side.
+? (_side == west) && (_victimName In westUnitDescriptions):Exit
+? (_side == east) && (_victimName In eastUnitDescriptions):Exit
+
+;No bounty for friendly fire...;)
+? (_victimSide == _side):Exit
+
+_vehicle = Vehicle _killer
+
+;If the killer is in a vehicle then award the bounty to the crew.
+;Bug:  The game doesn't return a vehicle when this script is called by an event handler.
+;As a result the vehicle's owner is actually the killer.  For now the crew doesn't get a bounty. :(
+? (_vehicle != _killer):goto "AwardToCrew"
+
+_value = _bounty
+_group = Group _killer
+_return = "Finished";goto "Add"
+
+#AwardToCrew
+
+_count = 0
+_driver = Driver _vehicle
+_gunner = Gunner _vehicle
+_commander = Commander _vehicle
+
+? !(IsNull _driver) && (Alive _driver):_count = _count + 1
+? !(IsNull _gunner) && (Alive _gunner):_count = _count + 1
+? !(IsNull _commander) && (Alive _commander):_count = _count + 1
+
+? (_count < 1):Exit
+
+_value = _bounty / _count
+_value = _value - (_value % 1)
+
+#AddToDriver
+
+	_group = Group _driver;_return = "AddToGunner";goto "Add"
+
+#AddToGunner
+
+	_group = Group _gunner;_return = "AddToCommander";goto "Add"
+
+#AddToCommander
+
+	_group = Group _commander;_return = "Finished"
+
+#Add
+
+;	? !(_group In westPlayerGroups) && !(_group In eastPlayerGroups):Exit
+
+	_selectedTeam = -1
+
+	? (_group == WestCommanderTeam) || (_group == EastCommanderTeam):_selectedTeam = groupCommander
+	? (_group == WestAlphaTeam) || (_group == EastAlphaTeam):_selectedTeam = groupAlpha
+	? (_group == WestBravoTeam) || (_group == EastBravoTeam):_selectedTeam = groupBravo
+	? (_group == WestCharlieTeam) || (_group == EastCharlieTeam):_selectedTeam = groupCharlie
+	? (_group == WestDeltaTeam) || (_group == EastDeltaTeam):_selectedTeam = groupDelta
+	? (_group == WestEchoTeam) || (_group == EastEchoTeam):_selectedTeam = groupEcho
+	? (_group == WestFoxtrotTeam) || (_group == EastFoxtrotTeam):_selectedTeam = groupFoxtrot
+	? (_group == WestGolfTeam) || (_group == EastGolfTeam):_selectedTeam = groupGolf
+	? (_group == WestHotelTeam) || (_group == EastHotelTeam):_selectedTeam = groupHotel
+
+	? (_selectedTeam < 0):Exit
+	? (_side == east):goto "AddToEast"
+
+#AddToWest
+
+	;Unit was not a recognized type.
+	? (_unitStatsCount < 0):goto _return
+
+	@ (addWestResourcesToTeam == -1)
+
+	addWestResourcesToTeam = _selectedTeam;PublicVariable "addWestResourcesToTeam"
+	addWestResourcesToTeamAmount = _value;PublicVariable "addWestResourcesToTeamAmount"
+
+	[Leader (westGroups Select _selectedTeam),groupCommander,messageBountyReceived,_value,_unitStatsCount] Exec "Main\SendPlayerMessage.sqs"
+	goto _return
+
+#AddToEast
+
+	;Unit was not a recognized type.
+	? (_unitStatsCount < 0):goto _return
+
+	@ (addEastResourcesToTeam == -1)
+
+	addEastResourcesToTeam = _selectedTeam;PublicVariable "addEastResourcesToTeam"
+	addEastResourcesToTeamAmount = _value;PublicVariable "addEastResourcesToTeamAmount"
+
+	[Leader (eastGroups Select _selectedTeam),groupCommander,messageBountyReceived,_value,_unitStatsCount] Exec "Main\SendPlayerMessage.sqs"
+	goto _return
+
+;Since local variables can't be passed to an event handler, get the unit's stats now.
+#GetUnitStats
+
+	_unitStatsCount = 0
+	_totalStatsUnits = Count _names
+	_victimName = "a unit not in the server lists"
+
+	;If the salvaged vehicle is a salvage truck then don't use CountType (it would report an HMMV/BRDM instead).
+	? !(publicServer) && ("MFCTI116WestSalvager" CountType [_victim] > 0):_actualValue = salvageTruckCost;_bounty = salvageTruckCost * bountyPercentage;_unitStatsCount = salvageTruckType;goto _return
+	? !(publicServer) && ("MFCTI116EastSalvager" CountType [_victim] > 0):_actualValue = salvageTruckCost;_bounty = salvageTruckEastCost * bountyPercentage;_unitStatsCount = salvageTruckEastType;goto _return
+
+	_soldiersFound = ("Soldier" CountType [_victim])
+	? (_soldiersFound > 0):goto "FindSoldier"
+
+#FindMatchingUnit
+
+	_name = _names Select _unitStatsCount
+	_unitsFound = (_name CountType [_victim])
+	_unitsFound1 = 0
+	_bradleysFound = 0
+	_kamovsFound = 0
+	_soldiersFound = 0
+
+	;Some vehicles such as BMP2s will return from a CountType as a BMP.  Do a special check for these.
+	? (_name == "BMP"):_unitsFound1 = ("BMP2" CountType [_victim]);_resistanceBMPFound = ("BMPRes" CountType [_victim])
+	? (_name == "M113"):_unitsFound1 = ("vulcan" CountType [_victim]);_bradleysFound = ("bradley" CountType [_victim])
+	? (_name == "Mi24"):_kamovsFound = ("Kamov" CountType [_victim])
+
+	? (_kamovsFound > 0):_unitStatsCount = V80Type;goto "MatchFound"
+	? (_bradleysFound > 0):_unitStatsCount = M2A2Type;goto "MatchFound"
+	? (_unitsFound1 > 0):_unitStatsCount = _unitStatsCount + 1;goto "MatchFound"
+	? (_unitsFound > 0):goto "MatchFound"
+
+	_unitStatsCount = _unitStatsCount + 1
+
+	? (_unitStatsCount < _totalStatsUnits):goto "FindMatchingUnit"
+
+	Exit
+
+	#MatchFound
+
+		_cost = unmannedUnitCosts Select _unitStatsCount
+		? (cheapTransportAC) && ((_unitType In westAircraftTransports) || (_unitType In westAircraftTransports)):_cost = _cost * cheapTransportACMultiplier
+		? (expensiveAssaultAC) && ((_unitType In westAssaultAircraft) || (_unitType In westAssaultAircraft)):_cost = _cost * expensiveAssaultACMultiplier
+
+		_bounty = _cost * bountyPercentage
+		_actualValue = _cost
+
+		_victimName = unitDescriptions Select _unitStatsCount
+		goto _return
+
+#FindSoldier
+
+	_unitsFound = 0
+	_totalStatsUnits = (Count soldierNames)
+	_unitStatsCount = _totalStatsUnits
+
+#FindMatchingSoldier
+
+	_name = soldierNames Select _unitStatsCount
+
+	_unitsFound = (_name CountType [_victim])
+
+	? (_unitsFound > 0):_actualValue = soldierCosts Select _unitStatsCount;_bounty = (soldierCosts Select _unitStatsCount) * bountyPercentage;_unitStatsCount = soldierTypes Select _unitStatsCount;_victimName = unitDescriptions Select _unitStatsCount;goto _return
+
+	_unitStatsCount = _unitStatsCount - 1
+
+	? (_unitStatsCount >= 0):goto "FindMatchingSoldier"
+
+#Finished
+
+	Exit

@@ -1,0 +1,12 @@
+;Last modified 8/25/2
+
+;Toggle between an open and closed command menu.
+redrawCommandActions = true
+
+? (!commandManualWaypointMenu):goto "Toggle"
+
+commandManualWaypointMenu = false
+
+#Toggle
+
+commandManualWaypointMenu = true

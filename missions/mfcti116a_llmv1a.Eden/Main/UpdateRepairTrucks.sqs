@@ -1,0 +1,126 @@
+;Last modified 9/12/3
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+#UpdateWest
+~updateWorkerAIDelay
+
+	_unitCount = 0
+	_commander = Leader Group WestCommander
+	_side = west
+
+	? (Count westRepairTrucks < 1):goto "UpdateEast"
+
+	#UpdateWestUnit
+
+		_vehicle = westRepairTrucks Select _unitCount
+		_unitCount = _unitCount + 1
+
+		? !(IsNull _vehicle):_return = "UpdateWestUnit";goto "UpdateWestTruck"
+		? (_unitCount < Count westRepairTrucks):goto "UpdateWestUnit"
+
+#UpdateEast
+
+	_unitCount = 0
+	_commander = Leader Group EastCommander
+	_side = east
+
+	? (Count eastRepairTrucks < 1):goto "UpdateWest"
+
+	#UpdateEastUnit
+
+		_vehicle = eastRepairTrucks Select _unitCount
+		_unitCount = _unitCount + 1
+
+		? (!IsNull _vehicle):_return = "UpdateEastUnit";goto "UpdateEastTruck"
+		?( _unitCount < Count eastRepairTrucks):goto "UpdateEastUnit"
+
+	goto "UpdateWest"
+
+#UpdateWestTruck
+
+	;If no driver or the vehicle is destroyed then skip this vehicle.
+	? (GetDammage _vehicle == 1) || (IsNull Driver _vehicle) || !(Alive Driver _vehicle):goto _return
+
+	;See if anything needs to be repaired or built.
+	#CheckWestBuildings
+
+		_buildingLists = [westControlCenter,westInfantryFactory,westLightFactory,westHeavyFactory,westAirFactory,westRepairDepot,westAmmoDepot,westObservationTower,westFieldHospital,westMortar,westAAStation,westAAGun,westHEFortification,westHEStation,westHEGun,westM2Fortification,westM2Station,westM2Gun]
+		_damageLists = [westControlCenterDamage,westInfantryFactoryDamage,westLightFactoryDamage,westHeavyFactoryDamage,westAirFactoryDamage,westRepairDepotDamage,westAmmoDepotDamage,westObservationTowerDamage,westFieldHospitalDamage,westMortarDamage,westAAStationDamage,westAAGunDamage,westHEFortificationDamage,westHEStationDamage,westHEGunDamage,westM2FortificationDamage,westM2StationDamage,westM2GunDamage]
+		_totalLists = Count _buildingLists
+
+		goto "CheckBuildings"
+
+#UpdateEastTruck
+
+	;If no driver or the vehicle is destroyed then skip this vehicle.
+	? (GetDammage _vehicle == 1) || (IsNull Driver _vehicle) || !(Alive Driver _vehicle):goto _return
+
+	;See if anything needs to be repaired or built.
+	#CheckEastBuildings
+
+		_buildingLists = [eastControlCenter,eastInfantryFactory,eastLightFactory,eastHeavyFactory,eastAirFactory,eastRepairDepot,eastAmmoDepot,eastObservationTower,eastFieldHospital,eastMortar,eastAAStation,eastAAGun,eastHEFortification,eastHEStation,eastHEGun,eastM2Fortification,eastM2Station,eastM2Gun]
+		_damageLists = [eastControlCenterDamage,eastInfantryFactoryDamage,eastLightFactoryDamage,eastHeavyFactoryDamage,eastAirFactoryDamage,eastRepairDepotDamage,eastAmmoDepotDamage,eastObservationTowerDamage,eastFieldHospitalDamage,eastMortarDamage,eastAAStationDamage,eastAAGunDamage,eastHEFortificationDamage,eastHEStationDamage,eastHEGunDamage,eastM2FortificationDamage,eastM2StationDamage,eastM2GunDamage]
+		_totalLists = Count _buildingLists
+
+		goto "CheckBuildings"
+
+#CheckBuildings
+
+	_listCount = 0
+
+	#CheckList
+
+		_buildinglist = _buildingLists Select _listCount
+		_damageList = _damageLists Select _listCount
+		_listCount = _listCount + 1
+
+		_buildingCount = 0
+		_totalbuildings = Count _buildinglist
+
+		? (_totalbuildings < 1):goto "CheckNextList"
+
+		#CheckBuilding
+
+			_building = _buildinglist Select _buildingCount
+			_damage = _damageList Select _buildingCount
+
+			? (IsNull _building):goto "CheckNextBuilding"
+
+			;If building is damaged & within range then add it to the list of repairable buildings.
+			? (_building Distance _vehicle < repairTruckRepairRange) && (_damage != 500):goto "Repair"
+
+			#CheckNextBuilding
+
+				_buildingCount = _buildingCount + 1
+				? (_buildingCount < _totalbuildings):goto "CheckBuilding"
+
+		#CheckNextList
+
+			? (_listCount < _totalLists):goto "CheckList"
+
+		goto _return
+
+#Repair
+
+	_lastDamage = 0
+
+	#RepairBuilding
+
+		;If the building is repaired go back to the main loop.
+		? (_damage < 0) || (_damage == 500) || (GetDammage _building < 1):goto _updateReturn
+
+		_damageList Set [_buildingCount,_damage - repairTruckRepairRate]
+		_lastBuilding = _building
+		_group = Group (Driver _vehicle)
+
+		? (_group In westPlayerGroups)&&(Driver _vehicle == Leader _group):westPlayerMessage = messageNull;PublicVariable "westPlayerMessage"
+		? (_group In eastPlayerGroups)&&(Driver _vehicle == Leader _group):eastPlayerMessage = messageNull;PublicVariable "eastPlayerMessage"
+
+		~1
+
+		? (_group In westPlayerGroups)&&(Driver _vehicle == Leader _group):westMessageValue1 = (1 - _damage) * 100;PublicVariable "westMessageValue1";westPlayerMessage = messageRepairTruckInUse;PublicVariable "westPlayerMessage";westPlayerMessagePlayer = Driver _vehicle;PublicVariable "westPlayerMessagePlayer"
+		? (_group In eastPlayerGroups)&&(Driver _vehicle == Leader _group):eastMessageValue1 = (1 - _damage) * 100;PublicVariable "eastMessageValue1";eastPlayerMessage = messageRepairTruckInUse;PublicVariable "eastPlayerMessage";eastPlayerMessagePlayer = Driver _vehicle;PublicVariable "eastPlayerMessagePlayer"
+
+		goto _return

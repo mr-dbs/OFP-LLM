@@ -1,0 +1,41 @@
+;Last modified 8/30/3
+
+_team = Group player
+? (Side player == east):goto "GetEastPlayerResources"
+? (Side player != west) && (Side player != east):Hint Localize "STRTRAITORS";Exit
+
+#GetWestPlayerResources
+
+	? (_team == WestAlphaTeam):_resources = westAlphaResources
+	? (_team == WestBravoTeam):_resources = westBravoResources
+	? (_team == WestCharlieTeam):_resources = westCharlieResources
+	? (_team == WestDeltaTeam):_resources = westDeltaResources
+	? (_team == WestEchoTeam):_resources = westEchoResources
+	? (_team == WestFoxtrotTeam):_resources = westFoxtrotResources
+	? (_team == WestGolfTeam):_resources = westGolfResources
+	? (_team == WestHotelTeam):_resources = westHotelResources
+
+	goto "CheckResources"
+
+#GetEastPlayerResources
+
+	? (_team == EastAlphaTeam):_resources = eastAlphaResources
+	? (_team == EastBravoTeam):_resources = eastBravoResources
+	? (_team == EastCharlieTeam):_resources = eastCharlieResources
+	? (_team == EastDeltaTeam):_resources = eastDeltaResources
+	? (_team == EastEchoTeam):_resources = eastEchoResources
+	? (_team == EastFoxtrotTeam):_resources = eastFoxtrotResources
+	? (_team == EastGolfTeam):_resources = eastGolfResources
+	? (_team == EastHotelTeam):_resources = eastHotelResources
+
+	goto "CheckResources"
+
+#CheckResources
+
+	_cost = 0
+	? (_side == west):_cost = westTemplateCosts Select customTemplate
+	? (_side == east):_cost = eastTemplateCosts Select customTemplate
+	? (_resources < _cost):Hint Format ["%1!",Localize "STRNOTENOUGHRESOURCES"]
+
+loadoutBuyCustomAndExit = true
+[] Exec "GUI\UpdateGUILoadout.sqs"

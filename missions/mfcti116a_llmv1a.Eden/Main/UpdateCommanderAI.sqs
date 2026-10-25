@@ -1,0 +1,682 @@
+;Last modified 8/5/4
+
+? !(Local LocalServerObject):Exit
+
+@ (serverStarted)
+
+_side = _this Select 0
+
+? (_side == west) && (WestCommanderTeam In westPlayerGroups):Exit
+? (_side == east) && (EastCommanderTeam In eastPlayerGroups):Exit
+
+_roles = []
+_orders = []
+_airTeam = -1
+
+_controlCenter = ObjNull
+_barracks = ObjNull
+_light = ObjNull
+_heavy = ObjNull
+_air = ObjNull
+_ammo = ObjNull
+_repair = ObjNull
+_hospital = ObjNull
+
+_controlCenterBuilt = false
+_barracksBuilt = false
+_lightBuilt = false
+_heavyBuilt = false
+_airBuilt = false
+_repairBuilt = false
+_ammoBuilt = false
+_hospitalBuilt = false
+
+_M2GunCount = 0
+_HEGunCount = 0
+_mortarCount = 0
+
+_rolesAssigned = false
+_fireMission = 0
+_timeFireMission = 0
+
+;AI characteristics
+
+_lightVehicleBuilt = false
+_heavyVehicleBuilt = false
+_aircraftBuilt = false
+
+_heavyBuildProbability = 50
+_airBuildProbability = 10
+_ammoBuildProbability = 10
+_repairBuildProbability = 90
+_HEBuildProbability = 6
+_M2BuildProbability = 20
+_mortarBuildProbability = 6
+_salvagerBuildProbability = 20
+_mortarReloadProbability = 10
+_giveTeamResourcesProbability = 50
+
+_defendedTargets = []
+_defendingTeams = []
+
+_totalTeams = Count teamDesignations
+_teamsAssigned = false
+_commanderDestination = "Logic" CamCreate [0,0,0]
+
+_teamSize = Count teamDesignations
+
+~5
+
+_built = []
+
+;Fix (added): how many times each main building has been tried again after a failed attempt.
+_retries = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+_mainBuild = false
+_count = 0
+
+#AddBuiltType
+
+	_built = _built + [false]
+	_count = _count + 1
+	? (_count < fieldHospitalType + 9):goto "AddBuiltType"
+
+? (_side == west):_sideText = "West";_groups = westGroups;_playerGroups = westPlayerGroups;_startingLocation = GetPos westStartingLocation;_baseTemplate = westBaseTemplate
+? (_side == east):_sideText = "East";_groups = eastGroups;_playerGroups = eastPlayerGroups;_startingLocation = GetPos eastStartingLocation;_baseTemplate = eastBaseTemplate
+
+_count = 0
+_disabledTeams = 0
+
+#CheckForDisabledTeam
+
+	? (Format ["%1",_groups Select _count] == undefined) || (IsNull (_groups Select _count)):_disabledTeams = _disabledTeams + 1
+
+	_count = _count + 1
+	? (_count < _totalTeams):goto "CheckForDisabledTeam"
+
+_totalAITeams = (_totalTeams - 1) - (Count _playerGroups) - _disabledTeams
+_timeLastAIBombard = 0
+
+#Update
+~10
+
+	? (!MFCTI116NoMortars):_timeLastAIBombard = _timeLastAIBombard + 10
+	? (_side == east):goto "SetEastStructures"
+
+	#SetWestStructures
+
+		? (Count westControlCenter > 0):_controlCenter = westControlCenter Select 0
+		? (Count westInfantryFactory > 0):_barracks = westInfantryFactory Select 0
+		? (Count westLightFactory > 0):_light = westLightFactory Select 0
+		? (Count westHeavyFactory > 0):_heavy = westHeavyFactory Select 0
+		? (Count westAirFactory > 0):_air = westAirFactory Select 0
+		? (Count westAmmoDepot > 0):_ammo = westAmmoDepot Select 0
+		? (Count westRepairDepot > 0):_repair = westRepairDepot Select 0
+		? (Count westFieldHospital > 0):_hospital = westFieldHospital Select 0
+
+		_disconnected = disconnectedWestCommander
+		goto "UpdateStart"
+
+	#SetEastStructures
+
+		? (Count eastControlCenter > 0):_controlCenter = eastControlCenter Select 0
+		? (Count eastInfantryFactory > 0):_barracks = eastInfantryFactory Select 0
+		? (Count eastLightFactory > 0):_light = eastLightFactory Select 0
+		? (Count eastHeavyFactory > 0):_heavy = eastHeavyFactory Select 0
+		? (Count eastAirFactory > 0):_air = eastAirFactory Select 0
+		? (Count eastAmmoDepot > 0):_ammo = eastAmmoDepot Select 0
+		? (Count eastRepairDepot > 0):_repair = eastRepairDepot Select 0
+		? (Count eastFieldHospital > 0):_hospital = eastFieldHospital Select 0
+
+		_disconnected = disconnectedEastCommander
+
+	#UpdateStart
+	~5
+
+	? (!MFCTI116NoMortars):_timeLastAIBombard = _timeLastAIBombard + 5
+
+	;If no main buildings were created prior to disconnection then run the normal AI routines.
+	? (_disconnected)&&(IsNull _controlCenter)&&(IsNull _barracks)&&(IsNull _light)&&(IsNull _heavy)&&(IsNull _air):_disconnected = false
+
+	? (_side == west):_resources = westResources;_commander = Leader WestCommanderTeam;_workers = totalWestWorkers;_team = WestCommanderTeam;_spottedBase = westBaseFound
+	? (_side == east):_resources = eastResources;_commander = Leader EastCommanderTeam;_workers = totalEastWorkers;_team = EastCommanderTeam;_spottedBase = eastBaseFound
+
+	#UpdateMortars
+
+		? (MFCTI116NoMortars):goto "CheckCommander"
+
+		;If a fire mission is in progress a new one may be requested after 100 seconds.
+		? (_side == west):_fireMission = westFireMission;_request = westRequestFireMission;_totalMortars = totalWestStationaryMortars
+		? (_side == east):_fireMission = eastFireMission;_request = eastRequestFireMission;_totalMortars = totalEastStationaryMortars
+
+		? (_totalMortars < 1):goto "CheckCommander"
+		? (_request && !_fireMission):[_commander] Exec "Main\AcceptFireMission.sqs"
+
+		;If a fire mission timer has started then incremement it.
+		? (_timeFireMission > 0):_timeFireMission = _timeFireMission + 15
+
+		;Start the timer.
+		? (_fireMission) && (_timeFireMission == 0):_timeFireMission = 15
+
+		;If the time delay has been reached reset it.
+		? (_side == west) && (_timeFireMission >= 100):_timeFireMission = 0;westFireMission = false;PublicVariable "westFireMission"
+		? (_side == east) && (_timeFireMission >= 100):_timeFireMission = 0;eastFireMission = false;PublicVariable "eastFireMission"
+
+		? (_resources > mortarRearmCost * 2) && (Random 100 < _mortarReloadProbability * _modifier):_return = "CheckCommander";goto "ReloadMortar"
+		? !(IsNull _spottedBase):_return = "CheckCommander";goto "BombardEnemyBase"
+
+	#CheckCommander
+
+		? !(Alive _commander):goto "Update"
+
+	? !(_teamsAssigned) && !(IsNull _spottedBase):_return = "SetModifier";goto "AssignTeamsToBaseAssault"
+
+	#SetModifier
+
+		_modifier = 1
+		? (_resources >= 5000):_modifier = 1.25
+		? (_resources >= 10000):_modifier = 1.5
+		? (_resources >= 20000):_modifier = 1.75
+		? (_resources >= 50000):_modifier = 2
+
+	_canBuild = false
+
+	? (_side == west)&&!(_disconnected)&&(GetDammage WestMobileHQ < 1)&&(_commander Distance WestMobileHQ < mobileHQBuildDistance):_canBuild = true
+	? (_side == east)&&!(_disconnected)&&(GetDammage EastMobileHQ < 1)&&(_commander Distance EastMobileHQ < mobileHQBuildDistance):_canBuild = true
+
+	;If AI commander has killed too many friendlies kill him.
+	? (Side _commander != west) && (Side _commander != east):_commander SetDammage 1;goto "Update"
+
+	;Upgrade.
+	? (_side == west):_upgradeInProgress = westUpgradeInProgress;_upgradedInfantry = westUpgradedInfantry;_upgradedBlackOps = westUpgradedBlackOps;_upgradedLight = westUpgradedLight;_upgradedHeavy = westUpgradedHeavy;_upgradedAir = westUpgradedAir;_upgradedAirRockets = westUpgradedAircraftRockets;_upgradedAirAT = westUpgradedAircraftAT;_upgradedRadar = westUpgradedRadar
+	? (_side == east):_upgradeInProgress = eastUpgradeInProgress;_upgradedInfantry = eastUpgradedInfantry;_upgradedBlackOps = eastUpgradedBlackOps;_upgradedLight = eastUpgradedLight;_upgradedHeavy = eastUpgradedHeavy;_upgradedAir = eastUpgradedAir;_upgradedAirRockets = eastUpgradedAircraftRockets;_upgradedAirAT = eastUpgradedAircraftAT;_upgradedRadar = eastUpgradedRadar
+
+	? (IsNull _controlCenter) || (GetDammage _controlCenter == 1):goto "CheckWorkers"
+	? (_upgradeInProgress):goto "CheckWorkers"
+
+	;Upgrade if needed and skip the normal AI delay if so.
+	? !(IsNull _barracks) && !(_upgradedInfantry) && (_resources >= upgradeInfantryCost):[_side,upgradeInfantryCost,infantryFactoryType] Exec "Main\Upgrade.sqs";goto "UpdateStart"
+	? !(IsNull _barracks) && !(_upgradedBlackOps) && (_resources >= upgradeBlackOpsCost * 2):[_side,upgradeBlackOpsCost,blackOpsUpgradeType] Exec "Main\Upgrade.sqs";goto "UpdateStart"
+	? !(IsNull _light) && !(_upgradedLight) && (_resources >= upgradeLightCost):[_side,upgradeLightCost,lightFactoryType] Exec "Main\Upgrade.sqs";goto "UpdateStart"
+	? !(IsNull _heavy) && !(_upgradedHeavy) && (_resources >= upgradeHeavyCost):[_side,upgradeHeavyCost,heavyFactoryType] Exec "Main\Upgrade.sqs";goto "UpdateStart"
+	? !(IsNull _air) && !(_upgradedAir) && (_resources >= upgradeAirCost):[_side,upgradeAirCost,airFactoryType] Exec "Main\Upgrade.sqs";goto "UpdateStart"
+	? !(IsNull _air) && !(_upgradedAirRockets) && (_resources >= upgradeAircraftRocketsCost):[_side,upgradeAircraftRocketsCost,aircraftRocketsUpgradeType] Exec "Main\Upgrade.sqs";goto "UpdateStart"
+	? !(IsNull _air) && !(_upgradedAirAT) && (_resources >= upgradeAircraftATCost):[_side,upgradeAircraftATCost,aircraftATUpgradeType] Exec "Main\Upgrade.sqs";goto "UpdateStart"
+	? !(IsNull _air) && !(_upgradedRadar) && (_resources >= upgradeRadarCost):[_side,upgradeRadarCost,radarUpgradeType] Exec "Main\Upgrade.sqs";goto "UpdateStart"
+
+	;Make sure there are workers.  Skip the normal AI delay if one is created.
+	#CheckWorkers
+
+		? !(_canBuild):goto "MoveToControlCenter"
+		? (_workers < 4) && (_resources >= workerCost):[_commander] Exec "Main\AddWorker.sqs";goto "UpdateStart"
+
+	? (_totalAITeams > 0) && !(IsNull _controlCenter) && !(_rolesAssigned):goto "SelectRandomTeam"
+
+	;Build base structures.
+	? (_disconnected):goto "MoveToControlCenter"
+	? !(_built Select controlCenterType) && (_resources >= controlCenterCost):_buildType = controlCenterType;goto "BuildNewStructure"
+	? !(_built Select infantryFactoryType) && (_resources >= infantryFactoryCost):_buildType = infantryFactoryType;goto "BuildNewStructure"
+	? !(_built Select lightFactoryType) && (_resources >= lightFactoryCost):_buildType = lightFactoryType;goto "BuildNewStructure"
+	? !(_built Select heavyFactoryType) && (_resources >= heavyFactoryCost) && (Random 100 <= _heavyBuildProbability * _modifier):_buildType = heavyFactoryType;goto "BuildNewStructure"
+	? !(_built Select fieldHospitalType) && (_resources >= fieldHospitalCost * _modifier):_buildType = fieldHospitalType;goto "BuildNewStructure"
+	? !(_built Select airFactoryType) && (_resources >= airFactoryCost) && (Random 100 <= _airBuildProbability * _modifier):_buildType = airFactoryType;goto "BuildNewStructure"
+	? !(_built Select repairDepotType) && (_resources >= repairDepotCost * _modifier) && (Random 100 <= _repairBuildProbability):_buildType = repairDepotType;goto "BuildNewStructure"
+	? !(_built Select ammoDepotType) && (_resources >= ammoDepotCost * _modifier) && (Random 100 <= _ammoBuildProbability):_buildType = ammoDepotType;goto "BuildNewStructure"
+
+	#BuildStationaryGun
+
+	? (_M2GunCount < 4) && (_resources >= M2GunCost + 500) && (Random 100 <= _M2BuildProbability):goto "BuildM2Gun"
+	? (_HEGunCount < 4) && (_resources >= AAGunCost + 500) && (Random 100 <= _HEBuildProbability):goto "BuildHEGun"
+	? (!MFCTI116NoMortars) && (_mortarCount < 2) && (_resources >= mortarCost + 500) && (Random 100 <= _mortarBuildProbability):goto "BuildMortar"
+	;LLM link (added): a side the LLM commands builds its two mortars as soon as it can, for base defence fire missions.
+	? (!MFCTI116NoMortars) && (_mortarCount < 2) && (_resources >= mortarCost + 500) && (((_side == east) && llmEastControl) || ((_side == west) && llmWestControl)):goto "BuildMortar"
+
+	#MoveToControlCenter
+
+		? (IsNull _controlCenter):goto "Update"
+		? (_commander Distance _controlCenter < 12):goto "AddSalvagers"
+
+		_position = GetPos _controlCenter
+		_direction = ((GetDir _controlCenter) + 270) % 360
+		_destination = [(_position Select 0)+((sin _direction)*7),(_position Select 1)+((cos _direction)*7),0]
+
+		_commander DoMove _destination
+
+		_moveCount = 0
+
+		#CheckControlCenterDistance
+		~0.5
+
+			_moveCount = _moveCount + 1
+
+			? !(Alive _commander) || (_moveCount > 50):goto "Update"
+			? (_commander Distance _controlCenter > 14):goto "CheckControlCenterDistance"
+
+	;Add independent salvagers.
+	#AddSalvagers
+
+		? !(Alive _commander):goto "Update"
+		? (_side == west):_totalSalvagers = Count westSalvageTrucks;_salvagerCost = mannedSalvageTruckCost
+		? (_side == east):_totalSalvagers = Count eastSalvageTrucks;_salvagerCost = mannedSalvageTruckEastCost
+
+		_salvagerProbability = _salvagerBuildProbability
+
+		;Reduce change of building a salvager if one already exists.
+		? (_totalSalvagers > 0):_salvagerProbability = _salvagerBuildProbability / 2
+
+		? (_side == west) && !(IsNull _repair) && (GetDammage _repair < 1) && (_totalSalvagers < 2) && (_resources >= _salvagerCost) && (Random 100 <= _salvagerProbability):[_side,_repair,salvageTruckType,salvageScript,GrpNull,false] Exec "Main\BuyVehicle.sqs";goto "Update"
+		? (_side == east) && !(IsNull _repair) && (GetDammage _repair < 1) && (_totalSalvagers < 2) && (_resources >= _salvagerCost) && (Random 100 <= _salvagerProbability):[_side,_repair,salvageTruckEastType,salvageScript,GrpNull,false] Exec "Main\BuyVehicle.sqs";goto "Update"
+
+	;Select a random AI team if one exists.
+	? (_totalAITeams < 1):goto "Update"
+	? (_rolesAssigned):_return = "SelectRandomTeam";goto "GetMostValuedTowns"
+
+	#SelectRandomTeam
+
+		? (_totalAITeams < 1):goto "CheckTeam"
+
+		_selectedTeam = Random _teamSize
+
+		;Cast to int.
+		_selectedTeam = _selectedTeam - (_selectedTeam % 1)
+
+	? (_side == east):goto "SelectEastTeam"
+
+	#SelectWestTeam
+
+		? (_selectedTeam == 0):_selectedTeam = 1
+		? ((westGroups Select _selectedTeam) In westPlayerGroups) || (IsNull (westGroups Select _selectedTeam)):_selectedTeam = (_selectedTeam + 1) % _teamSize;goto "SelectWestTeam"
+
+		goto "CheckTeam"
+	
+	#SelectEastTeam
+
+		? (_selectedTeam == 0):_selectedTeam = 1
+		? ((eastGroups Select _selectedTeam) In eastPlayerGroups) || (IsNull (eastGroups Select _selectedTeam)):_selectedTeam = (_selectedTeam + 1) % _teamSize;goto "SelectEastTeam"
+
+	#CheckTeam
+
+		? (Count _roles < 1):goto "TeamOrders"
+		? (_airTeam > 0) && (Count _defendedTargets >= maxDefendedTowns) && ((_orders Select _airTeam) != searchAndDestroyScript):_orders Set[_airTeam,searchAndDestroyScript];_return = "SetSelectedTeam";goto "SetTeams"
+
+	#SetSelectedTeam
+
+		? (_side == west):_team = westGroups Select _selectedTeam;westSelectedGroup = _selectedTeam;PublicVariable "westSelectedGroup"
+		? (_side == east):_team = eastGroups Select _selectedTeam;eastSelectedGroup = _selectedTeam;PublicVariable "eastSelectedGroup"
+		? (Count Units _team >= maxAIGroupSize):goto "TeamOrders"
+
+		_independentInfantry = false;_independentAir = false;_independentArmour = false
+
+		;LLM link (added): when the LLM commands this side, buy for the role it gave this team, not the stock role.
+		_teamRole = _roles Select _selectedTeam
+		? (_side == west) && (llmWestControl):_teamRole = llmWestRole Select _selectedTeam
+		? (_side == east) && (llmEastControl):_teamRole = llmEastRole Select _selectedTeam
+
+		? (_teamRole == airRole):_independentAir = true
+		? (_teamRole == armourRole) || (_teamRole == armourHeavyRole):_independentArmour = true
+		? (_teamRole == mechanizedRole) || (_teamRole == mechanizedAARole):_independentInfantry = true
+
+		_canBuildInfantry = false;_canBuildLight = false;_canBuildHeavy = false;_canBuildAir = false
+
+		? (Count Units _team < maxAIGroupSize - 2) && (_upgradedLight) && !(IsNull _light) && (GetDammage _light < 1) && !(_lightVehicleBuilt):_canBuildLight = true
+		? (Count Units _team < maxAIGroupSize - 3) && !(IsNull _heavy) && (GetDammage _heavy < 1) && !(_heavyVehicleBuilt):_canBuildHeavy = true
+		? (Count Units _team < maxAIGroupSize - 2) && !(IsNull _air) && (GetDammage _air < 1) && !(_aircraftBuilt):_canBuildAir = true
+		? !(IsNull _barracks) && (GetDammage _barracks < 1):_canBuildInfantry = true
+
+		;Reset build status.
+		_lightVehicleBuilt = false;_heavyVehicleBuilt = false;_aircraftBuilt = false
+
+		? (_side == east):goto "AddToEastTeam"
+
+	#AddToWestTeam
+
+		? (_canBuildAir) && (_independentAir) && (Random 100 <= 5 * _modifier) && (_resources >= UH60Cost):[_side,GrpNull,false,ObjNull,_resources] Exec "Main\BuyAircraft.sqs";_aircraftBuilt = true;goto "TeamOrders"
+		? (_canBuildHeavy) && (_independentArmour) && (Random 100 <= 5 * _modifier) && (_resources >= mannedM60Cost):[_side,GrpNull,false,ObjNull,_resources,roles Select _selectedTeam] Exec "Main\BuyTank.sqs";_heavyVehicleBuilt = true;goto "TeamOrders"
+		;LLM link (added): under LLM control a tank team is given tanks only. The stock line below also gave it
+		;anti-air vehicles, which for East are built at the heavy factory and take a tank's place in its queue.
+		_giveAA = true
+		? (llmWestControl):_giveAA = false
+		? (_canBuildLight) && (_giveAA) && (_independentArmour) && (Random 100 <= 5 * _modifier) && (_resources >= mannedVulcanCost):[_side,GrpNull,false,ObjNull,_resources] Exec "Main\BuyAA.sqs";_lightVehicleBuilt = true;goto "TeamOrders"
+;		? (_canBuildInfantry) && (_independentInfantry) && (Random 100 <= 5 * _modifier) && (_resources >= soldierCost):[_side,GrpNull,false,ObjNull,_resources,mechanizedRole] Exec "Main\BuyInfantry.sqs";goto "TeamOrders"
+		? (_canBuildHeavy) && (_independentInfantry) && (Random 100 <= 2 * _modifier) && (_resources >= mannedM2A2Cost):[_side,GrpNull,false,ObjNull,_resources] Exec "Main\BuyHeavyAPC.sqs";_heavyVehicleBuilt = true;goto "TeamOrders"
+		? (_canBuildLight) && (_independentInfantry) && (Random 100 <= 2.5 * _modifier) && (_resources >= mannedM113Cost):[_side,GrpNull,false,ObjNull,_resources] Exec "Main\BuyLightAPC.sqs";_lightVehicleBuilt = true;goto "TeamOrders"
+		? (_teamRole == mechanizedAARole) && (_canBuildLight) && (Random 100 <= 2.5 * _modifier) && (_resources >= mannedVulcanCost):[_side,GrpNull,false,ObjNull,_resources] Exec "Main\BuyAA.sqs";_lightVehicleBuilt = true;goto "TeamOrders"
+
+		goto "GiveResources"
+
+	#AddToEastTeam
+
+		? (_canBuildAir) && (_independentAir) && (Random 100 <= 5 * _modifier) && (_resources >= MI17Cost):[_side,GrpNull,false,ObjNull,_resources] Exec "Main\BuyAircraft.sqs";_aircraftBuilt = true;goto "TeamOrders"
+		? (_canBuildHeavy) && (_independentArmour) && (Random 100 <= 5 * _modifier) && (_resources >= mannedT72Cost):[_side,GrpNull,false,ObjNull,_resources,roles Select _selectedTeam] Exec "Main\BuyTank.sqs";_heavyVehicleBuilt = true;goto "TeamOrders"
+		;LLM link (added): as for West above.
+		_giveAA = true
+		? (llmEastControl):_giveAA = false
+		? (_canBuildLight) && (_giveAA) && (_independentArmour) && (Random 100 <= 5 * _modifier) && (_resources >= mannedShilkaCost):[_side,GrpNull,false,ObjNull,_resources] Exec "Main\BuyAA.sqs";_lightVehicleBuilt = true;goto "TeamOrders"
+;		? (_canBuildInfantry) && (_independentInfantry) && (Random 100 <= 5 * _modifier) && (_resources >= soldierCost):[_side,GrpNull,false,ObjNull,_resources,mechanizedRole] Exec "Main\BuyInfantry.sqs";goto "TeamOrders"
+		? (_canBuildHeavy) && (_independentInfantry) && (Random 100 <= 2.5 * _modifier) && (_resources >= mannedBMPCost):[_side,GrpNull,false,ObjNull,_resources] Exec "Main\BuyHeavyAPC.sqs";_heavyVehicleBuilt = true;goto "TeamOrders"
+		? (_teamRole == mechanizedAARole) && (_canBuildLight) && (Random 100 <= 2.5 * _modifier) && (_resources >= mannedVulcanCost):[_side,GrpNull,false,ObjNull,_resources] Exec "Main\BuyAA.sqs";_lightVehicleBuilt = true;goto "TeamOrders"
+
+#GiveResources
+
+	? (_resources < 5000) || (Random 100 > _giveTeamResourcesProbability * _modifier):goto "TeamOrders"
+
+	_amount = 250
+
+	? ((_roles Select _selectedTeam) >= mechanizedRole):_amount = 500
+	? ((_roles Select _selectedTeam) >= armourRole):_amount = 750
+	? ((_roles Select _selectedTeam) >= airRole):_amount = 1000
+
+	_receivingTeam = Random _teamSize
+	_amount = _amount * _modifier
+	[Leader (_groups Select _receivingTeam),_amount] Exec "Main\AddResourcesToTeam.sqs"
+	? ((_groups Select _receivingTeam) In westPlayerGroups) || ((_groups Select _receivingTeam) In eastPlayerGroups):[Leader (_groups Select _receivingTeam),groupCommander,messageFundsTransferred,_amount,0] Exec "Main\SendPlayerMessage.sqs"
+
+#TeamOrders
+
+	? (_rolesAssigned) || (IsNull _controlCenter):goto "Update"
+
+	goto "AssignTeamRoles"
+
+#BuildNewStructure
+
+	_built Set [_buildType,true]
+	_destination = [(_startingLocation Select 0) + (((basePositions Select _baseTemplate) Select _buildType) Select 0),(_startingLocation Select 1) + (((basePositions Select _baseTemplate) Select _buildType) Select 1)]
+	_direction = (baseDirections Select _baseTemplate) Select _buildType
+
+	;Fix (added): on a second or third attempt, place it 18 m further out each time.
+	_mainBuild = true
+	_shift = 18 * (_retries Select _buildType)
+	? (_shift > 0):_destination = [(_destination Select 0) + _shift,(_destination Select 1) + _shift]
+	_return = "Update";goto "BuildStructure"
+
+;GUNS
+#BuildHEGun
+
+	_buildType = HEGunType
+	_type = Random 100
+
+	? (_type < 80):_buildType = HEStationType
+	? (_type < 60):_buildType = HEFortificationType
+	? (_type < 30):_buildType = AAGunType
+	? (_type < 15):_buildType = AAStationType
+
+	_gunObject = fieldHospitalType + 5 + _HEGunCount
+	_HEGunCount = _HEGunCount + 1
+	_destination = [(_startingLocation Select 0) + (((basePositions Select _baseTemplate) Select _gunObject) Select 0),(_startingLocation Select 1) + (((basePositions Select _baseTemplate) Select _gunObject) Select 1)]
+	_direction = (baseDirections Select _baseTemplate) Select _gunObject
+	_return = "Update";goto "BuildStructure"
+
+#BuildM2Gun
+
+	_buildType = M2GunType
+	_type = Random 100
+
+	? (_type < 60):_buildType = M2StationType
+	? (_type < 40):_buildType = M2FortificationType
+
+	? (_type < 30) && (_resources > AAGunType):_buildType = AAGunType
+	? (_type < 15) && (_resources > AAStationType):_buildType = AAStationType
+
+	_gunObject = fieldHospitalType + 1 + _M2GunCount
+	_M2GunCount = _M2GunCount + 1
+
+	_destination = [(_startingLocation Select 0) + (((basePositions Select _baseTemplate) Select _gunObject) Select 0),(_startingLocation Select 1) + (((basePositions Select _baseTemplate) Select _gunObject) Select 1)]
+	_direction = (baseDirections Select _baseTemplate) Select _gunObject
+	_return = "Update";goto "BuildStructure"
+
+#BuildMortar
+
+	_buildType = mortarType
+	_gunObject = fieldHospitalType + 9 + _mortarCount
+	_mortarCount = _mortarCount + 1
+
+	_destination = [(_startingLocation Select 0) + (((basePositions Select _baseTemplate) Select _gunObject) Select 0),(_startingLocation Select 1) + (((basePositions Select _baseTemplate) Select _gunObject) Select 1)]
+	_direction = (baseDirections Select _baseTemplate) Select _gunObject
+	_return = "Update";goto "BuildStructure"
+
+#BuildStructure
+
+	_commanderDestination SetPos _destination
+	_commander DoMove _destination
+	_moveCount = 0
+
+	#CheckStructureDistance
+	~0.5
+
+		_moveCount = _moveCount + 1
+
+		;If commander is stuck return to the main loop.
+		? (_moveCount > 100):goto "CancelBuild"
+		? (_commander Distance _commanderDestination > 5):goto "CheckStructureDistance"
+		;Fix (added): a build lost because the commander died is cancelled properly, so it can be tried again.
+		? !(Alive _commander):goto "CancelBuild"
+
+	? (!Alive _commander):goto "CancelBuild"
+
+	DoStop _commander
+	_commander SetDir _direction
+	[_commander,_buildType] Exec "Build\BuildStructure.sqs"
+	_mainBuild = false
+	goto _return
+
+#CancelBuild
+
+	;Fix (added): the stock script marked a main building as built when it was ordered and never tried again
+	;if the commander could not reach the spot. Allow three more attempts.
+	? (_mainBuild) && ((_retries Select _buildType) < 3):_built Set [_buildType,false];_retries Set [_buildType,(_retries Select _buildType) + 1]
+	_mainBuild = false
+
+	? (_buildType == M2GunType) || (_buildType == M2StationType) || (_buildType == M2FortificationType):_M2GunCount = _M2GunCount - 1
+	? (_buildType == HEGunType) || (_buildType == HEStationType) || (_buildType == HEFortificationType):_HEGunCount = _HEGunCount - 1
+	? (_buildType == AAGunType) || (_buildType == AAStationType):_HEGunCount = _HEGunCount - 1
+	? (_buildType == mortarType):_mortarCount = _mortarCount - 1
+
+	goto "Update"
+
+#GetMostValuedTowns
+
+	_townCount = 0
+	_totalTowns = Count towns
+	_defendedTargets = []
+
+	#GetMostValuedTown
+
+	_count = 0
+	_value = 0
+	_mostValuedTown = ObjNull
+	_highestValue = 0
+
+	#GetTown
+
+		_town = towns Select _count
+		_value = townValues Select _count
+		_townSide = townSides Select _count
+
+		_count = _count + 1
+
+		? (_value > minDefendTownValue) && (_townSide == _sideText) && (_value > _highestValue) && !(_town In _defendedTargets):_mostValuedTown = _town;_highestValue = _value
+		? (_count < _totalTowns):goto "GetTown"
+
+	? !(IsNull _mostValuedTown):_defendedTargets = _defendedTargets + [_mostValuedTown]
+	_townCount = _townCount + 1
+
+	? (_townCount < ((Count _defendingTeams) - 1)):goto "GetMostValuedTown"
+
+	? (_side == west):westDefendedTargets = [_controlCenter] + _defendedTargets
+	? (_side == east):eastDefendedTargets = [_controlCenter] + _defendedTargets
+
+	goto _return
+
+#AssignTeamRoles
+
+	_count = 1
+	_airTeams = 0
+	_blackOpsTeams = 1
+	_infantryTeams = (_totalAITeams / 2) - 1
+	_defendingTeams = []
+	_roles = [0]
+	_orders = []
+
+	? (_totalAITeams > 4):_airTeams = 1;_infantryTeams = _infantryTeams - 1
+
+	#AssignRole
+
+		_roles = _roles + [0]
+		_orders = _orders + [takeTownsAndBasesScript]
+
+		? ((_groups Select _count) In _playerGroups):goto "AssignNextRole"
+		? (_infantryTeams > 0):_roles Set [_count,mechanizedRole];_infantryTeams = _infantryTeams - 1;goto "AssignOrders"
+		? (_airTeams > 0):_roles Set [_count,airRole];_airTeams = _airTeams - 1;_airTeam = _count;goto "AssignNextRole"
+		? (_blackOpsTeams > 0):_roles Set [_count,blackOpsRole];_blackOpsTeams = _blackOpsTeams - 1;_blackOpsTeam = _count;goto "AssignNextRole"
+
+		_roles Set [_count,armourRole]
+
+		#AssignOrders
+
+		? (Count _defendingTeams < (maxDefendedTowns + 1)):_defendingTeams = _defendingTeams + [_groups Select _count];_orders Set [_count,defendTownsAndBasesScript];_roles Set [_count,mechanizedAARole]
+
+		;For Defend the Base games set all AI except base defense team to attack.
+		? (Count _defendingTeams > 1) && (defendTheBase):_orders Set [_count,takeTownsAndBasesScript]
+
+		#AssignNextRole
+
+			_count = _count + 1
+			? (_count < _totalTeams):goto "AssignRole"
+
+		? (_side == west):westDefenseTeams = _defendingTeams
+		? (_side == east):eastDefenseTeams = _defendingTeams
+
+		_rolesAssigned = true
+		_return = "Update"
+
+#SetTeams
+
+	;LLM link (added): when the LLM commands this side it sets the team roles and orders, not this script.
+	? (_side == west) && (llmWestControl):goto _return
+	? (_side == east) && (llmEastControl):goto _return
+
+	_count = 0
+
+	? (_side == east):goto "SetEastTeam"
+
+	#SetWestTeam
+
+		? (_count == groupAlpha):westAlphaTeamScript = _orders Select _count;PublicVariable "westAlphaTeamScript";westAlphaIndependent = true;PublicVariable "westAlphaIndependent";westAlphaRole = _roles Select _count;PublicVariable "westAlphaRole"
+		? (_count == groupBravo):westBravoTeamScript = _orders Select _count;PublicVariable "westBravoTeamScript";westBravoIndependent = true;PublicVariable "westBravoIndependent";westBravoRole = _roles Select _count;PublicVariable "westBravoRole"
+		? (_count == groupCharlie):westCharlieTeamScript = _orders Select _count;PublicVariable "westCharlieTeamScript";westCharlieIndependent = true;PublicVariable "westCharlieIndependent";westCharlieRole = _roles Select _count;PublicVariable "westCharlieRole"
+		? (_count == groupDelta):westDeltaTeamScript = _orders Select _count;PublicVariable "westDeltaTeamScript";westDeltaIndependent = true;PublicVariable "westDeltaIndependent";westDeltaRole = _roles Select _count;PublicVariable "westDeltaRole"
+		? (_count == groupEcho):westEchoTeamScript = _orders Select _count;PublicVariable "westEchoTeamScript";westEchoIndependent = true;PublicVariable "westEchoIndependent";westEchoRole = _roles Select _count;PublicVariable "westEchoRole"
+		? (_count == groupFoxtrot):westFoxtrotTeamScript = _orders Select _count;PublicVariable "westFoxtrotTeamScript";westFoxtrotIndependent = true;PublicVariable "westFoxtrotIndependent";westFoxtrotRole = _roles Select _count;PublicVariable "westFoxtrotRole"
+		? (_count == groupGolf):westGolfTeamScript = _orders Select _count;PublicVariable "westGolfTeamScript";westGolfIndependent = true;PublicVariable "westGolfIndependent";westGolfRole = _roles Select _count;PublicVariable "westGolfRole"
+		? (_count == groupHotel):westHotelTeamScript = _orders Select _count;PublicVariable "westHotelTeamScript";westHotelIndependent = true;PublicVariable "westHotelIndependent";westHotelRole = _roles Select _count;PublicVariable "westHotelRole"
+
+		_count = _count + 1
+		? (_count < _totalTeams):goto "SetWestTeam"
+
+		goto _return
+
+	#SetEastTeam
+
+		? (_count == groupAlpha):eastAlphaTeamScript = _orders Select _count;PublicVariable "eastAlphaTeamScript";eastAlphaIndependent = true;PublicVariable "eastAlphaIndependent";eastAlphaRole = _roles Select _count;PublicVariable "eastAlphaRole"
+		? (_count == groupBravo):eastBravoTeamScript = _orders Select _count;PublicVariable "eastBravoTeamScript";eastBravoIndependent = true;PublicVariable "eastBravoIndependent";eastBravoRole = _roles Select _count;PublicVariable "eastBravoRole"
+		? (_count == groupCharlie):eastCharlieTeamScript = _orders Select _count;PublicVariable "eastCharlieTeamScript";eastCharlieIndependent = true;PublicVariable "eastCharlieIndependent";eastCharlieRole = _roles Select _count;PublicVariable "eastCharlieRole"
+		? (_count == groupDelta):eastDeltaTeamScript = _orders Select _count;PublicVariable "eastDeltaTeamScript";eastDeltaIndependent = true;PublicVariable "eastDeltaIndependent";eastDeltaRole = _roles Select _count;PublicVariable "eastDeltaRole"
+		? (_count == groupEcho):eastEchoTeamScript = _orders Select _count;PublicVariable "eastEchoTeamScript";eastEchoIndependent = true;PublicVariable "eastEchoIndependent";eastEchoRole = _roles Select _count;PublicVariable "eastEchoRole"
+		? (_count == groupFoxtrot):eastFoxtrotTeamScript = _orders Select _count;PublicVariable "eastFoxtrotTeamScript";eastFoxtrotIndependent = true;PublicVariable "eastFoxtrotIndependent";eastFoxtrotRole = _roles Select _count;PublicVariable "eastFoxtrotRole"
+		? (_count == groupGolf):eastGolfTeamScript = _orders Select _count;PublicVariable "eastGolfTeamScript";eastGolfIndependent = true;PublicVariable "eastGolfIndependent";eastGolfRole = _roles Select _count;PublicVariable "eastGolfRole"
+		? (_count == groupHotel):eastHotelTeamScript = _orders Select _count;PublicVariable "eastHotelTeamScript";eastHotelIndependent = true;PublicVariable "eastHotelIndependent";eastHotelRole = _roles Select _count;PublicVariable "eastHotelRole"
+
+		_count = _count + 1
+		? (_count < _totalTeams):goto "SetEastTeam"
+
+		goto _return
+
+;Assign black ops and assault team(s) to attack the enemy base.
+#AssignTeamsToBaseAssault
+
+	? (_blackOpsTeam >= 0):_orders Set [_blackOpsTeam,searchAndDestroyScript]
+
+	;If the AI side has plenty of money then assign an extra team to the base assault.
+	_assaultMod = 0
+	? (_resources > 50000):_assaultMod = 1
+
+	_teamsAssigned = true
+	_assaultTeams = 0
+	_count = 0
+
+	#AssignTeamToBaseAssault
+
+		? ((_roles Select _count) == armourRole):_orders Set [_count,searchAndDestroyScript];_assaultTeams = _assaultTeams + 1
+		? (_assaultTeams >= (teamsToAssaultBase + _assaultMod)):goto "SetTeams"
+
+		_count = _count + 1
+		? (_count < _totalTeams):goto "AssignTeamToBaseAssault"
+
+	goto "SetTeams"
+
+#BombardEnemyBase
+
+	? (_fireMission) || (_request):goto _return
+	? (_timeLastAIBombard < 600):goto _return
+
+	_timeLastAIBombard = 0
+
+	? (Random 100 < 10):goto _return
+
+	_marker = "WestCommanderWP"
+	? (_side == east):_marker = "EastCommanderWP"
+
+	? (_side == west):_spotted = westSpottedUnits;_structures = eastControlCenter + eastInfantryFactory + eastLightFactory + eastHeavyFactory + eastAirFactory + [EastMobileHQ]
+	? (_side == east):_spotted = eastSpottedUnits;_structures = westControlCenter + westInfantryFactory + westLightFactory + westHeavyFactory + westAirFactory + [WestMobileHQ]
+
+	_count = 0
+	_totalUnits = Count _spotted
+	_targets = []
+
+	;If no base or towns were found then return.
+	? (_totalUnits < 1):goto _return
+
+	#CheckTarget
+
+		_unit = _spotted Select _count
+		_count = _count + 1
+
+		? (GetDammage _unit < 1) && (_unit In _structures) && (_unit Distance _commander < MFCTI116MaxRange):_targets = _targets + [_unit]
+		? (_count < _totalUnits):goto "CheckTarget"
+
+	_totalTargets = Count _targets
+	? (_totalTargets < 1):goto _return
+
+	_target = _targets Select (Random (_totalTargets - 1))
+
+	[_commander,(GetPos _target) Select 0,(GetPos _target) Select 1] Exec "Main\SetAITeamWaypoint.sqs"
+	~.5
+	[_commander] Exec "Main\BombardWaypoint.sqs"
+	goto _return
+
+#ReloadMortar
+
+	? (_side == west):_mortars = westMortar
+	? (_side == east):_mortars = eastMortar
+
+	_count = 0
+	_totalMortars = Count _mortars
+	_reloadableMortars = []
+
+	? (_totalMortars < 1):goto _return
+
+	;Get functioning mortars within range.
+	#CheckMortar
+
+		_mortar = _mortars Select _count
+		_count = _count + 1
+
+		? (GetDammage _mortar < 1) && (_mortar Distance _commander < mobileHQBuildDistance):_reloadableMortars = _reloadableMortars + [_mortar]
+		? (_count < _totalMortars):goto "CheckMortar"
+
+	_totalMortars = Count _reloadableMortars
+	? (_totalMortars < 1):goto _return
+
+	;Randomly reload a mortar.
+	_mortar = _reloadableMortars Select (Random (_totalMortars - 1))
+	[_mortar,_commander] Exec "Main\BuyMortarShells.sqs"
+	goto _return

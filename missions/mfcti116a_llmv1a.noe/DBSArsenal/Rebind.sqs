@@ -1,0 +1,21 @@
+;DBS Arsenal - re-attach MFCTI player menus after the player's body was swapped.
+;Mirrors the action block in Main\ResetUnit.sqs without the respawn, casualty or bounty side effects.
+;Main\UpdatePlayer.sqs picks up the new body through dbsArsSwapped and re-adds the Score action itself.
+
+;Let the old body's menu loops see it is gone and exit first.
+~1.2
+
+? not (dbsArsMFCTI):[player] Exec "DBSArsenal\AddAction.sqs";Exit
+
+? (debugMP):player AddAction [Localize "STRDEBUGPROMPT","GUI\UpdateGUIDebugPrompt.sqs"]
+
+? (player == Leader WestCommanderTeam) or (player == Leader EastCommanderTeam):[player] Exec "GUI\UpdateGUIBuildMenu.sqs";[player] Exec "GUI\UpdateGUIControlCenterMenu.sqs";[player] Exec "GUI\UpdateGUICommandMenu.sqs";[player] Exec "GUI\UpdateGUITeamMenu.sqs"
+
+[player] Exec "GUI\UpdateGUIResourceMenu.sqs"
+[player] Exec "GUI\UpdateGUIOptionsMenu.sqs"
+[player] Exec "GUI\UpdateGUIFactoryMenu.sqs"
+[player] Exec "GUI\UpdateGUIRepairTruckMenu.sqs"
+[player] Exec "GUI\UpdateGUIAmmoTruckMenu.sqs"
+[player] Exec "DBSArsenal\AddAction.sqs"
+
+? (player != Leader WestCommanderTeam) and (player != Leader EastCommanderTeam):[player,50] Exec "Main\UnitCleanUp.sqs"

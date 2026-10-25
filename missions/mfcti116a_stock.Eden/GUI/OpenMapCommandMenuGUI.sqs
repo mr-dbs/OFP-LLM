@@ -1,0 +1,8 @@
+;Last modified 2/2/3
+;Open the Map Command Menu.
+
+_side = _this Select 0
+
+? (Side player != _side):Exit
+
+openMapCommandMenu = true

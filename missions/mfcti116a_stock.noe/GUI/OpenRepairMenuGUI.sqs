@@ -1,0 +1,4 @@
+;Last modified 4/29/3
+;Open the repair depot menu.
+
+openMenuType = repairDepotType

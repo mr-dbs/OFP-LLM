@@ -1,0 +1,75 @@
+;Last modified 3/3/4
+;Coop version.
+
+_timeLeft = 30
+_deathLocation = GetPos player
+_available = [true,false,false,false,false,false,false]
+_totalRespawns = Count respawnText
+
+CloseDialog 0
+_menu = CreateDialog Format["RespawnMenu%1",GUISkin]
+
+#Update
+~1
+
+	_timeLeft = _timeLeft - 1
+	CtrlSetText [IDCMenuTitle,Format["%1: %2",Localize "STRRESPAWNTIME",_timeLeft]]
+	CtrlSetText [IDCMENUSTATUSLABEL,Format["%1: %2.",Localize "STRRESPAWN",respawnText Select respawnLocation]]
+
+	goto "GetAvailableRespawns"
+
+	#UpdateButtons
+
+		_count = 0
+
+		#UpdateButton
+
+			_text = Format["%1",respawnText Select _count]
+			? !(_available Select _count):_text = Format["%1 (%2)",respawnText Select _count,Localize "STRNA"]
+			CtrlSetText [IDCMenuButton + _count,_text]
+			? (_timeLeft < 5):CtrlShow [IDCMenuButton + _count,false]
+
+			_count = _count + 1
+			? (_count < _totalRespawns):goto "UpdateButton"
+
+	? (teamRespawn):CtrlSetText [IDCMenuButton + 6,Format["%1: %2",Localize "STRTEAMRESPAWN",Localize "STRON"]]
+	? !(teamRespawn):CtrlSetText [IDCMenuButton + 6,Format["%1: %2",Localize "STRTEAMRESPAWN",Localize "STROFF"]]
+
+	CtrlEnable [IDCMenuButton + 6,!noTeamRespawning]
+	CtrlShow [IDCMenuButton + 6,!noTeamRespawning]
+
+	? (Alive player) || (_timeLeft < 0):CloseDialog 0;Exit
+	? !(dialog):Exit
+
+	goto "Update"
+
+#GetAvailableRespawns
+
+	_buildingsList = [infantryFactory,lightFactory,heavyFactory,airFactory,fieldHospital]
+	_listCount = 0
+	_totalLists = Count _buildingsList
+
+	? (_totalLists < 1):goto "UpdateButtons"
+
+	#CheckList
+
+		_count = 0
+		_list = _buildingsList Select _listCount
+		_totalBuildings = Count _list
+
+		? (_totalBuildings < 1):_available Set [_listCount + 1,false]
+
+		#CheckBuilding
+
+			_available Set [_listCount + 1,false]
+			? (GetDammage (_list Select _count) != 1):_available Set [_listCount + 1,true];goto "CheckNextList"
+
+			_count = _count + 1
+			? (_count < _totalBuildings):goto "CheckBuilding"
+
+	#CheckNextList
+
+		_listCount = _listCount + 1
+		? (_listCount < _totalLists):goto "CheckList"
+
+		goto "UpdateButtons"

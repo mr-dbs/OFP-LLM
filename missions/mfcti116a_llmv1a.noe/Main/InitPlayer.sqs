@@ -1,0 +1,372 @@
+;Last modified 12/31/3
+
+GUISkin = ""
+
+totalTeamCasualties = 0
+totalTeamVehiclesLost = 0
+
+statsStarted = false
+mapCenterComplete = false
+
+"Respawn_west" SetMarkerPos GetPos HiddenMarkers
+"Respawn_east" SetMarkerPos GetPos HiddenMarkers
+
+westStartingLocation = ObjNull
+eastStartingLocation = ObjNull
+
+[] Exec "Main\Stats.sqs"
+
+@ (statsStarted)
+
+;DBS Arsenal init (catalog, presets, settings).
+[] Exec "DBSArsenal\Init.sqs"
+
+;Client-side
+playSongs = false
+
+? (debug):playSongs = false
+
+viewDistance = 800
+alignWalls = true
+
+unlockWestMHQ = true
+unlockEastMHQ = true
+
+loadoutBuyCustomAndExit = false
+
+undefined = "scalar bool array string 0xfcffffef"
+
+;For alphanumeric sequence of a manual waypoint (D5, etc.)
+coordsColumn = ["A","B","C","D","E","F","G","H","I","J"]
+coordsRow = ["0","1","2","3","4","5","6","7","8","9"]
+
+;Manual waypoint setting.
+commandWaypointColumn = 0
+commandWaypointRow = 0
+
+commandPreciseWaypointColumn1 = 0
+commandPreciseWaypointColumn2 = 0
+
+commandPreciseWaypointRow1 = 0
+commandPreciseWaypointRow2 = 0
+
+OnMapSingleClick {[_pos,_alt,_shift] Exec "Main\MapClick.sqs"}
+
+;ARRAYS
+
+;Init build times (time until current item in factory is done being built)
+;Init factories currently owned.
+infantryFactory = []
+infantryFactoryDamage = []
+
+lightFactory = []
+lightFactoryDamage = []
+
+heavyFactory = []
+heavyFactoryDamage = []
+
+airFactory = []
+airFactoryDamage = []
+airFactoryPad = []
+
+controlCenter = []
+controlCenterDamage = []
+
+ammoDepot = []
+ammoDepotDamage = []
+
+repairDepot = []
+repairDepotDamage = []
+
+fieldHospital = []
+fieldHospitalDamage = []
+
+resistanceBarracks = []
+resistanceBarracksDamage = []
+
+resistanceFactory = []
+resistanceFactoryDamage = []
+
+;Defense structures.
+M2Fortification	= []
+M2FortificationDamage = []
+M2FortificationGun = []
+
+M2Fortification = []
+M2FortificationDamage = []
+M2FortificationGun = []
+
+HEFortification = []
+HEFortificationDamage = []
+HEFortificationGun = []
+
+ammoTrucks = []
+repairTrucks = []
+
+westMarkerGroups = [Group WestCommander,WestAlphaTeam,WestBravoTeam,WestCharlieTeam,WestDeltaTeam,WestEchoTeam,WestFoxtrotTeam,WestGolfTeam,WestHotelTeam]
+eastMarkerGroups = [Group EastCommander,EastAlphaTeam,EastBravoTeam,EastCharlieTeam,EastDeltaTeam,EastEchoTeam,EastFoxtrotTeam,EastGolfTeam,EastHotelTeam]
+westTeamNames = ["West Commander","West Alpha","West Bravo","West Charlie","West Delta","West Echo","West Foxtrot","West Golf","West Hotel"]
+eastTeamNames = ["East Commander","East Alpha","East Bravo","East Charlie","East Delta","East Echo","East Foxtrot","East Golf","East Hotel"]
+teamDesignations = [Localize "STRCOMMANDER",Localize "STRALPHA",Localize "STRBRAVO",Localize "STRCHARLIE",Localize "STRDELTA",Localize "STRECHO",Localize "STRFOXTROT",Localize "STRGOLF",Localize "STRHOTEL"]
+teamMapDesignations = ["Commander","Alpha","Bravo","Charlie","Delta","Echo","Foxtrot","Golf","Hotel"]
+
+;Arrays to store vehicles that have markers.
+markerVehicles = []
+westMarkerVehicles = []
+eastMarkerVehicles = []
+
+;Minimum value a town receives if own but unoccupied.
+unoccupiedTownPercentage = 0.25
+
+;Percentage of unit's value that opposing side receive if it is destroyed.
+bountyPercentage = 0.15
+
+;Total soldiers in each teams.
+westAlphaSize			= 1;PublicVariable "westAlphaSize"
+westBravoSize			= 1;PublicVariable "westBravoSize"
+westCharlieSize			= 1;PublicVariable "westCharlieSize"
+westDeltaSize			= 1;PublicVariable "westDeltaSize"
+westEchoSize			= 1;PublicVariable "westEchoSize"
+westFoxtrotSize			= 1;PublicVariable "westFoxtrotSize"
+westGolfSize			= 1;PublicVariable "westGolfSize"
+westHotelSize			= 1;PublicVariable "westHotelSize"
+
+eastAlphaSize			= 1;PublicVariable "eastAlphaSize"
+eastBravoSize			= 1;PublicVariable "eastBravoSize"
+eastCharlieSize			= 1;PublicVariable "eastCharlieSize"
+eastDeltaSize			= 1;PublicVariable "eastDeltaSize"
+eastEchoSize			= 1;PublicVariable "eastEchoSize"
+eastFoxtrotSize			= 1;PublicVariable "eastFoxtrotSize"
+eastGolfSize			= 1;PublicVariable "eastGolfSize"
+eastHotelSize			= 1;PublicVariable "eastHotelSize"
+
+;FACTORIES
+
+;Init build times (time until current item in factory is done being built)
+;Init factories currently owned.
+
+;Init upgrades (allow more build options for factories).
+westUpgradedInfantry = false;PublicVariable "westUpgradedInfantry"
+westUpgradedBlackOps = false;PublicVariable "westUpgradedBlackOps"
+westUpgradedLight = false;PublicVariable "westUpgradedLight"
+westUpgradedHeavy = false;PublicVariable "westUpgradedHeavy"
+westUpgradedAir = false;PublicVariable "westUpgradedAir"
+westUpgradedRadar = false;PublicVariable "westUpgradedRadar"
+westUpgradedAircraftRockets = false;PublicVariable "westUpgradedAircraftRockets"
+westUpgradedAircraftAT = false;PublicVariable "westUpgradedAircraftAT"
+
+eastUpgradedInfantry = false;PublicVariable "eastUpgradedInfantry"
+eastUpgradedBlackOps = false;PublicVariable "eastUpgradedBlackOps"
+eastUpgradedLight = false;PublicVariable "eastUpgradedLight"
+eastUpgradedHeavy = false;PublicVariable "eastUpgradedHeavy"
+eastUpgradedAir = false;PublicVariable "eastUpgradedAir"
+eastUpgradedRadar = false;PublicVariable "eastUpgradedRadar"
+eastUpgradedAircraftRockets = false;PublicVariable "eastUpgradedAircraftRockets"
+eastUpgradedAircraftAT = false;PublicVariable "eastUpgradedAircraftAT"
+
+;ARRAYS
+
+westGroups = [WestCommanderTeam,WestAlphaTeam,WestBravoTeam,WestCharlieTeam,WestDeltaTeam,WestEchoTeam,WestFoxtrotTeam,WestGolfTeam,WestHotelTeam]
+eastGroups = [EastCommanderTeam,EastAlphaTeam,EastBravoTeam,EastCharlieTeam,EastDeltaTeam,EastEchoTeam,EastFoxtrotTeam,EastGolfTeam,EastHotelTeam]
+
+;If an AI team is disabled replaced the undefined value with null.
+_count = 0
+_totalGroups = Count westGroups
+
+#InitGroup
+
+	? (Format["%1",westGroups Select _count] == undefined):westGroups Set[_count,GrpNull];call Format["West%1Team = GrpNull;PublicVariable ""West%1Team""",teamMapDesignations Select _count]
+	? (Format["%1",eastGroups Select _count] == undefined):eastGroups Set[_count,GrpNull];call Format["East%1Team = GrpNull;PublicVariable ""East%1Team""",teamMapDesignations Select _count]
+
+	_count = _count + 1
+	? (_count < _totalGroups):goto "InitGroup"
+
+;? (Format ["%1",_group] == undefined):
+
+;Messages
+messageNull							= 10
+
+messageEnemyCommanderKilled			= 50
+messageMHQDestroyed					= 51
+messageEnemyMHQDestroyed			= 52
+messageWorkerKilled					= 53
+messageSalvagerDestroyed			= 54
+messageMHQFriendlyFire				= 55
+
+messageSalvagedVehicle				= 60
+messageMaxVehiclesReached			= 61
+messageMaxGroupSizeReached			= 62
+messageRepairTruckInUse				= 63
+messageMaxSalvagersReached			= 64
+
+messageFundsTransferred				= 70
+
+messagePlayerDisconnected			= 80
+messageCommanderDisconnected		= 81
+
+messageConstructed					= 100
+messageBarracksConstructed			= messageConstructed + infantryFactoryType
+messageLightConstructed				= messageConstructed + lightFactoryType
+messageHeavyConstructed				= messageConstructed + heavyFactoryType
+messageAirConstructed				= messageConstructed + airFactoryType
+messageControlCenterConstructed		= messageConstructed + controlCenterType
+messageAmmoConstructed				= messageConstructed + ammoDepotType
+messageRepairConstructed			= messageConstructed + repairDepotType
+messageHospitalConstructed			= messageConstructed + fieldHospitalType
+
+messagePlaced						= 200
+messageBarracksPlaced				= messagePlaced + infantryFactoryType
+messageLightPlaced					= messagePlaced + lightFactoryType
+messageHeavyPlaced					= messagePlaced + heavyFactoryType
+messageAirPlaced					= messagePlaced + airFactoryType
+messageControlCenterPlaced			= messagePlaced + controlCenterType
+messageAmmoPlaced					= messagePlaced + ammoDepotType
+messageRepairPlaced					= messagePlaced + repairDepotType
+
+messageBuildingDestroyed			= 300
+messageBarracksDestroyed			= messageBuildingDestroyed + infantryFactoryType
+messageLightDestroyed				= messageBuildingDestroyed + lightFactoryType
+messageHeavyDestroyed				= messageBuildingDestroyed + heavyFactoryType
+messageAirDestroyed					= messageBuildingDestroyed + airFactoryType
+messageControlCenterDestroyed		= messageBuildingDestroyed + controlCenterType
+messageAmmoDestroyed				= messageBuildingDestroyed + ammoDepotType
+messageRepairDestroyed				= messageBuildingDestroyed + repairDepotType
+messageHospitalDestroyed			= messageBuildingDestroyed + fieldHospitalType
+
+messageOrderMoveToWaypoint			= 500
+messageOrderTakeTowns				= 501
+messageOrderDefend					= 502
+messageOrderDefendDenied			= 503
+messageOrderSearchAndDestroy		= 504
+messageOrderCommandVehicles			= 505
+messageOrderDisembarkVehicles		= 506
+messageOrderEmbarkTransports		= 507
+messageOrderDisembarkTransports		= 508
+
+messageUpgraded						= 600
+messageUpgradedInfantry				= messageUpgraded + infantryFactoryType
+messageUpgradedLight				= messageUpgraded + lightFactoryType
+messageUpgradedHeavy				= messageUpgraded + heavyFactoryType
+messageUpgradedAir					= messageUpgraded + airFactoryType
+messageUpgradedBlackOps				= messageUpgraded + blackOpsUpgradeType
+messageUpgradedRadar				= messageUpgraded + radarUpgradeType
+messageUpgradedAircraftRockets		= messageUpgraded + aircraftRocketsUpgradeType
+
+messageAICasualties					= 700
+messageEnemySpotted					= 701
+messageEnemyStructureSpotted		= 702
+
+messageBountyReceived				= 710
+messageCapturedTown					= 720
+messageRepairingVehicle				= 730
+messageCivilianKilled				= 740
+messageVehicleDestroyedByFriendly	= 750
+messageRearmingVehicle				= 760
+messageOptionVoted					= 770
+
+messageRequestFireMission				= 780
+messageFireMission						= 790
+
+messageDebugAIAssaultBase				= 1000
+messageDebugAwardResources				= 1001
+messageDebugPlayerResources				= 1002
+messageDebugVehicleAddToList			= 1003
+
+;End of messages
+
+;END OF CONSTANTS
+
+westPlayerGroups = []
+eastPlayerGroups = []
+
+;Temporary variable to store a newly created vehicle crew.
+newDriver = ObjNull
+newGunner = ObjNull
+newCommander = ObjNull
+
+gameStarted = true
+;PublicVariable "gameStarted"
+
+? (debug):player SideChat("Player init finished.")
+
+@ (serverStarted)
+
+? (Local LocalServerObject):goto "HideMarkers"
+
+;Create client-side lists of player controlled teams.
+? (westCommanderPlayer):westPlayerGroups = westPlayerGroups + [WestCommanderTeam]
+? (westAlphaPlayer):westPlayerGroups = westPlayerGroups + [WestAlphaTeam]
+? (westBravoPlayer):westPlayerGroups = westPlayerGroups + [WestBravoTeam]
+? (westCharliePlayer):westPlayerGroups = westPlayerGroups + [WestCharlieTeam]
+? (westDeltaPlayer):westPlayerGroups = westPlayerGroups + [WestDeltaTeam]
+? (westEchoPlayer):westPlayerGroups = westPlayerGroups + [WestEchoTeam]
+? (westFoxtrotPlayer):westPlayerGroups = westPlayerGroups + [WestFoxtrotTeam]
+? (westGolfPlayer):westPlayerGroups = westPlayerGroups + [WestGolfTeam]
+? (westHotelPlayer):westPlayerGroups = westPlayerGroups + [WestHotelTeam]
+
+? (eastCommanderPlayer):eastPlayerGroups = eastPlayerGroups + [EastCommanderTeam]
+? (eastAlphaPlayer):eastPlayerGroups = eastPlayerGroups + [EastAlphaTeam]
+? (eastBravoPlayer):eastPlayerGroups = eastPlayerGroups + [EastBravoTeam]
+? (eastCharliePlayer):eastPlayerGroups = eastPlayerGroups + [EastCharlieTeam]
+? (eastDeltaPlayer):eastPlayerGroups = eastPlayerGroups + [EastDeltaTeam]
+? (eastEchoPlayer):eastPlayerGroups = eastPlayerGroups + [EastEchoTeam]
+? (eastFoxtrotPlayer):eastPlayerGroups = eastPlayerGroups + [EastFoxtrotTeam]
+? (eastGolfPlayer):eastPlayerGroups = eastPlayerGroups + [EastGolfTeam]
+? (eastHotelPlayer):eastPlayerGroups = eastPlayerGroups + [EastHotelTeam]
+
+#HideMarkers
+
+	_count = 0
+	_hidden = GetPos HiddenMarkers
+
+	? (Side player == west):"Respawn_east" SetMarkerType "empty";"Respawn_west" SetMarkerPos _hidden
+	? (Side player == east):"Respawn_west" SetMarkerType "empty";"Respawn_east" SetMarkerPos _hidden
+
+#HideTownMarker
+
+	Format["West Town %1",_count] SetMarkerPos _hidden
+	Format["East Town %1",_count] SetMarkerPos _hidden
+	Format["Town Area %1",_count] SetMarkerPos _hidden
+
+	_count = _count + 1
+	? (_count < totalTowns):goto "HideTownMarker"
+
+_count = 0
+
+#HideVehicleMarker
+
+	Format["West Vehicle %1",_count] SetMarkerPos _hidden
+	Format["East Vehicle %1",_count] SetMarkerPos _hidden
+
+	_count = _count + 1
+	? (_count <= maxVehicleMarkers):goto "HideVehicleMarker"
+
+_count = 0
+_totalTeams = count teamMapDesignations
+_sideText = "West";_enemySideText = "East"
+? (Side player == east):_sideText = "East";_enemySideText = "West"
+
+Format["%1 Latest Activity",_enemySideText] SetMarkerType "empty"
+Format["%1 Latest Base",_enemySideText] SetMarkerType "empty"
+
+Format["%1 Latest Activity",_sideText] SetMarkerPos _hidden
+Format["%1 Latest Base",_sideText] SetMarkerPos _hidden
+
+#HideTeamMarker
+
+	Format["%1%2WP",_enemySideText,teamMapDesignations Select _count] SetMarkerType "empty"
+	Format["%1%2WP",_sideText,teamMapDesignations Select _count] SetMarkerPos _hidden
+
+	Format["%1 %2 Activity",_enemySideText,teamMapDesignations Select _count] SetMarkerType "empty"
+	Format["%1 %2 Activity",_sideText,teamMapDesignations Select _count] SetMarkerPos _hidden
+
+	Format["%1 %2 Base",_enemySideText,teamMapDesignations Select _count] SetMarkerType "empty"
+	Format["%1 %2 Base",_sideText,teamMapDesignations Select _count] SetMarkerPos _hidden
+
+	_count = _count + 1
+	? (_count < _totalTeams):goto "HideTeamMarker"
+
+@ (Side player == west) || (Side player == east)
+
+? (Side player == west):"Respawn_east" SetMarkerType "empty";"Respawn_west" SetMarkerPos _hidden
+? (Side player == east):"Respawn_west" SetMarkerType "empty";"Respawn_east" SetMarkerPos _hidden

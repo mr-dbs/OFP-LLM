@@ -1,0 +1,135 @@
+;Last modified 9/26/3
+;Script usage: [] Exec "UpdateQueue.sqs"
+
+_side = Side player
+
+? (_side != west) && (_side != east):Exit
+
+buildingQueue = []
+unitQueue = []
+mannedUnitQueue = []
+teamQueue = []
+_building = ObjNull
+
+#Update
+~2
+
+	#UpdateStart
+
+		_queueSize = Count unitQueue
+
+		? (_queueSize < 1):goto "Update"
+
+		goto "CheckPlayerResources"
+
+	#CheckQueue
+
+		_count = 0
+
+		#CheckBuilding
+
+			_building = buildingQueue Select _count
+			_unitType = unitQueue Select _count
+			_manned = mannedUnitQueue Select _count
+			_cost = unmannedUnitCosts Select _unitType
+			_unmannedCost = unmannedUnitCosts Select _unitType
+
+			? (cheapTransportAC) && ((_unitType In westAircraftTransports) || (_unitType In eastAircraftTransports)):_cost = _cost * cheapTransportACMultiplier;_unmannedCosts = _unmannedCosts * cheapTransportACMultiplier
+			? (expensiveAssaultAC) && ((_unitType In westAssaultAircraft) || (_unitType In eastAssaultAircraft)):_cost = _cost * expensiveAssaultACMultiplier;_unmannedCosts = _unmannedCosts * expensiveAssaultACMultiplier
+
+			_team = teamQueue Select _count
+
+			? (_manned):_cost = _unmannedCost
+			? (IsNull _building):goto "CheckNextBuilding"
+			? (GetDammage _building >= 1):goto "DeleteFromQueue"
+			? (_cost > _resources):goto "DeleteFromQueue"
+			? (_building In buildingsInUse):goto "CheckNextBuilding"
+
+			goto "RequestUnit"
+
+			#CheckNextBuilding
+
+				_count = _count + 1
+
+				? (_count < _queueSize):goto "CheckBuilding"
+
+	goto "Update"
+
+#RequestUnit
+
+	@ !queuedUnitRequestedMP
+	queuedUnitRequestedMP = true;PublicVariable "queuedUnitRequestedMP"
+
+	? (_building In buildingsInUse):goto "CheckNextBuilding"
+	? (GetDammage _building >= 1):goto "DeleteFromQueue"
+
+	player GroupChat Localize "STRBUILDINGNEXTUNIT"
+
+	? !(IsNull _team):goto "AddToTeam"
+
+	#AddToPlayer
+
+	;Add a soldier.
+	? (_unitType < lastWestSoldier):[player,_unitType,_building] Exec "Main\AddUnitToPlayer.sqs"
+	? (_unitType > lastWestUnit && _unitType < lastEastSoldier):[player,_unitType,_building] Exec "Main\AddUnitToPlayer.sqs"
+
+	;Add a vehicle
+	? (_unitType > lastWestSoldier && _unitType <= lastWestUnit):[player,_unitType,_building,_manned,false] Exec "Main\AddVehicleToPlayer.sqs"
+	? (_unitType > lastEastSoldier && _unitType <= lastEastUnit):[player,_unitType,_building,_manned,false] Exec "Main\AddVehicleToPlayer.sqs"
+
+	goto "DeleteFromQueue"
+
+	#AddToTeam
+
+	;Add a soldier.
+	? (_unitType < lastWestSoldier):[_side,_building,_unitType,noScript,_team,false] Exec "Main\BuyUnit.sqs"
+
+	? (_unitType > lastWestUnit && _unitType < lastEastSoldier):[_side,_building,_unitType,noScript,_team,false] Exec "Main\BuyUnit.sqs"
+
+	;Add a vehicle
+	? (_unitType > lastWestSoldier && _unitType <= lastWestUnit):[_side,_building,_unitType,noScript,_team,false] Exec "Main\BuyVehicle.sqs"
+	? (_unitType > lastEastSoldier && _unitType <= lastEastUnit):[_side,_building,_unitType,noScript,_team,false] Exec "Main\BuyVehicle.sqs"
+
+
+#DeleteFromQueue
+
+	buildingQueue Set [_count,ObjNull]
+	unitQueue Set [_count,0]
+	mannedUnitQueue Set [_count,false]
+	teamQueue Set [_count,ObjNull]
+
+	goto "UpdateStart"
+
+#CheckPlayerResources
+
+	_resources = 0
+
+	? (_side == east):goto "CheckEastPlayerResources"
+
+#CheckWestPlayerResources
+
+	? (player == Leader WestCommanderTeam):_resources = westResources;goto "CheckQueue"
+	? (player == Leader WestAlphaTeam):_resources = westAlphaResources;goto "CheckQueue"
+	? (player == Leader WestBravoTeam):_resources = westBravoResources;goto "CheckQueue"
+	? (player == Leader WestCharlieTeam):_resources = westCharlieResources;goto "CheckQueue"
+	? (player == Leader WestDeltaTeam):_resources = westDeltaResources;goto "CheckQueue"
+	? (player == Leader WestEchoTeam):_resources = westEchoResources;goto "CheckQueue"
+	? (player == Leader WestFoxtrotTeam):_resources = westFoxtrotResources;goto "CheckQueue"
+	? (player == Leader WestGolfTeam):_resources = westGolfResources;goto "CheckQueue"
+	? (player == Leader WestHotelTeam):_resources = westHotelResources;goto "CheckQueue"
+
+	Exit
+
+#CheckEastPlayerResources
+
+	? (player == Leader EastCommanderTeam):_resources = eastResources;goto "CheckQueue"
+	? (player == Leader EastAlphaTeam):_resources = eastAlphaResources;goto "CheckQueue"
+	? (player == Leader EastBravoTeam):_resources = eastBravoResources;goto "CheckQueue"
+	? (player == Leader EastCharlieTeam):_resources = eastCharlieResources;goto "CheckQueue"
+	? (player == Leader EastDeltaTeam):_resources = eastDeltaResources;goto "CheckQueue"
+	? (player == Leader EastEchoTeam):_resources = eastEchoResources;goto "CheckQueue"
+	? (player == Leader EastFoxtrotTeam):_resources = eastFoxtrotResources;goto "CheckQueue"
+	? (player == Leader EastGolfTeam):_resources = eastGolfResources;goto "CheckQueue"
+	? (player == Leader EastHotelTeam):_resources = eastHotelResources;goto "CheckQueue"
+
+	Exit

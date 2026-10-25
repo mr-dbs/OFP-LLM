@@ -1,0 +1,137 @@
+;Last modified 2/19/4
+;Routines for repair truck build menu.
+
+_unit = _this select 0
+_side = Side _unit
+
+openRepairBuildMenu = false
+repairBuildMenuInUse = false
+buildMenuBuild = false
+_actionsAdded = false
+
+? (debugMP):repairTruckCount = 0;repairTruckCheckActions = false
+
+#Update
+~0.5
+
+	? !(Alive _unit)||(Side _unit != west && Side _unit != east):_unit RemoveAction _actionID;Exit
+	? (debugMP):repairTruckCount = 0;repairTruckCheckActions = false
+
+	_count = 0
+	_inRange = false
+	_totalTrucks = Count repairTrucks
+
+	? (_totalTrucks < 1):goto "Update"
+
+	? (debugMP):repairTruckCount = _totalTrucks
+
+	#CheckRepairTruck
+
+		_truck = repairTrucks Select _count
+		_count = _count + 1
+
+		? (GetDammage _truck < 1) && (_unit Distance _truck < repairTruckBuildRange):_inRange = true;goto "CheckActions"
+		? (_count < _totalTrucks):goto "CheckRepairTruck"
+		? !(_inRange) && (_actionsAdded):_unit RemoveAction _actionID;_actionsAdded = false
+
+		goto "Update"
+
+	#CheckActions
+
+		? (_inRange) && !(_actionsAdded):_actionID = _unit AddAction [Localize "STRREPAIRTRUCKOPTIONS","GUI\OpenRepairTruckMenuGUI.sqs"];_actionsAdded = true
+		? (debugMP):repairTruckCheckActions = true
+
+		? (openRepairBuildMenu):goto "InitBuildMenu"
+		? !(repairBuildMenuInUse):goto "Update"
+		? (buildMenuBuild):goto "BuildDefense"
+
+		;If the value is not 1 then the menu was closed with the ESC key.
+		? !(dialog):repairBuildMenuInUse = false
+		_lastDefenseSelection = _defenseSelection
+
+		;Store current structure selection.
+		? (repairBuildMenuInUse):_defenseSelection = lbCurSel IDCMenuList
+
+		;If selection becomes -1 then the menu was exited by the ESC key.  Restore selection choice.
+		? (_defenseSelection < 0):_defenseSelection = _lastDefenseSelection
+
+	#UpdateInfoBox
+
+		;Show resources & total workers.
+		_text = Format["%1: %2",Localize "STRWORKERS",totalWestWorkers]
+		? (_side == east):_text = Format["%1: %2",Localize "STRWORKERS",totalEastWorkers]
+
+		lbClear IDCMenuInfo
+		[_unit,IDCMenuInfo,Format ["%1:",Localize "STRRESOURCES"]] Exec "GUI\SetGUIResources.sqs"
+
+		? (_unit == Leader WestCommanderTeam)||(_unit == Leader EastCommanderTeam):lbAdd[IDCMenuInfo,_text]
+
+		;Show auto-align on/off.
+		? (buildMenuAlign) && !(alignWalls):alignWalls = true;buildMenuAlign = false
+		? (buildMenuAlign) && (alignWalls):alignWalls = false;buildMenuAlign = false
+
+		CtrlSetText [IDCMenuButton,Format["%1: %2",Localize "STRAUTOALIGN",Localize "STROFF"]]
+
+		? (alignWalls):CtrlSetText [IDCMenuButton,Format["%1: %2",Localize "STRAUTOALIGN",Localize "STRON"]]
+
+		goto "Update"
+
+;Creates the build menu.
+#InitBuildMenu
+
+	openRepairBuildMenu = false
+	repairBuildMenuInUse = true
+
+	;Create the build menu.
+	_buildMenu = CreateDialog Format["RepairConstructionMenu%1",GUISkin]
+
+
+	lbClear IDCMenuInfo
+	lbAdd[IDCMenuInfo,""]
+
+	_count = observationTowerType
+	_totalStructures = Count structureNames
+	_IDC = IDCMenuList
+
+	;Add an entry onto the structure selection combobox.
+	#AddStructureSelection
+
+		_spacer = ""
+		? (structureCosts Select _count < 100):_spacer = " "
+		? (structureCosts Select _count < 1000):_spacer = _spacer + " "
+		? ((structureNames Select _count) == ""):_count = _count + 1;goto "AddStructureSelection"
+
+		_layout = "$%1 %2%3"
+		? (Localize "STRCURRENCYPOSITION" == "Back"):_layout = "%1$ %2%3"
+		_text = Format[_layout,structureCosts Select _count,_spacer,structureNames Select _count]
+
+		;Skip walls and AA guns on public servers.
+		? (publicServer) && ((_count >= AAGunType && _count <= mortarType) || _count == largeWallType):_count = _count + 1;goto "AddStructureSelection"
+		? (MFCTI116NoMortars) && (_count == mortarType):_count = _count + 1;goto "AddStructureSelection"
+
+		_selection = lbAdd[_IDC,_text]
+		lbSetValue [_IDC,_selection,_count]
+
+		_count = _count  + 1
+
+		? (_count < _totalStructures):goto "AddStructureSelection"
+
+		;Set cursor to last selected structure.
+		lbSetCurSel [IDCMenuList,_defenseSelection]
+
+		goto "Update"
+
+#BuildDefense
+
+	buildMenuBuild = false
+	repairBuildMenuInUse = false
+
+	_structureType = lbValue[IDCMenuList,_defenseSelection]
+
+	;Keep this line until remaining structures have been implemented (HE towers, etc.)
+;	? (_structureType > repairDepotType)&&(_structureType != M2GunType)&&(_structureType != M2StationType)&&(_structureType != HEGunType)&&(_structureType != HEStationType):buildMenuInUse = true;goto "Update"
+
+	[_unit,_structureType] Exec "Build\BuildStructure.sqs"
+
+	CloseDialog 0
+	goto "Update"

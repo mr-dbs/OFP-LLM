@@ -1,0 +1,38 @@
+;Last modified 11/14/3
+
+;Do not run this on the server.
+? (Local LocalServerObject):Exit
+
+@ (gamePropertiesStarted)
+
+_startedNightMission = false
+_lastOvercast = 0
+_lastRain = 0
+_notify15 = false
+_notify5 = false
+
+? (nightMission):SkipTime 11
+
+#Update
+~1
+
+	_delay = 60
+	? (acceleratedTime):_delay = 5
+
+	;If accelerated time is enabled then skip a little time.
+;	? (acceleratedTime):SkipTime (0.0165 * 2)
+	;1/2 hour = 24 hours.
+	;? (acceleratedTime):SkipTime 0.01333
+	;1 hour = 24 hours.
+	? (acceleratedTime):SkipTime (currentTime - DayTime)
+
+	? (timeToEnd <= 0):goto "SetWeather"
+	? !(_notify15) && (timeToEnd - time / 60 <= 15):_notify15 = true;TitleText[Localize "STR15MINUTESLEFT","Plain"]
+	? !(_notify5) && (timeToEnd - time / 60 <= 5):_notify5 = true;TitleText[Localize "STR5MINUTESLEFT","Plain"]
+
+#SetWeather
+
+	? (randomWeatherOvercast != _lastOvercast):(_delay * 4) SetOvercast randomWeatherOvercast
+	? (randomWeatherRain != _lastRain):_delay SetRain randomWeatherRain
+
+goto "Update"

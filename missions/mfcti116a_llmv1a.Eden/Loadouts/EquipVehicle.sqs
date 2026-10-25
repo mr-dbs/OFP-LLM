@@ -1,0 +1,85 @@
+;Last modified 2/19/4
+;Script Usage:[Vehicle,VehicleType] Exec "EquipVehicle.sqs"
+
+_vehicle = _this Select 0
+_vehicleType = _this Select 1
+
+_side = west
+? (_vehicleType > lastWestUnit):_side = east
+
+? (_side == west):_upgraded = westUpgradedAircraftRockets;_upgradedAT = westUpgradedAircraftAT
+? (_side == east):_upgraded = eastUpgradedAircraftRockets;_upgradedAT = eastUpgradedAircraftAT
+
+? !(publicServer):goto "CheckNoRockets"
+? (_vehicleType == MI17TransportType):goto "EquipMI17Transport"
+? (_vehicleType == MI17Type):goto "EquipMI17"
+
+;If needed remove any rockets from vehicle.
+#CheckNoRockets
+
+	? (!noACRockets && _upgraded) && (!noACATRockets && _upgradedAT):goto "EquipServer"
+	? (!noACRockets && _upgraded):goto "RemoveATs"
+
+	#RemoveRockets
+
+		? (publicServer):goto "RemoveRocketsPS"
+		? (_vehicleType == AH64AAType):_vehicle RemoveMagazine "ZuniLauncher38";_vehicle RemoveWeapon "ZuniLauncher38"
+		? (_vehicleType == KA50Type):_vehicle RemoveMagazine "MFCTI116Rocket80x40";_vehicle RemoveWeapon "MFCTI116Rocket80x40"
+		? (_vehicleType == KA50AAType):_vehicle RemoveMagazine "MFCTI116Rocket80x40";_vehicle RemoveWeapon "MFCTI116Rocket80x40"
+
+	#RemoveRocketsPS
+
+		? (_vehicleType == OH58Type):_vehicle RemoveMagazine "ZuniLauncherOH";_vehicle RemoveWeapon "ZuniLauncherOH"
+		? (_vehicleType == UH60Type):_vehicle RemoveMagazine "ZuniLauncher38";_vehicle RemoveWeapon "ZuniLauncher38"
+		? (_vehicleType == AH1Type):_vehicle RemoveMagazine "ZuniLauncher38";_vehicle RemoveWeapon "ZuniLauncher38"
+		? (_vehicleType == AH64Type):_vehicle RemoveMagazine "ZuniLauncher38";_vehicle RemoveWeapon "ZuniLauncher38"
+
+		? (_vehicleType == MI24Type):_vehicle RemoveMagazine "Rocket57x64";_vehicle RemoveWeapon "Rocket57x64"
+		? (_vehicleType == KA50Type):_vehicle RemoveMagazine "Rocket57x40Kamov";_vehicle RemoveWeapon "Rocket57x40Kamov"
+		? (_vehicleType == SU25Type):_vehicle RemoveMagazine "Rocket57x64";_vehicle RemoveWeapon "Rocket57x64"
+		? (_vehicleType == SU25LGBType):_vehicle RemoveMagazine "Rocket57x64";_vehicle RemoveWeapon "Rocket57x64"
+
+	#RemoveATs
+
+		? (!noACATRockets && _upgradedAT):goto "EquipServer"
+		? (publicServer):goto "RemoveATsPS"
+		? (_vehicleType == KA50AAType):_vehicle RemoveMagazine "MFCTI116AA11Launcher";_vehicle RemoveWeapon "MFCTI116AA11Launcher"
+		? (_vehicleType == AH64AAType):_vehicle RemoveMagazine "MFCTI116AIM9Launcher";_vehicle RemoveWeapon "MFCTI116AIM9Launcher"
+
+	#RemoveATsPS
+
+		? (_vehicleType == AH1Type):_vehicle RemoveMagazine "HellfireLauncherCobra";_vehicle RemoveWeapon "HellfireLauncherCobra"
+		? (_vehicleType == AH64Type):_vehicle RemoveMagazine "HellfireLauncherApach";_vehicle RemoveWeapon "HellfireLauncherApach"
+		? (_vehicleType == A10Type):_vehicle RemoveMagazine "Maverick";_vehicle RemoveWeapon "Maverick"
+
+		? (_vehicleType == MI24Type):_vehicle RemoveMagazine "HellfireLauncherHind";_vehicle RemoveWeapon "HellfireLauncherHind"
+		? (_vehicleType == V80Type):_vehicle RemoveMagazine "HellfireLauncherKamov";_vehicle RemoveWeapon "HellfireLauncherKamov"
+		? (_vehicleType == SU25Type):_vehicle RemoveMagazine "Ch29T";_vehicle RemoveWeapon "Ch29T"
+
+#EquipServer
+
+	? !(Local LocalServerObject) || (Local player):Exit
+
+	[_vehicle,_vehicleType] Exec "Loadouts\EquipCargo.sqs"
+	Exit
+
+;The MI17 'transport' does not have the standard heavy loadout of rockets.
+#EquipMI17Transport
+
+	_vehicle RemoveMagazine "Rocket57x192"
+	_vehicle RemoveWeapon "Rocket57x192"
+
+	_vehicle AddMagazine "Browning"
+	_vehicle AddWeapon "Browning"
+	goto "EquipServer"
+
+#EquipMI17
+
+	_vehicle RemoveMagazine "Rocket57x192"
+	_vehicle RemoveWeapon "Rocket57x192"
+
+	? (noACRockets) || !(_upgraded):Goto "EquipServer"
+
+	_vehicle AddMagazine "Rocket57x64"
+	_vehicle AddWeapon "Rocket57x64"
+	goto "EquipServer"

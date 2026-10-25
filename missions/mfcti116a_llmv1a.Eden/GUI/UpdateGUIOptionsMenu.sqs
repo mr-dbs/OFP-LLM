@@ -1,0 +1,215 @@
+;Last modified 3/3/4
+
+_unit = _this select 0
+_side = Side _unit
+
+;If true redraw command menu or opened sub-menu..
+openOptionsMenu = false
+optionsMenuInUse = false
+toggleGUISkin = false
+menuDeleteAll = false
+menuDelete = false
+menuToggleSongs = false
+_actionID = _unit AddAction[Localize "STROPTIONS","GUI\OpenOptionsMenuGUI.sqs"]
+
+#Update
+~0.5
+
+	? !(Alive _unit)||(Side _unit != west && Side _unit != east):_unit RemoveAction _actionID;Exit
+
+	#CheckActions
+
+		? (openOptionsMenu):goto "InitOptionsMenu"
+		? !(optionsMenuInUse):goto "Update"
+		? !(dialog) || (CtrlText IDCMenuTitle != Localize "STROPTIONSMENU"):optionsMenuInUse = false;goto "Update"
+
+		? (openResourceMenu):openResourceMenu = false;openResourceMenu = true
+		? (menuDeleteAll):goto "DeleteQueue"
+		? (menuDelete):goto "DeleteQueueEntry"
+
+		;Get respawn location.
+		_respawnSelection = lbValue[IDCMenuList1,lbCurSel IDCMenuList1]
+
+		? (_respawnSelection >= 0):respawnLocation = _respawnSelection
+
+		? !(playSongs):CtrlSetText [IDCMenuButton,Format["%1: %2",Localize "STRPLAYMUSIC",Localize "STROFF"]]
+		? (playSongs):CtrlSetText [IDCMenuButton,Format["%1: %2",Localize "STRPLAYMUSIC",Localize "STRON"]]
+
+		? !(toggleGUISkin):GUISkin = "";CtrlSetText [IDCMenuButton1,Format["%1: %2",Localize "STRGUISKIN",Localize "STRDARK"]]
+		? (toggleGUISkin):GUISkin = "Light";CtrlSetText [IDCMenuButton1,Format["%1: %2",Localize "STRGUISKIN",Localize "STRLIGHT"]]
+		? (_lastSkin && !toggleGUISkin) || (!_lastSkin && toggleGUISkin):goto "ResetMenu"
+		_lastSkin = toggleGUISkin
+
+		lbClear IDCMenuInfo
+
+		_text = Format ["%1:",Localize "STRPARAMMP2LABEL"]
+		_text1 = Localize "STRPARAMMP2A"
+
+		_points = westTotalPoints;_towns = westTownsHeld;_townsNeeded = townsToWin
+
+		? (townsToWin < 0):_townsNeeded = totalTowns
+		? (_side == east):_points = eastTotalPoints;_towns = eastTownsHeld
+
+		? (pointsToWin > 0):_text1 = Format["%1 %2 %3 %4",_points,Localize "STROF",pointsToWin,Localize "STRPOINTS"]
+		? (townsToWin != 0):_text1 = Format["%1 %2 %3 %4",_towns,Localize "STROF",_townsNeeded,Localize "STRTOWNS"]
+		? (timeToEnd > 0):_text1 = Format["%1 %2",timeToEnd,Localize "STRMINUTEGAME"]
+		lbAdd[IDCMenuInfo,Format["%1 %2",_text,_text1]]
+
+		_text = Format ["%1: %2%3",Localize "STRPLAYERPOOL",westPlayerResourcePercentage * 100,Localize "STRPERCENT"]
+		? (_side == east):_text = Format ["%1: %2%3",Localize "STRPLAYERPOOL",eastPlayerResourcePercentage * 100,Localize "STRPERCENT"]
+		lbAdd[IDCMenuInfo,_text]
+
+		_text = Format ["%1: %2%3",Localize "STRAWARDPLAYERPERCENT",westPlayerAwardPercentage * 100,Localize "STRPERCENT"]
+		? (_side == east):_text = Format ["%1: %2%3",Localize "STRAWARDPLAYERPERCENT",eastPlayerAwardPercentage * 100,Localize "STRPERCENT"]
+		lbAdd[IDCMenuInfo,_text]
+
+		[_unit,IDCMenuInfo,Format["%1:",Localize "STRRESOURCES"]] Exec "GUI\SetGUIResources.sqs"
+
+		[] Exec "GUI\GetGUIWaypointCoords.sqs"
+
+		_count = 0
+		_queueSize = Count unitQueue
+
+		? (_queueSize < 1):goto "Update"
+
+		lbClear IDCMenuList
+
+		#AddToQueue
+
+			_queueUnit = unitQueue Select _count
+			_manned = mannedUnitQueue Select _count
+			_unitTeam = teamQueue Select _count
+			_count = _count + 1
+
+			? !(IsNull _unitTeam):_return = "AddQueueText";goto "GetTeam"
+
+			#AddQueueText
+
+				_unitText = Format ["%1 ",Localize "STREMPTY"]
+				? (_manned):_unitText = ""
+				? ((unitNames Select _queueUnit) In soldierNames):_unitText = ""
+
+				_unitText = _unitText + (unitDescriptions Select _queueUnit)
+
+				_teamText = ""
+				? !(IsNull _unitTeam) && (_team >= 0):_teamText = Format[" to %1",teamDesignations Select _team]
+
+				_text = Format["%1%2",_unitText,_teamText]
+
+				? (_queueUnit != 0):_selection = lbAdd[IDCMenuList,_text];lbSetValue[IDCMenuList,_selection,_count - 1]
+				? (_count < _queueSize):goto "AddToQueue"
+
+		goto "Update"
+
+;Creates the resource menu.
+#InitOptionsMenu
+
+	optionsMenuInUse = true
+	openOptionsMenu = false
+
+	;Create the options menu.
+	_optionsMenu = CreateDialog Format ["OptionsMenu%1",GUISkin]
+
+	;Set respawn choices.
+	lbClear IDCMenuList1
+
+	_count = 0
+	_totalRespawns = Count respawnText
+
+	#AddRespawn
+
+		_selection = lbAdd[IDCMenuList1,respawnText Select _count]
+		lbSetValue [IDCMenuList1,_selection,_count]
+		_count = _count + 1
+
+		? (_count < _totalRespawns):goto "AddRespawn"
+
+	lbSetCurSel[IDCMenuList1,respawnLocation]
+
+	? !(playSongs):CtrlSetText [IDCMenuButton,Format["%1: %2",Localize "STRPLAYMUSIC",Localize "STROFF"]]
+	? (playSongs):CtrlSetText [IDCMenuButton,Format["%1: %2",Localize "STRPLAYMUSIC",Localize "STRON"]]
+
+	? !(toggleGUISkin):GUISkin = "";CtrlSetText [IDCMenuButton1,Format["%1: %2",Localize "STRGUISKIN",Localize "STRDARK"]]
+	? (toggleGUISkin):GUISkin = "Light";CtrlSetText [IDCMenuButton1,Format["%1: %2",Localize "STRGUISKIN",Localize "STRLIGHT"]]
+
+	[] Exec "GUI\SetGUIWaypointCoords.sqs"
+
+	lbClear IDCMenuInfo
+	lbAdd[IDCMenuInfo,""]
+
+	goto "Update"
+
+#DeleteQueueEntry
+
+	menuDelete = false
+	_selectedQueueEntry = lbValue [IDCMenuList,lbCurSel IDCMenuList]
+
+	? (_selectedQueueEntry < 0) || (_selectedQueueEntry >= Count unitQueue):goto "Update"
+
+	buildingQueue Set [_selectedQueueEntry,ObjNull]
+	unitQueue Set [_selectedQueueEntry,0]
+	mannedUnitQueue Set [_selectedQueueEntry,false]
+	teamQueue Set [_selectedQueueEntry,ObjNull]
+
+	goto "Update"
+
+#DeleteQueue
+
+	menuDeleteAll = false
+
+	_count = 0
+	_queueSize = Count unitQueue
+
+	#DeleteEntry
+
+		buildingQueue Set [_count,ObjNull]
+		unitQueue Set [_count,0]
+		mannedUnitQueue Set [_count,false]
+		teamQueue Set [_count,ObjNull]
+		_count = _count + 1
+
+		? (_count < _queueSize):goto "DeleteEntry"
+
+	goto "Update"
+
+;Determine if player is a commander or not and get appropriate resources available.
+#GetTeam
+
+	_team = -1
+
+	? (_side == east):goto "GetEastTeam"
+
+	#GetWestTeam
+
+		? (_unitTeam == WestCommanderTeam):_team = groupCommander
+		? (_unitTeam == WestAlphaTeam):_team = groupAlpha
+		? (_unitTeam == WestBravoTeam):_team = groupBravo
+		? (_unitTeam == WestCharlieTeam):_team = groupCharlie
+		? (_unitTeam == WestDeltaTeam):_team = groupDelta
+		? (_unitTeam == WestEchoTeam):_team = groupEcho
+		? (_unitTeam == WestFoxtrotTeam):_team = groupFoxtrot
+		? (_unitTeam == WestGolfTeam):_team = groupGolf
+		? (_unitTeam == WestHotelTeam):_team = groupHotel
+
+		goto _return
+
+	#GetEastTeam
+
+		? (_unitTeam == EastCommanderTeam):_team = groupCommander
+		? (_unitTeam == EastAlphaTeam):_team = groupAlpha
+		? (_unitTeam == EastBravoTeam):_team = groupBravo
+		? (_unitTeam == EastCharlieTeam):_team = groupCharlie
+		? (_unitTeam == EastDeltaTeam):_team = groupDelta
+		? (_unitTeam == EastEchoTeam):_team = groupEcho
+		? (_unitTeam == EastFoxtrotTeam):_team = groupFoxtrot
+		? (_unitTeam == EastGolfTeam):_team = groupGolf
+		? (_unitTeam == EastHotelTeam):_team = groupHotel
+
+		goto _return
+
+#ResetMenu
+
+	CloseDialog 0
+	~0.25
+	_lastSkin = toggleGUISkin
+	goto "InitOptionsMenu"

@@ -1,0 +1,30 @@
+;Last modified 8/28/3
+;Script usage:  [Group,true/false,Factory,Resources] Exec "BuyHeavyAPC.sqs"
+;Use to make AI randomly purchase an APC.
+
+_side = _this Select 0
+_group = _this Select 1
+_teamPurchase = _this Select 2
+_factory = _this Select 3
+_resources = _this Select 4
+
+? (_side == east):goto "BuyEast"
+
+#BuyWest
+
+	_vehicleType = M2A2Type
+	? !(publicServer) && (westUpgradedHeavy) && (Random 100 < 50) && (_resources >= mannedM3A2Cost):_vehicleType = M3A2Type
+
+	[_side,_factory,_vehicleType,noScript,_group,_teamPurchase] Exec "Main\BuyVehicle.sqs"
+	Exit
+
+#BuyEast
+
+	_vehicleType = BMPType
+	? !(eastUpgradedHeavy):goto "BuyEastAPC"
+	? (Random 100 < 50) && (_resources >= mannedBMP2Cost):_vehicleType = BMP2Type
+	? !(publicServer) && (Random 100 < 50) && (_resources >= mannedBMP2ECost):_vehicleType = BMP2EType
+
+	#BuyEastAPC
+
+		[_side,_factory,_vehicleType,noScript,_group,_teamPurchase] Exec "Main\BuyVehicle.sqs"

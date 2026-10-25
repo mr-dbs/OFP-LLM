@@ -1,0 +1,11 @@
+;Last modified 9/4/3
+
+_unit = _this Select 0
+_group = Group _unit
+_side = Side _unit
+
+? (Alive _unit):Exit
+
+~300
+
+DeleteVehicle _unit

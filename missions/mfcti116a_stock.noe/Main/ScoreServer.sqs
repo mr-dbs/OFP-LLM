@@ -1,0 +1,59 @@
+;Last modified 9/19/3
+
+_unit = _this Select 0
+_side = Side _unit
+
+_income = 0
+_westTownsHeld = 0
+_westValue = 0
+_eastTownsHeld = 0
+_eastValue = 0
+_count = 0
+_totalTowns = Count towns
+
+#CountTowns
+
+	;Minimum value a side receives for an owned town.
+	_value = (townValues Select _count) * unoccupiedTownPercentage
+
+	;If No Town Occupation parameter is set give max resources for an owned town.
+	? (noTownOccupation):_value = townValues Select _count;goto "GetValueMod"
+
+	;If a side occupies the area and the other side is not present then add the full value.
+	? (townSides Select _count == "West") && (townAreaWestSides Select _count) && !(townAreaEastSides Select _count):_value = townValues Select _count
+	? (townSides Select _count == "East") && (townAreaEastSides Select _count) && !(townAreaWestSides Select _count):_value = townValues Select _count
+
+	#GetValueMod
+
+	_valueMod = 0
+
+	? (townSides Select _count == "West") && (westPlayers > 1):_valueMod = _valueMod + westPlayers * .1
+	? (townSides Select _count == "East") && (eastPlayers > 1):_valueMod = _valueMod + eastPlayers * .1
+
+	_valueMod = _valueMod / 2 + 1
+	_value = _value * _valueMod
+
+	? (fastGame):_value = _value * fastGameMultiplier
+	? (higherIncome):_value = _value * higherIncomeMultiplier
+
+	;If the flag is west then the town is owned by the west.  Add the income to the west.
+	? (townSides Select _count == "West"):_westValue = _westValue + _value;_westTownsHeld = _westTownsHeld + 1
+	? (townSides Select _count == "East"):_eastValue = _eastValue + _value;_eastTownsHeld = _eastTownsHeld + 1
+
+	_count = _count + 1
+
+	? (_count < _totalTowns):goto "CountTowns"
+
+	_westValue = _westValue - (_westValue % 1)
+	_eastValue = _eastValue - (_eastValue % 1)
+
+	westIncome = _westValue;PublicVariable "westIncome"
+	westTownsHeld = _westTownsHeld;PublicVariable "westTownsHeld"
+
+	eastIncome = _eastValue;PublicVariable "eastIncome"
+	eastTownsHeld = _eastTownsHeld;PublicVariable "eastTownsHeld"
+
+	westTotalPoints = westTotalCommanderPoints+westTotalAlphaPoints+westTotalBravoPoints+westTotalCharliePoints+westTotalDeltaPoints+westTotalEchoPoints+westTotalFoxtrotPoints+westTotalGolfPoints+westTotalHotelPoints;PublicVariable "westTotalPoints"
+	eastTotalPoints = eastTotalCommanderPoints+eastTotalAlphaPoints+eastTotalBravoPoints+eastTotalCharliePoints+eastTotalDeltaPoints+eastTotalEchoPoints+eastTotalFoxtrotPoints+eastTotalGolfPoints+eastTotalHotelPoints;PublicVariable "eastTotalPoints"
+
+	requestScore = false;PublicVariable "requestScore"

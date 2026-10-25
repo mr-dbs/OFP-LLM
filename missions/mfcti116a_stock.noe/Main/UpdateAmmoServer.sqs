@@ -1,0 +1,38 @@
+;Last modified 8/30/3
+;Check for vehicles that can be rearmed.
+;ScriptUsage:  [Side,Building/Unit,Truck] Exec "UpdateAmmo.sqs"
+
+_side = _this Select 0
+_depot = _this Select 1
+_truck = _this Select 2
+
+? !(Local LocalServerObject):Exit
+
+#Update
+~30
+
+	? (IsNull _depot):Exit
+	? !(publicServer) && (GetDammage _depot >= 1):Exit
+	? (GetDammage _depot >= 1):goto "Update"
+
+	_count = 0
+
+	? (Count vehicles < 1):goto "Update"
+
+		#CheckVehicle
+
+			_vehicle = vehicles Select _count
+			_driver = Driver _vehicle
+
+			? (GetDammage _vehicle >= 1) || (IsNull _driver):goto "CheckNextVehicle"
+			? (Side _driver != _side):goto "CheckNextVehicle"
+			? (_vehicle Distance _depot > ammoDepotRearmRange):goto "CheckNextVehicle"
+
+			[_vehicle,false] Exec "Loadouts\RearmVehicle.sqs"
+
+			#CheckNextVehicle
+	
+				_count = _count + 1
+				? (_count < Count vehicles):goto "CheckVehicle"
+
+				goto "Update"

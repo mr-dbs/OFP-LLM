@@ -1,0 +1,25 @@
+;Last modified 10/4/3
+
+_side = _this Select 0
+_group = _this Select 1
+_unitType = _this Select 2
+_building = _this Select 3
+
+? (_side == east):goto "AddToEast"
+
+#AddToWest
+
+	@ (IsNull addToWestPlayer)
+
+	addToWestPlayer = _group;PublicVariable "addToWestPlayer"
+	addToWestPlayerUnit = _unitType;PublicVariable "addToWestPlayerUnit"
+	addToWestPlayerBuilding = _building;PublicVariable "addToWestPlayerBuilding"
+	Exit
+
+#AddToEast
+
+	@ (IsNull addToEastPlayer)
+
+	addToEastPlayer = _group;PublicVariable "addToEastPlayer"
+	addToEastPlayerUnit = _unitType;PublicVariable "addToEastPlayerUnit"
+	addToEastPlayerBuilding = _building;PublicVariable "addToEastPlayerBuilding"

@@ -1,0 +1,174 @@
+;Last modified 2/19/4
+;Script Usage:  [Unit,Type] Exec "BuildStructure.sqs"
+
+_unit = _this Select 0
+_structureType = _this Select 1
+_side = Side _unit
+_cost = structureCosts Select _structureType
+_points = _cost / buildValuePerPoint
+_reportToPlayer = false
+
+? (Group _unit In westPlayerGroups) || (Group _unit In eastPlayerGroups):_reportToPlayer = true
+
+;Ignore stationary gun limits for AIs.
+? !(_reportToPlayer):goto "CheckTowns"
+
+_AA = false
+_HE = false
+_M2 = false
+
+? (noStationaryGunLimit):goto "CheckMortar"
+
+? (_structureType == M2GunType || _structureType == M2StationType || _structureType == M2FortificationType):_M2 = true
+? (_structureType == HEGunType || _structureType == HEStationType || _structureType == HEFortificationType):_HE  = true
+? (_structureType == AAGunType || _structureType == AAStationType):_AA = true
+? (_structureType == mortarType):_mortar = true
+
+#CheckMortar
+
+? (_mortar) && (MFCTI116NoMortars):Exit
+? (_side == east):goto "CheckEast"
+
+#CheckWest
+
+	? (_M2) && (totalWestStationaryM2s >= maxStationaryM2s):Hint Format[Localize "STRMAXM2S",maxStationaryM2s];Exit
+	? (_HE) && (totalWestStationaryHEs >= maxStationaryHEs):Hint Format[Localize "STRMAXHES",maxStationaryHEs];Exit
+	? (_AA) && (totalWestStationaryAAs >= maxStationaryAAs):Hint Format[Localize "STRMAXAAS",maxStationaryAAs];Exit
+	? (_mortar) && (totalWestStationaryMortars >= maxStationaryMortars):Hint Format[Localize "STRMAXMORTARS",maxStationaryMortars];Exit
+
+	goto "CheckTowns"
+
+#CheckEast
+
+	? (_M2) && (totalEastStationaryM2s >= maxStationaryM2s):Hint Format[Localize "STRMAXM2S",maxStationaryM2s];Exit
+	? (_HE) && (totalEastStationaryHEs >= maxStationaryHEs):Hint Format[Localize "STRMAXHES",maxStationaryHEs];Exit
+	? (_AA) && (totalEastStationaryAAs >= maxStationaryAAs):Hint Format[Localize "STRMAXAAS",maxStationaryAAs];Exit
+	? (_mortar) && (totalEastStationaryMortars >= maxStationaryMortars):Hint Format[Localize "STRMAXMORTARS",maxStationaryMortars];Exit
+
+#CheckTowns
+
+	_count = 0
+	_totalTowns = Count townsMP
+
+#CheckTown
+
+	_distance = (townsMP Select _count) Distance _unit
+	_count = _count + 1
+
+	? (_distance < 35) && (_reportToPlayer):Hint Localize "STRCANTPLACESTRUCTURE";Exit
+	? (_distance < 35):Exit
+	? (_count < _totalTowns):goto "CheckTown"
+
+? (_unit != Leader WestCommanderTeam) && (_unit != Leader EastCommanderTeam):goto "CheckPlayerResources"
+
+_direction = GetDir _unit
+_position = GetPos _unit
+_distance = 8
+_range = 10
+? (_structureType == airFactoryType):_distance = 25;_range = 25
+? (_structureType == heavyFactoryType):_range = 12;_distance = 12
+
+_x = (_position Select 0) + ((sin _direction) * _distance)
+_y = (_position Select 1) + ((cos _direction) * _distance)
+
+_count = 0
+_totalTrucks = Count repairTrucks
+? (_totalTrucks < 1):goto "CheckMHQ"
+
+#CheckRepairTruck
+
+	_position = GetPos (repairTrucks Select _count)
+	_distance = sqrt((_x - (_position Select 0))^2 + (_y - (_position Select 1))^2)
+	_count = _count + 1
+
+	? (_distance < _range) && (_reportToPlayer):Hint Localize "STRCANTPLACESTRUCTURE";Exit
+	? (_count < _totalTrucks):goto "CheckRepairTruck"
+
+#CheckMHQ
+
+	? (_side == west) && (_reportToPlayer):_position = GetPos WestMobileHQ;_distance = sqrt((_x - (_position Select 0))^2 + (_y - (_position Select 1))^2)
+	? (_side == east) && (_reportToPlayer):_position = GetPos EastMobileHQ;_distance = sqrt((_x - (_position Select 0))^2 + (_y - (_position Select 1))^2)
+	? (_reportToPlayer) && (_distance < _range):Hint Localize "STRCANTPLACESTRUCTURE";Exit
+
+? (_unit != Leader WestCommanderTeam) && (_unit != Leader EastCommanderTeam):goto "CheckPlayerResources"
+
+_resources = westResources
+? (_side == east):_resources = eastResources
+
+#CheckResources
+
+_needed = _cost - _resources
+
+;If more resources are needed then available report an error to player.
+? (_needed > 0) && !(_reportToPlayer):Exit
+? (_needed > 0):Hint Format["%1  (%2 $%3 %4.)",Localize "STRNOTENOUGHRESOURCES",Localize "STRNEED",_needed,Localize "STRMORE"];Exit
+
+? (_side == east):Goto "SetEast"
+
+@ (!addWestStructure)
+
+? (debug):player SideChat ("Build west structure (client).")
+
+[Group _unit,_cost] Exec "Main\SubtractTeamResources.sqs"
+addWestStructureType = _structureType;PublicVariable "addWestStructureType"
+addWestStructurePlayer = _unit;PublicVariable "addWestStructurePlayer"
+addWestStructureX = GetPos _unit Select 0;PublicVariable "addWestStructureX"
+addWestStructureY = GetPos _unit Select 1;PublicVariable "addWestStructureY"
+addWestStructureZ = GetPos _unit Select 2;PublicVariable "addWestStructureZ"
+addWestStructureDirection = GetDir _unit;PublicVariable "addWestStructureDirection"
+addWestStructureAlign = alignWalls;PublicVariable "addWestStructureAlign"
+addWestStructure = true;PublicVariable "addWestStructure"
+
+? (Group _unit In westPlayerGroups):[_unit,_points] Exec "Main\AddPlayerPoints.sqs"
+
+Exit
+
+#SetEast
+
+@ (!addEastStructure)
+
+? (debug):player SideChat ("Build east structure (client).")
+
+[Group _unit,_cost] Exec "Main\SubtractTeamResources.sqs"
+addEastStructureType = _structureType ;PublicVariable "addEastStructureType"
+addEastStructurePlayer = _unit;PublicVariable "addEastStructurePlayer"
+addEastStructureX = GetPos _unit Select 0;PublicVariable "addEastStructureX"
+addEastStructureY = GetPos _unit Select 1;PublicVariable "addEastStructureY"
+addEastStructureZ = GetPos _unit Select 2;PublicVariable "addEastStructureZ"
+addEastStructureDirection = GetDir _unit;PublicVariable "addEastStructureDirection"
+addEastStructureAlign = alignWalls;PublicVariable "addEastStructureAlign"
+addEastStructure = true;PublicVariable "addEastStructure"
+
+? (Group _unit In eastPlayerGroups):[_unit,_points] Exec "Main\AddPlayerPoints.sqs"
+
+Exit
+
+#CheckPlayerResources
+
+	? (Side _unit == east):goto "CheckEastPlayerResources"
+
+#CheckWestPlayerResources
+
+	? (_unit == Leader WestAlphaTeam):_resources = westAlphaResources
+	? (_unit == Leader WestBravoTeam):_resources = westBravoResources
+	? (_unit == Leader WestCharlieTeam):_resources = westCharlieResources
+	? (_unit == Leader WestDeltaTeam):_resources = westDeltaResources
+	? (_unit == Leader WestEchoTeam):_resources = westEchoResources
+	? (_unit == Leader WestFoxtrotTeam):_resources = westFoxtrotResources
+	? (_unit == Leader WestGolfTeam):_resources = westGolfResources
+	? (_unit == Leader WestHotelTeam):_resources = westHotelResources
+
+	goto "CheckResources"
+
+#CheckEastPlayerResources
+
+	? (_unit == Leader EastAlphaTeam):_resources = eastAlphaResources
+	? (_unit == Leader EastBravoTeam):_resources = eastBravoResources
+	? (_unit == Leader EastCharlieTeam):_resources = eastCharlieResources
+	? (_unit == Leader EastDeltaTeam):_resources = eastDeltaResources
+	? (_unit == Leader EastEchoTeam):_resources = eastEchoResources
+	? (_unit == Leader EastFoxtrotTeam):_resources = eastFoxtrotResources
+	? (_unit == Leader EastGolfTeam):_resources = eastGolfResources
+	? (_unit == Leader EastHotelTeam):_resources = eastHotelResources
+
+	goto "CheckResources"

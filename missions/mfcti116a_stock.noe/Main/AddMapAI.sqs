@@ -1,0 +1,44 @@
+;Last modified 4/17/3
+;Call this to assign a marker to track a group on the map.
+;If Respawn is true then the marker is not removed when the unit is destroyed & keeps tracking it after a respawn.
+;Script usage:  [Side,Unit] exec "AddMapAI.sqs"
+
+_side = _this Select 0
+_unit = _this Select 1
+
+_marker = "TestMarker"
+
+_count = 0
+
+? (_side == west):_list = westMarkerVehicles
+? (_side == east):_list = eastMarkerVehicles
+
+_totalMarkers = Count _list
+
+? (_totalMarkers < maxVehicleMarkers):goto "AddMarker"
+
+#FindMarker
+
+	_markerVehicle = _list Select _count
+	_count = _count + 1
+
+	? (IsNull _markerVehicle):goto "SetMarker"
+	? (_count < _totalMarkers):goto "FindMarker"
+
+	Exit
+
+#AddMarker
+
+	? (_side == west):westMarkerVehicles = westMarkerVehicles + [_unit]
+	? (_side == east):eastMarkerVehicles = eastMarkerVehicles + [_unit]
+
+	_count = _totalMarkers
+
+	Exit
+
+#SetMarker
+
+	? (_side == west):westMarkerVehicles Set [_count,_unit]
+	? (_side == east):eastMarkerVehicles Set [_count,_unit]
+
+Exit

@@ -1,0 +1,145 @@
+;Last modified 5/23/3
+;Client-side script.
+;Call this to assign a marker to track a group on the map.
+;Script usage:  [] Exec "UpdateVehicleMarkers.sqs"
+
+_side = Side player
+_lastRadar = false
+_hidden = GetPos HiddenMarkers
+;Set marker visibility
+#Init
+
+	_count = 0
+
+	#SetMarker
+
+	_westMarker = Format ["West Vehicle %1",_count]
+	_eastMarker = Format ["East Vehicle %1",_count]
+
+	_westMarker SetMarkerPos GetPos HiddenMarkers
+	_eastMarker SetMarkerPos GetPos HiddenMarkers
+
+	;Make markers visible to proper sides only.
+	? (_side == west):_eastMarker SetMarkerType "empty";_eastMarker SetMarkerColor "ColorRed"
+	? (_side == east):_westMarker SetMarkerType "empty";_westMarker SetMarkerColor "ColorRed"
+
+	_count = _count + 1
+
+	? (_count < maxVehicleMarkers):goto "SetMarker"
+
+#Update
+~0.5
+
+#UpdateWest
+
+	_count = 0
+	_totalMarkers = Count westMarkerVehicles
+
+	? (_totalMarkers < 1):goto "UpdateEast"
+
+	_radar = false
+
+	? (_side == west):goto "CheckWestMarker"
+	? (eastRadarEnabled):_radar = true
+	? (_lastRadar) && !(_radar):goto "ClearWestMarkers"
+	? !(_radar):goto "UpdateEast"
+
+	_lastRadar = true
+
+	#CheckWestMarker
+
+		_markerVehicle = westMarkerVehicles Select _count
+		_marker = Format ["West Vehicle %1",_count]
+		_position = GetPos _markerVehicle
+		? !(_radar) || (_radar && ((_position Select 2) > radarMinHeight)) && (GetDammage _markerVehicle < 1):_marker SetMarkerType "Dot"
+
+		? (IsNull _markerVehicle):_marker SetMarkerType "empty";_position = _hidden;goto "CheckNextWestMarker"
+		? !(_radar) && (GetDammage _markerVehicle >= 1):_marker SetMarkerType "Marker"
+
+		;If unit is on radar of opposing side then make sure it is above min height to be visible.
+		? (_radar) && ((_position Select 2) < radarMinHeight):_marker SetMarkerType "empty";_position = _hidden
+
+		#CheckNextWestMarker
+
+			_marker SetMarkerPos _position
+			_count = _count + 1
+
+			? (_count < _totalMarkers):goto "CheckWestMarker"
+
+#UpdateEast
+
+	_count = 0
+	_totalMarkers = Count eastMarkerVehicles
+
+	? (_totalMarkers < 1):goto "Update"
+
+	_radar = false
+	? (_side == east):goto "CheckEastMarker"
+	? (westRadarEnabled):_radar = true
+	? (_lastRadar) && !(_radar):goto "ClearEastMarkers"
+	? !(_radar):goto "Update"
+
+	_lastRadar = true
+
+	#CheckEastMarker
+
+		_markerVehicle = eastMarkerVehicles Select _count
+		_marker = Format ["East Vehicle %1",_count]
+		_position = GetPos _markerVehicle
+		? !(_radar) || (_radar && ((_position Select 2) > radarMinHeight)) && (GetDammage _markerVehicle < 1):_marker SetMarkerType "Dot"
+
+		? (IsNull _markerVehicle):_marker SetMarkerType "empty";_position = _hidden;goto "CheckNextEastMarker"
+		? (GetDammage _markerVehicle >= 1):_marker SetMarkerType "Marker"
+
+		;If unit is on radar of opposing side then make sure it is above 75m to be visible.
+		? (_radar) && ((_position Select 2) < radarMinHeight):_marker SetMarkerType "empty";_position = _hidden
+
+		#CheckNextEastMarker
+
+			_marker SetMarkerPos _position
+			_count = _count + 1
+
+			? (_count < _totalMarkers):goto "CheckEastMarker"
+
+	goto "Update"
+
+#ClearWestMarkers
+
+	_lastRadar = false
+	_count = 0
+	_totalMarkers = Count westMarkerVehicles
+
+	? (_totalMarkers < 1):goto "UpdateEast"
+
+
+	#ClearWestMarker
+
+		_markerVehicle = westMarkerVehicles Select _count
+		_marker = Format ["West Vehicle %1",_count]
+		_marker SetMarkerType "empty"
+		_marker SetMarkerPos GetPos HiddenMarkers
+		_count = _count + 1
+
+		? (_count < _totalMarkers):goto "ClearWestMarker"
+
+	goto "UpdateEast"
+
+#ClearEastMarkers
+
+	_lastRadar = false
+	_count = 0
+	_totalMarkers = Count eastMarkerVehicles
+
+	? (_totalMarkers < 1):goto "Update"
+
+	#ClearEastMarker
+
+		_markerVehicle = eastMarkerVehicles Select _count
+		_marker = Format ["East Vehicle %1",_count]
+		_marker SetMarkerType "empty"
+		_marker SetMarkerPos GetPos HiddenMarkers
+		_count = _count + 1
+
+		? (_count < _totalMarkers):goto "ClearEastMarker"
+
+	goto "Update"

@@ -1,0 +1,133 @@
+--- a/engine/Poseidon/Game/Commands/GameStateExt.cpp	2026-10-12 18:52:51.102749309 -0400
++++ b/engine/Poseidon/Game/Commands/GameStateExt.cpp	2026-10-12 18:52:51.118969616 -0400
+@@ -644,6 +644,7 @@
+ GameValue GetMPReportKills(const GameState* state, GameValuePar oper1);
+ GameValue VehCommandStop(const GameState* state, GameValuePar oper1);
+ GameValue VehDelete(const GameState* state, GameValuePar oper1);
++GameValue ObjDbsSetBody(const GameState* state, GameValuePar oper1, GameValuePar oper2);
+ GameValue VehDoStop(const GameState* state, GameValuePar oper1);
+ GameValue VehDone(const GameState* state, GameValuePar oper1);
+ GameValue VehIsEngineOn(const GameState* state, GameValuePar oper1);
+@@ -1344,6 +1345,7 @@
+ 
+         GameOperator(GameObject, "createVehicle", function, VehCreate, GameString, GameArray),
+         GameOperator(GameNothing, "createUnit", function, UnitCreate, GameString, GameArray),
++        GameOperator(GameObject, "dbsSetBody", function, ObjDbsSetBody, GameObject, GameString),
+ 
+         GameOperator(GameNothing, "fadeMusic", function, SetMusicVolume, GameScalar, GameScalar),
+         GameOperator(GameNothing, "fadeSound", function, SetSoundVolume, GameScalar, GameScalar),
+--- a/engine/Poseidon/Game/Commands/GameStateExtWorld.cpp	2026-10-12 18:52:51.102803365 -0400
++++ b/engine/Poseidon/Game/Commands/GameStateExtWorld.cpp	2026-10-12 18:53:11.839271473 -0400
+@@ -31,6 +31,7 @@
+ #include <Poseidon/UI/Locale/StringtableExt.hpp>
+ 
+ #include <Poseidon/Game/UiActions.hpp>
++#include <Poseidon/UI/InGame/InGameUI.hpp>
+ #include <Poseidon/Foundation/Logging/Logging.hpp>
+ #include <Poseidon/Foundation/Platform/AppConfig.hpp>
+ 
+@@ -426,6 +427,104 @@
+     return NOTHING;
+ }
+ 
++// DBS: "unit dbsSetBody className" - move a living, on-foot soldier's brain into a new body of another
++// soldier class. Keeps the AIUnit (group slot, leader status, player control, identity, variable name).
++// Weapons are cleared; the calling script re-adds the loadout. Returns the new soldier or objNull.
++// Modelled on NetworkClient::DoRespawn. Written for single player first; the multiplayer branch is best effort.
++GameValue ObjDbsSetBody(const GameState* state, GameValuePar oper1, GameValuePar oper2)
++{
++    Person* body = dyn_cast<Person>(GetObject(oper1));
++    if (!body || !body->IsLocal())
++    {
++        return OBJECT_NULL;
++    }
++    AIUnit* unit = body->Brain();
++    if (!unit || unit->GetLifeState() != AIUnit::LSAlive || unit->GetVehicleIn())
++    {
++        return OBJECT_NULL;
++    }
++
++    GameStringType typeName = oper2;
++    Ref<EntityAI> veh = NewVehicle(typeName);
++    Soldier* soldier = dyn_cast<Soldier>(veh.GetRef());
++    if (!soldier)
++    {
++        return OBJECT_NULL;
++    }
++
++    bool wasPlayer = body == GWorld->PlayerOn();
++    bool wasCamera = GWorld->CameraOn() == body;
++    TargetSide side = body->Vehicle::GetTargetSide();
++    Matrix4 transform = body->Transform();
++
++    // move brain (same order as DoRespawn)
++    soldier->SetBrain(unit);
++    body->SetBrain(nullptr);
++    GWorld->RemoveSensor(body);
++    unit->SetPerson(soldier);
++    unit->SetVehicleIn(nullptr);
++
++    soldier->SetTargetSide(side);
++    AIUnitInfo& info = body->GetInfo();
++    soldier->SetInfo(info);
++    soldier->SetRemotePlayer(body->GetRemotePlayer());
++    soldier->SetFace(info._face, info._name);
++    soldier->SetGlasses(info._glasses);
++
++    RString var = body->GetVarName();
++    if (var.GetLength() > 0)
++    {
++        body->SetVarName(RString());
++        soldier->SetVarName(var);
++        GWorld->GetGameState()->VarSet(var, GameValueExt(soldier), true);
++    }
++
++    soldier->RemoveAllWeapons();
++    soldier->RemoveAllMagazines();
++
++    soldier->SetTransform(transform);
++    soldier->Init(transform);
++    GWorld->AddVehicle(soldier);
++    GWorld->AddSensor(soldier);
++
++    bool net = GWorld->GetMode() == GModeNetware;
++    if (net)
++    {
++        GetNetworkManager().CreateVehicle(soldier, VLTVehicle, var, -1);
++        GetNetworkManager().UpdateObject(soldier);
++        GetNetworkManager().UpdateObject(unit);
++    }
++
++    if (wasPlayer)
++    {
++        if (net)
++        {
++            // NetworkClient::SelectPlayer also performs the local switch for our own player id
++            GetNetworkManager().SelectPlayer(GetNetworkManager().GetPlayer(), soldier, false);
++        }
++        else
++        {
++            GWorld->SwitchCameraTo(soldier, CamInternal);
++            GWorld->SetPlayerManual(true);
++            GWorld->SwitchPlayerTo(soldier);
++            GWorld->SetRealPlayer(soldier);
++            if (GWorld->UI())
++            {
++                GWorld->UI()->ResetVehicle(soldier);
++            }
++        }
++    }
++    else if (wasCamera)
++    {
++        GWorld->SwitchCameraTo(soldier, GWorld->GetCameraType());
++    }
++
++    // old body has no brain now, so DeleteVehicle goes straight to SetDelete
++    DeleteVehicle(body);
++
++    return GameValueExt(soldier);
++}
++
+ GameValue MarkerGetPos(const GameState* state, GameValuePar oper1)
+ {
+     GameStringType name = oper1;

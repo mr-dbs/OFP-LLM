@@ -1,0 +1,235 @@
+;Last modified 10/21/3
+
+;Creates a unit, adds it to a group if needed, & runs a script on unit if needed.
+;Note that if _buildingList is an empty array then _deploymentLocation is used and there is no build time but twice the cost.
+;Script Usage:[Side,"Unit"] Exec "AddUnitServer.sqs"
+
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_building = ObjNull
+
+? (_side == east):goto "SetEast"
+
+#SetWest
+
+	_commander = Leader WestCommanderTeam
+	_unitType = addWestUnit
+	_building = addWestUnitBuilding
+	_unit = unitNames Select _unitType
+	_group = westGroups Select westSelectedGroup
+
+	_AIPurchase = addWestUnitTeamPurchase
+
+	? !(IsNull addWestUnitGroup):_group = addWestUnitGroup
+	? (IsNull _group):Exit
+
+	_cost = unitCosts Select _unitType
+	_buildTime = unitBuildTimes Select _unitType
+	_scriptType = addWestUnitScript
+
+	;Clear the server request variables now that they have been used.
+	addWestUnit = 0;PublicVariable "addWestUnit"
+	;westReinforcementUnit = 0;PublicVariable "westReinforcementUnit"
+	addWestUnitBuilding = ObjNull;PublicVariable "addWestUnitBuilding"
+	addWestUnit = 0;PublicVariable "addWestUnit"
+	addWestUnitGroup = ObjNull;PublicVariable "addWestUnitGroup"
+	addWestUnitPlayer = ObjNull;PublicVariable "addWestUnitPlayer"
+	addWestUnitScript = ObjNull;PublicVariable "addWestUnitScript"
+	addWestUnitTeamPurchase = false;PublicVariable "addWestUnitTeamPurchase"
+
+Goto "DebugText"
+
+#SetEast
+
+	_commander = Leader EastCommanderTeam
+	_unitType = addEastUnit
+	_building = addEastUnitBuilding
+	_unit = unitNames Select _unitType
+	_group = eastGroups Select eastSelectedGroup
+
+	_AIPurchase = addEastUnitTeamPurchase
+
+	? !(IsNull addEastUnitGroup):_group = addEastUnitGroup
+	? (IsNull _group):Exit
+
+	_cost = unitCosts Select _unitType
+	_buildTime = unitBuildTimes Select _unitType
+	_scriptType = addEastUnitScript
+
+	;Clear the server request variables now that they have been used.
+	addEastUnitBuilding = ObjNull;PublicVariable "addEastUnitBuilding"
+	addEastUnit = 0;PublicVariable "addEastUnit"
+	addEastUnitGroup = ObjNull;PublicVariable "addEastUnitGroup"
+	addEastUnitPlayer = ObjNull;PublicVariable "addEastUnitPlayer"
+	addEastUnitScript = ObjNull;PublicVariable "addEastUnitScript"
+	addEastUnitTeamPurchase = false;PublicVariable "addEastUnitTeamPurchase"
+
+#DebugText
+
+	? (debug):_mes = Format["Name: %1, Index: %2, Cost: %3, Group: %4",unitNames Select _unitType,_unitType,_buildTime,_group];player GlobalChat(_mes)
+
+;If group doesn't exist or is a player group exit the script now.
+? (IsNull _group):Exit
+
+_addToPlayer = false
+? (_side == west && _group In westPlayerGroups) || (_side == east && _group In eastPlayerGroups):_addToPlayer = true
+? !(_addToPlayer):goto "CheckAISize"
+? (_group In playerOnlyReinforcements):Exit
+? (Count Units _group > 11):[_commander,groupCommander,messageMaxGroupSizeReached,0,0] Exec "Main\SendPlayerMessage.sqs";Exit
+goto "CheckBuilding"
+
+#CheckAISize
+
+? (Count Units _group > maxAIGroupSize - 1):[_commander,groupCommander,messageMaxGroupSizeReached,0,0] Exec "Main\SendPlayerMessage.sqs";Exit
+
+#CheckBuilding
+
+? !(IsNull _building):goto "CheckDamage"
+
+;If no building was specified get first available barracks.
+_count = 0
+
+? (_side == west):_buildingsList = westInfantryFactory
+? (_side == east):_buildingsList = eastInfantryFactory
+
+_maxBuildings = Count _buildingsList
+
+? (_maxBuildings < 1):Exit
+
+;If no building was specified then find first available one.
+#FindFactory
+
+	_building = _buildingsList Select _count
+	_count = _count + 1
+
+	? (GetDammage _building != 1) && !(_building In buildingsInUseServer):goto "CheckDamage"
+	? (_count < _maxBuildings):goto "FindFactory"
+
+	? (_AIPurchase) && !(_group In westPlayerGroups) && !(_group In westPlayerGroups) && (_building In buildingsInUseServer):Exit
+	? (_building In buildingsInUseServer):[_side,_unitType,_building,false,_group] Exec "Main\AddToQueueServer.sqs"
+
+	Exit
+
+#CheckDamage
+
+	;If building is damaged then exit the script.
+	? (GetDammage _building == 1):Exit
+
+;If the building is in use & an AI team is purchasing then exit the script.
+? (_AIPurchase) && !(_group In westPlayerGroups) && !(_group In westPlayerGroups) && (_building In buildingsInUseServer):Exit
+? (_building In buildingsInUseServer):[_side,_unitType,_building,false,_group] Exec "Main\AddToQueueServer.sqs";Exit
+
+? (_side == east):goto "GetEastPlayerResources"
+
+#GetWestPlayerResources
+
+	_resources = westResources
+
+	? !(_AIPurchase):goto "CheckResources"
+	? (_group == WestAlphaTeam):_resources = westAlphaResources
+	? (_group == WestBravoTeam):_resources = westBravoResources
+	? (_group == WestCharlieTeam):_resources = westCharlieResources
+	? (_group == WestDeltaTeam):_resources = westDeltaResources
+	? (_group == WestEchoTeam):_resources = westEchoResources
+	? (_group == WestFoxtrotTeam):_resources = westFoxtrotResources
+	? (_group == WestGolfTeam):_resources = westGolfResources
+	? (_group == WestHotelTeam):_resources = westHotelResources
+
+	goto "CheckResources"
+
+#GetEastPlayerResources
+
+	_resources = eastResources
+
+	? !(_AIPurchase):goto "CheckResources"
+	? (_group == EastAlphaTeam):_resources = eastAlphaResources
+	? (_group == EastBravoTeam):_resources = eastBravoResources
+	? (_group == EastCharlieTeam):_resources = eastCharlieResources
+	? (_group == EastDeltaTeam):_resources = eastDeltaResources
+	? (_group == EastEchoTeam):_resources = eastEchoResources
+	? (_group == EastFoxtrotTeam):_resources = eastFoxtrotResources
+	? (_group == EastGolfTeam):_resources = eastGolfResources
+	? (_group == EastHotelTeam):_resources = eastHotelResources
+
+#CheckResources
+
+? (_resources < _cost):Exit
+? (_AIPurchase):[_group,_cost] Exec "Main\SubtractTeamResources.sqs"
+? !(_AIPurchase):[_side,_cost] Exec "Main\SubtractResources.sqs"
+
+? !(_AIPurchase):[_commander,_cost / purchaseValuePerPoint] Exec "Main\AddPlayerPoints.sqs"
+
+;Wait until a previous building lock is done.
+? (_side == east):goto "WaitForEast"
+
+@ !(westRequestBuildingInUseMP)
+westRequestBuildingInUseMP = true;PublicVariable "westRequestBuildingInUseMP"
+goto "SetBuildingInUse"
+
+#WaitForEast
+
+@ !(eastRequestBuildingInUseMP)
+eastRequestBuildingInUseMP = true;PublicVariable "eastRequestBuildingInUseMP"
+
+;This locks the building from other players until construction is complete.
+#SetBuildingInUse
+
+? (_side == west):westBuildingInUseMP = _building;PublicVariable "westBuildingInUseMP"
+? (_side == west):westBuildingInUseStateMP = true;PublicVariable "westBuildingInUseStateMP"
+
+? (_side == east):eastBuildingInUseMP = _building;PublicVariable "eastBuildingInUseMP"
+? (_side == east):eastBuildingInUseStateMP = true;PublicVariable "eastBuildingInUseStateMP"
+
+;Wait until the unit is built.
+~_buildTime
+
+? (_side == west):westBuildingInUseMP = _building;PublicVariable "westBuildingInUseMP"
+? (_side == west):westBuildingInUseStateMP = false;PublicVariable "westBuildingInUseStateMP"
+
+? (_side == east):eastBuildingInUseMP = _building;PublicVariable "eastBuildingInUseMP"
+? (_side == east):eastBuildingInUseStateMP = false;PublicVariable "eastBuildingInUseStateMP"
+
+;If the building was destroyed while unit was being built then exit now.
+? (GetDammage _building == 1):Exit
+
+;If adding to a player team.
+
+? (_addToPlayer):[_side,_group,_unitType,_building] Exec "Main\AddToPlayerServer.sqs";Exit
+
+;If the group has grown beyond size-limit since construction started then exit.
+? (Count Units _group > maxAIGroupSize - 1):Exit
+
+;Place unit outside of front of barracks.
+_direction = (GetDir _building + 90) % 360
+_distance = 14
+
+_destination = [(GetPos _building Select 0)+((sin _direction)*_distance),(GetPos _building Select 1)+((cos _direction)*_distance),GetPos _building Select 2]
+
+? (_side == west):_tempGroup = WestTempGroup
+? (_side == east):_tempGroup = EastTempGroup
+
+;Create a unit.
+_unit CreateUnit [_destination,_tempGroup,"",1,"PRIVATE"]
+
+;Newly created unit should be at the end of the temp group.
+_newUnit = (Units _tempGroup) Select (Count Units _tempGroup - 1)
+
+;Set direction and join designated group.
+_newUnit SetDir _direction
+[_newUnit] Join _group
+[_newUnit,_cost * bountyPercentage] Exec "Main\UnitCleanUp.sqs"
+
+? (_unit == "SoldierWSaboteurDay") || (_unit == "SoldierESaboteurPipe"):[_newUnit] Exec "Loadouts\EquipBlackOps.sqs"
+
+~0.25
+
+;Return to formation and follow the group leader.
+_newUnit DoFollow Leader _newUnit
+
+#Debug
+
+	? (debug):_message = Format["%1 (%2) built at %3.",_unit,_newUnit,_building]
+	? (debug):player GlobalChat (_message)
+
+Exit

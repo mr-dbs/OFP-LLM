@@ -1,0 +1,42 @@
+;Last modified 5/20/3
+;Work around for the permanent building in use bug.
+
+_side = _this Select 0
+_building = _this Select 1
+
+? !(Local LocalServerObject):Exit
+
+_maxTime = highestBuildTime * 1.5
+
+#Update
+~1
+
+	_timeInUse = _timeInUse + 1
+	? !(_building In buildingsInUseServer) || (GetDammage _building >= 1):_timeInUse = 0
+
+	? (IsNull _building):Exit
+	? (_timeInUse > _maxTime):goto "ResetBuilding"
+
+	goto "Update"
+
+#ResetBuilding
+
+	_timeInUse = 0
+
+	? (_side == east):goto "ResetEast"
+
+#ResetWest
+
+	@ !(westRequestBuildingInUseMP)
+	westRequestBuildingInUseMP = true;PublicVariable "westRequestBuildingInUseMP"
+	westBuildingInUseMP = _building;PublicVariable "westBuildingInUseMP"
+	westBuildingInUseStateMP = false;PublicVariable "westBuildingInUseStateMP"
+	goto "Update"
+
+#ResetEast
+
+	@ !(eastRequestBuildingInUseMP)
+	eastRequestBuildingInUseMP = true;PublicVariable "eastRequestBuildingInUseMP"
+	eastBuildingInUseMP = _building;PublicVariable "eastBuildingInUseMP"
+	eastBuildingInUseStateMP = false;PublicVariable "eastBuildingInUseStateMP"
+	goto "Update"

@@ -1,0 +1,48 @@
+;Last modified 8/13/3
+;Script usage:  [] Exec "SetTownSideMarker.sqs"
+
+_town = setTownMP
+_index = setTownIndexMP
+_sideValue = setTownSideMP
+_lastSide = setTownLastSideMP
+
+? (_sideValue == 0):_side = west
+? (_sideValue == 1):_side = east
+? (_sideValue == 2):_side = resistance
+
+_sideName = "West";_enemySideName = "East";_languageName = Localize "STRWEST"
+? (_side == east):_sideName = "East";_enemySideName = "West";_languageName = Localize "STREAST"
+? (_side == resistance):goto "LostToResistance"
+
+;Move the proper side marker to the town.
+_marker = Format["%1 Town %2",_side,_index]
+
+[_town,_marker] Exec "Main\MoveMarker.sqs"
+
+#SetMarker
+
+	? (Side player != _side):_marker SetMarkerType "empty"
+
+	;If flags switches from east to west or west to east announce it.
+	? (_lastSide == 0) || (_lastSide == 1):_marker SetMarkerType "flag";TitleText[Format["\n\n\n\n\n%1 %2 %3.",_languageName,Localize "STRHASTAKEN",townNamesMP Select _index],"Plain"]
+	? (_lastSide == 2) && (Side player == _side):_marker SetMarkerType "flag1"
+
+	;Hide the other side's marker incase it was already over the town.
+	_marker = Format["%1 Town %2",_enemySideName,_index]
+	[HiddenMarkers,_marker] exec "Main\MoveMarker.sqs"
+
+	Exit
+
+#LostToResistance
+
+	_marker = Format["West Town %1",_index]
+	_marker1 = Format["East Town %1",_index]
+
+	_marker SetMarkerType "empty"
+	_marker1 SetMarkerType "empty"
+
+	[HiddenMarkers,_marker] exec "Main\MoveMarker.sqs"
+	[HiddenMarkers,_marker1] exec "Main\MoveMarker.sqs"
+
+	? (_lastSide == 0) && (Side player == west):TitleText[Format["\n\n\n\n\n%1 %2",townNamesMP Select _index,Localize "STRFALLENTORESISTANCE"],"Plain"]
+	? (_lastSide == 1) && (Side player == east):TitleText[Format["\n\n\n\n\n%1 %2",townNamesMP Select _index,Localize "STRFALLENTORESISTANCE"],"Plain"]

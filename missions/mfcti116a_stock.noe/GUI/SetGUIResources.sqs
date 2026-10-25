@@ -1,0 +1,44 @@
+;Last modified 11/23/2
+
+;Routines for Commander's Resource menu.
+
+_unit = _this Select 0
+_idc = _this Select 1
+_text = _this Select 2
+_side = Side _unit
+
+? (_side == east):goto "GetEastResources"
+
+#GetWestResources
+
+	? (_unit == Leader WestCommanderTeam):_resources = westResources
+	? (_unit == Leader westAlphaTeam):_resources = westAlphaResources
+	? (_unit == Leader westBravoTeam):_resources = westBravoResources
+	? (_unit == Leader westCharlieTeam):_resources = westCharlieResources
+	? (_unit == Leader westDeltaTeam):_resources = westDeltaResources
+	? (_unit == Leader westEchoTeam):_resources = westEchoResources
+	? (_unit == Leader westFoxtrotTeam):_resources = westFoxtrotResources
+	? (_unit == Leader westGolfTeam):_resources = westGolfResources
+	? (_unit == Leader westHotelTeam):_resources = westHotelResources
+
+	goto "UpdateInfoBox"
+
+#GetEastResources
+
+	? (_unit == Leader EastCommanderTeam):_resources = eastResources
+	? (_unit == Leader eastAlphaTeam):_resources = eastAlphaResources
+	? (_unit == Leader eastBravoTeam):_resources = eastBravoResources
+	? (_unit == Leader eastCharlieTeam):_resources = eastCharlieResources
+	? (_unit == Leader eastDeltaTeam):_resources = eastDeltaResources
+	? (_unit == Leader eastEchoTeam):_resources = eastEchoResources
+	? (_unit == Leader eastFoxtrotTeam):_resources = eastFoxtrotResources
+	? (_unit == Leader eastGolfTeam):_resources = eastGolfResources
+	? (_unit == Leader eastHotelTeam):_resources = eastHotelResources
+
+#UpdateInfoBox
+
+	_formattedText = Format["%1 %2",_text,_resources]
+	lbAdd[_idc,_formattedText]
+
+	;Set slot 0 to 1.  If this is no longer one then the menu was exited by the ESC key.
+	lbSetValue[_idc,0,1]

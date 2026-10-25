@@ -1,0 +1,58 @@
+;Last modified 12/31/3
+
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+
+? (_side == west):_unit = westPlayerWaypointPlayer
+? (_side == east):_unit = eastPlayerWaypointPlayer
+
+_count = 0
+_totalGroups = Count teamDesignations
+
+_text = Format["Trying to find %1 waypoint team (on server).",_unit]
+? (debug):WestCommander SideChat (_text)
+
+#FindGroup
+
+	? (_side == west)&&(_unit In Units (westGroups Select _count)):goto "SetWestMarker"
+	? (_side == east)&&(_unit In Units (eastGroups Select _count)):goto "SetEastMarker"
+
+	_count = _count + 1
+
+	? (_count < _totalGroups):goto "FindGroup"
+
+	;Group wasn't found so reset the request and exit.
+	? (_side == west):westSetPlayerWaypoint = false;PublicVariable "westSetPlayerWaypoint"
+	? (_side == east):eastSetPlayerWaypoint = false;PublicVariable "eastSetPlayerWaypoint"
+	Exit
+
+#SetWestMarker
+
+	? (debug):WestCommander SideChat ("Setting west command waypoint (on server).")
+
+	;Clear public variable so another request can be made.
+	westSetPlayerWaypoint = false;PublicVariable "westSetPlayerWaypoint"
+
+	_marker = Format["West%1WP",teamMapDesignations Select _count]
+	_marker SetMarkerPos [westPlayerWaypointX,westPlayerWaypointY,0]
+
+	;Post waypoint group # so updates can be made client-side.
+	westPlayerWaypointGroup = _count;PublicVariable "westPlayerWaypointGroup"
+	Exit
+
+#SetEastMarker
+
+	? (debug):player SideChat ("Setting east command waypoint (on server).")
+
+	;Clear public variable so another request can be made.
+	eastSetPlayerWaypoint = false;PublicVariable "eastSetPlayerWaypoint"
+
+	_marker = Format["East%1WP",teamMapDesignations Select _count]
+	_marker SetMarkerPos [eastPlayerWaypointX,eastPlayerWaypointY,0]
+
+	;Post waypoint group # so updates can be made client-side.
+	eastPlayerWaypointGroup = _count;PublicVariable "eastPlayerWaypointGroup"
+	Exit
+
+Exit

@@ -1,0 +1,39 @@
+;Last modified 8/30/3
+;Check for team vehicles that can be rearmed client-side.
+;ScriptUsage:  [Side,Building/Unit,Truck] Exec "UpdateAmmo.sqs"
+
+_side = _this Select 0
+_depot = _this Select 1
+_truck = _this Select 2
+
+#Update
+~30
+
+	? (IsNull _depot):Exit
+	? !(publicServer) && (GetDammage _depot >= 1):Exit
+	? (GetDammage _depot >= 1):goto "Update"
+
+	_count = 0
+	_units = Units player 
+	_totalUnits = Count _units
+
+	? (_totalUnits < 1):goto "Update"
+
+		#CheckVehicle
+
+			_vehicle = Vehicle (_units Select _count)
+			_driver = Driver _vehicle
+
+			? (Side _driver != _side) || (_driver == _vehicle):goto "CheckNextVehicle"
+			? (GetDammage _vehicle >= 1) || (IsNull _driver):goto "CheckNextVehicle"
+			? (_vehicle Distance _depot > ammoDepotRearmRange):goto "CheckNextVehicle"
+
+			[_vehicle,true] Exec "Loadouts\RearmVehicle.sqs"
+
+			#CheckNextVehicle
+	
+				_count = _count + 1
+				? (_count < _totalUnits):goto "CheckVehicle"
+
+				goto "Update"
+

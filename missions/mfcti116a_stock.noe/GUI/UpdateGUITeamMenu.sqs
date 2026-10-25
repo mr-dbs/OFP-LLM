@@ -1,0 +1,302 @@
+;Last modified 12/31/3
+;Routines for Commander's Team menu.
+private ["_currentTeam","_independent","_role","_resources","_size"]
+
+_role = 0
+_size = 0
+_currentTeam = 0
+_resources = 0
+_independent = false
+
+_unit = _this select 0
+_side = Side _unit
+
+_sideText = "west"
+? (_side == east):_sideText = "east"
+
+_totalTeams = Count teamDesignations
+
+;If true redraw command menu or opened sub-menu..
+openTeamMenu = false
+teamMenuInUse = false
+giveTeam = 0
+toggleTeam = 0
+allMechanized = false
+allArmoured = false
+allAir = false
+
+_infoCommand = "_resources = %1%2Resources;_independent = %1%2Independent;_size = %1%2Size"
+_setModeCommand = "%1%2Independent = _independent;PublicVariable ""%1%2Independent"";%1%2Role = _role;PublicVariable ""%1%2Role"""
+_getRoleCommand = "_role = %1%2Role"
+_setAllRolesCommand = "%1%2Role = _role;PublicVariable ""%1%2Role"""
+_toggleAllIndependentCommand = "%1%2Independent = _setIndependent;PublicVariable ""%1%2Independent"""
+
+#Update
+~0.5
+
+	? !(Alive _unit) || (Side _unit != west && Side _unit != east):Exit
+
+	#CheckActions
+
+		? (openTeamMenu):goto "InitTeamMenu"
+		? !(teamMenuInUse):goto "Update"
+
+		;If data is not valid then the menu was exited with ESC.  Set commandMenuInUse false.
+		? (ctrlText IDCTeamLabel != (Localize "STRTEAM")):teamMenuInUse = false;goto "Update"
+
+		? (toggleTeam > 0):_team = toggleTeam;_return = "ToggleIndependent";_command = _infoCommand;goto "RunTeamCommand"
+		? (giveTeam > 0):_team = giveTeam;_return = "UpdateTeamInfo";goto "GiveResources"
+
+		? (allIndependent):_return = "UpdateTeamInfo";goto "ToggleAllIndependent"
+		? (noIndependent):_return = "UpdateTeamInfo";goto "ToggleAllIndependent"
+		? (allMechanized):_role = mechanizedRole;_return = "UpdateTeamInfo";goto "SetAllRoles"
+		? (allArmoured):_role = armourRole;_return = "UpdateTeamInfo";goto "SetAllRoles"
+		? (allAir):_role = airRole;_return = "UpdateTeamInfo";goto "SetAllRoles"
+
+		goto "UpdateTeamInfo"
+
+;Creates the Team menu.
+#InitTeamMenu
+
+	teamMenuInUse = true
+	openTeamMenu = false
+
+	@ !(dialog)
+
+	;Create the resource menu.
+	_resourceMenu = CreateDialog Format["TeamMenu%1",GUISkin]
+
+#InitTeamRoles
+
+	_count = 1
+
+	lbClear (IDCTeamRole + _count)
+
+	#AddTeamRole
+
+		_team = _count
+		_return = "AddTeamPlayer"
+		_command = _getRoleCommand
+		goto "RunTeamCommand"
+
+	#AddTeamPlayer
+
+		_group = westGroups Select _count;_playerGroups = westPlayerGroups
+		? (_side == east):_group = eastGroups Select _count;_playerGroups = eastPlayerGroups
+
+		? !(_group in _playerGroups) && !(IsNull _group):goto "AddTeamRoles"
+
+		_text = Localize "STRPLAYER"
+		? (IsNull _group):_text = Localize "STRDISABLED"
+
+		lbAdd[IDCTeamRole + _count,_text]
+		lbSetCurSel[IDCTeamRole + _count,0]
+
+		goto "AddTeamAmounts"
+
+	#AddTeamRoles
+
+		_selection = lbAdd[IDCTeamRole + _count,Localize "STRINFANTRY"]
+		lbSetValue [IDCTeamRole + _count,_selection,infantryRole]
+		_selection = lbAdd[IDCTeamRole + _count,Localize "STRINFANTRYAA"]
+		lbSetValue [IDCTeamRole + _count,_selection,infantryAARole]
+		_selection = lbAdd[IDCTeamRole + _count,Localize "STRINFANTRYAT"]
+		lbSetValue [IDCTeamRole + _count,_selection,infantryATRole]
+		_selection = lbAdd[IDCTeamRole + _count,Localize "STRINFANTRYCQB"]
+		lbSetValue [IDCTeamRole + _count,_selection,infantryCQBRole]
+		_selection = lbAdd[IDCTeamRole + _count,Localize "STRBLACKOPS"]
+		lbSetValue [IDCTeamRole + _count,_selection,blackOpsRole]
+		_selection = lbAdd[IDCTeamRole + _count,Localize "STRMECHANIZED"]
+		lbSetValue [IDCTeamRole + _count,_selection,mechanizedRole]
+		_selection = lbAdd[IDCTeamRole + _count,Localize "STRMECHANIZEDAA"]
+		lbSetValue [IDCTeamRole + _count,_selection,mechanizedAARole]
+		_selection = lbAdd[IDCTeamRole + _count,Localize "STRARMOUR"]
+		lbSetValue [IDCTeamRole + _count,_selection,armourRole]
+		_selection = lbAdd[IDCTeamRole + _count,Localize "STRARMOURHEAVY"]
+		lbSetValue [IDCTeamRole + _count,_selection,armourHeavyRole]
+		_selection = lbAdd[IDCTeamRole + _count,Localize "STRAIR"]
+		lbSetValue [IDCTeamRole + _count,_selection,airRole]
+
+		;Select team role.
+		lbSetCurSel[IDCTeamRole + _count,_role]
+
+	#AddTeamAmounts
+
+		? (IsNull _group):_selection = lbAdd[IDCTeamGiveAmount + _count,Localize "STRNA"];lbSetValue [IDCTeamGiveAmount + _count,_selection,0];lbSetCurSel[IDCTeamGiveAmount + _count,0];goto "AddNextTeam"
+
+		_layout = "$%1"
+		? (Localize "STRCURRENCYPOSITION" == "Back"):_layout = "%1$"
+
+		_selection = lbAdd[IDCTeamGiveAmount + _count,Format [_layout,25]]
+		lbSetValue [IDCTeamGiveAmount + _count,_selection,25]
+		_selection = lbAdd[IDCTeamGiveAmount + _count,Format [_layout,50]]
+		lbSetValue [IDCTeamGiveAmount + _count,_selection,50]
+		_selection = lbAdd[IDCTeamGiveAmount + _count,Format [_layout,100]]
+		lbSetValue [IDCTeamGiveAmount + _count,_selection,100]
+		_selection = lbAdd[IDCTeamGiveAmount + _count,Format [_layout,250]]
+		lbSetValue [IDCTeamGiveAmount + _count,_selection,250]
+		_selection = lbAdd[IDCTeamGiveAmount + _count,Format [_layout,500]]
+		lbSetValue [IDCTeamGiveAmount + _count,_selection,500]
+		_selection = lbAdd[IDCTeamGiveAmount + _count,Format [_layout,1000]]
+		lbSetValue [IDCTeamGiveAmount + _count,_selection,1000]
+		_selection = lbAdd[IDCTeamGiveAmount + _count,Format [_layout,2000]]
+		lbSetValue [IDCTeamGiveAmount + _count,_selection,2000]
+
+		lbSetCurSel[IDCTeamGiveAmount + _count,4]
+
+		#AddNextTeam
+
+		_count = _count  + 1
+
+		? (_count < _totalTeams):goto "AddTeamRole"
+
+#UpdateTeamInfo
+
+	_count = 1
+
+	? (_side == west):CtrlSetText [IDCCommanderResources,Format["%1: %2",Localize "STRRESOURCES",westResources]]
+	? (_side == east):CtrlSetText [IDCCommanderResources,Format["%1: %2",Localize "STRRESOURCES",eastResources]]
+
+	;Add an entry onto the team selection combobox.
+	#AddTeamInfo
+
+		_team = _count
+
+		_group = westGroups Select _count;_playerGroups = westPlayerGroups
+		? (_side == east):_group = eastGroups Select _count;_playerGroups = eastPlayerGroups
+
+		_size = 0
+		_resources = 0
+		_independent = false
+		_name = Format["%1 (%2)",teamDesignations Select _count,Localize "STRDISABLED"]
+		? (IsNull _group):goto "SetTeamInfo"
+
+		? !(_group in _playerGroups):_name = Format["%1 (%2)",teamDesignations Select _count,Localize "STRAI"]
+		? (_group in _playerGroups) && (_side == west):_name = Format["%1 (%2)",teamDesignations Select _count,Name Leader (westGroups Select _count)]
+		? (_group in _playerGroups) && (_side == east):_name = Format["%1 (%2)",teamDesignations Select _count,Name Leader (eastGroups Select _count)]
+
+		_return = "SetTeamInfo";_command = _infoCommand;goto "RunTeamCommand"
+
+	;Add the data that is stored in the entry.
+	#SetTeamInfo
+
+		CtrlSetText [IDCTeamSize + _count,Format["%1",_size]]
+
+		? !(_independent):CtrlSetText [IDCTeamIndependent + _count,Localize "STROFF"]
+		? (_independent):CtrlSetText [IDCTeamIndependent + _count,Localize "STRON"]
+
+		CtrlSetText [IDCTeam + _count,_name]
+		CtrlSetText [IDCTeamResources + _count,Format["%1",_resources]]
+
+		_role = lbValue[IDCTeamRole + _count,lbCurSel (IDCTeamRole + _count)]
+		_return = "SetNextTeamInfo"
+		_command = _setModeCommand
+		goto "RunTeamCommand"
+
+		#SetNextTeamInfo
+
+			_count = _count  + 1
+			? (_count < _totalTeams):goto "AddTeamInfo"
+
+	goto "Update"
+
+#ToggleIndependent
+
+	toggleTeam = 0
+
+	_return = "Update"
+	_command = _setModeCommand
+
+	? !(_independent):_independent = true;goto "RunTeamCommand"
+	? (_independent):_independent = false
+
+	goto "RunTeamCommand"
+
+#ToggleAllIndependent
+
+	_setIndependent = allIndependent
+	allIndependent = false
+	noIndependent = false
+	_command = _toggleAllIndependentCommand
+	goto "RunAllTeamsCommand"
+
+#SetAllRoles
+	
+	allAir = false
+	allArmoured = false
+	allMechanized = false
+	_count = 1
+
+	#SetRole
+
+		lbSetCurSel[IDCTeamRole + _count,_role]
+		_count = _count + 1
+
+		? (_count < _totalTeams):goto "SetRole"
+
+	_command = _setAllRolesCommand
+	goto "RunAllTeamsCommand"
+
+#GiveResources
+
+	giveTeam = 0
+	_value = lbValue [IDCTeamGiveAmount + _team,lbCurSel (IDCTeamGiveAmount + _team)]
+
+	? (_side == west) && (_value > westResources):Hint Localize "STRNOTENOUGHRESOURCES";goto "Update"
+	? (_side == east) && (_value > eastResources):Hint Localize "STRNOTENOUGHRESOURCES";goto "Update"
+	? (_side == east):goto "GiveEastTeam"
+
+	@ (addWestResourcesToTeam == -1)
+
+	addWestResourcesToTeam = _team;PublicVariable "addWestResourcesToTeam"
+	addWestResourcesFromTeam = groupCommander;PublicVariable "addWestResourcesFromTeam"
+	addWestResourcesToTeamAmount = _value;PublicVariable "addWestResourcesToTeamAmount"
+
+	;Send a message to the player.
+	[Leader (westGroups Select _team),_team,messageFundsTransferred,_value,0] Exec "Main\SendPlayerMessage.sqs"
+	goto "Update"
+
+	#GiveEastTeam
+
+	@ (addEastResourcesToTeam == -1)
+
+	addEastResourcesToTeam = _team;PublicVariable "addEastResourcesToTeam"
+	addEastResourcesFromTeam = groupCommander;PublicVariable "addEastResourcesFromTeam"
+	addEastResourcesToTeamAmount = _value;PublicVariable "addEastResourcesToTeamAmount"
+
+	;Send a message to the player.
+	[Leader (eastGroups Select _team),_team,messageFundsTransferred,_value,0] Exec "Main\SendPlayerMessage.sqs"
+	goto "Update"
+
+#RunTeamCommand
+
+	;Make sure menu has not closed.
+	? (ctrlText IDCTeamLabel != (Localize "STRTEAM")):teamMenuInUse = false;goto "Update"
+
+	_teamCount = 1
+
+	#CheckTeam
+
+		Call Format["_currentTeam = group%1",teamMapDesignations Select _teamCount]
+		? (_team == _currentTeam):Call Format[_command,_sideText,teamMapDesignations Select _teamCount];goto _return
+
+		_teamCount = _teamCount + 1
+		? (_teamCount < _totalTeams):goto "CheckTeam"
+
+	goto _return
+
+#RunAllTeamsCommand
+
+	;Make sure menu has not closed.
+	? (ctrlText IDCTeamLabel != (Localize "STRTEAM")):teamMenuInUse = false;goto "Update"
+
+	_teamCount = 1
+
+	#RunCommand
+
+		Call Format[_command,_sideText,teamMapDesignations Select _teamCount]
+
+		_teamCount = _teamCount + 1
+		? (_teamCount < _totalTeams):goto "RunCommand"
+
+	goto _return

@@ -1,0 +1,162 @@
+;Last modified 3/19/4
+;Routines for Commander's build menu.
+
+_unit = _this select 0
+_side = Side _unit
+
+openBuildMenu = false
+buildMenuInUse = false
+buildMenuBuild = false
+buildMenuBuildDefense = false
+_actionsAdded = false
+
+? (Side _unit == west):_mobileHQ = WestMobileHQ;goto "Update"
+? (Side _unit == east):_mobileHQ = EastMobileHQ;goto "Update"
+
+Exit
+
+#Update
+~0.5
+
+	? !(Alive _unit) || (Side _unit != west && Side _unit != east):goto "RemoveMenuActions"
+
+	#CheckActions
+
+		? (GetDammage _mobileHQ == 1) && (buildMenuInUse):closeDialog 0;buildMenuInUse = false
+		? (GetDammage _mobileHQ == 1):_unit RemoveAction _actionID;_actionsAdded = false;Exit
+
+		;Add or remove open build menu action depending on distance of commander from the Mobile HQ.
+		? !(_actionsAdded) && (_unit Distance _mobileHQ <= mobileHQBuildDistance):_actionID = _unit AddAction [Localize "STROPENBUILDMENU","GUI\OpenBuildMenuGUI.sqs"];_actionsAdded = true
+		? (_actionsAdded) && (_unit Distance _mobileHQ > mobileHQBuildDistance):_unit RemoveAction _actionID;_actionsAdded = false
+
+		? (openBuildMenu):goto "InitBuildMenu"
+		? !(buildMenuInUse):goto "Update"
+		? (buildMenuBuild):goto "BuildStructure"
+		? (buildMenuBuildDefense):goto "BuildDefense"
+		? (buildMenuAddWorker):goto "AddWorker"
+
+		;If the value is not 1 then the menu was closed with the ESC key.
+		? !(dialog):buildMenuInUse = false
+
+		_lastStructureSelection = _structureSelection
+		_lastDefenseSelection = _defenseSelection
+
+		;Store current structure selection.
+		? (buildMenuInUse):_structureSelection = lbCurSel IDCMenuList;_defenseSelection = lbCurSel IDCMenuList1
+
+		;If selection becomes -1 then the menu was exited by the ESC key.  Restore selection choice.
+		? (_structureSelection < 0):_structureSelection = _lastStructureSelection
+		? (_defenseSelection < 0):_defenseSelection = _lastDefenseSelection
+
+		;Show resources & total workers.
+		? (_side == west):_text = Format["%1: %2",Localize "STRRESOURCES",westResources]
+		? (_side == west):_text1 = Format["%1: %2 %3 %4",Localize "STRWORKERS",totalWestWorkers,Localize "STROF",maxWorkers]
+
+		? (_side == east):_text = Format["%1: %2",Localize "STRRESOURCES",eastResources]
+		? (_side == east):_text1 = Format["%1: %2 %3 %4",Localize "STRWORKERS",totalEastWorkers,Localize "STROF",maxWorkers]
+
+		lbClear IDCMenuInfo
+		lbAdd[IDCMenuInfo,_text]
+		lbAdd[IDCMenuInfo,_text1]
+
+		;Show auto-align on/off.
+		? (buildMenuAlign) && !(alignWalls):alignWalls = true;buildMenuAlign = false
+		? (buildMenuAlign) && (alignWalls):alignWalls = false;buildMenuAlign = false
+
+		CtrlSetText [IDCMenuButton,Format["%1: %2",Localize "STRAUTOALIGN",Localize "STROFF"]]
+
+		? (alignWalls):CtrlSetText [IDCMenuButton,Format["%1: %2",Localize "STRAUTOALIGN",Localize "STRON"]]
+
+		goto "Update"
+
+;Creates the build menu.
+#InitBuildMenu
+
+	openBuildMenu = false
+	buildMenuInUse = true
+
+	;Create the build menu.
+	_buildMenu = CreateDialog Format ["ConstructionMenu%1",GUISkin]
+
+	lbClear IDCMenuInfo
+	lbAdd[IDCMenuInfo,""]
+
+	_count = 0
+	_count = 1
+	_totalStructures = Count structureNames
+
+	;Add an entry onto the structure selection combobox.
+	#AddStructureSelection
+
+		_spacer = ""
+		? (structureCosts Select _count < 100):_spacer = " "
+		? (structureCosts Select _count < 1000):_spacer = _spacer + " "
+
+		_layout = "$%1 %2%3"
+		? (Localize "STRCURRENCYPOSITION" == "Back"):_layout = "%1$ %2%3"
+		_text = Format[_layout,structureCosts Select _count,_spacer,structureNames Select _count]
+
+		;Don't display a price for the blank line.
+		? (_count == 0):_text = ""
+		? (_count >= blackOpsUpgradeType) && (_count <= radarUpgradeType):_count = _count + 1;goto "AddStructureSelection"
+		? ((structureNames Select _count) == ""):_count = _count + 1;goto "AddStructureSelection"
+
+		;Skip walls and AA guns on public servers.
+		? (publicServer) && ((_count >= AAGunType && _count <= mortarType) || _count == largeWallType):_count = _count + 1;goto "AddStructureSelection"
+		? (MFCTI116NoMortars) && (_count == mortarType):_count = _count + 1;goto "AddStructureSelection"
+
+		? (_count < observationTowerType):_IDC = IDCMenuList
+		? (_count >= observationTowerType):_IDC = IDCMenuList1
+
+		_selection = lbAdd[_IDC,_text]
+
+		;Add the data that is stored in the entry.
+		lbSetValue [_IDC,_selection,_count]
+
+		_count = _count  + 1
+
+		? (_count < _totalStructures):goto "AddStructureSelection"
+
+		;Set cursor to last selected structure.
+		lbSetCurSel [IDCMenuList,_structureSelection]
+		lbSetCurSel [IDCMenuList1,_defenseSelection]
+
+		goto "Update"
+
+#AddWorker
+
+	buildMenuAddWorker = false
+	? (_side == west && totalWestWorkers >= maxWorkers) || (_side == east && totalEastWorkers >= maxWorkers):Hint Format[Localize "STRMAXWORKERS",maxWorkers];goto "Update"
+	[_unit] Exec "Main\AddWorker.sqs"
+
+	goto "Update"
+
+#BuildStructure
+
+	buildMenuBuild = false
+	buildMenuInUse = false
+
+	_structureType = lbValue[IDCMenuList,_structureSelection]
+
+	[_unit,_structureType] Exec "Build\BuildStructure.sqs"
+
+	CloseDialog 0
+	goto "Update"
+
+#BuildDefense
+
+	buildMenuBuildDefense = false
+	buildMenuInUse = false
+
+	_structureType = lbValue[IDCMenuList1,_defenseSelection]
+
+	[_unit,_structureType] Exec "Build\BuildStructure.sqs"
+
+	CloseDialog 0
+	goto "Update"
+
+#RemoveMenuActions
+
+	_unit RemoveAction _actionID
+
+Exit

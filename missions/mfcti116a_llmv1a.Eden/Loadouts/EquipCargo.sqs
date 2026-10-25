@@ -1,0 +1,109 @@
+;Last modified 8/27/3
+;Adds equipment to a vehicle on the client's side.
+;Script Usage:[Vehicle,VehicleType] Exec "EquipVehicle.sqs"
+
+_vehicle = _this Select 0
+_vehicleType = _this Select 1
+
+? !(publicServer):Exit
+? (_vehicleType == UH60MGType) || (_vehicleType == UH60Type) || (_vehicleType == CH47DType):goto "EquipTransport"
+? (_vehicleType == MI17TransportType) || (_vehicleType == MI17Type):goto "EquipTransport"
+? (_vehicleType == ammoTruckEastType) || (_vehicleType == ammoTruckType):goto "EquipAmmoTruck"
+
+Exit
+
+#EquipAmmoTruck
+
+	ClearMagazineCargo _vehicle
+	ClearWeaponCargo _vehicle
+
+	_vehicle AddMagazineCargo ["Mine",24]
+	_vehicle AddMagazineCargo ["Pipebomb",6]
+	_vehicle AddMagazineCargo ["Handgrenade",10]
+
+	? (_vehicleType == ammoTruckEastType):goto "EquipEastAmmoTruck"
+
+#EquipWestAmmoTruck
+
+	_vehicle AddWeaponCargo ["M16",1]
+	_vehicle AddMagazineCargo ["M16",12]
+
+	_vehicle AddWeaponCargo ["M60",1]
+	_vehicle AddMagazineCargo ["M60",6]
+
+	_vehicle AddWeaponCargo ["HK",1]
+	_vehicle AddMagazineCargo ["HK",12]
+
+	_vehicle AddWeaponCargo ["M21",1]
+	_vehicle AddMagazineCargo ["M21",12]
+
+	_vehicle AddMagazineCargo ["Steyrmag",6]
+	_vehicle AddMagazineCargo ["G36aMag",6]
+
+	_vehicle AddMagazineCargo ["M4",6]
+	_vehicle AddMagazineCargo ["MM1magazine",4]
+
+	_vehicle AddWeaponCargo ["LAWLauncher",2]
+	_vehicle AddMagazineCargo ["LAWLauncher",12]
+
+	_vehicle AddWeaponCargo ["CarlGustavLauncher",2]
+	_vehicle AddMagazineCargo ["CarlGustavLauncher",6]
+
+	_vehicle AddWeaponCargo ["AALauncher",2]
+	_vehicle AddMagazineCargo ["AALauncher",6]
+
+	Exit
+
+#EquipEastAmmoTruck
+
+	_vehicle AddWeaponCargo ["AK74",1]
+	_vehicle AddMagazineCargo ["AK74",12]
+
+	_vehicle AddWeaponCargo ["PK",1]
+	_vehicle AddMagazineCargo ["PK",6]
+
+	_vehicle AddWeaponCargo ["Bizon",1]
+	_vehicle AddMagazineCargo ["BizonMag",12]
+
+	_vehicle AddWeaponCargo ["SVDDragunov",1]
+	_vehicle AddMagazineCargo ["SVDDragunov",12]
+
+	_vehicle AddMagazineCargo ["6g30Magazine",6]
+
+	_vehicle AddWeaponCargo ["RPGLauncher",2]
+	_vehicle AddMagazineCargo ["RPGLauncher",12]
+
+	_vehicle AddWeaponCargo ["AT4Launcher",2]
+	_vehicle AddMagazineCargo ["AT4Launcher",6]
+
+	_vehicle AddWeaponCargo ["9K32Launcher",2]
+	_vehicle AddMagazineCargo ["9K32Launcher",6]
+
+	_vehicle AddMagazineCargo ["6g30Magazine",6]
+
+	Exit
+
+#EquipTransport
+
+	ClearMagazineCargo _vehicle
+	ClearWeaponCargo _vehicle
+
+	? (_vehicleType == MI17TransportType) || (_vehicleType == MI17Type) || (_vehicleType == MI24Type):goto "EquipEastTransport"
+
+#EquipWestTransport
+
+	_vehicle AddWeaponCargo ["HK",1]
+	_vehicle AddMagazineCargo ["HK",6]
+
+	_vehicle AddWeaponCargo ["M21",1]
+	_vehicle AddMagazineCargo ["M21",6]
+
+	Exit
+
+#EquipEastTransport
+
+	_vehicle AddWeaponCargo ["Bizon",1]
+	_vehicle AddMagazineCargo ["BizonMag",6]
+
+	_vehicle AddWeaponCargo ["SVDDragunov",1]
+	_vehicle AddMagazineCargo ["SVDDragunov",6]

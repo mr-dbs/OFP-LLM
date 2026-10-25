@@ -1,0 +1,188 @@
+;Last modified 1/30/4
+
+? !(Local LocalServerObject):Exit
+
+;Time since team sent last message.
+_lastWestBaseMessage = [120,120,120,120,120,120,120,120,120]
+_lastEastBaseMessage = [120,120,120,120,120,120,120,120,120]
+
+_lastWestUnitMessage = [120,120,120,120,120,120,120,120,120]
+_lastEastUnitMessage = [120,120,120,120,120,120,120,120,120]
+
+_hidden = GetPos HiddenMarkers
+_totalTeams = Count teamDesignations
+_totalDelay = 20
+_delay = _totalDelay / (_totalTeams * 2)
+
+#Update
+
+	#UpdateWest
+
+		_unitList = Units EastCommanderTeam + Units EastAlphaTeam + Units EastBravoTeam + Units EastCharlieTeam + Units EastDeltaTeam + Units EastEchoTeam + Units EastFoxtrotTeam + Units EastGolfTeam + Units EastHotelTeam
+		_baseList = [EastMobileHQ] + eastInfantryFactory + eastLightFactory + eastHeavyFactory + eastAirFactory + eastControlCenter + eastAmmoDepot + eastRepairDepot + eastFieldHospital
+		_teams = westGroups
+		_side = west
+		_sideText = "West"
+		goto "UpdateTeams"
+
+	#UpdateEast
+
+		_unitList = Units WestCommanderTeam + Units WestAlphaTeam + Units WestBravoTeam + Units WestCharlieTeam + Units WestDeltaTeam + Units WestEchoTeam + Units WestFoxtrotTeam + Units WestGolfTeam + Units WestHotelTeam
+		_baseList = [WestMobileHQ] + westInfantryFactory + westLightFactory + westHeavyFactory + westAirFactory + westControlCenter + westAmmoDepot + westRepairDepot + westFieldHospital
+		_teams = eastGroups
+		_side = east
+		_sideText = "East"
+		goto "UpdateTeams"
+
+	#UpdateTeams
+
+		_teamCount = 0
+
+		#UpdateTeam
+		~_delay
+
+			? (_side == west) && ((_lastWestUnitMessage Select _teamCount) > 0):_lastWestUnitMessage Set [_teamCount,(_lastWestUnitMessage Select _teamCount) + _totalDelay]
+			? (_side == west) && ((_lastWestBaseMessage Select _teamCount) > 0):_lastWestBaseMessage Set [_teamCount,(_lastWestBaseMessage Select _teamCount) + _totalDelay]
+			? (_side == east) && ((_lastEastUnitMessage Select _teamCount) > 0):_lastEastUnitMessage Set [_teamCount,(_lastEastUnitMessage Select _teamCount) + _totalDelay]
+			? (_side == east) && ((_lastEastBaseMessage Select _teamCount) > 0):_lastEastBaseMessage Set [_teamCount,(_lastEastBaseMessage Select _teamCount) + _totalDelay]
+
+			_team = _teams Select _teamCount
+			_observer = Leader _team
+			_enemySpotted = ObjNull
+			_totalUnits = Count _unitList
+			_count = Random (_totalUnits - 1)
+			_checkedUnits = []
+			? (Count _unitList < 1):goto "CheckForEnemyStructures"
+
+			#CheckForEnemyUnit
+
+				_unit = _unitList Select _count
+				_checkedUnits = _checkedUnits + [_count]
+
+				_value = 1.25
+				? (_team In westPlayerGroups) || (_team In eastPlayerGroups):_value = 0.9
+				? ((_team In westPlayerGroups) || (_team In eastPlayerGroups)) && (_observer Distance _unit < 250) :_value = 0.5
+
+				? (_side == west) && (_observer KnowsAbout _unit >= _value) && !(_unit In westSpottedUnits):_enemySpotted = _unit;goto "CheckForEnemyStructures"
+				? (_side == east) && (_observer KnowsAbout _unit >= _value) && !(_unit In eastSpottedUnits):_enemySpotted = _unit;goto "CheckForEnemyStructures"
+
+				? (Count _checkedUnits >= _totalUnits):goto "CheckForEnemyStructures"
+
+				#GetRandomEnemy
+
+					_count = Random (_totalUnits - 1)
+					? (_count In _checkedUnits):goto "GetRandomEnemy"
+
+				? (Count _checkedUnits < _totalUnits):goto "CheckForEnemyUnit"
+
+			#CheckForEnemyStructures
+
+				_totalStructures = Count _baseList
+				_count = Random (_totalStructures - 1)
+				_enemyStructureSpotted = ObjNull
+				_checkedUnits = []
+
+			#CheckForEnemyStructure
+
+				_structure = _baseList Select _count
+				_checkedUnits = _checkedUnits + [_count]
+
+				_value = 1
+				? (_team In westPlayerGroups) || (_team In eastPlayerGroups):_value = 0.75
+				? ((_team In westPlayerGroups) || (_team In eastPlayerGroups)) && (_observer Distance _unit < 400) :_value = 0.5
+
+				? (_side == west) && (GetDammage _structure < 1) && (_observer KnowsAbout _structure >= _value) && !(_structure In westSpottedUnits):_enemyStructureSpotted = _structure;goto "UpdateTeamObservation"
+				? (_side == east) && (GetDammage _structure < 1) && (_observer KnowsAbout _structure >= _value) && !(_structure In eastSpottedUnits):_enemyStructureSpotted = _structure;goto "UpdateTeamObservation"
+
+				? (Count _checkedUnits >= _totalStructures):goto "UpdateTeamObservation"
+				#GetRandomStructure
+
+					_count = Random (_totalStructures - 1)
+					? (_count In _checkedUnits):goto "GetRandomStructure"
+
+				? (Count _checkedUnits < _totalStructures):goto "CheckForEnemyStructure"
+
+		#UpdateTeamObservation
+
+			? (IsNull _enemySpotted):goto "UpdateTeamBaseObservation"
+
+			? (_side == west) && ((_lastWestUnitMessage Select _teamCount) > 60):_lastWestUnitMessage Set [_teamCount,1]
+			? (_side == east) && ((_lastEastUnitMessage Select _teamCount) > 60):_lastEastUnitMessage Set [_teamCount,1]
+
+			_sendMessage = true
+			? (_side == west) && ((_lastWestUnitMessage Select _teamCount) > 1):_sendMessage = false
+			? (_side == east) && ((_lastEastUnitMessage Select _teamCount) > 1):_sendMessage = false
+
+			_return = "UpdateTeamBaseObservation"
+			_enemy = _enemySpotted
+			_enemyType = enemyMarker
+			_message = messageEnemySpotted
+			goto "SetTeamObservation"
+
+		#UpdateTeamBaseObservation
+
+			? (IsNull _enemyStructureSpotted):goto "UpdateNextTeam"
+
+			? (_side == west) && ((_lastWestBaseMessage Select _teamCount) > 60):_lastWestBaseMessage Set [_teamCount,1]
+			? (_side == east) && ((_lastEastBaseMessage Select _teamCount) > 60):_lastEastBaseMessage Set [_teamCount,1]
+
+			_sendMessage = true
+			? (_side == west) && (((_lastWestBaseMessage Select _teamCount) > 1) || (_enemyStructureSpotted In westSpottedUnits)):_sendMessage = false
+			? (_side == east) && (((_lastEastBaseMessage Select _teamCount) > 1) || (_enemyStructureSpotted In eastSpottedUnits)):_sendMessage = false
+
+			_return = "UpdateNextTeam"
+			_enemy = _enemyStructureSpotted
+			_enemyType = baseMarker
+			_message = messageEnemyStructureSpotted
+			goto "SetTeamObservation"
+
+		#UpdateNextTeam
+
+			_teamCount = _teamCount  + 1
+			? (_teamCount < _totalTeams):goto "UpdateTeam"
+
+			? (_side == west):goto "UpdateEast"
+			goto "Update"
+
+#SetTeamObservation
+
+	_enemyPosition = GetPos _enemy
+	_column = (_enemyPosition Select 0) / 1280
+	_column = _column - (_column % 1)
+	_row = 10 - (_enemyPosition Select 1) / 1280
+	_row = _row - (_row % 1)
+
+	? (_column < 0):_column = 0
+	? (_row < 0):_row = 0
+
+	;Place marker on map & send message to side if needed.
+	? (_sendMessage):[_side,_teamCount,_message,_column,_row] Exec "Main\SendSideMessage.sqs"
+
+	[_teams Select _teamCount,_enemy] Exec "Main\CheckSpottedUnit.sqs"
+
+	? (_side == west):goto "SetWestMarker"
+	? (_side == east):goto "SetEastMarker"
+
+	goto _return
+
+#SetWestMarker
+
+	? (_enemyType == baseMarker):westBaseFound = _enemy;PublicVariable "westBaseFound"
+
+	westMarkerID = Random 50000;PublicVariable "westMarkerID"
+	westMarkerTeam = _teamCount;PublicVariable "westMarkerTeam"
+	westMarkerType = _enemyType;PublicVariable "westMarkerType"
+	westMarkerUnit = _enemy;PublicVariable "westMarkerUnit"
+	~1
+	goto _return
+
+#SetEastMarker
+
+	? (_enemyType == baseMarker):eastBaseFound = _enemy;PublicVariable "eastBaseFound"
+
+	eastMarkerID = Random 50000;PublicVariable "eastMarkerID"
+	eastMarkerTeam = _teamCount;PublicVariable "eastMarkerTeam"
+	eastMarkerType = _enemyType;PublicVariable "eastMarkerType"
+	eastMarkerUnit = _enemy;PublicVariable "eastMarkerUnit"
+	~1
+	goto _return

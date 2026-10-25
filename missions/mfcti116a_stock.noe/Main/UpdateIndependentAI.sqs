@@ -1,0 +1,1380 @@
+;Last modified 2/22/4
+private ["_currentGroup","_role","_scriptType","_independent","_groupValue","_resources"]
+
+_currentGroup = ObjNull
+_role = 0
+_scriptType = 0
+_independent = false
+_groupValue = 0
+_resources = 0
+
+;Use on a group to give it AI control.
+;Script usage: [Group] Exec "UpdateIndependentAI.sqs"
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_group = _this select 0
+_side = Side _group
+_sideText = "West"
+? (_side == east):_sideText = "East"
+
+;Get group
+_group SetCombatMode "RED"
+_group SetBehaviour "AWARE"
+
+_delay = 0
+? (_group == WestBravoTeam) || (_group == EastBravoTeam):_delay = 4
+? (_group == WestCharlieTeam) || (_group == EastCharlieTeam):_delay = 8
+? (_group == WestDeltaTeam) || (_group == EastDeltaTeam):_delay = 12
+? (_group == WestEchoTeam) || (_group == EastEchoTeam):_delay = 16
+? (_group == WestFoxtrotTeam) || (_group == EastFoxtrotTeam):_delay = 20
+? (_group == WestGolfTeam) || (_group == EastGolfTeam):_delay = 24
+? (_group == WestHotelTeam) || (_group == EastHotelTeam):_delay = 28
+~(15 + _delay)
+
+;If the unit is a player then don't run the AI routines.
+? (player == Leader _group):Exit
+? !(Local Leader _group):Exit
+
+_timeElapsed = 0
+_killed = false
+_newState = true
+_lastRole = 0
+_lastScriptType = 0
+_embarkLeader = 0
+_checkFormation = true
+_reportMission = false
+_defendingTarget = true
+_loopCount = 0
+_goalLoopCount = 0
+_unitsBought = 0
+_returnToBase = false
+_saboteurs = []
+_saboteurTargets = []
+
+_destinationObject = "Logic" CamCreate [0,0,0]
+_totalTowns = Count towns
+_totalTeams = Count teamDesignations
+
+#Update
+~1
+
+	_count = 0
+
+	#GetTeamInfo
+
+		Call Format["_currentGroup = %1%2Team",_sideText,teamMapDesignations Select _count]
+		? (_group == _currentGroup):Call Format["_role = %1%2Role;_scriptType = %1%2TeamScript;_independent = %1%2Independent;_groupValue = group%2;_resources = %1%2Resources",_sideText,teamMapDesignations Select _count];goto "UpdateState"
+
+		_count = _count + 1
+		? (_count < _totalTeams):goto "GetTeamInfo"
+
+;Check for AI state change and if enough time has passed to update current state.
+#UpdateState
+
+	;LLM link (added): true when the LLM commands this side. The changes marked "LLM link" below apply only then.
+	_llm = ((_side == west) && (llmWestControl)) || ((_side == east) && (llmEastControl))
+
+	;LLM link (added): true for the team the relay names as the mortar crew. _count is this team's number here.
+	_crew = false
+	? (_llm) && (_side == west):_crew = (_count == llmWestCrew)
+	? (_llm) && (_side == east):_crew = (_count == llmEastCrew)
+
+	;LLM link (added): the team's combat mode. This script sets "RED" at its start: fire at will, every man for himself.
+	;Under "RED" the game lets each man hide or go and attack on his own, in a subgroup of his own. The team's
+	;order then waits in a main subgroup with nobody in it for as long as that lasts, which can be the rest of the game.
+	;llmCombatMode is "YELLOW" unless LLM\Init.sqs says otherwise: fire at will and keep formation.
+	;Given on every pass, because the game hands a mode to the men one by one over the radio. It sends nothing to a man who has it.
+	;Not for aircraft: they fight by attack runs, which is exactly what keeping formation forbids. They stay on "RED".
+	? (_llm) && (_role != airRole):_group SetCombatMode llmCombatMode
+	? (_llm) && (_role == airRole):_group SetCombatMode "RED"
+	;LLM link (added): the crew of the leader's vehicle (or the leader himself, on foot) are never handed a target
+	;by the team leader, so that vehicle is never sent away to attack one. It still fires at what it sees.
+	;All of the crew, not only the man who commands it now: when he is killed the next man takes over, and a target
+	;handed to a man before this reaches him stays his. Given on every pass because the crew changes.
+	;The game has no command to undo this for a man: whoever has once ridden with a leader keeps it.
+	;Only while one of this team's own men drives that vehicle, so a leader riding with another team changes nothing there.
+	? (_llm) && (llmLeadObeys) && (_role != airRole) && ((Group (Driver (Vehicle (Leader _group)))) == _group):(Leader _group) DisableAI "TARGET";(Driver (Vehicle (Leader _group))) DisableAI "TARGET";(Gunner (Vehicle (Leader _group))) DisableAI "TARGET";(Commander (Vehicle (Leader _group))) DisableAI "TARGET"
+
+	;If unit just became independent set new state.
+	? (_independent) && (!_lastIndependent):_newState = true;_loopCount = 0
+	? (_independent):_lastIndependent = true
+	? (!_independent):_lastIndependent = false;goto "Update"
+
+	;This prevents the unit from following the new commander waypoints without further orders to do so.
+	? (_scriptType == newOrderScript):_newOrder = true
+
+	;If role or goal just changed set new state.
+	? (_role != _lastRole) || ((_scriptType != _lastScriptType) && (_scriptType != newOrderScript)):_newState = true
+
+	_lastRole = _role
+	_lastScriptType = _scriptType
+	_timeElapsed = _timeElapsed + 1
+
+	? (_killed) && (Alive Leader _group):_killed = false;_newState = true
+	? !(_killed) && !(Alive Leader _group):_killed = true;goto "WaitForRespawn"
+	? (_newState):goto "UpdateRole"
+	? (_timeElapsed < 16) || (_killed):goto "Update"
+	? (_scriptType == newOrderScript):goto "Update"
+
+;Determine which AI role needs to be executed.
+#UpdateRole
+
+	_timeElapsed = 0
+
+	? (_newState):_reportMission = true;_newState = false
+
+	? (_role >= infantryRole) && (_role <= mechanizedAARole) :goto "UpdateInfantry"
+	? (_role == armourRole) || (_role == armourHeavyRole):goto "UpdateArmour"
+	? (_role == airRole):goto "UpdateAir"
+
+	goto "Update"
+
+#UpdateAir
+
+	_loopCount = _loopCount + 1
+
+	? (_loopCount > 2):goto "AirCheckOnFoot"
+	? !(_reportMission):goto "Update"
+	? (_returnToBase):goto "Update"
+
+	goto "UpdateAirLeader"
+
+	#AirCheckOnFoot
+
+		_loopCount = 0
+		_nearestFactory = ObjNull
+
+		_leaderOnFoot = true
+		? (Leader _group != Vehicle Leader _group):_leaderOnFoot = false;_returnToBase = false
+
+	_minResources = airMinResources
+	? (expensiveAssaultAC):_minResources = _minResources * expensiveAssaultACMultiplier
+
+	? (_resources < _minResources):goto "UpdateAirLeader"
+
+	;Do not attempt to purchase vehicles if limit has been reached.
+	? (_side == west) && (totalWestVehicles >= maxVehicles):goto "UpdateAirLeader"
+	? (_side == east) && (totalEastVehicles >= maxVehicles):goto "UpdateAirLeader"
+
+	;Attempt to get nearest heavy factory from leader.
+	_factoryType = airFactoryType;_getNearestFactoryReturn = "AirPurchase";goto "GetNearestFactory"
+
+	#AirPurchase
+
+		;Try not to exceed team size.
+		_teamSize = Count Units _group + _unitsBought
+		;LLM link (added): the mortar crew buys nothing once it has llmCrewMax men, and stays at the guns.
+		? (_crew) && (_teamSize >= llmCrewMax):_unitsBought = 0;goto "UpdateAirLeader"
+		_unitsBought = 0
+		_airExists = false
+
+		;If aircraft vehicles have not been upgraded then an armed aircraft cannot be purchased.
+		? (_side == west) && !(westUpgradedAir):_nearestFactory = ObjNull
+		? (_side == east) && !(eastUpgradedAir):_nearestFactory = ObjNull
+
+		? (IsNull _nearestFactory):goto "UpdateAirLeader"
+
+		;If air leader is not on foot then purchase at any range.
+		? !(_leaderOnFoot) && !(_nearestFactory In buildingsInUseServer) && (_teamSize < (maxAIGroupSize - 1)):_unitsBought = 2;[_side,_group,true,_nearestFactory,_resources] Exec "Main\BuyAircraft.sqs";goto "UpdateAirLeader"
+		? !(_leaderOnFoot):goto "UpdateAirLeader"
+
+		_returnToBase = true
+
+		;If structure is in range, not being used, and group is small enough then flag it as usable.
+		? (Leader _group Distance _nearestFactory < (AIPurchaseRange * 2)) && !(_nearestFactory In buildingsInUseServer) && (_teamSize < (maxAIGroupSize - 1)):_unitsBought = 2;[_side,_group,true,_nearestFactory,_resources] Exec "Main\BuyAircraft.sqs";goto "UpdateAirLeader"
+
+		;Move to closest available factory if team is very small.
+		? (Count Units _group < minIndependentSize):Leader _group DoMove (GetPos _nearestFactory)
+
+		;Move to closest available factory if conveniently close by and team is not too full.
+		? (Count Units _group < (maxAIGroupSize * .5)) && ((Leader _group Distance _nearestFactory) < (reinforceRange * 3)):Leader _group DoMove (GetPos _nearestFactory)
+
+	#UpdateAirLeader
+
+		_airCount = 0
+		_units = Units _group
+
+		;If leader is returning to base then do not include in unit destination assignment.
+		? (_returnToBase):_units = _units - [Leader _group]
+
+		_totalUnits = Count _units
+
+		? (_totalUnits < 1):goto "UpdateAirGoal"
+
+		#UpdateAirMember
+
+			;Randomize position slightly.
+			_direction = Random 360
+			_position = GetPos _destinationObject
+			_distance = 25 + Random 50
+			_destination = [(_position Select 0)+((sin _direction)*_distance),(_position Select 1)+((cos _direction)*_distance),50]
+
+			;Move unit to position.
+			(_units Select _airCount) DoMove _destination
+
+			_airCount = _airCount + 1
+			? (_airCount < _totalUnits):goto "UpdateAirMember"
+
+		goto "UpdateAirGoal"
+
+#UpdateAirGoal
+
+	goto "UpdateGoal"
+
+#UpdateArmour
+
+	_loopCount = _loopCount + 1
+
+	? (_loopCount < 2) && !(_reportMission):goto "Update"
+	? (_loopCount < 2):goto "UpdateArmourLeader"
+
+	_loopCount = 0
+
+	_nearestFactory = ObjNull
+
+	? (_resources < armourMinResources):goto "UpdateArmourLeader"
+
+	;Do not attempt to purchase vehicles if limit has been reached.
+	? (_side == west) && (totalWestVehicles >= maxVehicles):goto "UpdateArmourLeader"
+	? (_side == east) && (totalEastVehicles >= maxVehicles):goto "UpdateArmourLeader"
+
+	;Attempt to get nearest heavy factory from leader.
+	_factoryType = heavyFactoryType;_getNearestFactoryReturn = "ArmourGetNearestLight";goto "GetNearestFactory"
+
+	;Attempt to get nearest light factory from leader (if team has enough money for APCs).
+	#ArmourGetNearestLight
+
+		_nearestHeavy = _nearestFactory
+		_nearestFactory = ObjNull
+		_factoryType = lightFactoryType;_getNearestFactoryReturn = "ArmourPurchase";goto "GetNearestFactory"
+
+	#ArmourPurchase
+
+		;Try not to exceed team size.
+		_teamSize = Count Units _group + _unitsBought
+		;LLM link (added): the mortar crew buys nothing once it has llmCrewMax men, and stays at the guns.
+		? (_crew) && (_teamSize >= llmCrewMax):_unitsBought = 0;goto "UpdateArmourLeader"
+		_unitsBought = 0
+		_heavyExists = false
+		_heavyAvailable = false
+		_lightAvailable = false
+		_range = AIPurchaseRange
+
+		;If leader is in an immobile vehicle (like a stationary gun) then extend purchase range to defend range.
+		? (Leader _group != Vehicle Leader _group) && (!(CanMove (Vehicle Leader _group)) || (IsNull Driver (Vehicle Leader _group))):_range = targetDefendRange
+
+		;If light vehicles have not been upgraded then a light cannot be purchased.
+		? (_side == west) && !(westUpgradedLight):_nearestFactory = ObjNull
+		? (_side == east) && !(eastUpgradedLight):_nearestFactory = ObjNull
+
+		;If structure is in range, not being used, and group is small enough then flag it as usable.
+		? !(IsNull _nearestHeavy) && (Leader _group Distance _nearestHeavy < _range) && !(_nearestHeavy In buildingsInUseServer) && (_teamSize < (maxAIGroupSize - 2)):_heavyAvailable = true
+		? !(IsNull _nearestFactory) && (Leader _group Distance _nearestFactory < _range) && !(_nearestFactory In buildingsInUseServer) && (_teamSize < (maxAIGroupSize - 2)):_lightAvailable = true
+		? !(IsNull _nearestHeavy) && (Leader _group Distance _nearestHeavy < _range) && (_teamSize < (maxAIGroupSize - 2)):_heavyExists = true
+
+		;LLM link (added): if the side has a heavy factory but this leader is out of its reach, he does not buy
+		;Shilkas where he stands. The return-to-factory lines below take him to the heavy factory instead.
+		? (_llm) && !(IsNull _nearestHeavy) && !(_heavyExists):_lightAvailable = false
+
+		;If a heavy factory is not available guarantee light.
+		? !(_heavyExists) && (_lightAvailable):_unitsBought = 3;[_side,_group,true,_nearestFactory,_resources] Exec "Main\BuyAA.sqs";goto "Update"
+
+		;If multiple choices are available then randomly pick one.
+		;Fix (added): roll the dice only when a tank could be bought too. The stock line rolled again on every
+		;pass while the heavy factory was busy, so a team waiting for tanks ended up with mostly Shilkas.
+		? (_lightAvailable) && (_heavyAvailable) && (Random 100 < armourBuyLight):_unitsBought = 3;[_side,_group,true,_nearestFactory,_resources] Exec "Main\BuyAA.sqs";goto "Update"
+		? (_heavyAvailable):_unitsBought = 3;[_side,_group,true,_nearestHeavy,_resources,_role] Exec "Main\BuyTank.sqs";goto "Update"
+
+	;Return to base for reinforcements if team is very small or it is just convenient.
+	#CheckArmourReturnToBase
+
+		_lightClosest = false
+		_lightDistance = 10000
+		_heavyDistance = 10000
+
+		;Get distances.
+		? !(IsNull _nearestFactory):_lightDistance = Leader _group Distance _nearestFactory
+		? !(IsNull _nearestHeavy):_heavyDistance = Leader _group Distance _nearestHeavy
+
+		;Determine closest.  Add a slight preference for the heavy factory.
+		? !(IsNull _nearestFactory) && ((_lightDistance + 100) < _heavyDistance):_lightClosest = true
+
+		;LLM link (added): with a heavy factory on the side, a tank team refills there, not at the light factory.
+		? (_llm) && !(IsNull _nearestHeavy):_lightClosest = false
+
+		;Move to closest available factory/barracks if team is very small.
+		? (_lightClosest) && (Count Units _group < minIndependentSize):goto "ReturnToFactory"
+		? !(IsNull _nearestHeavy) && (Count Units _group < minIndependentSize):_nearestFactory = _nearestHeavy;goto "ReturnToFactory"
+
+		;Move to closest available factory/barracks if conveniently close by and team is not too full.
+		? (_lightClosest) && (Count Units _group < (maxAIGroupSize * .5)) && (_lightDistance < reinforceRange):goto "ReturnToFactory"
+		? (Count Units _group < (maxAIGroupSize * .5)) && (_heavyDistance < reinforceRange):_nearestFactory = _nearestHeavy;goto "ReturnToFactory"
+
+	#UpdateArmourLeader
+
+		;If leader is in a mobile vehicle then skip this section.
+		? (Leader _group != Vehicle Leader _group) && (CanMove Vehicle Leader _group):goto "UpdateArmourMembers"
+
+		_transportOnly = false
+		_inRangeDistance = embarkVehicleRange
+		_currentUnit = Leader _group
+		_returnGetTeamVehicles = "ArmourEmbarkLeader";goto "GetTeamVehicles"
+
+		#ArmourEmbarkLeader
+
+			;If leader has been trying to enter vehicle for multiple updates then teleport into vehicle now.
+			? (_embarkLeader > 2):_currentUnit MoveInDriver (_teamVehicles Select 0);_embarkLeader = 0;goto "UpdateArmourMembers"
+			? (Count _teamVehicles > 0):_embarkLeader = _embarkLeader + 1;_embarkAsDriverInTeamVehicleReturn = "UpdateArmourMembers";goto "EmbarkAsDriverInTeamVehicle"
+
+			_embarkLeader = 0
+
+		#UpdateArmourMembers
+
+			_armourCount = 0
+			_units = Units _group
+			_units = _units - [Leader _group]
+			_unitsOutOfFormation = []
+			_outOfFormation = false
+			_totalUnits = Count _units
+			_vehicleAssigned = ObjNull
+
+			? (_totalUnits < 1):goto "UpdateArmourGoal"
+
+			#UpdateArmourMember
+
+				_currentUnit = _units Select _armourCount
+				_armourCount = _armourCount + 1
+				_vehicle = Vehicle _currentUnit
+
+				;If no gunner is in vehicle & it is a tank & current unit is not the driver then make unit gunner.
+				? (_vehicleAssigned != _vehicle) && ((IsNull Gunner _vehicle) || !(Alive Gunner _vehicle)) && (_currentUnit != Driver _vehicle) && ((_vehicle In westHeavyVehicles) || (_vehicle In eastHeavyVehicles)):_currentUnit AssignAsGunner _vehicle;_vehicleAssigned = _vehicle
+
+				;If no driver is in vehicle & the leader is out of range then make unit a driver.
+				? (_vehicleAssigned != _vehicle) && ((IsNull Driver _vehicle) || !(Alive Driver _vehicle)) && ((_currentUnit Distance Leader _group > embarkVehicleRange) || (Leader _group != Vehicle Leader _group)):_currentUnit AssignAsDriver _vehicle;_vehicleAssigned = _vehicle
+;				? ((IsNull Driver _vehicle) || !(Alive Driver _vehicle)) && (CanMove _vehicle) && (_currentUnit Distance Leader _group > embarkVehicleRange):_currentUnit MoveInDriver _vehicle
+				? (GetDammage _currentUnit >= 1) || !(Alive _currentUnit):goto "UpdateNextArmourMember"
+
+				;If unit out of range of team or on foot.
+				#ArmourMemberOutOfRange
+
+					_leaderDistance = _currentUnit Distance Leader _group 
+
+					? (_leaderDistance <= inFormationRange) && (_currentUnit != _vehicle):goto "UpdateNextArmourMember"
+
+					;If unit is out of range of the team then proceed to the team independently.
+					;This prevents the team from slowing down and waiting.
+					_outOfFormation = true
+					_unitsOutOfFormation = _unitsOutOfFormation + [_currentUnit]
+
+					? (_leaderDistance < _currentUnit Distance _destinationObject):_currentUnit DoMove GetPos Leader _group;goto "UpdateNextArmourMember"
+
+					_currentUnit DoMove GetPos _destinationObject
+
+				#UpdateNextArmourMember
+
+					? (_armourCount < _totalUnits):goto "UpdateArmourMember"
+
+			goto "UpdateArmourGoal"
+
+#UpdateArmourGoal
+
+	_updateFormationReturn = "UpdateGoal";goto "UpdateFormation"
+
+#UpdateInfantry
+
+	_loopCount = _loopCount + 1
+
+	? (_loopCount < 2) && !(_reportMission):goto "Update"
+	? (_loopCount < 2):goto "UpdateInfantryLeader"
+
+	_loopCount = 0
+
+	_affordLight = false
+	_nearestFactory = ObjNull
+
+	? (_resources < soldierCost):goto "UpdateInfantryLeader"
+	? (_role == blackOpsRole) && (_resources < sniperCost):goto "UpdateInfantryLeader"
+	? (_resources >= mechanizedInfantryMinResources):_affordLight = true
+
+	;Do not attempt to purcahse vehicles if limit has been reached.
+	? (_side == west) && (totalWestVehicles >= maxVehicles):_affordLight = false
+	? (_side == east) && (totalEastVehicles >= maxVehicles):_affordLight = false
+
+	;Attempt to get nearest barracks from leader.
+	_factoryType = infantryFactoryType;_getNearestFactoryReturn = "InfantryGetNearestLight";goto "GetNearestFactory"
+
+	;Attempt to get nearest light factory from leader (if team has enough money for APCs).
+	#InfantryGetNearestLight
+
+		_nearestBarracks = _nearestFactory
+		_nearestFactory = ObjNull
+
+		? !(_affordLight):goto "CheckInfantryPurchase"
+
+		_factoryType = lightFactoryType;_getNearestFactoryReturn = "InfantryGetNearestHeavy";goto "GetNearestFactory"
+
+	#InfantryGetNearestHeavy
+
+		_nearestLight = _nearestFactory
+		_nearestFactory = ObjNull
+		? (_side == west) && !(westUpgradedLight):_nearestLight = ObjNull
+
+		_factoryType = heavyFactoryType;_getNearestFactoryReturn = "CheckInfantryTransport";goto "GetNearestFactory"
+
+	#CheckInfantryTransport
+
+		_transportOnly = true
+		_inRangeDistance = 0
+		_currentUnit = Leader _group
+		_returnGetTeamVehicles = "CheckInfantryPurchase";goto "GetTeamVehicles"
+
+	#CheckInfantryPurchase
+
+		;Try not to exceed team size.
+		_teamSize = Count Units _group + _unitsBought
+		;LLM link (added): the mortar crew buys nothing once it has llmCrewMax men, and stays at the guns.
+		? (_crew) && (_teamSize >= llmCrewMax):_unitsBought = 0;goto "UpdateInfantryLeader"
+
+		_unitsBought = 0
+
+		_buyLight = false
+		_heavyAvailable = false
+		_lightAvailable = false
+		_barracksAvailable = false
+		_range = AIPurchaseRange
+
+		;If leader is in an immobile vehicle (like a stationary gun) then extend purchase range to defend range.
+		? (Leader _group != Vehicle Leader _group) && (!(CanMove (Vehicle Leader _group)) || (IsNull Driver (Vehicle Leader _group))):_range = targetDefendRange
+
+		;If structure is in range, not being used, and group is small enough then flag it as usable.
+		? !(IsNull _nearestFactory) && (Leader _group Distance _nearestFactory < _range) && !(_nearestFactory In buildingsInUseServer) && (_teamSize < (maxAIGroupSize - 2)):_heavyAvailable = true
+		? !(IsNull _nearestLight) && (Leader _group Distance _nearestLight < _range) && !(_nearestLight In buildingsInUseServer) && (_teamSize < (maxAIGroupSize - 2)):_lightAvailable = true
+		? !(IsNull _nearestBarracks) && (Leader _group Distance _nearestBarracks < _range) && !(_nearestBarracks In buildingsInUseServer) && (_teamSize < maxAIGroupSize):_barracksAvailable = true
+		? (_role < mechanizedRole):_lightAvailable = false;_heavyAvailable = false
+
+		;Since east do not have light APCs set false.
+		;ADDON NOTE - This needs to be removed if an addon is used with east light APCs.
+		? (_side == east):_lightAvailable = false
+
+		_lightChance = infantryBuyLight
+		_heavyChance = infantryBuyHeavy
+
+		;If both types of APCs are available adjust purchase probabilities.
+		? (_barracksAvailable) && (_lightAvailable):_heavyChance = infantryBuyHeavy / 2
+		? (_barracksAvailable) && (_heavyAvailable):_lightChance = infantryBuyLight / 2
+
+		;If a barracks is not available increase heavy odds & guarantee light (if heavy is not chosen).
+		? !(_barracksAvailable) && (_lightAvailable):_heavyChance = infantryBuyHeavy * 2;_lightChance = 100
+
+		;If the barracks is just in use then reduce the light chance.
+		? !(IsNull _nearestBarracks) && !(_barracksAvailable) && (Leader _group Distance _nearestBarracks < _range) && (_nearestBarracks In buildingsInUseServer):_lightChance = 25
+
+		;If a barracks & light are not available guarantee heavy.
+		? !(_barracksAvailable) && !(_lightAvailable):_heavyChance = 100
+		? (_role == mechanizedAARole):_lightChance = _lightChance / 2
+
+		;If multiple choices are available then randomly pick one.
+		? (_heavyAvailable) && (Random 100 < _heavyChance):_unitsBought = 3;[_side,_group,true,_nearestFactory,_resources] Exec "Main\BuyHeavyAPC.sqs";goto "Update"
+		? (_lightAvailable) && (Random 100 < _lightChance):_unitsBought = 3;[_side,_group,true,_nearestLight,_resources] Exec "Main\BuyLightAPC.sqs";goto "Update"
+		? (_role == mechanizedAARole) && (_lightAvailable) && (Random 100 < _lightChance):_unitsBought = 3;[_side,_group,true,_nearestLight,_resources] Exec "Main\BuyAA.sqs";goto "Update"
+
+		;If team has transports only buy a soldier if there is room in the transports.
+		? (_barracksAvailable) && (Count _teamVehicles > 0) && ((Count Units _group - 2) < _totalTransportPositions):_unitsBought = 1;[_side,_group,true,_nearestFactory,_resources,_role] Exec "Main\BuyInfantry.sqs";goto "Update"
+
+		;Buy a soldier if there are no transports.
+		? (_barracksAvailable) && (Count _teamVehicles < 1):_unitsBought = 1;[_side,_group,true,_nearestBarracks,_resources,_role] Exec "Main\BuyInfantry.sqs";goto "Update"
+
+	;Return to base for reinforcements if team is very small or it is just convenient.
+	#CheckInfantryReturnToBase
+
+		_lightClosest = false
+		_heavyClosest = false
+		_barracksDistance = 10000
+		_lightDistance = 10000
+		_heavyDistance = 10000
+
+		;Get distances.
+		? !(IsNull _nearestFactory):_heavyDistance = Leader _group Distance _nearestFactory
+		? !(IsNull _nearestLight):_lightDistance = Leader _group Distance _nearestLight
+		? !(IsNull _nearestBarracks):_barracksDistance = Leader _group Distance _nearestBarracks
+
+		;LLM link (added): East has no light APC, so for East the light factory is left out of the comparison.
+		? (_llm) && (_side == east):_lightDistance = 10000
+
+		;Determine closest.
+		? !(IsNull _nearestFactory) && (_heavyDistance < _lightDistance) && (_heavyDistance < _barracksDistance):_heavyClosest = true
+		? !(IsNull _nearestLight) && (_lightDistance < _heavyDistance) && (_lightDistance < _barracksDistance):_lightClosest = true
+
+		;LLM link (added): a team that can buy nothing at a vehicle factory refills at the barracks. The stock lines sent
+		;it to whichever building was nearest, and an infantry team then stood at the heavy factory for good.
+		? (_llm) && (_role < mechanizedRole):_heavyClosest = false;_lightClosest = false
+
+		;Move to closest available factory/barracks if team is very small.
+		? (_heavyClosest) && (_affordLight) && (Count Units _group < minIndependentSize):goto "ReturnToFactory"
+		? (_lightClosest) && (_affordLight) && (Count Units _group < minIndependentSize):_nearestFactory = _nearestLight;goto "ReturnToFactory"
+		? !(IsNull _nearestBarracks) && (_resources >= infantryMinResources) && (Count Units _group < minIndependentSize):_nearestFactory = _nearestBarracks;goto "ReturnToBarracks"
+
+		;Move to closest available factory/barracks if conveniently close by and team is not too full.
+		? (_heavyClosest) && (_affordLight) && (Count Units _group < (maxAIGroupSize * .75)) && (_heavyDistance < reinforceRange):goto "ReturnToFactory"
+		? (_lightClosest) && (_affordLight) && (Count Units _group < (maxAIGroupSize * .75)) && (_lightDistance < reinforceRange):_nearestFactory = _nearestLight;goto "ReturnToFactory"
+		? (_barracksDistance < reinforceRange) && (_resources >= infantryMinResources) && (Count Units _group < (maxAIGroupSize * .75)):_nearestFactory = _nearestBarracks;goto "ReturnToBarracks"
+
+		#UpdateInfantryLeader
+
+			;If leader is in a mobile vehicle then skip this section.
+			? (Leader _group != Vehicle Leader _group) && (CanMove Vehicle Leader _group):goto "UpdateInfantryMembers"
+
+			_transportOnly = false
+			_inRangeDistance = embarkVehicleRange
+			_currentUnit = Leader _group
+			_returnGetTeamVehicles = "InfantryEmbarkLeader";goto "GetTeamVehicles"
+
+			#InfantryEmbarkLeader
+
+				;If leader has been trying to enter vehicle for multiple updates then teleport into vehicle now.
+				? (_embarkLeader > 2):_currentUnit MoveInDriver (_teamVehicles Select 0);_embarkLeader = 0;goto "UpdateInfantryMembers"
+				? (Count _teamVehicles > 0):_embarkLeader = _embarkLeader + 1;_embarkAsDriverInTeamVehicleReturn = "UpdateInfantryMembers";goto "EmbarkAsDriverInTeamVehicle"
+
+				_embarkLeader = 0
+
+		#UpdateInfantryMembers
+
+			_infantryCount = 0
+			_units = Units _group
+			_units = _units - [Leader _group]
+			_unitsOutOfFormation = []
+			_outOfFormation = false
+			_totalUnits = Count _units
+	
+			? (_totalUnits < 1):goto "UpdateInfantryGoal"
+
+			#UpdateInfantryMember
+
+				_currentUnit = _units Select _infantryCount
+				_infantryCount = _infantryCount + 1
+				_vehicle = Vehicle _currentUnit
+
+				? (GetDammage _currentUnit >= 1) || !(Alive _currentUnit):goto "UpdateNextInfantryMember"
+				;If the destination is far away embark in a transport if available.
+				? (_currentUnit Distance _destinationObject > disembarkVehicleRange):goto "InfantryEmbarkMember"
+
+				;Otherwise disembark if in a transport & not one of the crew.
+				? (_currentUnit != _vehicle) && (Driver _vehicle != _currentUnit) && (Gunner _vehicle != _currentUnit) && (Commander _vehicle != _currentUnit):UnassignVehicle _currentUnit
+
+				goto "InfantryMemberOutOfRange"
+
+				#InfantryEmbarkMember
+
+					;If not in a vehicle & a transport is available.
+					? (_vehicle != _currentUnit) && (CanMove _vehicle):goto "InfantryMemberOutOfRange"
+
+					_transportOnly = true
+					_inRangeDistance = embarkVehicleRange
+					_returnGetTeamVehicles = "InfantryMemberEmbarkTransport";goto "GetTeamVehicles"
+
+				#InfantryMemberEmbarkTransport
+
+					? (Count _teamVehicles < 1):goto "InfantryMemberOutOfRange"
+
+					_currentUnit AssignAsCargo (_teamVehicles Select (Random (Count _teamVehicles)))
+
+					;Vary the transports used a little.
+					? (Count _teamVehicles > 1) && ((_infantryCount / 2) % 1 > 0):_currentUnit AssignAsCargo (_teamVehicles Select 0)
+					? (Count _teamVehicles > 1) && ((_infantryCount / 2) % 1 == 0):_currentUnit AssignAsCargo (_teamVehicles Select 1)
+
+					[_currentUnit] OrderGetIn true
+
+				#InfantryMemberOutOfRange
+
+					_leaderDistance = _currentUnit Distance Leader _group 
+
+					? (_leaderDistance <= inFormationRange):goto "UpdateNextInfantryMember"
+
+					;If unit is out of range of the team then proceed to the team independently.
+					;This prevents the team from slowing down and waiting.
+					_outOfFormation = true
+					_unitsOutOfFormation = _unitsOutOfFormation + [_currentUnit]
+
+					;If not near the leader DoMove to current position.
+					? (_leaderDistance < _currentUnit Distance _destinationObject):_currentUnit DoMove GetPos Leader _group;goto "UpdateNextInfantryMember"
+
+					_currentUnit DoMove GetPos _destinationObject
+
+				#UpdateNextInfantryMember
+
+					? (_infantryCount < _totalUnits):goto "UpdateInfantryMember"
+
+			goto "UpdateInfantryGoal"
+
+#UpdateInfantryGoal
+
+	_updateFormationReturn = "UpdateGoal";goto "UpdateFormation"
+
+#UpdateFormation
+
+	;If anyone was out of formation previously order those now in range to follow.
+	? (_checkFormation):_checkFormation = false;_units = _units - [_unitsOutOfFormation];[_units] CommandFollow Leader _group
+
+	;If anyone is out of formation keep track of it for next update.
+	? (_outOfFormation):_outOfFormation = false;_checkFormation = true
+
+	goto _updateFormationReturn
+
+#UpdateGoal
+
+	? (_side == west):_defenseTeams = westDefenseTeams;_defendedTargets = westDefendedTargets
+	? (_side == east):_defenseTeams = eastDefenseTeams;_defendedTargets = eastDefendedTargets
+
+	;LLM link (added): a team smaller than the stock minimum whose leader is on foot does not set out. Stock sent
+	;a lone leader towards the nearest town on the first pass after every new order. A crew still in its vehicle
+	;carries on as before, and an explicit move order is still obeyed.
+	? (_llm) && (_role != airRole) && (Count Units _group < minIndependentSize) && (Leader _group == Vehicle Leader _group) && (_scriptType != moveToWaypointScript):goto "Update"
+
+	? (_scriptType == moveToWaypointScript) && (_newOrder):goto "MoveToWaypoint"
+	? (_scriptType == assaultScript) || (_scriptType == takeTownsAndBasesScript):goto "TakeTownsAndBases"
+	? (_scriptType == defenseScript) || (_scriptType == defendBaseScript):goto "DefendTowns"
+	? (_scriptType == defendTownsAndBasesScript):goto "CheckDefendTargets"
+	? (_scriptType == searchAndDestroyScript):goto "SearchAndDestroy"
+
+	goto "Update"
+#MoveToWaypoint
+
+	? (_side == west):_waypointMarker = "WestCommanderWP";_WPDestination = westCommanderWPDestination
+	? (_side == east):_waypointMarker = "EastCommanderWP";_WPDestination = eastCommanderWPDestination
+
+	_destinationObject SetPos GetPos _WPDestination
+
+	;LLM link (added): each team has its own destination when the LLM commands this side.
+	? (_side == west) && (llmWestControl):_destinationObject SetPos (llmWestDest Select _groupValue)
+	? (_side == east) && (llmEastControl):_destinationObject SetPos (llmEastDest Select _groupValue)
+
+	? (_reportMission) && (_side == west):westMessage = messageOrderMoveToWaypoint;PublicVariable "westMessage";westPlayerMessageGroupFrom = _groupValue;PublicVariable "westPlayerMessageGroupFrom";_reportMission = false
+	? (_reportMission) && (_side == east):eastMessage = messageOrderMoveToWaypoint;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = _groupValue;PublicVariable "eastPlayerMessageGroupFrom";_reportMission = false
+	? (_role != airRole):_group Move GetPos _destinationObject
+
+	_newOrder = false
+	goto "Update"
+
+;Return to position in front of barracks.
+#ReturnToBarracks
+
+	_getFactoryPositionReturn = "SetBaseDestination";goto "GetBarracksPosition"
+
+;Return to position in front of factory.
+#ReturnToFactory
+
+	;LLM link (added): a leader already in a working vehicle beside the factory is close enough to buy (the purchase
+	;range is larger than this). He is not ordered to shuffle his vehicle to the door among the ones parked there.
+	? (_llm) && (Leader _group != Vehicle Leader _group) && (CanMove Vehicle Leader _group) && !(IsNull Driver Vehicle Leader _group) && (Leader _group Distance _nearestFactory < 60):goto "Update"
+
+	_getFactoryPositionReturn = "SetBaseDestination";goto "GetFactoryPosition"
+
+#SetBaseDestination
+
+	_group Move _destination
+
+	;LLM link (added): under LLM control the leader is not also sent by name. An order by name takes him out of
+	;the main body of his team until he has carried it out, and the engine gives a group order (Move) to the main
+	;body only. A leader put into the driving seat of a new vehicle while he still holds such an order never
+	;finishes it: in the trial of 8 October every team that froze at base had its leader in exactly that state.
+	_byName = true
+	? (_llm):_byName = false
+	? (_byName):Leader _group DoMove _destination
+
+	? !(CanMove (Vehicle Leader _group)) || (IsNull Driver (Vehicle Leader _group)):UnassignVehicle Leader _group
+
+	goto "Update"
+
+;Get position in front of barracks.
+#GetBarracksPosition
+
+	_direction = ((GetDir _nearestFactory + 90) + (Random 5) - 10) % 360
+	goto "GetBuildingPosition"
+
+;Get position in front of factory.
+#GetFactoryPosition
+
+	_direction = ((GetDir _nearestFactory + 180) + (Random 5) - 10) % 360
+
+;Get slightly random position in front of building.
+#GetBuildingPosition
+
+	_position = GetPos _nearestFactory
+
+	_distance = (Random 10) + 12
+	_destination = [(_position Select 0)+((sin _direction)*_distance),(_position Select 1)+((cos _direction)*_distance),_position Select 2]
+	_destinationObject SetPos _destination
+
+	goto _getFactoryPositionReturn
+
+;Finds the nearest qualifying factory.
+#GetNearestFactory
+
+	_nearestDistance = 100000
+	_nearestFactory = ObjNull
+	_getFactoryListReturn = "FindFactories"
+
+	? (_side == west):goto "GetWestFactoryList"
+	? (_side == east):goto "GetEastFactoryList"
+
+	goto _getNearestFactoryReturn
+
+	#FindFactories
+
+		_nearestCount = 0
+		_totalFactories = Count _factoryList
+
+		? (_totalFactories < 1):goto _getNearestFactoryReturn
+
+		#FindFactory
+
+			_factory = _factoryList Select _nearestCount
+			_distance = Leader _group Distance _factory 
+			_nearestCount = _nearestCount + 1
+
+			? (_distance < _nearestDistance) && (GetDammage _factory < 1):_nearestDistance = _distance;_nearestFactory = _factory
+
+			? (_nearestCount < _totalFactories):goto "FindFactory"
+
+	goto _getNearestFactoryReturn
+
+#GetWestFactoryList
+
+	? (_factoryType == infantryFactoryType):_factoryList = westInfantryFactory
+	? (_factoryType == lightFactoryType):_factoryList = westLightFactory
+	? (_factoryType == heavyFactoryType):_factoryList = westHeavyFactory
+	? (_factoryType == airFactoryType):_factoryList = westAirFactory
+
+	goto _getFactoryListReturn
+
+#GetEastFactoryList
+
+	? (_factoryType == infantryFactoryType):_factoryList = eastInfantryFactory
+	? (_factoryType == lightFactoryType):_factoryList = eastLightFactory
+	? (_factoryType == heavyFactoryType):_factoryList = eastHeavyFactory
+	? (_factoryType == airFactoryType):_factoryList = eastAirFactory
+
+	goto _getFactoryListReturn
+
+;Gets vehicles for team.
+#GetTeamVehicles
+
+	_teamVehicleCount = 0
+	_totalTransportPositions = 0
+	_teamVehicles = []
+	_units = Units _group
+	_totalUnits = Count _units
+
+	? (_totalUnits < 1):goto _returnGetTeamVehicles
+
+	#GetTeamVehicle
+
+		_unit = _units Select _teamVehicleCount
+		_vehicle = Vehicle (_units Select _teamVehicleCount)
+		_teamVehicleCount = _teamVehicleCount + 1
+
+		? (_unit == _vehicle) || !(CanMove _vehicle) || (_vehicle In _teamVehicles):goto "GetNextTeamVehicle"
+		
+		_teamVehicles = _teamVehicles + [_vehicle]
+
+		;If _inRangeDistance is positive then only add unit to array if in range of _currentUnit.
+		? (_inRangeDistance > 0) && (_currentUnit Distance _vehicle > _inRangeDistance):_teamVehicles = _teamVehicles - [_vehicle];goto "GetNextTeamVehicle"
+
+		;If only transports are wanted then check for available transport spaces now.
+		? (_transportOnly):_transport = _vehicle;_transportPositionReturn = "GetTeamTransport";goto "GetAvailableTransportPositions"
+
+		#GetTeamTransport
+
+			;If only transports are wanted and no transport space exists remove this vehicle from list.
+			? (_transportOnly) && (_availableTransportPositions < 1):_teamVehicles = _teamVehicles - [_vehicle]
+			? (_transportOnly):_totalTransportPositions = _totalTransportPositions + _availableTransportPositions
+
+		#GetNextTeamVehicle
+
+			? (_teamVehicleCount < _totalUnits):goto "GetTeamVehicle"
+
+		goto _returnGetTeamVehicles
+
+#EmbarkAsDriverInTeamVehicle
+
+;	_vehicle = _teamVehicles Select (Random (Count _teamVehicles))
+	_vehicle = _teamVehicles Select 0
+
+	UnassignVehicle Driver _vehicle
+	;_currentUnit DoMove GetPos _vehicle
+	_currentUnit AssignAsDriver _vehicle
+	;[_currentUnit] OrderGetIn true
+
+	goto _embarkAsDriverInTeamVehicleReturn
+
+;Get free positions on transport.
+#GetAvailableTransportPositions
+
+	_totalTransportPositions = 0;_transportReturn = "CountTransportPositions";goto "GetTotalTransportPositions"
+
+	#CountTransportPositions
+
+		_transportCrew = Crew _transport
+		_transportCrew = _transportCrew - [Driver _transport];_transportCrew = _transportCrew - [Commander _transport];_transportCrew = _transportCrew - [Gunner _transport]
+
+		_transportCrewBoarded = Count _transportCrew
+		_availableTransportPositions = _totalTransportPositions - _transportCrewBoarded
+
+		goto _transportPositionReturn
+
+;Get max positions available for a given transport
+#GetTotalTransportPositions
+
+	_transportPositionsCount = 0
+	_transportNames = westTransportNames + eastTransportNames
+	_transportPositions = westTransportPositions + eastTransportPositions
+	_totalTransports = Count _transportNames
+
+	#FindMatchingTransport
+
+		;CountType doesn't seem to return Vulcans or sometimes BMPs.
+		;BMPs are returned when BMP2s are counted.
+		_transportName = _transportNames Select _transportPositionsCount
+		_transportsFound = (_transportName CountType [_transport])
+		_BMP2Found = 0
+		_M2A2Found = 0
+
+		;Some vehicles such as BMP2s will return from a CountType as a BMP.  Do a special check for these.
+		? (_transportName == "BMP"):_BMP2Found = ("BMP2" CountType [_transport])
+		? (_transportName == "M113"):_M2A2Found = ("bradley" CountType [_transport])
+
+		? (_BMP2Found > 0):_totalTransportPositions = _transportPositions Select (_transportPositionsCount + 1);goto _transportReturn
+		? (_M2A2Found > 0):_totalTransportPositions = _transportPositions Select (_transportPositionsCount + 2);goto _transportReturn
+		? (_transportsFound > 0):_totalTransportPositions = _transportPositions Select _transportPositionsCount;goto _transportReturn
+
+		_transportPositionsCount = _transportPositionsCount + 1
+
+		? (_transportPositionsCount < _totalTransports):goto "FindMatchingTransport"
+
+	goto _transportReturn
+
+;Check if AI teams need to defend a target or just take towns.
+#CheckDefendTargets
+
+	_totalGroups = Count _defenseTeams
+	? !(_group In _defenseTeams) || (_totalGroups < 1):goto "TakeTownsAndBases"
+
+	_count = 0
+
+	#FindDefenseTeam
+
+		_defender = _defenseTeams Select _count
+		? (_defender == _group):goto "SetDefenseTeam"
+
+		_count = _count + 1
+		? (_count < _totalGroups):goto "FindDefenseTeam"
+
+	goto "TakeTownsAndBases"
+
+	#SetDefenseTeam
+
+		? ((Count _defendedTargets) <= _count):goto "TakeTownsAndBases"
+		_closestTarget = _defendedTargets Select _count
+
+;AI routines for defending towns.
+#DefendTowns
+
+	_goalLoopCount = _goalLoopCount + 1
+
+	? (_goalLoopCount < 3) && !(_reportMission):goto "Update"
+	
+	_goalLoopCount = 0
+
+	? !(Alive Leader _group):goto "Update"
+	? (_reportMission) && (_side == west):westMessage = messageOrderDefend;PublicVariable "westMessage";westPlayerMessageGroupFrom = _groupValue;PublicVariable "westPlayerMessageGroupFrom";_reportMission = false;_closestTarget = ObjNull
+	? (_reportMission) && (_side == east):eastMessage = messageOrderDefend;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = _groupValue;PublicVariable "eastPlayerMessageGroupFrom";_reportMission = false;_closestTarget = ObjNull
+
+	;If a town was previously chosen and in range then do a patrol.
+	? !(IsNull _closestTarget):goto "MoveToClosestDefendTarget"
+
+	#CreateDefendTargetList
+
+	_closestDistance = 10000
+	_tempTargets = []
+	_tempTargetDistances = []
+	_closestTarget = ObjNull
+
+	;BUILD A LIST OF TAKEN TOWNS
+	_count = 0
+	_maxTargets = Count towns
+
+	? (_maxTargets < 1):goto "Update"
+
+	;Add any friendly towns to the defend target list.
+	#CheckTowns
+
+	;If a town is taken then add it to the list.
+	? (_side == west):_tempSide = "west"
+	? (_side == east):_tempSide = "east"
+
+	? (townSides Select _count == _tempSide):_tempTargets = _tempTargets + [towns Select _count];_tempTargetDistances = _tempTargetDistances + [Leader _group Distance (towns Select _count)]
+
+	_count = _count + 1
+
+	? (_count < _maxTargets):goto "CheckTowns"
+
+	;DETERMINE WHICH TOWN IS CLOSEST
+	_count = 0
+	_maxTargets = Count _tempTargets
+
+	;If no friendly towns have been found then check for any targets.
+	? (_maxTargets < 1):goto "FindClosestBase"
+
+	;Check for a closer target.
+	#CheckClosestTowns
+
+		? (_tempTargetDistances Select _count < _closestDistance):_closestDistance = _tempTargetDistances Select _count;_closestTarget = _tempTargets Select _count
+
+		_count =_count + 1
+
+		? (_count < _maxTargets):goto "CheckClosestTowns"
+
+	? (_side == west):_totalBases = Count westControlCenter
+	? (_side == east):_totalBases = Count eastControlCenter
+
+	;If no bases exist then skip closest base check.
+	? (_totalBases < 1):goto "MoveToClosestDefendTarget"
+
+	_count = 0
+
+	;Find base closest to group leader.
+	#FindClosestBase
+
+		? (_side == west):_base = westControlCenter Select _count
+		? (_side == east):_base = eastControlCenter Select _count
+
+		_count =_count + 1
+		_distance = Leader _group Distance _base
+
+		? (_distance < _closestDistance):_closestDistance = _distance;_closestTarget = _base
+		? (_count < _totalBases):goto "FindClosestBase"
+
+	#MoveToClosestDefendTarget
+
+		? (IsNull _closestTarget) && (_side == west):westMessage = messageOrderDefendDenied;PublicVariable "westMessage";westPlayerMessageGroupFrom = _groupValue;PublicVariable "westPlayerMessageGroupFrom"
+		? (IsNull _closestTarget) && (_side == east):eastMessage = messageOrderDefendDenied;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = _groupValue;PublicVariable "eastPlayerMessageGroupFrom"
+
+		? (Leader _group Distance _closestTarget < targetDefendRange):goto "DefendTarget"
+	
+		_destinationObject SetPos GetPos _closestTarget
+		? (_role != airRole):_group Move GetPos _destinationObject
+
+		goto "Update"
+
+#DefendTarget
+
+	_defendingTarget = true
+	_unmannedGuns = []
+
+	#FindUnmannedMortar
+
+		? (_side == west):_gunList = westMortar
+		? (_side == east):_gunList = eastMortar
+
+		_return = "FindUnmannedAAStations";goto "FindUnmannedGuns"
+
+	#FindUnmannedAAStations
+
+		? (_side == west):_gunList = westAAStation
+		? (_side == east):_gunList = eastAAStation
+
+		_return = "FindUnmannedAAGuns";goto "FindUnmannedGuns"
+
+	#FindUnmannedAAGuns
+
+		? (_side == west):_gunList = westAAGun
+		? (_side == east):_gunList = eastAAGun
+
+		_return = "FindUnmannedHEFortifications";goto "FindUnmannedGuns"
+
+	#FindUnmannedHEFortifications
+
+		? (_side == west):_gunList = westHEFortification
+		? (_side == east):_gunList = eastHEFortification
+
+		_return = "FindUnmannedHEStations";goto "FindUnmannedGuns"
+
+	#FindUnmannedHEStations
+
+		? (_side == west):_gunList = westHEStation
+		? (_side == east):_gunList = eastHEStation
+
+		_return = "FindUnmannedHEGuns";goto "FindUnmannedGuns"
+
+	#FindUnmannedHEGuns
+
+		? (_side == west):_gunList = westHEGun
+		? (_side == east):_gunList = eastHEGun
+
+		_return = "FindUnmannedM2Fortifications";goto "FindUnmannedGuns"
+
+	#FindUnmannedM2Fortifications
+
+		? (_side == west):_gunList = westM2Fortification
+		? (_side == east):_gunList = eastM2Fortification
+
+		_return = "FindUnmannedM2Stations";goto "FindUnmannedGuns"
+
+	#FindUnmannedM2Stations
+
+		? (_side == west):_gunList = westM2Station
+		? (_side == east):_gunList = eastM2Station
+
+		_return = "FindUnmannedM2Guns";goto "FindUnmannedGuns"
+
+	#FindUnmannedM2Guns
+
+		? (_side == west):_gunList = westM2Gun
+		? (_side == east):_gunList = eastM2Gun
+
+		_return = "AssignToGuns";goto "FindUnmannedGuns"
+
+	#AssignToGuns
+
+		? (Count _unmannedGuns < 1):_units = Units _group;goto "StartDefendTargetPatrol"
+
+		_units = Units _group
+		_units = _units - [Leader _group]
+		_units = _units + [Leader _group]
+
+		#AssignToGun
+
+			? (Count _unmannedGuns < 1) && (Count _units > 0):goto "StartDefendTargetPatrol"
+			? (Count _units < 1):goto "Update"
+
+			_gunner = _units Select 0
+			_gun = _unmannedGuns Select 0
+			_units = _units - [_gunner]
+
+			;If potential gunner is not in a vehicle then assign to current gun.
+			? (Vehicle _gunner == _gunner):_gunner AssignAsGunner _gun;[_gunner] OrderGetIn true;_unmannedGuns = _unmannedGuns - [_gun]
+
+			goto "AssignToGun"
+
+		#StartDefendTargetPatrol
+
+			_count = 0
+			_totalUnits = Count _units
+
+		;Patrol the target if not manning a stationary gun.
+		#DefendTargetPatrol
+
+			_unit = _units Select _count
+			_count = _count + 1
+
+			? !(CanMove Vehicle _unit) || (GetDammage _unit >= 1):goto "DefendTargetPatrolNext"
+
+			;Change direction.
+			_direction = Random 359
+			_position = GetPos _closestTarget
+			_distance = (targetDefendRange / 3) + Random (targetDefendRange - (targetDefendRange / 3))
+			_destination = [(_position Select 0)+((Sin _direction)*_distance),(_position Select 1)+((Cos _direction)*_distance),_position Select 2]
+
+			;Occasionally return to target.
+			? (Random 100 < 25):_destination = _position
+
+			_destinationObject SetPos _destination
+
+			? (_role != airRole):_unit DoMove _destination
+
+			#DefendTargetPatrolNext
+
+				? (_count < _totalUnits):goto "DefendTargetPatrol"
+
+		goto "Update"
+
+#FindUnmannedGuns
+
+	_count = 0
+	_totalGuns = Count _gunList
+
+	? (_totalGuns < 1):goto _return
+
+	#CheckForUnmannedGun
+
+		_gun = _gunList Select _count
+		? (IsNull _gun):goto "CheckNextUnmannedGun"
+
+		_distance = Leader _group Distance _gun
+		_count =_count + 1
+
+		? ((IsNull Gunner _gun)||(!Alive Gunner _gun))&&(_distance < targetDefendRange):_unmannedGuns = _unmannedGuns + [_gun]
+
+		#CheckNextUnmannedGun
+
+			? (_count < _totalGuns):goto "CheckForUnmannedGun"
+
+		goto _return
+
+
+
+
+
+#TakeTownsAndBases
+
+	? !(Alive Leader _group):goto "Update"
+	? (_reportMission) && (_side == west):westMessage = messageOrderTakeTowns;PublicVariable "westMessage";westPlayerMessageGroupFrom = _groupValue;PublicVariable "westPlayerMessageGroupFrom";_reportMission = false
+	? (_reportMission) && (_side == east):eastMessage = messageOrderTakeTowns;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = _groupValue;PublicVariable "eastPlayerMessageGroupFrom";_reportMission = false
+
+	_tempTargets = []
+	_tempTargetDistances = []
+
+	;BUILD A LIST OF UNTAKEN TOWNS
+	_count = 0
+	_maxTargets = Count towns
+
+	;If no town targets then check for base targets.
+	? (_maxTargets < 1):goto "CheckBaseTargets"
+	? (defendTheBase) && (_scriptType == takeTownsAndBasesScript):goto "CheckBaseTargets"
+
+	#CheckTownTarget
+
+		;If a town is untaken then add it to the list.
+		? (_side == west):_tempSide = "west"
+		? (_side == east):_tempSide = "east"
+
+		? (townSides Select _count != _tempSide):_tempTargets = _tempTargets + [towns Select _count];_tempTargetDistances = _tempTargetDistances + [Leader _group Distance (towns Select _count)]
+
+		_count = _count + 1
+
+		? (_count < _maxTargets):goto "CheckTownTarget"
+
+	;If this is not an AI controlled side or a public server then don't target the base.
+	? (publicServer):goto "FindClosestTownsBases"
+
+	;BUILD A LIST OF UNDESTROYED ENEMY STRUCTURES
+	#CheckBaseTargets
+
+	? (_side == west):_structureList = eastControlCenter + eastInfantryFactory + eastLightFactory + eastHeavyFactory + eastAirFactory + [EastMobileHQ]
+	? (_side == east):_structureList = westControlCenter + westInfantryFactory + westLightFactory + westHeavyFactory + westAirFactory + [WestMobileHQ]
+
+	_count = 0
+	_maxStructureTargets = Count _structureList
+
+	;If no base or towns were found then return.
+	? (_maxTargets < 1) && (_maxStructureTargets < 1):goto "Update"
+	? (_maxStructureTargets < 1):goto "FindClosestTownsBases"
+
+	#CheckBaseTarget
+
+		_structure = _structureList Select _count
+		_count = _count + 1
+
+		? (GetDammage _structure < 1):_tempTargets = _tempTargets + [_structure];_tempTargetDistances = _tempTargetDistances + [Leader _group Distance _structure]
+		? (_count < _maxStructureTargets):goto "CheckBaseTarget"
+
+	;DETERMINE WHICH TARGET IS CLOSEST
+	#FindClosestTownsBases
+
+	_count = 0
+	_closestDistance = 10000
+	_closestTarget = ObjNull
+	_maxTargets = Count _tempTargets
+
+	? (_maxTargets < 1):goto "Update"
+
+	;Check for a closer target.
+	#FindClosestTownBase
+
+		_attackUnits = Units _group
+		_attackUnits = _attackUnits - [Leader _group]
+		_tempTarget = _tempTargets Select _count
+
+		;Attack the MHQ even if it is empty.
+		? (_tempTarget == EastMobileHQ) && (_tempTargetDistances Select _count < 60):Leader _group DoTarget _tempTarget;Leader _group DoFire _tempTarget;[_attackUnits] CommandTarget _tempTarget;[_attackUnits] CommandFire _tempTarget;_closestTarget = _tempTarget;goto "ForceMHQAttack"
+		? (_tempTarget == WestMobileHQ) && (_tempTargetDistances Select _count < 60):Leader _group DoTarget _tempTarget;Leader _group DoFire _tempTarget;[_attackUnits] CommandTarget _tempTarget;[_attackUnits] CommandFire _tempTarget;_closestTarget = _tempTarget;goto "ForceMHQAttack"
+
+		;If within range of the enemy base move to the next target.
+		? (_scriptType == takeTownsAndBasesScripts) && ((_tempTargets Select _count) In _structureList) && (_tempTargetDistances Select _count < _closestDistance)&&(_tempTargetDistances Select _count < 75):goto "FindNextClosestTownBase"
+		? (_tempTargetDistances Select _count < _closestDistance)&&(_tempTargetDistances Select _count > 25):_closestDistance = _tempTargetDistances Select _count;_closestTarget = _tempTargets Select _count
+
+		#FindNextClosestTownBase
+
+		_count = _count + 1
+
+		? (_count < _maxTargets):goto "FindClosestTownBase"
+
+	? (IsNull _closestTarget):goto "Update"
+
+	_direction = Random 360
+	_position = GetPos _closestTarget
+	_destinationObject SetPos [(_position Select 0)+((sin _direction)*15),(_position Select 1)+((cos _direction)*15),_position Select 2]
+	? (_role != airRole):_group Move GetPos _destinationObject
+	goto "Update"
+
+#SearchAndDestroy
+
+	? (_reportMission) && (_side == west):westMessage = messageOrderSearchAndDestroy;PublicVariable "westMessage";westPlayerMessageGroupFrom = _groupValue;PublicVariable "westPlayerMessageGroupFrom";_reportMission = false
+	? (_reportMission) && (_side == east):eastMessage = messageOrderSearchAndDestroy;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = _groupValue;PublicVariable "eastPlayerMessageGroupFrom";_reportMission = false
+
+	_town = towns Select (Random (_totalTowns - 1))
+	_position = GetPos _town
+
+	? (_side == west) && !(IsNull westBaseFound) && (GetDammage westBaseFound < 1):_position = GetPos westBaseFound
+	? (_side == east) && !(IsNull eastBaseFound) && (GetDammage eastBaseFound < 1):_position = GetPos eastBaseFound
+
+	? (_baseFound):_x = (_position Select 0) + (Random 200) - 100;_y = (_position Select 1) + (Random 200) - 100;goto "MoveToSearchAndDestroyTarget"
+
+	_leaderPosition = GetPos Leader _group
+	_x = (_position Select 0) + (((_leaderPosition Select 0) - (_position Select 0)) / 2) * (Random 1)
+	_y = (_position Select 1) + (((_leaderPosition Select 1) - (_position Select 1)) / 2) * (Random 1)
+
+#MoveToSearchAndDestroyTarget
+
+	_destinationObject SetPos [_x,_y,0]
+	? (_role != airRole):_group Move [_x,_y]
+
+	_count = 0
+	_units = Units _group
+	_totalUnits = Count _units
+	_saboteurs = []
+
+	? (_totalUnits < 1):goto "Update"
+
+	#CountSaboteur
+
+		_saboteur = _units Select _count
+		_count = _count + 1
+
+		? (Alive _saboteur) && (_saboteur Ammo "Timebomb" > 0) && (Vehicle _saboteur == _saboteur):_saboteurs = _saboteurs + [_saboteur]
+		? (_count < _totalUnits):goto "CountSaboteur"
+
+	? (Count _saboteurs > 0):goto "SaboteurCheck"
+	goto "Update"
+
+;Check to see if current saboteur knows the location of the enemy mobile HQ.
+#SaboteurCheck
+
+	? (_side == west):_targets = [EastMobileHQ] + eastControlCenter + eastInfantryFactory + eastLightFactory + eastHeavyFactory + eastAirFactory;_spottedTargets = westSpottedUnits - [EastMobileHQ]
+	? (_side == east):_targets = [WestMobileHQ] + westControlCenter + westInfantryFactory + westLightFactory + westHeavyFactory + westAirFactory;_spottedTargets = eastSpottedUnits - [WestMobileHQ]
+
+	_saboteurCount = 0
+	_totalSaboteurs = Count _saboteurs
+	_totalTargets = Count _targets
+
+	#UpdateSaboteur
+
+		_count = 0
+		_checkedTargets = []
+		_count = Random (_totalTargets - 1)
+		_saboteur = _saboteurs Select _saboteurCount
+
+	#FindSaboteurTarget
+
+		_target = _targets Select _count
+		? (Count _saboteurTargets > _saboteurCount):_target = _saboteurTargets Select _saboteurCount
+
+		_distance = _target Distance _saboteur
+		_checkedTargets  = _checkedTargets + [_count]
+
+		? (_distance < 300) && (GetDammage _target < 1) && ((_saboteur KnowsAbout _target >= 1) || (_target In _spottedTargets)):goto "SabotageTarget"
+		_saboteurTargets = _saboteurTargets - [_target]
+
+		#GetRandomTarget
+
+			_count = Random (_totalTargets - 1)
+			? (_count In _checkedTargets):goto "GetRandomTarget"
+
+		? (Count _checkedTargets < _totalTargets):goto "FindSaboteurTarget"
+
+	#UpdateNextSaboteur
+
+		_saboteurCount = _saboteurCount + 1
+		? (_saboteurCount < _totalSaboteurs):goto "UpdateSaboteur"
+
+	goto "Update"
+
+#SabotageTarget
+
+	? !(_target In _saboteurTargets):_saboteurTargets = _saboteurTargets + [_target]
+	_saboteur CommandMove GetPos _target
+
+	#SaboteurCheckDistance
+
+		? (_distance < 15):goto "SaboteurDropBomb"
+
+	goto "UpdateNextSaboteur"
+
+;Make the saboteur drop a satchel by the enemy's structure.
+#SaboteurDropBomb
+
+	_saboteur Fire ["throw","Timebomb","Timebomb"]
+	~2
+
+	;Pick a random direction and run like hell from the bomb.
+	_direction = Random 359
+	_position = GetPos _saboteur
+	_saboteur CommandMove [(_position Select 0)+((sin _direction)*50),(_position Select 1)+((cos _direction)*50),_position Select 2]
+	goto "UpdateNextSaboteur"
+
+#ForceMHQAttack
+
+	_count = 0
+	_units = Units _group
+	_teamSize = Count _units
+	_vehicles = []
+
+	#GetVehicleInRange
+
+		_vehicle = Vehicle (_units Select _count)
+
+		? (_vehicle In _vehicles) || (_vehicle Distance _closestTarget > 50) || (_vehicle In westAirVehicles) || (_vehicle In eastAirVehicles):goto "GetNextVehicleInRange"
+
+		_vehicles = _vehicles + [_vehicle]
+		_vehicle DoWatch _closestTarget
+
+		#GetNextVehicleInRange
+
+			_count = _count  + 1
+			? (_count < _teamSize):goto "GetVehicleInRange"
+
+	_totalVehicles = Count _vehicles
+	? (_totalVehicles < 1):goto "Update"
+
+	~2
+	_count = 0
+
+	;Determine weapon type of each vehicle and fire a shell at the MHQ.
+	#FireVehicle
+
+		_vehicle = _vehicles Select _count
+		_weapons = Weapons _vehicle
+
+		_totalWeapons = Count _weapons
+		? (_totalWeapons < 1):goto "FireNextVehicle"
+
+		_weaponCount = 0
+
+		#CheckWeapon
+
+			_weapon = _weapons Select _weaponCount
+			? (_weapon In AIMainWeapons):_vehicle Fire _weapon;goto "FireNextVehicle"
+
+			_weaponCount = _weaponCount + 1
+			? (_weaponCount < _totalWeapons):goto "CheckWeapon"
+
+		#FireNextVehicle
+
+			_count = _count + 1
+			? (_count < _totalVehicles):goto "FireVehicle"
+
+		goto "Update"
+
+#WaitForRespawn
+
+	_deadUnit = Leader _group
+	_deathLocation = GetPos Leader _group
+
+	@ (Alive Leader _group)
+
+	[_deadUnit] Exec "Main\RespawnableUnitCleanUp.sqs"
+	[Leader _group,_deathLocation] Exec "Main\RespawnUnit.sqs"
+
+	goto "Update"

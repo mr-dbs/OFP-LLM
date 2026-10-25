@@ -1,0 +1,62 @@
+;Last modified 12/31/2
+
+_order = _this Select 0
+_unit = player
+_side = Side _unit
+
+? (_side == east):goto "SetEast"
+? (_side != west) && (_side != east):Exit
+
+#SetWest
+
+	;Issue new order to reset previous order.
+	? (westSelectedGroup == groupAlpha):westAlphaTeamScript = newOrderScript;PublicVariable "westAlphaTeamScript"
+	? (westSelectedGroup == groupBravo):westBravoTeamScript = newOrderScript;PublicVariable "westBravoTeamScript"
+	? (westSelectedGroup == groupCharlie):westCharlieTeamScript = newOrderScript;PublicVariable "westCharlieTeamScript"
+	? (westSelectedGroup == groupDelta):westDeltaTeamScript = newOrderScript;PublicVariable "westDeltaTeamScript"
+	? (westSelectedGroup == groupEcho):westEchoTeamScript = newOrderScript;PublicVariable "westEchoTeamScript"
+	? (westSelectedGroup == groupFoxtrot):westFoxtrotTeamScript = newOrderScript;PublicVariable "westFoxtrotTeamScript"
+	? (westSelectedGroup == groupGolf):westGolfTeamScript = newOrderScript;PublicVariable "westGolfTeamScript"
+	? (westSelectedGroup == groupHotel):westHotelTeamScript = newOrderScript;PublicVariable "westHotelTeamScript"
+	? (westSelectedAll):westAlphaTeamScript = newOrderScript;PublicVariable "westAlphaTeamScript";westBravoTeamScript = newOrderScript;PublicVariable "westBravoTeamScript";westCharlieTeamScript = newOrderScript;PublicVariable "westCharlieTeamScript";westDeltaTeamScript = newOrderScript;PublicVariable "westDeltaTeamScript";westEchoTeamScript = newOrderScript;PublicVariable "westEchoTeamScript";westFoxtrotTeamScript = newOrderScript;PublicVariable "westFoxtrotTeamScript";westGolfTeamScript = newOrderScript;PublicVariable "westGolfTeamScript";westHotelTeamScript = newOrderScript;PublicVariable "westHotelTeamScript"
+
+	~1
+
+	;Now issue the order that was passed to this script.
+	? (westSelectedGroup == groupAlpha):westAlphaTeamScript = _order;PublicVariable "westAlphaTeamScript"
+	? (westSelectedGroup == groupBravo):westBravoTeamScript = _order;PublicVariable "westBravoTeamScript"
+	? (westSelectedGroup == groupCharlie):westCharlieTeamScript = _order;PublicVariable "westCharlieTeamScript"
+	? (westSelectedGroup == groupDelta):westDeltaTeamScript = _order;PublicVariable "westDeltaTeamScript"
+	? (westSelectedGroup == groupEcho):westEchoTeamScript = _order;PublicVariable "westEchoTeamScript"
+	? (westSelectedGroup == groupFoxtrot):westFoxtrotTeamScript = _order;PublicVariable "westFoxtrotTeamScript"
+	? (westSelectedGroup == groupGolf):westGolfTeamScript = _order;PublicVariable "westGolfTeamScript"
+	? (westSelectedGroup == groupHotel):westHotelTeamScript = _order;PublicVariable "westHotelTeamScript"
+	? (westSelectedAll):westAlphaTeamScript = _order;PublicVariable "westAlphaTeamScript";westBravoTeamScript = _order;PublicVariable "westBravoTeamScript";westCharlieTeamScript = _order;PublicVariable "westCharlieTeamScript";westDeltaTeamScript = _order;PublicVariable "westDeltaTeamScript";westEchoTeamScript = _order;PublicVariable "westEchoTeamScript";westFoxtrotTeamScript = _order;PublicVariable "westFoxtrotTeamScript";westGolfTeamScript = _order;PublicVariable "westGolfTeamScript";westHotelTeamScript = _order;PublicVariable "westHotelTeamScript"
+
+	Exit
+
+#SetEast
+
+	;Issue new order to reset previous order.
+	? (eastSelectedGroup == groupAlpha):eastAlphaTeamScript = newOrderScript;PublicVariable "eastAlphaTeamScript"
+	? (eastSelectedGroup == groupBravo):eastBravoTeamScript = newOrderScript;PublicVariable "eastBravoTeamScript"
+	? (eastSelectedGroup == groupCharlie):eastCharlieTeamScript = newOrderScript;PublicVariable "eastCharlieTeamScript"
+	? (eastSelectedGroup == groupDelta):eastDeltaTeamScript = newOrderScript;PublicVariable "eastDeltaTeamScript"
+	? (eastSelectedGroup == groupEcho):eastEchoTeamScript = newOrderScript;PublicVariable "eastEchoTeamScript"
+	? (eastSelectedGroup == groupFoxtrot):eastFoxtrotTeamScript = newOrderScript;PublicVariable "eastFoxtrotTeamScript"
+	? (eastSelectedGroup == groupGolf):eastGolfTeamScript = newOrderScript;PublicVariable "eastGolfTeamScript"
+	? (eastSelectedGroup == groupHotel):eastHotelTeamScript = newOrderScript;PublicVariable "eastHotelTeamScript"
+	? (eastSelectedAll):eastAlphaTeamScript = newOrderScript;PublicVariable "eastAlphaTeamScript";eastBravoTeamScript = newOrderScript;PublicVariable "eastBravoTeamScript";eastCharlieTeamScript = newOrderScript;PublicVariable "eastCharlieTeamScript";eastDeltaTeamScript = newOrderScript;PublicVariable "eastDeltaTeamScript";eastEchoTeamScript = newOrderScript;PublicVariable "eastEchoTeamScript";eastFoxtrotTeamScript = newOrderScript;PublicVariable "eastFoxtrotTeamScript";eastGolfTeamScript = newOrderScript;PublicVariable "eastGolfTeamScript";eastHotelTeamScript = newOrderScript;PublicVariable "eastHotelTeamScript"
+
+	~1
+
+	;Now issue the order that was passed to this script.
+	? (eastSelectedGroup == groupAlpha):eastAlphaTeamScript = _order;PublicVariable "eastAlphaTeamScript"
+	? (eastSelectedGroup == groupBravo):eastBravoTeamScript = _order;PublicVariable "eastBravoTeamScript"
+	? (eastSelectedGroup == groupCharlie):eastCharlieTeamScript = _order;PublicVariable "eastCharlieTeamScript"
+	? (eastSelectedGroup == groupDelta):eastDeltaTeamScript = _order;PublicVariable "eastDeltaTeamScript"
+	? (eastSelectedGroup == groupEcho):eastEchoTeamScript = _order;PublicVariable "eastEchoTeamScript"
+	? (eastSelectedGroup == groupFoxtrot):eastFoxtrotTeamScript = _order;PublicVariable "eastFoxtrotTeamScript"
+	? (eastSelectedGroup == groupGolf):eastGolfTeamScript = _order;PublicVariable "eastGolfTeamScript"
+	? (eastSelectedGroup == groupHotel):eastHotelTeamScript = _order;PublicVariable "eastHotelTeamScript"
+	? (eastSelectedAll):eastAlphaTeamScript = _order;PublicVariable "eastAlphaTeamScript";eastBravoTeamScript = _order;PublicVariable "eastBravoTeamScript";eastCharlieTeamScript = _order;PublicVariable "eastCharlieTeamScript";eastDeltaTeamScript = _order;PublicVariable "eastDeltaTeamScript";eastEchoTeamScript = _order;PublicVariable "eastEchoTeamScript";eastFoxtrotTeamScript = _order;PublicVariable "eastFoxtrotTeamScript";eastGolfTeamScript = _order;PublicVariable "eastGolfTeamScript";eastHotelTeamScript = _order;PublicVariable "eastHotelTeamScript"

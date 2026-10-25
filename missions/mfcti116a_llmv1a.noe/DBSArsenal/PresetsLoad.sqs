@@ -1,0 +1,7 @@
+;DBS Arsenal - load presets from <user dir>\Config\DBSArsenal_Presets.cfg (CWR loadConfig).
+;Missing file is fine: getValue returns an empty string and nothing is loaded.
+
+_cfg = loadConfig dbsArsPresetFile
+_magic = _cfg getValue "magic"
+? (Format ["%1",_magic] != "DBSARS1"):Exit
+dbsArsPresets = _cfg getValue "presets"

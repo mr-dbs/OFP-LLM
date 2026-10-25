@@ -1,0 +1,502 @@
+;Last modified 3/19/4
+
+_unit = _this Select 0
+_side = Side _unit
+
+ForceMap true
+
+;Only enable the radio for the commander.
+_count = 0
+
+#ClearRadio
+
+	_count SetRadioMsg "NULL"
+	_count = _count  + 1
+
+	? (_count < 11):goto "ClearRadio"
+
+~2
+
+#Start
+
+;Equip unit with standard soldier's loadout.
+? (_side == west):[_unit] Exec "Loadouts\EquipWestSoldierLoadout.sqs"
+? (_side == east):[_unit] Exec "Loadouts\EquipEastSoldierLoadout.sqs"
+
+;AI routines if a player is not controlling this unit.
+[_unit] Exec "Main\UpdateAI.sqs"
+[Group _unit] Exec "Main\UpdateAICommunication.sqs"
+[Group _unit] Exec "Main\UpdateIndependentAI.sqs"
+
+;Do not proceed further unless unit is a player.
+;Note normally this would just exit but there seems to be a delay in MP before the player shows up.
+@ (_unit == player) && (statsStarted)
+
+[player] Exec "Main\PlaceTeam.sqs"
+[] Exec "Main\DisplayCredits.sqs"
+[] Exec "Main\UpdateVehicleMarkers.sqs"
+[] Exec "Main\UpdatePlayerMarkers.sqs"
+[] Exec "Main\UpdateDisconnectedPlayer.sqs"
+[] Exec "Main\UpdateQueue.sqs"
+[] Exec "Main\UpdateMusic.sqs"
+[] Exec "Main\UpdateRespawn.sqs"
+[] Exec "Main\UpdateGUI.sqs"
+
+? (player == Leader WestCommanderTeam):1 SetRadioMsg Localize "STRCOMMANDMENU"
+? (player == Leader EastCommanderTeam):2 SetRadioMsg Localize "STRCOMMANDMENU"
+
+_side = Side _unit
+
+;Equip unit with default loadout.
+? (_side == west):[_unit] Exec "Loadouts\EquipWestSoldierLoadout.sqs"
+? (_side == east):[_unit] Exec "Loadouts\EquipEastSoldierLoadout.sqs"
+
+;Give player Score menu choice.
+_scoreID = _unit AddAction [Localize "STRSCORE","Main\Score.sqs"]
+
+;If debug mode is enable add an action to access the debug prompt.
+? (debugMP):_unit AddAction [Localize "STRDEBUGPROMPT","GUI\UpdateGUIDebugPrompt.sqs"]
+
+;Run player menu routines for base buildings.
+;[_unit] Exec "Main\ResetUnit.sqs"
+[_unit] Exec "GUI\UpdateGUIOptionsMenu.sqs"
+[_unit] Exec "GUI\UpdateGUIResourceMenu.sqs"
+[_unit] Exec "GUI\UpdateGUIFactoryMenu.sqs"
+[_unit] Exec "GUI\UpdateGUIRepairTruckMenu.sqs"
+[_unit] Exec "GUI\UpdateGUIAmmoTruckMenu.sqs"
+;DBS Arsenal action.
+[_unit] Exec "DBSArsenal\AddAction.sqs"
+
+timeLastDeath = 0
+
+buildTimes = []
+buildingsInUse = []
+buildingsBuilt = []
+buildingsBuiltType = []
+
+_killed = false
+
+_lastBuildingBuilt = ObjNull
+_lastUnitBuilt = ObjNull
+_lastBuildingInUse = ObjNull
+_lastBuildingInUseState = false
+
+_lastWestMarkerUnit = ObjNull
+_lastEastMarkerUnit = ObjNull
+_markerSide = resistance
+
+_upgradedInfantry = false
+_upgradedBlackOps = false
+_upgradedLight = false
+_upgradedHeavy = false
+_upgradedAir = false
+
+_lastPlayerWaypointX = 0
+_lastPlayerWaypointY = 0
+
+_lastWestMessage = 0
+_lastEastMessage = 0
+_lastWestPlayerMessage = 0
+_lastEastPlayerMessage = 0
+
+_lastTown = ObjNull
+_lastTownSide = -1
+_lastTownAreaSide = -1
+_lastTownArea = ObjNull
+_lastTownAreaSet = false
+
+_lastWestPlayerPointsID = 0
+_lastEastPlayerPointsID = 0
+
+_lastUnitMarkerTime = [120,120,120,120,120,120,120,120,120]
+_markerText = ["","Activity","Base"]
+
+_totalMarkers = Count _lastUnitMarkerTime
+
+_lastMarkerID = 0
+
+_lastUnlock = unlockWestMHQ
+? (_side == east):_lastUnlock = unlockEastMHQ
+
+;Center map to starting position.
+MapAnimClear
+
+? (_side == west):MapAnimAdd [.5,.3,GetPos WestMobileHQ]
+? (_side == east):MapAnimAdd [.5,.3,GetPos EastMobileHQ]
+
+MapAnimCommit
+@mapAnimDone
+~2
+
+ForceMap false
+mapCenterComplete = true
+
+? (publicServer):[WestMobileHQ,mobileHQType] Exec "Loadouts\EquipCargo.sqs";[EastMobileHQ,mobileHQEastType] Exec "Loadouts\EquipCargo.sqs"
+
+_sideText = "East"
+
+? (_side == east):goto "UpdateEast"
+
+_sideText = "West"
+
+#UpdateWest
+~0.25
+
+	? (westWinsGame || eastWinsGame):[] Exec "Main\GameOver.sqs";goto "UpdateWestScore"
+
+	;Update score.
+	? (_lastWestPlayerPointsID != addWestPlayerPointsID):_lastWestPlayerPointsID = addWestPlayerPointsID;addWestPlayerPointsPlayer AddScore -(addWestPlayerPointsLast);addWestPlayerPointsPlayer AddScore addWestPlayerPoints
+	? (_lastEastPlayerPointsID != addEastPlayerPointsID):_lastEastPlayerPointsID = addEastPlayerPointsID;addEastPlayerPointsPlayer AddScore -(addEastPlayerPointsLast);addEastPlayerPointsPlayer AddScore addEastPlayerPoints
+
+	;If commander has enabled commander only driving of MHQ then keep it in place.
+	? (westCommanderOnlyMHQ) && !(IsNull Driver WestMobileHQ) && (Driver WestMobileHQ != Leader WestCommanderTeam):WestMobileHQ SetVelocity [0,0,0.25]
+
+	;Check for a team activity marker update.
+	? !(IsNull westMarkerUnit) && (_lastMarkerID != westMarkerID) && (westMarkerType == enemyMarker):_lastUnitMarkerTime Set [westMarkerTeam,0.25];"West Latest Activity" SetMarkerPos GetPos westMarkerUnit
+	? !(IsNull westMarkerUnit) && (_lastMarkerID != westMarkerID) && (westMarkerType == baseMarker):"West Latest Base" SetMarkerPos GetPos westMarkerUnit
+	? !(IsNull westMarkerUnit) && (_lastMarkerID != westMarkerID):Format["West %1 %2",teamMapDesignations Select westMarkerTeam,_markerText Select westMarkerType] SetMarkerPos GetPos westMarkerUnit;_lastMarkerID = westMarkerID
+
+	timeLastDeath = timeLastDeath + 0.25
+
+	? (timeLastDeath >= stayAliveTime):timeLastDeath = 0;[player,pointsPerStayAlive] Exec "Main\AddPlayerPoints.sqs"
+
+	_return = "UpdateWestMHQLock"
+	goto "UpdateMarkers"
+
+	#UpdateWestMHQLock
+
+	;Lock/unlock MHQ.
+	? (_lastUnlock && !unlockWestMHQ):WestMobileHQ Lock true;_lastUnlock = unlockWestMHQ
+	? (!_lastUnlock && unlockWestMHQ):WestMobileHQ Lock false;_lastUnlock = unlockWestMHQ
+
+	? !(IsNull setTownMP) && ((_lastTown != setTownMP)||(_lastTownSide != setTownSideMP)):_lastTown = setTownMP;_lastTownSide = setTownSideMP;[] Exec "Main\SetTownMarker.sqs"
+	? !(IsNull setTownAreaMP) && ((_lastTownArea != setTownAreaMP)||(_lastTownAreaSide != setTownAreaSideMP)||(!_lastTownAreaSet && setTownAreaSetMP)||(_lastTownAreaSet && !setTownAreaSetMP)):_lastTownArea = setTownAreaMP;_lastTownAreaSide = setTownAreaSideMP;_lastTownAreaSet = setTownAreaSetMP;[] Exec "Main\SetTownAreaMarker.sqs"
+
+	;Display any new messages to the side.
+	? (westMessage > 0) && (_lastWestMessage != westMessage):_lastWestMessage = westMessage;[_lastWestMessage] Exec "Main\DisplayMessage.sqs"
+	? (westMessage == 0) && (_lastWestMessage != westMessage):_lastWestMessage = westMessage
+
+	;Display any new messages to specific player.
+	? (westPlayerMessagePlayer == player) && (westPlayerMessage > 0) && (_lastWestPlayerMessage != westPlayerMessage):_lastWestPlayerMessage = westPlayerMessage;[_lastWestPlayerMessage] Exec "Main\DisplayMessage.sqs"
+	? (westPlayerMessagePlayer == player) && (westPlayerMessage == 0) && (_lastWestPlayerMessage != westPlayerMessage):_lastWestPlayerMessage = westPlayerMessage
+
+	;If server requests an item be added to player's queue then do so.
+	? !(IsNull westAddToQueuePlayer) && (westAddToQueuePlayer == player):[west] Exec "Main\AddToQueuePlayer.sqs"
+
+	;If commander has tried to reinforce team.
+	? !(IsNull addToWestPlayer) && (Leader addToWestPlayer == player):[west] Exec "Main\AddToPlayer.sqs"
+
+	;Check status of player.  If killed reset unit upon respawn.
+	;DBS Arsenal: body swap is not a death. Rebind to the new body.
+	? (dbsArsSwapped) and (Alive player):dbsArsSwapped = false;_unit RemoveAction _scoreID;_unit = player;_scoreID = _unit AddAction [Localize "STRSCORE","Main\Score.sqs"]
+	? (_killed) && (Alive player):_unit = player;_killed = false
+	? !(_killed) && !(Alive _unit):_killed = true;timeLastDeath = 0;[_unit] Exec "Main\ResetUnit.sqs";[] Exec "GUI\UpdateGUIRespawnMenu.sqs";_unit RemoveAction _scoreID
+
+	;Check if a new marker unit needs to be added.
+	_return = "UpdateWest"
+	? !(IsNull westUnitBuiltMP) && (_lastWestMarkerUnit != westUnitBuiltMP):_markerSide = west;goto "CheckMarkerUnit"
+	? !(IsNull eastUnitBuiltMP) && (_lastEastMarkerUnit != eastUnitBuiltMP):_markerSide = east;goto "CheckMarkerUnit"
+
+	;Check for a newly created building on player's side.
+	? !(IsNull westBuildingBuiltMP) && (_lastBuildingBuilt != westBuildingBuiltMP):goto "CheckWestBuildings"
+	? !(IsNull westUnitBuiltMP) && (_lastUnitBuilt != westUnitBuiltMP):goto "CheckWestUnit"
+	? (!westSetPlayerWaypoint)&&(_lastPlayerWaypointX != westPlayerWaypointX || _lastPlayerWaypointY != westPlayerWaypointY):goto "CheckWestPlayerWaypoint"
+
+	? (pointsToWin > 0):goto "UpdateWestScore"
+
+	;Check for any building currently in use on player's side.
+	#UpdateWestBuildingsInUse
+
+	;Check for any building currently in use on player's side.
+	? (_lastBuildingInUse != westBuildingInUseMP):goto "CheckWestBuildingsInUse"
+	? (_lastBuildingInUseState && !westBuildingInUseStateMP):goto "CheckWestBuildingsInUse"
+	? (!_lastBuildingInUseState && westBuildingInUseStateMP):goto "CheckWestBuildingsInUse"
+
+	goto "UpdateWest"
+
+;Add any buildings in use to the client-side list.
+#CheckWestBuildingsInUse
+
+	_lastBuildingInUse = westBuildingInUseMP
+	_lastBuildingInUseState = westBuildingInUseStateMP
+
+	? (IsNull westBuildingInUseMP):goto "UpdateWest"
+
+	;If state is false then remove the building in use from the list & return to main loop.
+	? !(westBuildingInUseStateMP):buildingsInUse = buildingsInUse - [westBuildingInUseMP];Goto "UpdateWest"
+
+	;If the building is already in use then go back to the main loop.
+	? (westBuildingInUseMP In buildingsInUse):goto "UpdateWest"
+
+	;If state is true then add building in use to the list.
+	? (westBuildingInUseStateMP):buildingsInUse = buildingsInUse + [westBuildingInUseMP]
+
+	goto "UpdateWest"
+
+;Add any new buildings to the client-side list.
+#CheckWestBuildings
+
+	_lastBuildingBuilt = westBuildingBuiltMP
+
+	? (IsNull westBuildingBuiltMP):goto "UpdateWest"
+
+	;If building is already in player's list then return to the update.
+	? (westBuildingBuiltMP In buildingsBuilt):goto "UpdateWest"
+
+	;Add the new building to the player's list.
+	buildingsBuilt = buildingsBuilt + [westBuildingBuiltMP]
+	buildingsBuiltType = buildingsBuiltType + [westBuildingBuiltTypeMP]
+
+	? (westBuildingBuiltTypeMP == controlCenterType):controlCenter = controlCenter + [westBuildingBuiltMP]
+	? (westBuildingBuiltTypeMP == infantryFactoryType):infantryFactory = infantryFactory + [westBuildingBuiltMP]
+	? (westBuildingBuiltTypeMP == lightFactoryType):lightFactory = lightFactory + [westBuildingBuiltMP]
+	? (westBuildingBuiltTypeMP == heavyFactoryType):heavyFactory = heavyFactory + [westBuildingBuiltMP]
+	? (westBuildingBuiltTypeMP == airFactoryType):airFactory = airFactory + [westBuildingBuiltMP]
+	? (westBuildingBuiltTypeMP == ammoDepotType):ammoDepot = ammoDepot + [westBuildingBuiltMP];[west,westBuildingBuiltMP,false] Exec "Main\UpdateAmmo.sqs"
+	? (westBuildingBuiltTypeMP == repairDepotType):repairDepot = repairDepot + [westBuildingBuiltMP]
+	? (westBuildingBuiltTypeMP == fieldHospitalType):fieldHospital = fieldHospital + [westBuildingBuiltMP]
+	? (westBuildingBuiltTypeMP == mortarType):[westBuildingBuiltMP] Exec "Main\UpdateMortar.sqs";westBuildingBuiltMP AddAction [Format [Localize "STRBUYMORTARSHELLS",mortarRearmCost],"Main\BuyMortarShells.sqs"]
+
+	;Equip ammo crate client-side if a public server game.
+	? (publicServer) && (westBuildingBuiltTypeMP == weaponsCrateType || westBuildingBuiltTypeMP == ammoCrateType || westBuildingBuiltTypeMP == heavyWeaponsCrateType || westBuildingBuiltTypeMP == heavyAmmoCrateType):[west,westBuildingBuiltTypeMP,westBuildingBuiltMP] Exec "Loadouts\EquipCrate.sqs"
+
+	_building = westBuildingBuiltMP
+	_type = westBuildingBuiltTypeMP
+	_return = "UpdateWest"
+
+#CheckWestUnit
+
+	_lastUnitBuilt = westUnitBuiltMP
+
+	? (IsNull _lastUnitBuilt):goto "UpdateWest"
+	? ("Truck5TRepair" CountType [_lastUnitBuilt] > 0):repairTrucks = repairTrucks + [_lastUnitBuilt]
+	? ("Truck5TReammo" CountType [_lastUnitBuilt] > 0):ammoTrucks = ammoTrucks + [_lastUnitBuilt]
+
+	? !(publicServer):goto "UpdateWest"
+	? ("Truck5TReammo" CountType [_lastUnitBuilt] > 0):[_lastUnitBuilt,ammoTruckType] Exec "Loadouts\EquipCargo.sqs"
+	? ("Ch47D" CountType [_lastUnitBuilt] > 0):[_lastUnitBuilt,CH47DType] Exec "Loadouts\EquipCargo.sqs"
+	? ("UH60" CountType [_lastUnitBuilt] > 0):[_lastUnitBuilt,UH60Type] Exec "Loadouts\EquipCargo.sqs"
+	? ("UH60MG" CountType [_lastUnitBuilt] > 0):[_lastUnitBuilt,UH60MGType] Exec "Loadouts\EquipCargo.sqs"
+
+	goto "UpdateWest"
+
+#CheckWestPlayerWaypoint
+
+	_lastPlayerWaypointX = westPlayerWaypointX
+	_lastPlayerWaypointY = westPlayerWaypointY
+
+	_marker = Format["West%1WP",teamMapDesignations Select westPlayerWaypointGroup]
+	_marker SetMarkerPos [_lastPlayerWaypointX,_lastPlayerWaypointY,0]
+
+	goto "UpdateWest"
+
+#UpdateEast
+~0.25
+
+	? (westWinsGame || eastWinsGame):[] Exec "Main\GameOver.sqs";goto "UpdateEastScore"
+
+	;Update score.
+	? (_lastWestPlayerPointsID != addWestPlayerPointsID):_lastWestPlayerPointsID = addWestPlayerPointsID;addWestPlayerPointsPlayer AddScore -(addWestPlayerPointsLast);addWestPlayerPointsPlayer AddScore addWestPlayerPoints
+	? (_lastEastPlayerPointsID != addEastPlayerPointsID):_lastEastPlayerPointsID = addEastPlayerPointsID;addEastPlayerPointsPlayer AddScore -(addEastPlayerPointsLast);addEastPlayerPointsPlayer AddScore addEastPlayerPoints
+
+	;If commander has enable commander only driving of MHQ then keep it in place.
+	? (eastCommanderOnlyMHQ) && !(IsNull Driver EastMobileHQ) && (Driver EastMobileHQ != Leader EastCommanderTeam):EastMobileHQ SetVelocity [0,0,0.25]
+
+	;Check for a team activity marker update.
+	? !(IsNull eastMarkerUnit) && (_lastMarkerID != eastMarkerID) && (eastMarkerType == enemyMarker):_lastUnitMarkerTime Set [eastMarkerTeam,0.25];"East Latest Activity" SetMarkerPos GetPos eastMarkerUnit
+	? !(IsNull eastMarkerUnit) && (_lastMarkerID != eastMarkerID) && (eastMarkerType == baseMarker):"East Latest Base" SetMarkerPos GetPos eastMarkerUnit
+	? !(IsNull eastMarkerUnit) && (_lastMarkerID != eastMarkerID):Format["East %1 %2",teamMapDesignations Select eastMarkerTeam,_markerText Select eastMarkerType] SetMarkerPos GetPos eastMarkerUnit;_lastMarkerID = eastMarkerID
+
+	timeLastDeath = timeLastDeath + 0.25
+
+	? (timeLastDeath >= stayAliveTime):timeLastDeath = 0;[player,pointsPerStayAlive] Exec "Main\AddPlayerPoints.sqs"
+
+	_return = "UpdateEastMHQLock"
+	goto "UpdateMarkers"
+
+	#UpdateEastMHQLock
+
+	;Lock/unlock MHQ.
+	? (_lastUnlock && !unlockEastMHQ):EastMobileHQ Lock true;_lastUnlock = unlockEastMHQ
+	? (!_lastUnlock && unlockEastMHQ):EastMobileHQ Lock false;_lastUnlock = unlockEastMHQ
+
+	? !(IsNull setTownMP) && ((_lastTown != setTownMP)||(_lastTownSide != setTownSideMP)):_lastTown = setTownMP;_lastTownSide = setTownSideMP;[] Exec "Main\SetTownMarker.sqs"
+	? !(IsNull setTownAreaMP) && ((_lastTownArea != setTownAreaMP)||(_lastTownAreaSide != setTownAreaSideMP)||(!_lastTownAreaSet && setTownAreaSetMP)||(_lastTownAreaSet && !setTownAreaSetMP)):_lastTownArea = setTownAreaMP;_lastTownAreaSide = setTownAreaSideMP;_lastTownAreaSet = setTownAreaSetMP;[] Exec "Main\SetTownAreaMarker.sqs"
+
+	;Display any new messages to the side.
+	? (eastMessage > 0) && (_lastEastMessage != eastMessage):_lastEastMessage = eastMessage;[_lastEastMessage] Exec "Main\DisplayMessage.sqs"
+	? (eastMessage == 0) && (_lastEastMessage != eastMessage):_lastEastMessage = eastMessage
+
+	;Display any new messages to specific player.
+	? (eastPlayerMessagePlayer == player) && (eastPlayerMessage > 0) && (_lastEastPlayerMessage != eastPlayerMessage):_lastEastPlayerMessage = eastPlayerMessage;[_lastEastPlayerMessage] Exec "Main\DisplayMessage.sqs"
+	? (eastPlayerMessagePlayer == player) && (eastPlayerMessage == 0) && (_lastEastPlayerMessage != eastPlayerMessage):_lastEastPlayerMessage = eastPlayerMessage
+
+	;If server requests an item be added to player's queue then do so.
+	? !(IsNull eastAddToQueuePlayer) && (eastAddToQueuePlayer == player):[east] Exec "Main\AddToQueuePlayer.sqs"
+
+	;If commander has tried to reinforce team.
+	? !(IsNull addToEastPlayer) && (Leader addToEastPlayer == player):[east] Exec "Main\AddToPlayer.sqs"
+
+	;DBS Arsenal: body swap is not a death. Rebind to the new body.
+	? (dbsArsSwapped) and (Alive player):dbsArsSwapped = false;_unit RemoveAction _scoreID;_unit = player;_scoreID = _unit AddAction [Localize "STRSCORE","Main\Score.sqs"]
+	? (_killed) && (Alive player):_unit = player;_killed = false
+	? !(_killed) && !(Alive _unit):_killed = true;timeLastDeath = 0;[_unit] Exec "Main\ResetUnit.sqs";[] Exec "GUI\UpdateGUIRespawnMenu.sqs";_unit RemoveAction _scoreID
+
+	;Check if a new marker unit needs to be added.
+	_return = "UpdateEast"
+	? !(IsNull eastUnitBuiltMP) && (_lastEastMarkerUnit != eastUnitBuiltMP):_markerSide = east;goto "CheckMarkerUnit"
+	? !(IsNull westUnitBuiltMP) && (_lastWestMarkerUnit != westUnitBuiltMP):_markerSide = west;goto "CheckMarkerUnit"
+
+	? !(IsNull eastBuildingBuiltMP) && (_lastBuildingBuilt != eastBuildingBuiltMP):goto "CheckEastBuildings"
+	? !(IsNull eastUnitBuiltMP) && (_lastUnitBuilt != eastUnitBuiltMP):goto "CheckEastUnit"
+	? (!eastSetPlayerWaypoint)&&(_lastPlayerWaypointX != eastPlayerWaypointX || _lastPlayerWaypointY != eastPlayerWaypointY):goto "CheckEastPlayerWaypoint"
+
+	? (pointsToWin > 0):goto "UpdateEastScore"
+
+	#UpdateEastBuildingsInUse
+
+	? (_lastBuildingInUse != eastBuildingInUseMP):goto "CheckEastBuildingsInUse"
+	? (_lastBuildingInUseState && !eastBuildingInUseStateMP):goto "CheckEastBuildingsInUse"
+	? (!_lastBuildingInUseState && eastBuildingInUseStateMP):goto "CheckEastBuildingsInUse"
+
+	goto "UpdateEast"
+
+;Add any buildings in use to the client-side list.
+#CheckEastBuildingsInUse
+
+	_lastBuildingInUse = eastBuildingInUseMP;
+	_lastBuildingInUseState = eastBuildingInUseStateMP;
+
+	? (IsNull eastBuildingInUseMP):goto "UpdateEast"
+
+	;If state is false then remove the building in use from the list & return to main loop.
+	? !(eastBuildingInUseStateMP):buildingsInUse = buildingsInUse - [eastBuildingInUseMP];Goto "UpdateEast"
+
+	;If the building is already in use then go back to the main loop.
+	? (eastBuildingInUseMP In buildingsInUse):goto "UpdateEast"
+
+	;If state is true then add building in use to the list.
+	? (eastBuildingInUseStateMP):buildingsInUse = buildingsInUse + [eastBuildingInUseMP]
+
+	goto "UpdateEast"
+
+;Add any new buildings to the client-side list.
+#CheckEastBuildings
+
+	_lastBuildingBuilt = eastBuildingBuiltMP
+
+	? (IsNull eastBuildingBuiltMP):goto "UpdateEast"
+
+	;If building is already in player's list then return to the update.
+	? (eastBuildingBuiltMP In buildingsBuilt):goto "UpdateEast"
+
+	;Add the new building to the player's list.
+	buildingsBuilt = buildingsBuilt + [eastBuildingBuiltMP]
+	buildingsBuiltType = buildingsBuiltType + [eastBuildingBuiltTypeMP]
+
+	? (eastBuildingBuiltTypeMP == controlCenterType):controlCenter = controlCenter + [eastBuildingBuiltMP]
+	? (eastBuildingBuiltTypeMP == infantryFactoryType):infantryFactory = infantryFactory + [eastBuildingBuiltMP]
+	? (eastBuildingBuiltTypeMP == lightFactoryType):lightFactory = lightFactory + [eastBuildingBuiltMP]
+	? (eastBuildingBuiltTypeMP == heavyFactoryType):heavyFactory = heavyFactory + [eastBuildingBuiltMP]
+	? (eastBuildingBuiltTypeMP == airFactoryType):airFactory = airFactory + [eastBuildingBuiltMP]
+	? (eastBuildingBuiltTypeMP == ammoDepotType):ammoDepot = ammoDepot + [eastBuildingBuiltMP];[east,eastBuildingBuiltMP,false] Exec "Main\UpdateAmmo.sqs"
+	? (eastBuildingBuiltTypeMP == repairDepotType):repairDepot = repairDepot + [eastBuildingBuiltMP]
+	? (eastBuildingBuiltTypeMP == fieldHospitalType):fieldHospital = fieldHospital + [eastBuildingBuiltMP]
+	? (eastBuildingBuiltTypeMP == mortarType):[eastBuildingBuiltMP] Exec "Main\UpdateMortar.sqs";eastBuildingBuiltMP AddAction [Format [Localize "STRBUYMORTARSHELLS",mortarRearmCost],"Main\BuyMortarShells.sqs"]
+
+	;Equip ammo crate client-side if a public server game.
+	? (publicServer) && (eastBuildingBuiltTypeMP == weaponsCrateType || eastBuildingBuiltTypeMP == ammoCrateType || eastBuildingBuiltTypeMP == heavyWeaponsCrateType || eastBuildingBuiltTypeMP == heavyAmmoCrateType):[east,eastBuildingBuiltTypeMP,eastBuildingBuiltMP] Exec "Loadouts\EquipCrate.sqs"
+
+	_building = eastBuildingBuiltMP
+	_type = eastBuildingBuiltTypeMP
+	_return = "UpdateEast"
+
+#CheckEastUnit
+
+	_lastUnitBuilt = eastUnitBuiltMP
+
+	? (IsNull _lastUnitBuilt):goto "UpdateEast"
+	? ("UralRepair" CountType [_lastUnitBuilt] > 0):repairTrucks = repairTrucks + [_lastUnitBuilt]
+	? ("UralReammo" CountType [_lastUnitBuilt] > 0):ammoTrucks = ammoTrucks + [_lastUnitBuilt]
+	? ("Mi17" CountType [_lastUnitBuilt] > 0):[_lastUnitBuilt,MI17Type] Exec "Loadouts\EquipCargo.sqs"
+
+	? !(publicServer):goto "UpdateEast"
+	? ("UralReammo" CountType [_lastUnitBuilt] > 0):[_lastUnitBuilt,ammoTruckEastType] Exec "Loadouts\EquipCargo.sqs"
+
+	goto "UpdateEast"
+
+#CheckEastPlayerWaypoint
+
+	_lastPlayerWaypointX = eastPlayerWaypointX
+	_lastPlayerWaypointY = eastPlayerWaypointY
+
+	_marker = Format["East%1WP",teamMapDesignations Select eastPlayerWaypointGroup]
+	_marker SetMarkerPos [_lastPlayerWaypointX,_lastPlayerWaypointY,0]
+
+	goto "UpdateEast"
+
+#CheckMarkerUnit
+
+	? (_markerSide == east):goto "CheckEastMarkerUnit"
+
+	_lastWestMarkerUnit = westUnitBuiltMP
+
+	? (IsNull _lastWestMarkerUnit):goto _return
+
+	[_markerSide,_lastWestMarkerUnit] Exec "Main\AddMapAI.sqs"
+	goto _return
+
+#CheckEastMarkerUnit
+
+	_lastEastMarkerUnit = eastUnitBuiltMP
+
+	? (IsNull _lastEastMarkerUnit):goto _return
+
+	[_markerSide,_lastEastMarkerUnit] Exec "Main\AddMapAI.sqs"
+	goto _return
+
+#UpdateMarkers
+
+	_count = 0
+
+	#UpdateMarker
+
+		? ((_lastUnitMarkerTime Select _count) > 0):_lastUnitMarkerTime Set [_count,(_lastUnitMarkerTime Select _count) + .25]
+		? ((_lastUnitMarkerTime Select _count) > 60):_lastUnitMarkerTime Set [_count,0];Format["%1 %2 Activity",_sideText,teamMapDesignations Select _count] SetMarkerPos GetPos HiddenMarkers
+
+		_count = _count + 1
+		? (_count < _totalMarkers):goto "UpdateMarker"
+
+		goto _return
+
+#UpdateWestScore
+
+	? (Group player == WestCommanderTeam) && (Score player != westTotalCommanderPoints):westTotalCommanderPoints = Score player;PublicVariable "westTotalCommanderPoints"
+	? (Group player == WestAlphaTeam) && (Score player != westTotalAlphaPoints):westTotalAlphaPoints = Score player;PublicVariable "westTotalAlphaPoints"
+	? (Group player == WestBravoTeam) && (Score player != westTotalBravoPoints):westTotalBravoPoints = Score player;PublicVariable "westTotalBravoPoints"
+	? (Group player == WestCharlieTeam) && (Score player != westTotalCharliePoints):westTotalCharliePoints = Score player;PublicVariable "westTotalCharliePoints"
+	? (Group player == WestDeltaTeam) && (Score player != westTotalDeltaPoints):westTotalDeltaPoints = Score player;PublicVariable "westTotalDeltaPoints"
+	? (Group player == WestEchoTeam) && (Score player != westTotalEchoPoints):westTotalEchoPoints = Score player;PublicVariable "westTotalEchoPoints"
+	? (Group player == WestFoxtrotTeam) && (Score player != westTotalFoxtrotPoints):westTotalFoxtrotPoints = Score player;PublicVariable "westTotalFoxtrotPoints"
+	? (Group player == WestGolfTeam) && (Score player != westTotalGolfPoints):westTotalGolfPoints = Score player;PublicVariable "westTotalGolfPoints"
+	? (Group player == WestHotelTeam) && (Score player != westTotalHotelPoints):westTotalHotelPoints = Score player;PublicVariable "westTotalHotelPoints"
+
+	? (westWinsGame || eastWinsGame):Exit
+
+	goto "UpdateWestBuildingsInUse"
+
+#UpdateEastScore
+
+	? (Group player == EastCommanderTeam) && (Score player != eastTotalCommanderPoints):eastTotalCommanderPoints = Score player;PublicVariable "eastTotalCommanderPoints"
+	? (Group player == EastAlphaTeam) && (Score player != eastTotalAlphaPoints):eastTotalAlphaPoints = Score player;PublicVariable "eastTotalAlphaPoints"
+	? (Group player == EastBravoTeam) && (Score player != eastTotalBravoPoints):eastTotalBravoPoints = Score player;PublicVariable "eastTotalBravoPoints"
+	? (Group player == EastCharlieTeam) && (Score player != eastTotalCharliePoints):eastTotalCharliePoints = Score player;PublicVariable "eastTotalCharliePoints"
+	? (Group player == EastDeltaTeam) && (Score player != eastTotalDeltaPoints):eastTotalDeltaPoints = Score player;PublicVariable "eastTotalDeltaPoints"
+	? (Group player == EastEchoTeam) && (Score player != eastTotalEchoPoints):eastTotalEchoPoints = Score player;PublicVariable "eastTotalEchoPoints"
+	? (Group player == EastFoxtrotTeam) && (Score player != eastTotalFoxtrotPoints):eastTotalFoxtrotPoints = Score player;PublicVariable "eastTotalFoxtrotPoints"
+	? (Group player == EastGolfTeam) && (Score player != eastTotalGolfPoints):eastTotalGolfPoints = Score player;PublicVariable "eastTotalGolfPoints"
+	? (Group player == EastHotelTeam) && (Score player != eastTotalHotelPoints):eastTotalHotelPoints = Score player;PublicVariable "eastTotalHotelPoints"
+
+	? (westWinsGame || eastWinsGame):Exit
+
+	goto "UpdateEastBuildingsInUse"

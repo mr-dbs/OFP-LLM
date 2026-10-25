@@ -1,0 +1,3 @@
+;Last modified 10/17/2
+
+[defenseScript] Exec "Command\CommandMenuOrder.sqs"

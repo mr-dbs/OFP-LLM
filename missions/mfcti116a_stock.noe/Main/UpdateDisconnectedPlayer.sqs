@@ -1,0 +1,30 @@
+;Last modified 11/23/2
+
+;Don't run this script on the server.
+? (Local LocalServerObject):Exit
+
+#Update
+~30
+
+;Create client-side lists of player controlled teams.
+? !(westCommanderPlayer)&&(WestCommanderTeam In westPlayerGroups):westPlayerGroups = westPlayerGroups - [WestCommanderTeam]
+? !(westAlphaPlayer)&&(WestAlphaTeam In westPlayerGroups):westPlayerGroups = westPlayerGroups - [WestAlphaTeam]
+? !(westBravoPlayer)&&(WestBravoTeam In westPlayerGroups):westPlayerGroups = westPlayerGroups - [WestBravoTeam]
+? !(westCharliePlayer)&&(WestCharlieTeam In westPlayerGroups):westPlayerGroups = westPlayerGroups - [WestCharlieTeam]
+? !(westDeltaPlayer)&&(WestDeltaTeam In westPlayerGroups):westPlayerGroups = westPlayerGroups - [WestDeltaTeam]
+? !(westEchoPlayer)&&(WestEchoTeam In westPlayerGroups):westPlayerGroups = westPlayerGroups - [WestEchoTeam]
+? !(westFoxtrotPlayer)&&(WestFoxtrotTeam In westPlayerGroups):westPlayerGroups = westPlayerGroups - [WestFoxtrotTeam]
+? !(westGolfPlayer)&&(WestGolfTeam In westPlayerGroups):westPlayerGroups = westPlayerGroups - [WestGolfTeam]
+? !(westHotelPlayer)&&(WestHotelTeam In westPlayerGroups):westPlayerGroups = westPlayerGroups - [WestHotelTeam]
+
+? !(eastCommanderPlayer)&&(EastCommanderTeam In eastPlayerGroups):eastPlayerGroups = eastPlayerGroups - [EastCommanderTeam]
+? !(eastAlphaPlayer)&&(EastAlphaTeam In eastPlayerGroups):eastPlayerGroups = eastPlayerGroups - [EastAlphaTeam]
+? !(eastBravoPlayer)&&(EastBravoTeam In eastPlayerGroups):eastPlayerGroups = eastPlayerGroups - [EastBravoTeam]
+? !(eastCharliePlayer)&&(EastCharlieTeam In eastPlayerGroups):eastPlayerGroups = eastPlayerGroups - [EastCharlieTeam]
+? !(eastDeltaPlayer)&&(EastDeltaTeam In eastPlayerGroups):eastPlayerGroups = eastPlayerGroups - [EastDeltaTeam]
+? !(eastEchoPlayer)&&(EastEchoTeam In eastPlayerGroups):eastPlayerGroups = eastPlayerGroups - [EastEchoTeam]
+? !(eastFoxtrotPlayer)&&(EastFoxtrotTeam In eastPlayerGroups):eastPlayerGroups = eastPlayerGroups - [EastFoxtrotTeam]
+? !(eastGolfPlayer)&&(EastGolfTeam In eastPlayerGroups):eastPlayerGroups = eastPlayerGroups - [EastGolfTeam]
+? !(eastHotelPlayer)&&(EastHotelTeam In eastPlayerGroups):eastPlayerGroups = eastPlayerGroups - [EastHotelTeam]
+
+goto "Update"

@@ -1,0 +1,47 @@
+;Last modified 2/19/4
+;Aligns a building so it is in front of the unit that created it.
+;Script usage:  [Vehicle,Direction] exec AlignBuildingDirection.sqs"
+
+_building = _this Select 0
+_name = _this Select 1
+_position = _this Select 2
+_direction = _this Select 3
+
+_xOffset = 0
+_distance = 8
+_directionAlignment = 0
+
+? (_name == "MASH"):_xOffset = .16;_distance = 3
+? (_name == "ViewTower2"):_xOffset = -2.91;_distance = 6
+? (_name == "HeliH"):_distance = 6
+
+? (_name == "MFCTI116WestControlCenter") || (_name == "MFCTI116EastControlCenter") || (_name == "Housebudova5"):_xOffset = .04;_distance = 4;_directionAlignment = -90
+? (_name == "MFCTI116WestBarracks") || (_name == "MFCTI116EastBarracks") || (_name == "Housebudova4"):_xOffset = .22;_directionAlignment = 90
+? (_name == "MFCTI116WestLightFactory") || (_name == "MFCTI116EastLightFactory") || (_name == "Housebouda3"):_xOffset = .04;_distance = 5.5
+? (_name == "MFCTI116WestHeavyFactory") || (_name == "MFCTI116EastHeavyFactory") || (_name == "Housegaraz_s_tankem"):_distance = 6
+? (_name == "MFCTI116WestAircraftFactory") || (_name == "MFCTI116EastAircraftFactory") || (_name == "Hangar_Hall"):_xOffset = -8.2;_distance = 20
+? (_name == "MFCTI116WestRepairDepot") || (_name == "MFCTI116EastRepairDepot") || (_name == "Houserepair_center"):_xOffset = .2;_distance = 1.5
+? (_name == "MFCTI116WestAmmoDepot") || (_name == "MFCTI116EastAmmoDepot") || (_name == "Houseammostore2"):_xOffset = 5.87;_distance = 0
+
+? (_name == "MFCTI116WestAmmoCrate") || (_name == "MFCTI116EastAmmoCrate") || (_name == "ReammoBoxWest") || (_name == "ReammoBoxEast"):_xOffset = -4;_distance = -1.5
+? (_name == "MFCTI116WestHeavyAmmoCrate") || (_name == "MFCTI116EastHeavyAmmoCrate") || (_name == "HeavyReammoBoxWest") || (_name == "HeavyReammoBoxEast"):_distance = -1.5
+? (_name == "MFCTI116WestEquipmentCrate") || (_name == "MFCTI116EastEquipmentCrate") || (_name == "AmmoBoxAddW") || (_name == "AmmoBoxAddE"):_xOffset = 4;_distance = -1.5
+
+_destination = [(_position Select 0)+((sin _direction)*_distance),(_position Select 1)+((cos _direction)*_distance),0]
+
+? (_xOffset == 0):goto "PlaceBuilding"
+
+_direction = (_direction + 90) % 360
+_destination = [(_destination Select 0)+((sin _direction)*_xOffset),(_destination Select 1)+((cos _direction)*_xOffset),0]
+_direction = (_direction - 90) % 360
+
+#PlaceBuilding
+
+_building SetDir ((_direction + _directionAlignment) % 360)
+_building SetPos _destination
+
+;Get position & x,y,z coords.
+_position = GetPos _building
+
+;Fix for an annoying bug where buildings will be built underground.
+? (_position Select 2 < -1.5):_building SetPos [_position Select 0,_position Select 1,-0.75]

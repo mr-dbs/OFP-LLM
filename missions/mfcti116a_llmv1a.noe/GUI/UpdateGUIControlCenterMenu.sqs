@@ -1,0 +1,467 @@
+;Last modified 11/23/3
+;Routines for a Control Center's build menu.
+
+_unit = _this select 0
+_side = Side _unit
+
+@ (serverStarted)
+
+? (_side == west):_upgradedLightNames = westUpgradedLightNames;_upgradedHeavyNames = westUpgradedHeavyNames;_upgradedAirNames = westUpgradedAirNames
+? (_side == east):_upgradedLightNames = eastUpgradedLightNames;_upgradedHeavyNames = eastUpgradedHeavyNames;_upgradedAirNames = eastUpgradedAirNames
+
+_names = unitNames
+
+? !(limitedRadar):goto "SetTransports"
+
+? (_side == west):_upgradedLightNames = westUpgradedLRLightNames;_upgradedHeavyNames = westUpgradedLRHeavyNames;_upgradedAirNames = westUpgradedLRAirNames
+? (_side == east):_upgradedLightNames = eastUpgradedLRLightNames;_upgradedHeavyNames = eastUpgradedLRHeavyNames;_upgradedAirNames = eastUpgradedLRAirNames
+
+_names = unitLRNames
+
+#SetTransports
+
+_aircraftTransports = westAircraftTransports;_assaultAircraft = westAssaultAircraft 
+? (_side == east):_aircraftTransports = eastAircraftTransports;_assaultAircraft = eastAssaultAircraft 
+
+openControlCenterMenu = false
+controlCenterMenuInUse = false
+controlCenterMenuUpgrade = false
+controlCenterMenuUnit = false
+controlCenterMenuLight = false
+controlCenterMenuHeavy = false
+controlCenterMenuAir = false
+
+_upgradedInfantry = false
+_upgradedBlackOps = false
+_upgradedLight = false
+_upgradedHeavy = false
+_upgradedAir = false
+_upgradedRadar = false
+_upgradedAircraftRockets = false
+
+_actionsAdded = false
+
+#Update
+~0.5
+
+	;If unit dies or is no longer on his/her side (team killing).
+	? !(Alive _unit)||(Side _unit != west && Side _unit != east):_unit RemoveAction _actionID;Exit
+
+	_count = 0
+	_maxCenters = Count controlCenter
+
+	? (_maxCenters < 1):goto "Update"
+
+	;If a center already exists & is in range & not destroyed then skip the check.
+	? (!IsNull _center)&&(_actionsAdded)&&(_center Distance _unit <= buildingActionRange)&&(GetDammage _center != 1):goto "UpdateActions"
+
+	;If center was destroyed or out of range then remove action.
+	? (_actionsAdded):_actionsAdded = false;_unit RemoveAction _actionID;_center = ObjNull
+
+	#CheckCenters
+
+		_center = controlCenter Select _count
+		_count = _count + 1
+
+		;If in range of a control center and no actions have been added then do so.
+		? (_center Distance _unit <= buildingActionRange)&&(GetDammage _center != 1)&&(!_actionsAdded):_actionsAdded = true;_actionID = _unit AddAction[Localize "STROPTIONSCONTROLCENTER","GUI\OpenControlCenterMenuGUI.sqs"];goto "UpdateActions"
+		? (_count < _maxCenters):goto "CheckCenters"
+
+		goto "Update"
+
+	#UpdateActions
+
+		? (!_actionsAdded):goto "Update"
+		? (openControlCenterMenu):goto "InitMenu"
+		? !(controlCenterMenuInUse):goto "Update"
+
+		;Command menu actions.
+		? (controlCenterMenuUpgrade):goto "Upgrade"
+		? (controlCenterMenuUnit):goto "AddToTeam"
+		? (controlCenterMenuLight):goto "AddToTeam"
+		? (controlCenterMenuHeavy):goto "AddToTeam"
+		? (controlCenterMenuAir):goto "AddToTeam"
+
+		;Start at 1 since the commander's team is 0.
+		_count = 1
+		_totalTeams = Count teamDesignations
+
+		#GetSelectedTeam
+
+			_selectedTeam = lbData[IDCControlMenuTeamSelect,lbCurSel IDCControlMenuTeamSelect]
+
+			? (_side == west)&&(_selectedTeam == (teamDesignations Select _count)):westSelectedGroup = _count;PublicVariable "westSelectedGroup"
+			? (_side == east)&&(_selectedTeam == (teamDesignations Select _count)):eastSelectedGroup = _count;PublicVariable "eastSelectedGroup"
+
+			_count = _count  + 1
+
+			? (_count < _totalTeams):goto "GetSelectedTeam"
+
+		? (_side == west):_return = "UpdateInfoBox";goto "GetWestSelectedTeamSize"
+		? (_side == east):_return = "UpdateInfoBox";goto "GetEastSelectedTeamSize"
+
+		#UpdateInfoBox
+
+			;Show resources & total workers.
+			? (_side == west):_text = Format["%1: %2",Localize "STRRESOURCES",westResources];_text1 = Format["%1 %2: %3",teamDesignations Select westSelectedGroup,Localize "STRSIZE",_selectedteamSize]
+			? (_side == east):_text = Format["%1: %2",Localize "STRRESOURCES",eastResources];_text1 = Format["%1 %2: %3",teamDesignations Select eastSelectedGroup,Localize "STRSIZE",_selectedteamSize]
+
+			;If the value is invalid then the menu was closed with the ESC key.
+			? !(dialog) || (ctrlText IDCMenuTitle != Localize "STRCONTROLCENTER"):controlCenterMenuInUse = false;goto "Update"
+
+			lbClear IDCControlMenuInfo
+			lbAdd[IDCControlMenuInfo,_text]
+			lbAdd[IDCControlMenuInfo,_text1]
+
+		#UpdateUpgradeInfo
+
+			? (_side == west):_upgradeType = westUpgradeInProgressType
+			? (_side == east):_upgradeType = eastUpgradeInProgressType
+
+			_upgradeText = ""
+
+			? (_upgradeType > 0):_upgradeText = Format ["%1 %2",Localize "STRUPGRADING",upgradeNames Select _upgradeType]
+			? (_upgradeType == blackOpsUpgradeType):_upgradeText = Format ["%1 %2",Localize "STRUPGRADINGTO",upgradeNames Select _upgradeType]
+
+			CtrlSetText [IDCMenuStatusLabel,_upgradeText]
+
+			? (_side == west):goto "CheckWestUpgrades"
+			? (_side == east):goto "CheckEastUpgrades"
+
+		goto "Update"
+
+;Creates the control menu.
+#InitMenu
+
+	openControlCenterMenu = false
+	controlCenterMenuInUse = true
+
+	;Create the control center menu.
+	_controlCenterMenu = CreateDialog Format ["ControlMenu%1",GUISkin]
+
+	;Start at 1 since the commander's team is 0.
+	_count = 1
+	_totalTeams = Count teamDesignations
+
+	;Add an entry onto the team selection combobox.
+	#AddTeamSelection
+
+		? (_side == west) && ((westGroups Select _count) In westPlayerGroups):_selection = lbAdd[IDCControlMenuTeamSelect,Format["%1 (%2)",teamDesignations Select _count,Name Leader (westGroups Select _count)]];lbSetData [IDCControlMenuTeamSelect,_selection,teamDesignations Select _count];goto "AddTeamSelectionCount"
+		? (_side == east) && ((eastGroups Select _count) In eastPlayerGroups):_selection = lbAdd[IDCControlMenuTeamSelect,Format["%1 (%2)",teamDesignations Select _count,Name Leader (eastGroups Select _count)]];lbSetData [IDCControlMenuTeamSelect,_selection,teamDesignations Select _count];goto "AddTeamSelectionCount"
+
+		;Add the text & data to the team entry.
+		_selection = lbAdd[IDCControlMenuTeamSelect,teamDesignations Select _count]
+		lbSetData [IDCControlMenuTeamSelect,_selection,teamDesignations Select _count]
+
+		#AddTeamSelectionCount
+
+			_count = _count  + 1
+
+		? (_count < _totalTeams):goto "AddTeamSelection"
+
+	;Set the selected combobox entry to the current commander-selected team.
+	? (_side == west):lbSetCurSel[IDCControlMenuTeamSelect,westSelectedGroup - 1]
+	? (_side == east):lbSetCurSel[IDCControlMenuTeamSelect,eastSelectedGroup - 1]
+
+	? (_side == west):_return = "AddUnitSelections";goto "AddWestUpgrades"
+	? (_side == east):_return = "AddUnitSelections";goto "AddEastUpgrades"
+
+#AddUnitSelections
+
+	_blackOpsAdded = false
+
+	lbClear IDCControlMenuUnitSelect
+	lbClear IDCControlMenuLightSelect
+	lbClear IDCControlMenuHeavySelect
+	lbClear IDCControlMenuAirSelect
+
+	_count = 1
+
+	? (_side == east):_count = lastWestUnit + 1
+
+	#CountBarracks
+		_buildingList = infantryFactory;_return = "CountLightFactories";goto "CountWorkingBuildings"
+
+	#CountLightFactories
+		_totalInfantryFactories = _workingBuildings
+		_buildingList = lightFactory;_return = "CountHeavyFactories";goto "CountWorkingBuildings"
+
+	#CountHeavyFactories
+		_totalLightFactories = _workingBuildings
+		_buildingList = heavyFactory;_return = "CountAirFactories";goto "CountWorkingBuildings"
+
+	#CountAirFactories
+		_totalHeavyFactories = _workingBuildings
+		_buildingList = airFactory
+
+		? (_side == west):_return = "AddWestUnitSelection";goto "CountWorkingBuildings"
+		? (_side == east):_return = "AddEastUnitSelection";goto "CountWorkingBuildings"
+
+	;Add a west entry onto the unit selection comboboxes.
+	#AddWestUnitSelection
+
+		? (_count > lastWestUnit):goto "Update"
+		? (_count <= lastWestSoldier):_IDC = IDCControlMenuUnitSelect
+		? (_count > lastWestSoldier && _count <= lastWestLight):_IDC = IDCControlMenuLightSelect
+		? (_count > lastWestLight && _count <= lastWestMisc):_count = lastWestMisc + 1;goto "AddWestUnitSelection"
+		? (_count > lastWestMisc && _count <= lastWestHeavy):_IDC = IDCControlMenuHeavySelect
+		? (_count > lastWestHeavy && _count <= lastWestAir):_IDC = IDCControlMenuAirSelect
+
+		_totalAirFactories = _workingBuildings
+		_unitCost = unitCosts Select _count
+
+		? (cheapTransportAC) && (_count In _aircraftTransports):_unitCost = _unitCost * cheapTransportACMultiplier;_unmannedCosts = _unmannedCosts * cheapTransportACMultiplier
+		? (expensiveAssaultAC) && (_count In _assaultAircraft):_unitCost = _unitCost * expensiveAssaultACMultiplier;_unmannedCosts = _unmannedCosts * expensiveAssaultACMultiplier
+
+		_spacer = ""
+		? (_unitCost < 100):_spacer = " "
+		? (_unitCost < 1000):_spacer = _spacer + " "
+		? (_IDC == IDCControlMenuAirSelect) && (_unitCost < 10000):_spacer = _spacer + " "
+
+		_layout = "$%1 %2%3"
+		? (Localize "STRCURRENCYPOSITION" == "Back"):_layout = "%1$ %2%3"
+
+		_text = Format[_layout,_unitCost,_spacer,unitDescriptions Select _count]
+		_value = _count
+
+		;Check to see if a proper building exists.  If not skip this list.
+		? (_IDC == IDCControlMenuUnitSelect)&&(_totalInfantryFactories < 1):_count = lastWestSoldier;_text = Localize "STRNOBARRACKS";_value = 0;goto "AddWestUnitToList"
+		? (_IDC == IDCControlMenuLightSelect)&&(_totalLightFactories < 1):_count = lastWestLight;_text = Localize "STRNOFACTORY";_value = 0;goto "AddWestUnitToList"
+		? (_IDC == IDCControlMenuHeavySelect)&&(_totalHeavyFactories < 1):_count = lastWestHeavy;_text = Localize "STRNOFACTORY";_value = 0;goto "AddWestUnitToList"
+		? (_IDC == IDCControlMenuAirSelect)&&(_totalAirFactories < 1):_count = lastWestAir;_text = Localize "STRNOFACTORY";_value = 0;goto "AddWestUnitToList"
+
+		;If there are no aircraft rockets remove UH-60 from list since it would just be an expensive unarmed craft.
+		? ((noACRockets) || !(westUpgradedAircraftRockets)) && (_IDC == IDCControlMenuAirSelect) && (_count == UH60Type):goto "AddNextWestUnit"
+
+		;Check for upgrades.
+		? ((_names Select _count) In westUpgradedSoldierNames)&&(!westUpgradedInfantry):_count = _count + 1;goto "AddWestUnitSelection"
+		? ((_names Select _count) In westUpgradedBlackOpNames)&&(!westUpgradedBlackOps):_count = _count + 1;goto "AddWestUnitSelection"
+		? ((_names Select _count) In _upgradedLightNames)&&(!westUpgradedLight):_count = _count + 1;goto "AddWestUnitSelection"
+		? ((_names Select _count) In _upgradedHeavyNames)&&(!westUpgradedHeavy):_count = _count + 1;goto "AddWestUnitSelection"
+		? ((_names Select _count) In _upgradedAirNames)&&(!westUpgradedAir):_count = _count + 1;goto "AddWestUnitSelection"
+
+		#AddWestUnitToList
+
+			_selection = lbAdd[_IDC,_text]
+
+			;Add the data that is stored in the entry.
+			lbSetValue [_IDC,_selection,_value]
+
+			#AddNextWestUnit
+
+				_count = _count  + 1
+
+				? (_count <= lastWestUnit):goto "AddWestUnitSelection"
+
+				goto "Update"
+
+	;Add a east entry onto the unit selection comboboxes.
+	#AddEastUnitSelection
+
+		? (_count > lastEastUnit):goto "Update"
+
+		_totalAirFactories = _workingBuildings
+
+		_unitCost = unitCosts Select _count
+
+		? (cheapTransportAC) && (_count In _aircraftTransports):_unitCost = _unitCost * cheapTransportACMultiplier;_unmannedCosts = _unmannedCosts * cheapTransportACMultiplier
+		? (expensiveAssaultAC) && (_count In _assaultAircraft):_unitCost = _unitCost * expensiveAssaultACMultiplier;_unmannedCosts = _unmannedCosts * expensiveAssaultACMultiplier
+
+		_spacer = ""
+		? (_unitCost < 100):_spacer = " "
+		? (_unitCost < 1000):_spacer = _spacer + " "
+
+		_layout = "$%1 %2%3"
+		? (Localize "STRCURRENCYPOSITION" == "Back"):_layout = "%1$ %2%3"
+
+		_text = Format[_layout,_unitCost,_spacer,unitDescriptions Select _count]
+		_value = _count
+
+		? (_count <= lastEastSoldier):_IDC = IDCControlMenuUnitSelect
+		? (_count > lastEastSoldier && _count <= lastEastLight):_IDC = IDCControlMenuLightSelect
+		? (_count > lastEastLight && _count <= lastEastMisc):_count = lastEastMisc + 1;goto "AddEastUnitSelection"
+		? (_count > lastEastMisc && _count <= lastEastHeavy):_IDC = IDCControlMenuHeavySelect
+		? (_count > lastEastHeavy && _count <= lastEastAir):_IDC = IDCControlMenuAirSelect
+
+		;Check to see if a proper building exists.  If not skip this list.
+		? (_IDC == IDCControlMenuUnitSelect)&&(_totalInfantryFactories < 1):_count = lastEastSoldier;_text = Localize "STRNOBARRACKS";_value = 0;goto "AddEastUnitToList"
+		? (_IDC == IDCControlMenuLightSelect)&&(_totalLightFactories < 1):_count = lastEastLight;_text = Localize "STRNOFACTORY";_value = 0;goto "AddEastUnitToList"
+		? (_IDC == IDCControlMenuHeavySelect)&&(_totalHeavyFactories < 1):_count = lastEastHeavy;_text = Localize "STRNOFACTORY";_value = 0;goto "AddEastUnitToList"
+		? (_IDC == IDCControlMenuAirSelect)&&(_totalAirFactories < 1):_count = lastEastAir;_text = Localize "STRNOFACTORY";_value = 0;goto "AddEastUnitToList"
+
+		;Since the Mi17 Transport & Mi17 are the same vehicle on PS version do a special upgrade check now.
+		? (publicServer) && (_IDC == IDCControlMenuAirSelect) && (_count == MI17TransportType):goto "AddEastUnitToList"
+
+		;If there are no aircraft rockets remove MI-17 from list since it would just be an expensive Mi-17 Transport.
+		? ((noACRockets) || !(eastUpgradedAircraftRockets)) && (_IDC == IDCControlMenuAirSelect) && (_count == MI17Type):goto "AddNextEastUnit"
+
+		;Check for upgrades.
+		? ((_names Select _count) In eastUpgradedSoldierNames)&&(!eastUpgradedInfantry):_count = _count + 1;goto "AddEastUnitSelection"
+		? ((_names Select _count) In eastUpgradedBlackOpNames)&&(!eastUpgradedBlackOps):_count = _count + 1;goto "AddEastUnitSelection"
+		? ((_names Select _count) In _upgradedLightNames)&&(!eastUpgradedLight):_count = _count + 1;goto "AddEastUnitSelection"
+		? ((_names Select _count) In _upgradedHeavyNames)&&(!eastUpgradedHeavy):_count = _count + 1;goto "AddEastUnitSelection"
+		? ((_names Select _count) In _upgradedAirNames)&&(!eastUpgradedAir):_count = _count + 1;goto "AddEastUnitSelection"
+
+		#AddEastUnitToList
+
+			_selection = lbAdd[_IDC,_text]
+
+			;Add the data that is stored in the entry.
+			lbSetValue [_IDC,_selection,_value]
+
+			#AddNextEastUnit
+
+				_count = _count  + 1
+
+				? (_count <= lastEastAir):goto "AddEastUnitSelection"
+
+				goto "Update"
+
+#AddWestUpgrades
+
+	lbClear IDCControlMenuUpgradeSelect
+	_selection = 0
+
+	_layout = "$%1 %2"
+	? (Localize "STRCURRENCYPOSITION" == "Back"):_layout = "%1$ %2"
+	
+	? (!westUpgradedInfantry):_text = Format[_layout,upgradeInfantryCost,Localize "STRINFANTRY"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,infantryFactoryType]
+	? (!westUpgradedBlackOps):_text = Format[_layout,upgradeBlackOpsCost,Localize "STRBLACKOPS"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,blackOpsUpgradeType]
+	? (!westUpgradedLight):_text = Format[_layout,upgradeLightCost,Localize "STRLIGHTVEHICLES"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,lightFactoryType]
+	? (!westUpgradedHeavy):_text = Format[_layout,upgradeHeavyCost,Localize "STRHEAVYVEHICLES"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,heavyFactoryType]
+	? (!westUpgradedAir):_text = Format[_layout,upgradeAirCost,Localize "STRAIRCRAFT"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,airFactoryType]
+	? (!westUpgradedAircraftRockets) && (!noACRockets):_text = Format[_layout,upgradeAircraftRocketsCost,Localize "STRACROCKETS"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,aircraftRocketsUpgradeType]
+	? (!westUpgradedAircraftAT):_text = Format[_layout,upgradeAircraftATCost,Localize "STRACAT"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,aircraftATUpgradeType]
+	? (!westUpgradedRadar):_text = Format[_layout,upgradeRadarCost,Localize "STRRADAR"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,radarUpgradeType]
+
+	goto "AddUnitSelections"
+
+#AddEastUpgrades
+
+	lbClear IDCControlMenuUpgradeSelect
+	_selection = 0
+
+	_layout = "$%1 %2"
+	? (Localize "STRCURRENCYPOSITION" == "Back"):_layout = "%1$ %2"
+
+	? (!eastUpgradedInfantry):_text = Format[_layout,upgradeInfantryCost,Localize "STRINFANTRY"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,infantryFactoryType]
+	? (!eastUpgradedBlackOps):_text = Format[_layout,upgradeBlackOpsCost,Localize "STRSPETZNATZ"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,blackOpsUpgradeType]
+	? (!eastUpgradedLight):_text = Format[_layout,upgradeLightCost,Localize "STRLIGHTVEHICLES"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,lightFactoryType]
+	? (!eastUpgradedHeavy):_text = Format[_layout,upgradeHeavyCost,Localize "STRHEAVYVEHICLES"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,heavyFactoryType]
+	? (!eastUpgradedAir):_text = Format[_layout,upgradeAirCost,Localize "STRAIRCRAFT"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,airFactoryType]
+	? (!eastUpgradedAircraftRockets) && (!noACRockets):_text = Format[_layout,upgradeAircraftRocketsCost,Localize "STRACROCKETS"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,aircraftRocketsUpgradeType]
+	? (!eastUpgradedAircraftAT):_text = Format[_layout,upgradeAircraftATCost,Localize "STRACAT"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,aircraftATUpgradeType]
+	? (!eastUpgradedRadar):_text = Format[_layout,upgradeRadarCost,Localize "STRRADAR"];_selection = lbAdd[IDCControlMenuUpgradeSelect,_text];lbSetValue [IDCControlMenuUpgradeSelect,_selection,radarUpgradeType]
+
+	goto "AddUnitSelections"
+
+#CheckWestUpgrades
+
+	_return = "Update"
+
+	? (westUpgradedInfantry) && (!_upgradedInfantry):_upgradedInfantry = true;goto "AddWestUpgrades"
+	? (westUpgradedBlackOps) && (!_upgradedBlackOps):_upgradedBlackOps = true;goto "AddWestUpgrades"
+	? (westUpgradedLight) && (!_upgradedLight):_upgradedLight = true;goto "AddWestUpgrades"
+	? (westUpgradedHeavy) && (!_upgradedHeavy):_upgradedHeavy = true;goto "AddWestUpgrades"
+	? (westUpgradedAir) && (!_upgradedAir):_upgradedAir = true;goto "AddWestUpgrades"
+	? (westUpgradedAircraftRockets) && (!_upgradedAircraftRockets):_upgradedAircraftRockets = true;goto "AddWestUpgrades"
+	? (westUpgradedRadar) && (!_upgradedRadar):_upgradedRadar = true;goto "AddWestUpgrades"
+
+	goto "Update"
+
+#CheckEastUpgrades
+
+	_return = "Update"
+
+	? (eastUpgradedInfantry) && (!_upgradedInfantry):_upgradedInfantry = true;goto "AddEastUpgrades"
+	? (eastUpgradedBlackOps) && (!_upgradedBlackOps):_upgradedBlackOps = true;goto "AddEastUpgrades"
+	? (eastUpgradedLight) && (!_upgradedLight):_upgradedLight = true;goto "AddEastUpgrades"
+	? (eastUpgradedHeavy) && (!_upgradedHeavy):_upgradedHeavy = true;goto "AddEastUpgrades"
+	? (eastUpgradedAir) && (!_upgradedAir):_upgradedAir = true;goto "AddEastUpgrades"
+	? (eastUpgradedAircraftRockets) && (!_upgradedAircraftRockets):_upgradedAircraftRockets = true;goto "AddEastUpgrades"
+	? (eastUpgradedRadar) && (!_upgradedRadar):_upgradedRadar = true;goto "AddEastUpgrades"
+
+	goto "Update"
+
+#Upgrade
+
+	controlCenterMenuUpgrade = false
+	_upgradeType = lbValue[IDCControlMenuUpgradeSelect,lbCurSel IDCControlMenuUpgradeSelect]
+
+	? (_upgradeType < 1):goto "Update"
+	[_side,upgradeCosts Select _upgradeType,_upgradeType] Exec "Main\Upgrade.sqs"
+
+	~1.5
+
+	goto "Update"
+
+#AddToTeam
+
+	_buyUnit = false
+
+	? (controlCenterMenuUnit):_unitType = lbValue[IDCControlMenuUnitSelect,lbCurSel IDCControlMenuUnitSelect];_buyUnit = true
+	? (controlCenterMenuLight):_unitType = lbValue[IDCControlMenuLightSelect,lbCurSel IDCControlMenuLightSelect]
+	? (controlCenterMenuHeavy):_unitType = lbValue[IDCControlMenuHeavySelect,lbCurSel IDCControlMenuHeavySelect]
+	? (controlCenterMenuAir):_unitType = lbValue[IDCControlMenuAirSelect,lbCurSel IDCControlMenuAirSelect]
+
+	controlCenterMenuUnit = false
+	controlCenterMenuLight = false
+	controlCenterMenuHeavy = false
+	controlCenterMenuAir = false
+
+	;Make sure player is not trying to add to a disabled AI team.
+	_group = westGroups Select westSelectedGroup
+	? (_side == east):_group = eastGroups Select eastSelectedGroup
+	? (IsNull _group):goto "Update"
+
+	? (_buyUnit):[_side,ObjNull,_unitType,noScript,GrpNull,false] Exec "Main\BuyUnit.sqs"
+	? (!_buyUnit):[_side,ObjNull,_unitType,noScript,GrpNull,false] Exec "Main\BuyVehicle.sqs"
+
+	;Prevents multiple build orders before buildingInUse takes effect.
+	~1.5
+
+	goto "Update"
+
+
+;Count total working buildings on list.
+#CountWorkingBuildings
+
+	_buildingCount = 0
+	_totalBuildings = Count _buildingList
+	_workingBuildings = 0
+
+	#CountBuilding
+
+		_building = _buildingList Select _buildingCount
+		_buildingCount = _buildingCount + 1
+
+		? (GetDammage _building != 1):_workingBuildings = _workingBuildings + 1
+		? (_buildingCount < _totalBuildings):goto "CountBuilding"
+
+		goto _return
+
+#GetWestSelectedTeamSize
+
+	? (westSelectedGroup == groupAlpha):_selectedTeamSize = westAlphaSize
+	? (westSelectedGroup == groupBravo):_selectedTeamSize = westBravoSize
+	? (westSelectedGroup == groupCharlie):_selectedTeamSize = westCharlieSize
+	? (westSelectedGroup == groupDelta):_selectedTeamSize = westDeltaSize
+	? (westSelectedGroup == groupEcho):_selectedTeamSize = westEchoSize
+	? (westSelectedGroup == groupFoxtrot):_selectedTeamSize = westFoxtrotSize
+	? (westSelectedGroup == groupGolf):_selectedTeamSize = westGolfSize
+	? (westSelectedGroup == groupHotel):_selectedTeamSize = westHotelSize
+
+	goto _return
+
+#GetEastSelectedTeamSize
+
+	? (eastSelectedGroup == groupAlpha):_selectedTeamSize = eastAlphaSize
+	? (eastSelectedGroup == groupBravo):_selectedTeamSize = eastBravoSize
+	? (eastSelectedGroup == groupCharlie):_selectedTeamSize = eastCharlieSize
+	? (eastSelectedGroup == groupDelta):_selectedTeamSize = eastDeltaSize
+	? (eastSelectedGroup == groupEcho):_selectedTeamSize = eastEchoSize
+	? (eastSelectedGroup == groupFoxtrot):_selectedTeamSize = eastFoxtrotSize
+	? (eastSelectedGroup == groupGolf):_selectedTeamSize = eastGolfSize
+	? (eastSelectedGroup == groupHotel):_selectedTeamSize = eastHotelSize
+
+	goto _return

@@ -1,0 +1,97 @@
+;Last modified 5/28/3
+;Script Usage:  [Side] Exec "AddResourcesServer.sqs"
+
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+
+? (_side == east):goto "AddEastResources"
+
+#AddWestResources
+
+	_noPoints = false
+	_count = 0
+
+	? (westPlayers < 1):westResources = westResources + addWestAwardResources;PublicVariable "westResources";goto "ClearWestResourceRequest"
+
+	_totalPoints = westAlphaPoints + westBravoPoints + westCharliePoints + westDeltaPoints + westEchoPoints + westFoxtrotPoints + westGolfPoints + westHotelPoints
+
+	;If no points have been earned award pool equally.
+	? (_totalPoints < 1):_totalPoints = westPlayers;_noPoints = true
+
+	;Add player resources to each player.
+	#AddWestPlayerResources
+
+		_group = westPlayerGroups Select _count
+		_count = _count + 1
+
+		? (_group == WestCommanderTeam):goto "AddNextWest"
+		? (_group == WestAlphaTeam):_points = westAlphaPoints
+		? (_group == WestBravoTeam):_points = westBravoPoints
+		? (_group == WestCharlieTeam):_points = westCharliePoints
+		? (_group == WestDeltaTeam):_points = westDeltaPoints
+		? (_group == WestEchoTeam):_points = westEchoPoints
+		? (_group == WestFoxtrotTeam):_points = westFoxtrotPoints
+		? (_group == WestGolfTeam):_points = westGolfPoints
+		? (_group == WestHotelTeam):_points = westHotelPoints
+
+		? (_noPoints):_points = 1
+
+		_points = _points - (_points % 1)
+		_teamValue = (_points / _totalPoints) * addWestAwardResources
+		_teamValue = _teamValue - (_teamValue % 1)
+		[Leader _group,_teamValue] Exec "Main\AddResourcesToTeam.sqs"
+
+	#AddNextWest
+		? (_count < Count westPlayerGroups):goto "AddWestPlayerResources"
+
+#ClearWestResourceRequest
+
+	addWestAwardResources = 0;PublicVariable "addWestAwardResources"
+	Exit
+
+#AddEastResources
+
+	_noPoints = false
+	_count = 0
+
+	? (eastPlayers < 1):eastResources = eastResources + addEastAwardResources;PublicVariable "eastResources";goto "ClearEastResourceRequest"
+
+	_totalPoints = eastAlphaPoints + eastBravoPoints + eastCharliePoints + eastDeltaPoints + eastEchoPoints + eastFoxtrotPoints + eastGolfPoints + eastHotelPoints
+
+	;If no points have been earned award pool equally.
+	? (_totalPoints < 1):_totalPoints = eastPlayers;_noPoints = true
+
+	;Add player resources to each player.
+	#AddEastPlayerResources
+
+		_group = eastPlayerGroups Select _count
+		_count = _count + 1
+
+		? (_group == EastCommanderTeam):goto "AddNextEast"
+		? (_group == EastAlphaTeam):_points = eastAlphaPoints
+		? (_group == EastBravoTeam):_points = eastBravoPoints
+		? (_group == EastCharlieTeam):_points = eastCharliePoints
+		? (_group == EastDeltaTeam):_points = eastDeltaPoints
+		? (_group == EastEchoTeam):_points = eastEchoPoints
+		? (_group == EastFoxtrotTeam):_points = eastFoxtrotPoints
+		? (_group == EastGolfTeam):_points = eastGolfPoints
+		? (_group == EastHotelTeam):_points = eastHotelPoints
+
+		? (_noPoints):_points = 1
+
+		_points = _points - (_points % 1)
+		_teamValue = (_points / _totalPoints) * addEastAwardResources
+		_teamValue = _teamValue - (_teamValue % 1)
+		[Leader _group,_teamValue] Exec "Main\AddResourcesToTeam.sqs"
+
+	#AddNextEast
+
+		? (_count < Count eastPlayerGroups):goto "AddEastPlayerResources"
+
+#ClearEastResourceRequest
+
+	addEastAwardResources = 0;PublicVariable "addEastAwardResources"
+	Exit
+

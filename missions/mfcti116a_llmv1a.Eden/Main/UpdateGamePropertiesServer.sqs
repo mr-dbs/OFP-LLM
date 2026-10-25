@@ -1,0 +1,70 @@
+;Last modified 11/14/3
+
+;Only run this on the server.
+? !(Local LocalServerObject):Exit
+
+_timeLastOvercast = 0
+_lastOvercast = 0
+_lastRain = 0
+
+_notify15 = false
+_notify5 = false
+
+_updateDelay = 1
+
+? (nightMission):SkipTime 11
+? (randomWeather):hint "rand"
+currentTime = DayTime;PublicVariable "currentTime"
+gamePropertiesStarted = true;PublicVariable "gamePropertiesStarted"
+
+#Update
+~_updateDelay
+
+	_delay = 900;_transitionDelay = 60
+	? (acceleratedTime):_delay = 75;_transitionDelay = 5
+
+	;If accelerated time is enabled then skip a little time.
+;	? (acceleratedTime):SkipTime (0.0165 * 2)
+	;1/2 hour = 24 hours.
+	;? (acceleratedTime):SkipTime 0.01333
+	;1 hour = 24 hours.
+	;? !(acceleratedTime):SkipTime 0.00666
+	? (acceleratedTime):SkipTime 0.00666;currentTime = DayTime;PublicVariable "currentTime"
+
+	? (timeToEnd <= 0):goto "SetWeather"
+	? !(_notify15) && (timeToEnd - time / 60 <= 15):_notify15 = true;TitleText[Localize "STR15MINUTESLEFT","Plain"]
+	? !(_notify5) && (timeToEnd - time / 60 <= 5):_notify5 = true;TitleText[Localize "STR5MINUTESLEFT","Plain"]
+
+#SetWeather
+
+	? !(randomWeather):randomWeatherOvercast = 0;randomWeatherRain = 0;goto "RunWeather"
+
+	_timeLastOvercast = _timeLastOvercast + _updateDelay
+
+	? (_timeLastOvercast < _delay):goto "Update"
+
+	_timeLastOvercast = 0
+	? (debug):player sidechat "Change in weather."
+	randomWeatherOvercast = Random 1
+
+;	_rain = Random 500
+	_rain = 100
+
+	? (randomWeatherOvercast >= 0.75) && (_rain < 20):randomWeatherRain = Random 1
+	? (randomWeatherOvercast >= 0.75) && (_rain < 40):randomWeatherRain = Random 0.5 + 0.5
+
+	;Sunny day.
+	;? (Random 100 > 60):randomWeatherOvercast = 0;randomWeatherRain = 0
+
+	#RunWeather
+
+		PublicVariable "randomWeatherOvercast"
+		PublicVariable "randomWeatherRain"
+
+		? (randomWeatherOvercast != _lastOvercast):(_transitionDelay * 4) SetOvercast randomWeatherOvercast
+		? (randomWeatherRain != _lastRain):_transitionDelay SetRain randomWeatherRain
+
+		_lastOvercast = randomWeatherOvercast
+		_lastRain = randomWeatherRain
+
+goto "Update"

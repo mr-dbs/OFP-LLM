@@ -1,0 +1,51 @@
+;Last modified 3/30/3
+
+_position = _this Select 0
+_alt = _this Select 1
+_shift = _this Select 2
+
+_unit = player
+_side = Side _unit
+
+? !(_alt) && !(_shift):Exit
+? (_unit != player):Exit
+? (_side == east):Goto "SetEast"
+
+#SetWest
+
+	;Wait for server to process any other waypoint requests.
+	@ (!westSetPlayerWaypoint)
+
+	westPlayerWaypointPlayer = _unit;PublicVariable "westPlayerWaypointPlayer"
+	westPlayerWaypointX = _position Select 0;PublicVariable "westPlayerWaypointX"
+	westPlayerWaypointY = _position Select 1;PublicVariable "westPlayerWaypointY"
+	westSetPlayerWaypoint = true;PublicVariable "westSetPlayerWaypoint"
+
+	;If commander shift-clicks the map then order current group to new waypoint.
+	? !(_shift) || (_unit != Leader WestCommanderTeam):Exit
+	
+	Hint Localize "STRORDERINGTEAM"
+
+	~1
+
+	[] Exec"Command\CommandMenuMoveToCommanderWP.sqs"
+	Exit
+
+#SetEast
+
+	;Wait for server to process any other waypoint requests.
+	@ (!eastSetPlayerWaypoint)
+
+	eastPlayerWaypointPlayer = _unit;PublicVariable "eastPlayerWaypointPlayer"
+	eastPlayerWaypointX = _position Select 0;PublicVariable "eastPlayerWaypointX"
+	eastPlayerWaypointY = _position Select 1;PublicVariable "eastPlayerWaypointY"
+	eastSetPlayerWaypoint = true;PublicVariable "eastSetPlayerWaypoint"
+
+	;If commander shift-clicks the map then order current group to new waypoint.
+	? !(_shift) || (_unit != Leader EastCommanderTeam):Exit
+
+	Hint Localize "STRORDERINGTEAM"
+
+	~1
+
+	[] Exec"Command\CommandMenuMoveToCommanderWP.sqs"

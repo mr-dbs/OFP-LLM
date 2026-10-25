@@ -1,0 +1,53 @@
+;Last modified 2/19/4
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_destination = _this Select 1
+_direction = _this Select 2
+
+_M2Name = "M2StaticMG"
+
+? !(publicServer):_M2Name = "MFCTI116M2StaticMG"
+? (_side == east):_M2Name = _M2Name + "E"
+? !(publicServer) && (limitedRadar):_M2Name = _M2Name + "LR"
+
+#CreateM2
+
+	;Create building, props, gun, & gunner.
+	_M2 = _M2Name CreateVehicle _destination
+	_M2  SetDir _direction
+	_M2  SetPos _destination
+	_M2 SetPos [(_destination Select 0)+((sin _direction)*0.5),(_destination Select 1)+((cos _direction)*.5),(_destination Select 2)]
+
+	[_side,_M2,M2GunType] Exec "Main\UpdateStationaryGun.sqs"
+	[_M2,[]] Exec "Main\StationaryGunCleanUp.sqs"
+
+	? (_side == east):goto "AddM2ToEast"
+
+#AddM2ToWest
+
+	;Add it to the list of factories & increment the total count.
+	westM2Gun = westM2Gun + [_M2]
+	westM2GunDamage = westM2GunDamage + [500]
+
+	;Send the new building to other players.
+	westBuildingBuiltMP = _M2;PublicVariable "westBuildingBuiltMP"
+	westBuildingBuiltTypeMP = M2GunType;PublicVariable "westBuildingBuiltTypeMP"
+
+	totalWestStationaryM2s = totalWestStationaryM2s + 1;PublicVariable "totalWestStationaryM2s"
+
+	Exit
+
+#AddM2ToEast
+
+
+	;Add it to the list of factories & increment the total count.
+	eastM2Gun = eastM2Gun + [_M2]
+	eastM2GunDamage = eastM2GunDamage + [500]
+
+	;Send the new building to other players.
+	eastBuildingBuiltMP = _M2;PublicVariable "eastBuildingBuiltMP"
+	eastBuildingBuiltTypeMP = M2GunType;PublicVariable "eastBuildingBuiltTypeMP"
+
+	totalEastStationaryM2s = totalEastStationaryM2s + 1;PublicVariable "totalEastStationaryM2s"

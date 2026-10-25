@@ -1,0 +1,60 @@
+;Last modified 8/28/3
+;Script usage:  [Group,true/false,Factory,Resources] Exec "BuyTank.sqs"
+;Use to make AI randomly purchase a tank.
+
+_side = _this Select 0
+_group = _this Select 1
+_teamPurchase = _this Select 2
+_factory = _this Select 3
+_resources = _this Select 4
+_role = _this Select 5
+
+? (_side == east):goto "BuyEast"
+
+#BuyWest
+
+	_vehicleType = M60Type
+
+	? (_resources < mannedM60Cost):Exit
+	? !(westUpgradedHeavy):goto "PurchaseWest"
+
+	_type = Random 100
+
+	;If heavy role then attempt to buy the best.
+	? !(publicServer) && (_role == armourHeavyRole) && (_resources >= mannedM60A3Cost):_type = 74
+	? !(publicServer) && (_role == armourHeavyRole) && (_resources >= mannedM1Cost):_type = 0
+	? (_role == armourHeavyRole) && (_resources >= mannedM1A1Cost):_type = 49
+
+	? (_type < 50) && (_resources >= mannedM1A1Cost):_vehicleType = M1A1Type
+	? (publicServer):goto "PurchaseWest"
+	? (_type >= 50) && (_type < 75) && (_resources >= mannedM60A3Cost):_vehicleType = M60A3Type
+	? (_type < 25) && (_resources >= mannedM1Cost):_vehicleType = M1Type
+
+	#PurchaseWest
+
+		[_side,_factory,_vehicleType,noScript,_group,_teamPurchase] Exec "Main\BuyVehicle.sqs"
+
+	Exit
+
+#BuyEast
+
+	_vehicleType = T72Type
+
+	? (_resources < mannedT72Cost):Exit
+	? !(eastUpgradedHeavy):goto "PurchaseEast"
+
+	_type = Random 100
+
+	;If heavy role then attempt to buy the best.
+	? !(publicServer) && (_role == armourHeavyRole) && (_resources >= mannedT80BCost):_type = 74
+	? (_role == armourHeavyRole) && (_resources >= mannedT80Cost):_type = 49
+	? !(publicServer) && (_role == armourHeavyRole) && (_resources >= mannedT80UCost):_type = 0
+
+	? (_type < 50) && (_resources >= mannedT80Cost):_vehicleType = T80Type
+	? (publicServer):goto "PurchaseEast"
+	? (_type >= 50) && (_type < 75) && (_resources >= mannedT72ACost):_vehicleType = T80BType
+	? (_type < 25) && (_resources >= mannedT80BCost):_vehicleType = T80UType
+
+	#PurchaseEast
+
+		[_side,_factory,_vehicleType,noScript,_group,_teamPurchase] Exec "Main\BuyVehicle.sqs"

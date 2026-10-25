@@ -1,0 +1,40 @@
+;Last modified 2/19/4
+
+_unit = _this Select 0
+
+_team = Group _unit
+_side = Side _team
+_notify = false
+
+? (!MFCTI116NoMortars):CtrlSetText [IDCCommandMenuFireMission,Localize "STRSTOPFIREMISSION"]
+
+? (_side == east):goto "EastBombard"
+
+#WestBombard
+
+	_destination = GetMarkerPos "WestCommanderWP"
+
+	? (_team In westPlayerGroups):_notify = true
+	? (MFCTI116NoMortars && _notify):Hint Localize "STRNOFIREMISSION";Exit
+	? (totalWestStationaryMortars < 1) && (_notify):Hint Localize "STRNOMORTARS";Exit
+	? (totalWestStationaryMortars < 1):Exit
+
+	[west,groupCommander,messageFireMission,_destination Select 0,_destination Select 1] Exec "Main\SendSideMessage.sqs"
+	westFireMissionX = _destination Select 0;PublicVariable "westFireMissionX"
+	westFireMissionY = _destination Select 1;PublicVariable "westFireMissionY"
+	westFireMission = true;PublicVariable "westFireMission"
+	Exit
+
+#EastBombard
+
+	_destination = GetMarkerPos "EastCommanderWP"
+
+	? (_team In eastPlayerGroups):_notify = true
+	? (MFCTI116NoMortars && _notify):Hint Localize "STRNOFIREMISSION";Exit
+	? (totalEastStationaryMortars < 1) && (_notify):Hint Localize "STRNOMORTARS";Exit
+	? (totalEastStationaryMortars < 1):Exit
+
+	[east,groupCommander,messageFireMission,_destination Select 0,_destination Select 1] Exec "Main\SendSideMessage.sqs"
+	eastFireMissionX = _destination Select 0;PublicVariable "eastFireMissionX"
+	eastFireMissionY = _destination Select 1;PublicVariable "eastFireMissionY"
+	eastFireMission = true;PublicVariable "eastFireMission"

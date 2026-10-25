@@ -1,0 +1,67 @@
+;Last modified 2/19/4
+;Only execute this on the server.
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_destination = _this Select 1
+_direction = _this Select 2
+
+_M2Name = "M2StaticMG"
+
+? !(publicServer):_M2Name = "MFCTI116HEStaticMG"
+? (_side == east):_M2Name = _M2Name + "E"
+? !(publicServer) && (limitedRadar):_M2Name = _M2Name + "LR"
+
+#CreateM2
+
+	;Create building, props, gun, & gunner.
+	_M2 = _M2Name CreateVehicle _destination
+	_M2  SetDir _direction
+	_M2  SetPos _destination
+	_M2 SetPos [(_destination Select 0)+((sin _direction)*0.5),(_destination Select 1)+((cos _direction)*.5),(_destination Select 2)]
+
+	;Load the gun with high-explosive rounds for the public server version.
+	? (publicServer):_M2 RemoveMagazine "Browning";_M2 RemoveWeapon "Browning";_M2 AddWeapon "MachineGun30";_M2 AddMagazine "MachineGun30"
+
+	[_side,_M2,HEGunType] Exec "Main\UpdateStationaryGun.sqs"
+
+	? (_side == east):goto "AddHEStationToEast"
+
+#AddHEStationToWest
+
+	;Add it to the list of factories & increment the total count.
+	westHEGun = westHEGun + [_M2]
+	westHEGunDamage = westHEGunDamage + [500]
+
+	;Send the new building to other players.
+	westBuildingBuiltMP = _M2;PublicVariable "westBuildingBuiltMP"
+	westBuildingBuiltTypeMP = HEGunType;PublicVariable "westBuildingBuiltTypeMP"
+
+	totalWestStationaryHEs = totalWestStationaryHEs + 1;PublicVariable "totalWestStationaryHEs"
+
+	goto "AddObjects"
+
+#AddHEStationToEast
+
+	;Add it to the list of factories & increment the total count.
+	eastHEGun = eastHEGun + [_M2]
+	eastHEGunDamage = eastHEGunDamage + [500]
+
+	;Send the new building to other players.
+	eastBuildingBuiltMP = _M2;PublicVariable "eastBuildingBuiltMP"
+	eastBuildingBuiltTypeMP = HEGunType;PublicVariable "eastBuildingBuiltTypeMP"
+
+	totalEastStationaryHEs = totalEastStationaryHEs + 1;PublicVariable "totalEastStationaryHEs"
+
+#AddObjects
+
+	_sign = "MFCTI116DangerSign" CreateVehicle _destination
+
+	_direction = GetDir _M2
+	_position = GetPos _M2
+
+	_sign SetPos _position
+	_sign SetDir _direction
+	_sign SetPos [(_position Select 0)-((sin _direction)*4),(_position Select 1)-((cos _direction)*4),(_position Select 2)]
+
+	[_M2,[_sign]] Exec "Main\StationaryGunCleanUp.sqs"

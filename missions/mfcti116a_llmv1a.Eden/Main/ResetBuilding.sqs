@@ -1,0 +1,152 @@
+;Last modified 2/19/4
+;Script usage:  [Side,Building,"BuildingName",BuildingType,ReportDestruction (true/false)] Exec "ResetBuilding.sqs"
+
+? !(Local LocalServerObject):Exit
+
+_side = _this Select 0
+_building = _this Select 1
+_buildingName = _this Select 2
+_buildingType = _this Select 3
+_reportDestruction = _this Select 4
+_undo = false
+_cost = 0
+
+? (publicServer) && ((_buildingType == infantryFactoryType) || (_buildingType == lightFactoryType) || (_buildingType == heavyFactoryType) || (_buildingType == airFactoryType)):[_side,_building] Exec "Main\UpdateBuildingInUse.sqs"
+
+;Public servers don't use addons so targettable buildings don't exist and therefore don't need to be reset.
+? (publicServer):goto "PublicServerUpdate"
+
+;Wait until building is destroyed.
+@ (GetDammage _building == 1)
+
+;Have the commander transmit a structure destroyed message to everyone on his/her side.
+? (_reportDestruction)&&(_side == west):westMessage = messageBuildingDestroyed + _buildingType;PublicVariable "westMessage";westPlayerMessageGroupFrom = groupCommander;PublicVariable "westPlayerMessageGroupFrom"
+? (_reportDestruction)&&(_side == east):eastMessage = messageBuildingDestroyed + _buildingType;PublicVariable "eastMessage";eastPlayerMessageGroupFrom = groupCommander;PublicVariable "eastPlayerMessageGroupFrom"
+
+;Once it has been repaired, replaced it with a new structure.  This is needed to reset it as a target for AIs.
+@ (GetDammage _building == 0) || (deleteStructure == _building)
+
+westTempBuildingList = westTempBuildingList - [_building]
+eastTempBuildingList = eastTempBuildingList - [_building]
+
+? (_side == west) && (deleteStructure == _building):_undo = true;goto "DeleteWestBuilding"
+? (_side == east) && (deleteStructure == _building):_undo = true;goto "DeleteEastBuilding"
+
+#ReplaceBuilding
+
+	_position = GetPos _building
+	_direction = GetDir _building
+
+	_newBuilding = _buildingName CreateVehicle _position
+	_newBuilding SetDir _direction
+	_newBuilding SetPos _position
+	_offsetDir = 0
+
+	;Certain buildings have strange placement behavior.  Use this to compensate.
+	? (_buildingName == "MFCTI116WestAmmoDepot") || (_buildingName == "MFCTI116EastAmmoDepot") || (_buildingName == "Houseammostore2"):_yOffset = -6.13;_xOffset = 5.87;goto "AlignWeirdOrigin"
+	? (_buildingName == "MFCTI116WestAircraftFactory") || (_buildingName == "MFCTI116EastAircraftFactory") || (_buildingName == "Hangar_Hall"):_yOffset = 5;_xOffset = -8.2;goto "AlignWeirdOrigin"
+	? (_buildingName == "MFCTI116WestRepairDepot") || (_buildingName == "MFCTI116EastRepairDepot") || (_buildingName == "Houserepair_center"):_yOffset = -2.28;_xOffset = .2;goto "AlignWeirdOrigin"
+	? (_buildingName == "ViewTower2"):_offsetDir = 45
+
+	goto "PlaceBuilding"
+
+	;Align buildings with strange origins.
+	#AlignWeirdOrigin
+
+	_position = [(_position Select 0)+((sin _direction)*_yOffset),(_position Select 1)+((cos _direction)*_yOffset),(_position Select 2)]
+	_direction = (_direction + 90) % 360
+	_position = [(_position Select 0)+((sin _direction)*_xOffset),(_position Select 1)+((cos _direction)*_xOffset),(_position Select 2)]
+	_direction = (_direction - 90) % 360
+	_newBuilding SetDir _direction
+	_newBuilding SetPos _position
+
+	#PlaceBuilding
+
+	_newBuilding SetDir ((_direction + _offsetDir) % 360)
+	_newBuilding SetPos _position
+	_newBuilding SetDir _direction
+
+	? (_buildingType == repairDepotType):[_side,_newBuilding] Exec "Main\UpdateRepairDepot.sqs"
+	? (_buildingType == ammoDepotType):[_side,_newBuilding,false] Exec "Main\UpdateAmmoServer.sqs"
+	? (_buildingType == infantryFactoryType) || (_buildingType == lightFactoryType) || (_buildingType == heavyFactoryType) || (_buildingType == airFactoryType):[_side,_newBuilding] Exec "Main\UpdateBuildingInUse.sqs"
+
+	[_side,_newBuilding,_buildingName,_buildingType,true] Exec "Main\ResetBuilding.sqs"
+
+	? (_side == east):goto "DeleteEastBuilding"
+
+#DeleteWestBuilding
+
+	;Send the new building to other players.
+	? !(_undo):westBuildingBuiltMP = _newBuilding;PublicVariable "westBuildingBuiltMP"
+	? !(_undo):westBuildingBuiltTypeMP = _buildingType;PublicVariable "westBuildingBuiltTypeMP"
+
+	? (_buildingType == controlCenterType):westControlCenter = westControlCenter - [_building];_cost = controlCenterCost
+	? !(_undo) && (_buildingType == controlCenterType):westControlCenter = westControlCenter + [_newBuilding]
+	? (_buildingType == infantryFactoryType):westInfantryFactory = westInfantryFactory - [_building];_cost = infantryFactoryCost
+	? !(_undo) && (_buildingType == infantryFactoryType):westInfantryFactory = westInfantryFactory + [_newBuilding]
+	? (_buildingType == lightFactoryType):westLightFactory = westLightFactory - [_building];_cost = lightFactoryCost
+	? !(_undo) && (_buildingType == lightFactoryType):westLightFactory = westLightFactory + [_newBuilding]
+	? (_buildingType == heavyFactoryType):westHeavyFactory = westHeavyFactory - [_building];_cost = heavyFactoryCost
+	? !(_undo) && (_buildingType == heavyFactoryType):westHeavyFactory = westHeavyFactory + [_newBuilding]
+	? (_buildingType == airFactoryType):westAirFactory = westAirFactory - [_building];_cost = airFactoryCost
+	? !(_undo) && (_buildingType == airFactoryType):westAirFactory = westAirFactory + [_newBuilding]
+	? (_buildingType == ammoDepotType):westAmmoDepot = westAmmoDepot - [_building];_cost = ammoDepotCost
+	? !(_undo) && (_buildingType == ammoDepotType):westAmmoDepot = westAmmoDepot + [_newBuilding]
+	? (_buildingType == repairDepotType):westRepairDepot = westRepairDepot - [_building];_cost = repairDepotCost
+	? !(_undo) && (_buildingType == repairDepotType):westRepairDepot = westRepairDepot + [_newBuilding]
+	? (_buildingType == observationTowerType):westObservationTower = westObservationTower - [_building];_cost = observationTowerCost
+	? !(_undo) && (_buildingType == observationTowerType):westObservationTower = westObservationTower + [_newBuilding]
+
+	? !(_undo):goto "DeleteBuilding"
+
+	deleteStructure = ObjNull;PublicVariable "deleteStructure"
+	westResources = westResources + _cost;PublicVariable "westResources"
+	[Leader WestCommanderTeam,-(_cost / buildValuePerPoint)] Exec "Main\AddPlayerPoints.sqs"
+	goto "DeleteBuilding"
+
+#DeleteEastBuilding
+
+	;Send the new building to other players.
+	? !(_undo):eastBuildingBuiltMP = _newBuilding;PublicVariable "eastBuildingBuiltMP"
+	? !(_undo):eastBuildingBuiltTypeMP = _buildingType;PublicVariable "eastBuildingBuiltTypeMP"
+
+	? (_buildingType == controlCenterType):eastControlCenter = eastControlCenter - [_building];_cost = controlCenterCost
+	? !(_undo) && (_buildingType == controlCenterType):eastControlCenter = eastControlCenter + [_newBuilding]
+	? (_buildingType == infantryFactoryType):eastInfantryFactory = eastInfantryFactory - [_building];_cost = infantryFactoryCost
+	? !(_undo) && (_buildingType == infantryFactoryType):eastInfantryFactory = eastInfantryFactory + [_newBuilding]
+	? (_buildingType == lightFactoryType):eastLightFactory = eastLightFactory - [_building];_cost = lightFactoryCost
+	? !(_undo) && (_buildingType == lightFactoryType):eastLightFactory = eastLightFactory + [_newBuilding]
+	? (_buildingType == heavyFactoryType):eastHeavyFactory = eastHeavyFactory - [_building];_cost = heavyFactoryCost
+	? !(_undo) && (_buildingType == heavyFactoryType):eastHeavyFactory = eastHeavyFactory + [_newBuilding]
+	? (_buildingType == airFactoryType):eastAirFactory = eastAirFactory - [_building];_cost = airFactoryCost
+	? !(_undo) && (_buildingType == airFactoryType):eastAirFactory = eastAirFactory + [_newBuilding]
+	? (_buildingType == ammoDepotType):eastAmmoDepot = eastAmmoDepot - [_building];_cost = ammoDepotCost
+	? !(_undo) && (_buildingType == ammoDepotType):eastAmmoDepot = eastAmmoDepot + [_newBuilding]
+	? (_buildingType == repairDepotType):eastRepairDepot = eastRepairDepot - [_building];_cost = repairDepotCost
+	? !(_undo) && (_buildingType == repairDepotType):eastRepairDepot = eastRepairDepot + [_newBuilding]
+	? (_buildingType == observationTowerType):eastObservationTower = eastObservationTower - [_building];_cost = observationTowerCost
+	? !(_undo) && (_buildingType == observationTowerType):eastObservationTower = eastObservationTower + [_newBuilding]
+
+	? !(_undo):goto "DeleteBuilding"
+	
+	deleteStructure = ObjNull;PublicVariable "deleteStructure"
+	eastResources = eastResources + _cost;PublicVariable "eastResources"
+	[Leader EastCommanderTeam,-(_cost / buildValuePerPoint)] Exec "Main\AddPlayerPoints.sqs"
+
+#DeleteBuilding
+
+	DeleteVehicle _building
+	Exit
+
+#PublicServerUpdate
+
+	@ (deleteStructure == _building || GetDammage _building == 0)
+
+	westTempBuildingList = westTempBuildingList - [_building]
+	eastTempBuildingList = eastTempBuildingList - [_building]
+
+	;If the building has been constructed then it cannot be deleted by an undo.
+	? (GetDammage _building == 0):Exit
+
+	? (_side == west):_undo = true;goto "DeleteWestBuilding"
+	? (_side == east):_undo = true;goto "DeleteEastBuilding"

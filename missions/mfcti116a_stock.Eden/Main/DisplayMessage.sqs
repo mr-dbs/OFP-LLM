@@ -1,0 +1,152 @@
+;Last modified 1/30/4
+;Script Usage:  [MessageType] Exec "DisplayMessage.sqs"
+
+_messageType = _this Select 0
+
+? (_messageType == messageNull):Exit
+_message = ""
+
+? (_messageType == messageControlCenterConstructed):_message = Localize "STRMESCONTROLCENTERCONSTRUCTED"
+? (_messageType == messageBarracksConstructed):_message = Localize "STRMESBARRACKSCONSTRUCTED"
+? (_messageType == messageLightConstructed):_message = Localize "STRMESLIGHTCONSTRUCTED"
+? (_messageType == messageHeavyConstructed):_message = Localize "STRMESHEAVYCONSTRUCTED"
+? (_messageType == messageAirConstructed):_message = Localize "STRMESAIRCONSTRUCTED"
+? (_messageType == messageAmmoConstructed):_message = Localize "STRMESAMMOCONSTRUCTED"
+? (_messageType == messageRepairConstructed):_message = Localize "STRMESREPAIRCONSTRUCTED"
+? (_messageType == messageHospitalConstructed):_message = Localize "STRMESHOSPITALCONSTRUCTED"
+? (_messageType == messageWorkerKilled):_message = Localize "STRMESWORKERKILLED"
+? (_messageType == messageMHQDestroyed):_message = Localize "STRMESMHQDESTROYED"
+? (_messageType == messageEnemyMHQDestroyed):_message = Localize "STRMESENEMYMHQDESTROYED"
+
+? (_messageType == messageEnemyCommanderKilled):_message = Format["%1 $%2 %3.",Localize "STRMESENEMYCOMMANDERKILLED",commanderDeadBonus,Localize "STRMESENEMYCOMMANDERKILLED1"]
+? (_messageType == messageSalvagerDestroyed):_message = Localize "STRMESSALVAGERDESTROYED"
+? (_messageType == messageMaxVehiclesReached):Hint Format["%1 (%2)!",Localize "STRMESMAXVEHICLES",maxVehicles];Exit
+? (_messageType == messageMaxSalvagersReached):Hint Format["%1 (%2)!",Localize "STRMESMAXSALVAGERS",maxSalvagers];Exit
+
+? (_messageType == messageMaxGroupSizeReached):_message = Format["%1 (%2)!",Localize "STRMESMAXGROUP",maxAIGroupSize]
+? (_messageType == messagePlayerDisconnected):_message = Localize "STRMESPLAYERDISCONNECTED"
+? (_messageType == messageCommanderDisconnected):_message = Localize "STRMESCOMMANDERDISCONNECTED"
+
+;Commander messages.
+? (_messageType == messageControlCenterPlaced):_message = Localize "STRMESCONTROLCENTERPLACED"
+? (_messageType == messageBarracksPlaced):_message = Localize "STRMESBARRACKSPLACED"
+? (_messageType == messageLightPlaced):_message = Localize "STRMESLIGHTPLACED"
+? (_messageType == messageHeavyPlaced):_message = Localize "STRMESHEAVYPLACED"
+? (_messageType == messageAirPlaced):_message = Localize "STRMESAIRPLACED"
+? (_messageType == messageAmmoPlaced):_message = Localize "STRMESAMMOPLACED"
+? (_messageType == messageRepairPlaced):_message = Localize "STRMESREPAIRPLACED"
+
+? (_messageType == messageControlCenterDestroyed):_message = Localize "STRMESCONTROLCENTERDESTROYED"
+? (_messageType == messageBarracksDestroyed):_message = Localize "STRMESBARRACKSDESTROYED"
+? (_messageType == messageLightDestroyed):_message = Localize "STRMESLIGHTDESTROYED"
+? (_messageType == messageHeavyDestroyed):_message = Localize "STRMESHEAVYDESTROYED"
+? (_messageType == messageAirDestroyed):_message = Localize "STRMESAIRDESTROYED"
+? (_messageType == messageAmmoDestroyed):_message = Localize "STRMESAMMODESTROYED"
+? (_messageType == messageRepairDestroyed):_message = Localize "STRMESREPAIRDESTROYED"
+
+;AI Order acknowledgement messages.
+? (_messageType == messageOrderMoveToWaypoint):_message = Localize "STRMESORDERMOVETOWP"
+? (_messageType == messageOrderTakeTowns):_message = Localize "STRMESORDERTAKETOWNS"
+? (_messageType == messageOrderDefend):_message = Localize "STRMESORDERDEFEND"
+? (_messageType == messageOrderDefendDenied):_message = Localize "STRMESORDERDEFENDDENIED"
+? (_messageType == messageOrderSearchAndDestroy):_message = Localize "STRMESORDERSEARCH"
+? (_messageType == messageOrderCommandVehicles):_message = Localize "STRMESORDERCOMMANDVEHICLES"
+? (_messageType == messageOrderDisembarkVehicles):_message = Localize "STRMESORDERDISEMBARKVEHICLES"
+? (_messageType == messageOrderEmbarkTransports):_message = Localize "STRMESORDEREMBARKTRANSPORTS"
+? (_messageType == messageOrderDisembarkTransports):_message = Localize "STRMESORDERDISEMBARKTRANSPORTS"
+
+? (_messageType == messageUpgradedInfantry):_message = Localize "STRMESUPGRADEDINFANTRY"
+? (_messageType == messageUpgradedLight):_message = Localize "STRMESUPGRADEDLIGHT"
+? (_messageType == messageUpgradedHeavy):_message = Localize "STRMESUPGRADEDHEAVY"
+? (_messageType == messageUpgradedAir):_message = Localize "STRMESUPGRADEDAIR"
+? (_messageType == messageUpgradedBlackOps):_message = Localize "STRMESUPGRADEDBLACKOPS"
+? (_messageType == messageUpgradedRadar):_message = Localize "STRMESUPGRADEDRADAR"
+? (_messageType == messageUpgradedAircraftRockets):_message = Localize "STRMESUPGRADEDACROCKETS"
+? (_messageType == messageRepairingVehicle):Hint Localize "STRMESREPAIRINGVEHICLE";Exit
+? (_messageType == messageRearmingVehicle):Hint Localize "STRMESREARMINGVEHICLE";Exit
+
+;AI communications.
+? (_messageType == messageAICasualties):_message = Localize "STRMESCASUALTIES"
+
+;Messages with values
+_side = Side player
+
+? (_side != west) && (_side != east):Exit
+? (_side == west):_value1 = westMessageValue1;_value2 = westMessageValue2
+? (_side == east):_value1 = eastMessageValue1;_value2 = eastMessageValue2
+
+? (_messageType == messageOptionVoted):_message = Format[Localize "STRMESOPTIONVOTED",voteText Select _value1,[Localize "STROFF",Localize "STRON"] Select _value2]
+? (_messageType == messageSalvagedVehicle):_message = Format["%1 %2 %3 $%4.",Localize "STRMESSALVAGEDVEHICLE",unitDescriptions Select _value1,Localize "STRMESSALVAGEDVEHICLE1",_value2]
+? (_messageType == messageCapturedTown):_message = Format["%1 $%2 %3 %4.",Localize "STRYOURECEIVE",_value1,Localize "STRFORTHECAPTUREOF",townNamesMP Select _value2]
+
+? (_messageType == messageRequestFireMission):goto "DisplayFireMissionMessage"
+? (_messageType == messageFireMission):goto "DisplayFireMissionMessage"
+
+? (_side == west) && (_messageType == messageMHQFriendlyFire) && (_value1 <= Count westGroups):_message = Format["%1 (%2) %3",Name Leader (westGroups Select _value1),teamDesignations Select _value1,Localize "STRDESTROYEDFRIENDLYMHQ"]
+? (_side == east) && (_messageType == messageMHQFriendlyFire) && (_value1 <= Count eastGroups):_message = Format["%1 (%2) %3",Name Leader (eastGroups Select _value1),teamDesignations Select _value1,Localize "STRDESTROYEDFRIENDLYMHQ"]
+
+;Debug Messages
+? (_messageType == messageDebugAIAssaultBase):_message = "The AI commander is assigning team(s) to assault your base!"
+? (_messageType == messageDebugAwardResources):_message = Format["Awards gained: $%1.",_value1]
+? (_messageType == messageDebugPlayerResources):_message = Format["Income gained: $%1.",_value1]
+? (_messageType == messageDebugVehicleAddToList):_message = "Adding vehicle to list."
+
+? (_messageType == messageEnemySpotted || _messageType == messageEnemyStructureSpotted) && (_value1 >= Count coordsColumn || _value2 >= Count coordsRow):Exit
+? (_messageType == messageEnemySpotted):_message = Format ["%1 %2%3.",Localize "STRMESENEMYSPOTTED",coordsColumn Select _value1,coordsRow Select _value2]
+? (_messageType == messageEnemyStructureSpotted):_message = Format ["%1 %2%3!",Localize "STRMESENEMYSTRUCTURESPOTTED",coordsColumn Select _value1,coordsRow Select _value2]
+
+;DEBUG - REMOVE THIS!
+;? (_messageType == messageEnemySpotted) && ((westPlayerMessageGroupFrom > Count westGroups) || (westPlayerMessageGroupFrom < 0)):_message = Format ["West spotted message group was %1!",westPlayerMessageGroupFrom]
+;? (_messageType == messageStructureSpotted) && ((westPlayerMessageGroupFrom > Count westGroups) || (westPlayerMessageGroupFrom < 0)):_message = Format ["West structure spotted message group was %1!",westPlayerMessageGroupFrom]
+;? (_messageType == messageSalvagedVehicle) && ((_value1 > (Count unitDescriptions)) || (_value1 < 0)):_message = Format["Type %1 was salvaged and caused an error!",_value1]
+
+? (_messageType == messageEnemySpotted) && ((westPlayerMessageGroupFrom > Count westGroups) || (westPlayerMessageGroupFrom < 0)):Exit
+? (_messageType == messageStructureSpotted) && ((westPlayerMessageGroupFrom > Count westGroups) || (westPlayerMessageGroupFrom < 0)):Exit
+? (_messageType == messageSalvagedVehicle) && ((_value1 > (Count unitDescriptions)) || (_value1 < 0)):Exit
+
+? (_messageType == messageFundsTransferred):_message = Format[Localize "STRMESFUNDSTRANSFERRED",_value1]
+? (_messageType == messageRepairTruckInUse):_message = Format["%1\n(%2 %3.)",Localize "STRMESREPAIRTRUCKINUSE",_value1,Localize "STRMESREPAIRTRUCKINUSE1"]
+? (_messageType == messageBountyReceived):_message = Format["%1 %2.  %3 $%4.",Localize "STRMESBOUNTYRECEIVED",unitDescriptions Select _value2,Localize "STRMESBOUNTYRECEIVED1",_value1]
+? (_messageType == messageCivilianKilled):_message = Format[Localize "STRMESCIVILIANKILLED",_value1]
+
+? (_messageType == messageVehicleDestroyedByFriendly):_message = Format[Localize "STRMESVEHICLEDESTROYEDBYFRIENDLY",_value1,Name Leader _value2]
+
+;If the message came from a team then have that team send the message client-side.
+? (_messageType == messageRepairTruckInUse) || (_messageType == messageRepairingVehicle):goto "HintMessage"
+? (_messageType >= messageEnemyCommanderKilled) && (_messageType <= messageUpgradedAircraftRockets):goto "DisplayMessageFromGroup"
+? (_messageType >= messageAICasualties) && (_messageType <= messageEnemyStructureSpotted):goto "DisplayMessageFromGroup"
+? (_messageType == messageOptionVoted):goto "DisplayMessageFromGroup"
+
+#DisplayMessage
+
+	player GroupChat _message
+	Exit
+
+#DisplayMessageFromGroup
+
+	_unit = Leader (westGroups Select westPlayerMessageGroupFrom)
+	? (_side == east):_unit = Leader (eastGroups Select eastPlayerMessageGroupFrom)
+
+	_unit SideChat _message
+	Exit
+
+#HintMessage
+
+	Hint _message
+	Exit
+
+#DisplayFireMissionMessage
+
+	_column1 = _value1 / 1280;_column1 = _column1 - (_column1 % 1)
+	_column2 = _value1 % 1280;_column2 = _column2 / 128;_column2 = _column2 - (_column2 % 1)
+
+	_row1 = 10 - _value2 / 1280;_row1 = _row1 - (_row1 % 1)
+	_row2 = _value2 % 1280;_row2 = 10 - _row2 / 128;_row2 = _row2 - (_row2 % 1)
+
+	_unit = Leader (westGroups Select westPlayerMessageGroupFrom)
+	? (_side == east):_unit = Leader (eastGroups Select eastPlayerMessageGroupFrom)
+
+	_message = Format[Localize "STRMESREQUESTFIREMISSION",coordsColumn Select _column1,coordsColumn Select _column2,coordsRow Select _row1,coordsRow Select _row2]
+	? (_messageType == messageFireMission):_message = Format[Localize "STRMESFIREMISSION",coordsColumn Select _column1,coordsColumn Select _column2,coordsRow Select _row1,coordsRow Select _row2]
+
+	_unit sidechat _message

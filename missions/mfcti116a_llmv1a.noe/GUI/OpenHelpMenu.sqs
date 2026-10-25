@@ -1,0 +1,10 @@
+;Last modified 11/23/3
+;Open the online help menu.
+~0.25
+_menu = _this Select 0
+
+? (_menu == 0):CreateDialog Format["HelpMenu%1",GUISkin]
+? (_menu == 1):CreateDialog Format["GoalsHelpMenu%1",GUISkin]
+? (_menu == 2):CreateDialog Format["TeamHelpMenu%1",GUISkin]
+? (_menu == 3):CreateDialog Format["CommanderHelpMenu%1",GUISkin]
+? (_menu == 4):CreateDialog Format["TipsHelpMenu%1",GUISkin]

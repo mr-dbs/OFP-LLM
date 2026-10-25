@@ -1,0 +1,118 @@
+;Last modified 3/3/4
+;Coop version.
+
+_respawnedUnit = _this Select 0
+_deathLocation = _this Select 1
+_side = Side _respawnedUnit
+
+? (_side == west):totalWestCasualties = totalWestCasualties + 1;PublicVariable "totalWestCasualties";_position = GetMarkerPos "Respawn_west"
+? (_side == east):totalEastCasualties = totalEastCasualties + 1;PublicVariable "totalEastCasualties";_position = GetMarkerPos "Respawn_east"
+
+;If unit is a player check if they need to respawn by their team.
+? ((Group _respawnedUnit In westPlayerGroups) || (Group _respawnedUnit In eastPlayerGroups)) && (!teamRespawn || noTeamRespawning):goto "InitUnit"
+
+;Calculate distance between unit and respawn location.
+_x = _deathLocation Select 0
+_y = _deathLocation Select 1
+_distance = sqrt((_x - (_position Select 0))^2 + (_y - (_position Select 1))^2)
+
+;If respawn location is close enough then do not respawn into a team member.
+? (_distance < teamRespawnRange):goto "InitUnit"
+
+#SetRespawnTeam
+
+	_count = 0
+	_units = Units Group _respawnedUnit
+	_units = _units - [_respawnedUnit]
+	_totalUnits = Count _units
+
+	_nearestDistance = 100000
+	_nearestUnit = ObjNull
+
+	? (_totalUnits < 1):goto "InitUnit"
+
+	#GetNearbyUnit
+
+		_unit = _units Select _count
+		_position = GetPos _unit
+		_distance = sqrt(((_deathLocation Select 0) - (_position Select 0))^2 + ((_deathLocation Select 1) - (_position Select 1))^2)
+
+		_count = _count + 1
+
+		? (_distance < _nearestDistance) && (_distance < teamRespawnRange) && (Alive _unit):_nearestDistance = _distance;_nearestUnit = _unit
+		? (_count < _totalUnits):goto "GetNearbyUnit"
+
+		? (IsNull _nearestUnit):goto "InitUnit"
+
+		_vehicle = Vehicle _nearestUnit
+		_assignDriver = false
+
+		? (_vehicle == _nearestUnit):goto "RearmPlayer"
+
+		;If unit is in a vehicle try to select the driver.
+		_driver = Driver _vehicle
+
+		? (IsNull _driver) || !(Alive _driver):_assignDriver = true
+		? !(IsNull _driver) && (Alive _driver) && (_driver In _units):_nearestUnit = _driver;_assignDriver = true;goto "RearmPlayer"
+
+		#RearmPlayer
+
+			_weapons = Weapons _nearestUnit
+			_ammo = Magazines _nearestUnit
+			_totalWeapons = Count Weapons _nearestUnit
+			_totalAmmo = Count Magazines _nearestUnit
+
+			RemoveAllWeapons _respawnedUnit
+
+			_count = 0
+			? (_totalAmmo < 1):goto "AddWeapons"
+
+			#AddAmmo
+
+				_respawnedUnit AddMagazine (_ammo Select _count)
+				_count = _count + 1
+				? (_count < _totalAmmo):goto "AddAmmo"
+
+			_count = 0
+			? (_totalWeapons < 1):goto "ReplaceUnit"
+
+			#AddWeapons
+
+				_respawnedUnit AddWeapon (_weapons Select _count)
+				_count = _count + 1
+				? (_count < _totalWeapons):goto "AddWeapons"
+
+		~.1
+		_respawnedUnit SelectWeapon PrimaryWeapon _respawnedUnit
+
+	#ReplaceUnit
+
+		_position = GetPos _nearestUnit
+		_direction = GetDir _nearestUnit
+		_nearestUnit removeAllEventHandlers "killed"
+		? (_nearestUnit == _vehicle):goto "RespawnIntoSoldier"
+
+		_nearestUnit SetDammage 1
+		~.1
+		DeleteVehicle _nearestUnit
+
+		? (Group _respawnedUnit In westPlayerGroups) || (Group _respawnedUnit In eastPlayerGroups):Hint Localize "STRRESPAWNEDTOTEAM"
+
+		? (IsNull _vehicle) || !(_assignDriver):_respawnedUnit SetPos _position;_respawnedUnit SetDir _direction;Exit
+
+		_respawnedUnit MoveInDriver _vehicle
+		Exit
+
+#RespawnIntoSoldier
+
+	DeleteVehicle _nearestUnit
+	_respawnedUnit SetPos _position
+	_respawnedUnit SetDir _direction
+	? (Group _respawnedUnit In westPlayerGroups) || (Group _respawnedUnit In eastPlayerGroups):Hint Localize "STRRESPAWNEDTOTEAM"
+	Exit
+
+#InitUnit
+
+	? (_side == west):[_respawnedUnit] Exec "Loadouts\EquipWestSoldierLoadout.sqs";_respawnedUnit SetPos GetMarkerPos "Respawn_west"
+	? (_side == east):[_respawnedUnit] Exec "Loadouts\EquipEastSoldierLoadout.sqs";_respawnedUnit SetPos GetMarkerPos "Respawn_east"
+
