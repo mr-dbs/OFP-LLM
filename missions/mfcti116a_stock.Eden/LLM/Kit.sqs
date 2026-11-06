@@ -1,0 +1,54 @@
+; LLM\Kit.sqs (version 1)
+; [unit, kit] exec "LLM\Kit.sqs" - re-equips the leader of an AI team on a side the LLM commands, just after he
+; respawns, by what has been killing his team. LLM\Report.sqs (version 20) keeps the choice in llmWestKit and
+; llmEastKit; Main\UpdateIndependentAI.sqs starts this script after the respawn.
+;   kit 1, the team has lost men to a tank or other armour: the heavy AT launcher of the mission's AT teams
+;   kit 2, the team has lost men to a helicopter or plane: the AA launcher of the mission's AA teams
+; Free, as the mission's own respawn loadouts are. He keeps his rifle and gets four magazines for it, as the
+; mission's AT and AA soldiers do; grenades make room for the launcher.
+_unit = _this select 0
+_kit = _this select 1
+_rifle = ""
+_mag = ""
+_mags = []
+_sec = ""
+_launcher = ""
+_m = 0
+_skip = ["HandGrenade", "SmokeShell", "SmokeShellRed", "SmokeShellGreen", "RPGLauncher", "LAWLauncher", "AT4Launcher", "CarlGustavLauncher", "9K32Launcher", "AALauncher"]
+
+; Let Main\RespawnUnit.sqs finish first: it moves him and may hand him a dead team member's weapons.
+~3
+? not (alive _unit) : exit
+? (vehicle _unit) != _unit : exit
+? (_kit == 1) and ((side _unit) == east) : _launcher = "AT4Launcher"
+? (_kit == 1) and ((side _unit) == west) : _launcher = "CarlGustavLauncher"
+? (_kit == 2) and ((side _unit) == east) : _launcher = "9K32Launcher"
+? (_kit == 2) and ((side _unit) == west) : _launcher = "AALauncher"
+? (_launcher == "") : exit
+? (secondaryWeapon _unit) == _launcher : exit
+
+_rifle = primaryWeapon _unit
+_mags = magazines _unit
+_sec = secondaryWeapon _unit
+
+#FindMag
+
+	? (_m >= count _mags) : _mag = ""; goto "FindMagDone"
+	_mag = _mags select _m
+	_m = _m + 1
+	? (_mag == _sec) or (_mag in _skip) : goto "FindMag"
+
+#FindMagDone
+
+? (_rifle == "") and ((side _unit) == east) : _rifle = "AK74"; _mag = "AK74"
+? (_rifle == "") and ((side _unit) == west) : _rifle = "M16"; _mag = "M16"
+
+removeAllWeapons _unit
+? (_mag != "") : _unit addMagazine _mag; _unit addMagazine _mag; _unit addMagazine _mag; _unit addMagazine _mag
+_unit addWeapon _rifle
+_unit selectWeapon _rifle
+_unit addMagazine _launcher
+_unit addWeapon _launcher
+_unit addWeapon "Binocular"
+? (acceleratedTime || nightMission) : _unit addWeapon "NVGoggles"
+exit

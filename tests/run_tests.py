@@ -12,7 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)                         # the folder that holds relay.py
 FIXTURES = os.path.join(HERE, "fixtures")
 MISSIONS = os.path.join(os.path.expanduser("~"), "Documents", "Cold War Assault", "Missions")
-MISSION_SCRIPTS = ["LLM/Init.sqs", "LLM/Report.sqs", "LLM/AirBuy.sqs", "LLM/TownWatch.sqs", "Main/UpdateIndependentAI.sqs",
+MISSION_SCRIPTS = ["LLM/Init.sqs", "LLM/Report.sqs", "LLM/AirBuy.sqs", "LLM/Kit.sqs", "LLM/TownWatch.sqs", "Main/UpdateIndependentAI.sqs",
                    "Main/UpdateCommanderAI.sqs", "Main/UpdateServer.sqs", "Main/UpdateVotes.sqs", "Main/PlaceSides.sqs"]
 
 

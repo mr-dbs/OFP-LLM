@@ -50,6 +50,9 @@ _loopCount = 0
 _goalLoopCount = 0
 _unitsBought = 0
 _returnToBase = false
+;LLM link (added): this team's number, and the launcher its leader gets when he respawns.
+_teamNo = 0
+_kit = 0
 _saboteurs = []
 _saboteurTargets = []
 
@@ -80,6 +83,7 @@ _totalTeams = Count teamDesignations
 	_crew = false
 	? (_llm) && (_side == west):_crew = (_count == llmWestCrew)
 	? (_llm) && (_side == east):_crew = (_count == llmEastCrew)
+	_teamNo = _count
 
 	;LLM link (added): the team's combat mode. This script sets "RED" at its start: fire at will, every man for himself.
 	;Under "RED" the game lets each man hide or go and attack on his own, in a subgroup of his own. The team's
@@ -1376,5 +1380,12 @@ _totalTeams = Count teamDesignations
 
 	[_deadUnit] Exec "Main\RespawnableUnitCleanUp.sqs"
 	[Leader _group,_deathLocation] Exec "Main\RespawnUnit.sqs"
+
+	;LLM link (added): the leader's launcher follows what has been killing the team: heavy AT after losses to
+	;armour, AA after losses to aircraft (LLM\Kit.sqs; llmWestKit and llmEastKit are kept by LLM\Report.sqs).
+	_kit = 0
+	? (_llm) && (_side == west):_kit = llmWestKit Select _teamNo
+	? (_llm) && (_side == east):_kit = llmEastKit Select _teamNo
+	? (_kit > 0):[Leader _group,_kit] Exec "LLM\Kit.sqs"
 
 	goto "Update"

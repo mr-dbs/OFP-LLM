@@ -1,5 +1,14 @@
 # DBS Arsenal for MFCTI 1.16A (mfcti116a_llmv1a.Noe)
 
+## Where it lives
+
+| What | Where |
+|---|---|
+| Arsenal in MFCTI | `Documents\Cold War Assault\missions\mfcti116a_llmv1a.Noe\DBSArsenal` |
+| Test mission (Everon) | `Documents\DBS_OFP\Projects\ArsenalTest\DBS_ArsenalTest.Eden` (editor copy in `Documents\Cold War Assault\missions\DBS_ArsenalTest.Eden`) |
+| Test launcher | `Documents\DBS_OFP\Projects\ArsenalTest\Launch_ArsenalTest.cmd` |
+| Test logs | `Documents\DBS_OFP\Logs\ArsenalTest` |
+
 Arsenal-style loadout screen. Camera orbits the selected unit; skin, weapons and items change on the live unit as you click. Edits the player or any AI in the player's group. Presets save/load/delete and can be pushed to the whole squad.
 
 ## Use
@@ -14,6 +23,17 @@ Action menu -> **Arsenal** (available anywhere, on foot).
 - PRESETS: type a name, Save current. Same name overwrites. Load to unit applies gear then skin. Apply to squad AI runs the preset on every AI in your group.
 - CAMERA: rotate, zoom, height.
 - ESC or CLOSE exits.
+
+## Settings (top of `Init.sqs`)
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `dbsArsEngineBody` | `false` | `true` once CWR has the `dbsSetBody` command; enables player skin change |
+| `dbsArsPersist` | `true` | Save presets to disk with `saveConfig` / `loadConfig` |
+| `dbsArsPresetFile` | `DBSArsenal_Presets.cfg` | Preset file name in the CWR user `Config` folder |
+| `dbsArsOwnSideFirst` | `true` | Skin list starts filtered to the unit's own side |
+
+Standalone mode (no MFCTI menus or bounty scripts): `[1] Exec "DBSArsenal\Init.sqs"`. Any argument switches it on.
 
 ## Files
 
@@ -61,3 +81,22 @@ Status: the patched `GameStateExtWorld.cpp` passes a clang C++20 syntax/semantic
 - OFP has 10 magazine slots. Adding past that fails silently in the engine.
 - GR pistol and launcher hand fit is still unfinished in the mod (r009/r012 notes); those weapons equip but may look off.
 - Skin list is filtered to the unit's side by default; the "Skins: own side / all sides" button toggles it. A cross-side skin still fights for the group's side.
+
+## Test mission
+
+`Launch_ArsenalTest.cmd` runs CWR (`PoseidonGame.exe`) with `@DBS_GR_DEV` straight into the test mission, windowed, logs to `Documents\DBS_OFP\Logs\ArsenalTest`, and prints any errors from the log when the game closes.
+
+In the mission:
+
+- Action menu "Arsenal", or radio 0-0-1.
+- You: GR rifleman (sergeant). Squad: 5 GR AI to re-skin and re-equip.
+- East GR squad 25 m north, captive, for looking at East skins.
+- Crate beside you with the r012 BAS/RHS/GR weapon set.
+- Stock OFP weapons are listed too (marked MFCTI).
+
+The test mission's `DBSArsenal` folder is a copy of the MFCTI one running in standalone mode. Player skin change stays off in both copies until the engine patch is built and `dbsArsEngineBody = true`.
+
+## Status
+
+- The `ENGINE_dbsSetBody.patch` has not been applied or built yet.
+- Scripts pass syntax checks; the arsenal has been run in the test mission.

@@ -1,4 +1,4 @@
-; LLM\Init.sqs (version 11)
+; LLM\Init.sqs (version 12)
 ; Starts the link between this mission and the LLM relay. Server only.
 ; Started from Main\UpdateServer.sqs once the server has finished setting up.
 
@@ -34,6 +34,11 @@ llmEastShots = 0
 ; at most this many soldiers the commander buys into his own team to man the guns (one per gun).
 llmBaseHE = 4
 llmGuardMax = 6
+
+; The launcher each team's leader gets when he respawns (LLM\Kit.sqs), per team number 0 to 8: 0 the mission's
+; own, 1 heavy AT (the team has lost men to enemy armour), 2 AA (to enemy aircraft). Kept by LLM\Report.sqs 20.
+llmWestKit = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+llmEastKit = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 ? !(Local LocalServerObject) : Exit
 

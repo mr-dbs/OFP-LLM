@@ -1,4 +1,4 @@
-; LLM\Report.sqs (version 19)
+; LLM\Report.sqs (version 20)
 ; Reports one side's situation to the LLM relay every cycle. Server only.
 ; Usage: [east] exec "LLM\Report.sqs"
 ;
@@ -505,6 +505,9 @@ _n = 0
 		? (not (isNull _killer)) and ((side _killer) != resistance) and ((side _killer) != _side) and ((side _killer) != civilian) : _ks = 0
 		? (not (isNull _killer)) : _what = typeOf (vehicle _killer); _own = ((side _killer) == _side) or (_killer == _victim) or ((vehicle _killer) == (vehicle _victim))
 		? (not (isNull _killer)) : _kp = getPos (vehicle _killer)
+		; Version 20: what the enemy kills this team with decides its leader's launcher when he respawns (LLM\Kit.sqs).
+		? (_ks == 0) and (not (isNull _killer)) and (("Tank" countType [vehicle _killer]) > 0) : Call Format ["llm%1Kit set [%2, 1]", _sideText, (_batch select _k) select 0]
+		? (_ks == 0) and (not (isNull _killer)) and (("Air" countType [vehicle _killer]) > 0) : Call Format ["llm%1Kit set [%2, 2]", _sideText, (_batch select _k) select 0]
 		_kx = (_kp select 0) - ((_kp select 0) % 1)
 		_ky = (_kp select 1) - ((_kp select 1) % 1)
 		_deathsOut = _deathsOut + [[(_batch select _k) select 0, _what, _own, _kx, _ky, _ks]]

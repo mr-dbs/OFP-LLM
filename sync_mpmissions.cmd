@@ -16,7 +16,7 @@ for %%m in (mfcti116a_llmv1a.noe mfcti116a_stock.noe mfcti116a_llmv1a.Eden mfcti
 echo.
 echo MPMissions now:
 for %%m in (mfcti116a_llmv1a.noe mfcti116a_stock.noe mfcti116a_llmv1a.Eden mfcti116a_stock.Eden) do (
-  findstr /c:"(version 18)" "%DST%\%%m\LLM\Report.sqs" >nul && findstr /c:"(version 11)" "%DST%\%%m\LLM\Init.sqs" >nul && (echo    %%m: current) || (echo    %%m: COPY FAILED)
+  findstr /c:"(version 20)" "%DST%\%%m\LLM\Report.sqs" >nul && findstr /c:"(version 12)" "%DST%\%%m\LLM\Init.sqs" >nul && (echo    %%m: current) || (echo    %%m: COPY FAILED)
 )
 echo.
 echo Done. Copy the whole window text to Claude if anything says FAILED.
